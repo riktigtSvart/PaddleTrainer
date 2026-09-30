@@ -27,9 +27,8 @@ def build_readiness_evidence(
     extra_data = readiness.extra_data or {}
 
     return {
-        "recorded_date": (
-            readiness.recorded_date.isoformat()
-        ),
+        "recorded_date": readiness.recorded_date.isoformat(),
+        "source": readiness.source,
         "objective": {
             "hrv_rmssd_ms": (
                 readiness.hrv_rmssd_ms

@@ -21,6 +21,10 @@ from app.services.capacity_observations import (
     build_capacity_evidence,
     get_capacity_observations,
 )
+from app.services.long_term_background import (
+    build_long_term_background_evidence,
+    get_long_term_background,
+)
 
 
 async def get_athlete_state(
@@ -76,6 +80,21 @@ async def get_athlete_state(
         capacity_observations
     )
 
+    long_term_background = (
+        await get_long_term_background(
+            db=db,
+            user=user,
+            as_of_date=as_of_date,
+            timezone_name=timezone_name,
+        )
+    )
+
+    long_term_background_evidence = (
+        build_long_term_background_evidence(
+            long_term_background
+        )
+    )
+
     return {
         "as_of_date": as_of_date,
         "training_load": training_load,
@@ -89,5 +108,11 @@ async def get_athlete_state(
         ),
         "capacity_evidence": (
             capacity_evidence
+        ),
+        "long_term_background": (
+            long_term_background
+        ),
+        "long_term_background_evidence": (
+            long_term_background_evidence
         ),
     }

@@ -85,6 +85,30 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         ],
     }
 
+    expected_long_term_background = {
+        "assessments": [
+            {
+                "assessment_type": "TRAINING_HISTORY",
+                "sport": "KAYAK",
+                "source": "SELF_REPORTED",
+            },
+        ],
+    }
+
+    expected_long_term_background_evidence = {
+        "by_sport": [
+            {
+                "sport": "KAYAK",
+                "assessments": (
+                    expected_long_term_background[
+                        "assessments"
+                    ]
+                ),
+            },
+        ],
+        "unscoped_assessments": [],
+    }
+
     async def fake_get_training_load_proxies(
         db,
         user,
@@ -139,6 +163,29 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
 
         return expected_capacity_evidence
 
+    async def fake_get_long_term_background(
+        db,
+        user,
+        as_of_date,
+        timezone_name,
+    ):
+        assert as_of_date == date(2026, 9, 30)
+        assert timezone_name == "Europe/Budapest"
+
+        return expected_long_term_background
+
+    def fake_build_long_term_background_evidence(
+        background,
+    ):
+        assert (
+            background
+            is expected_long_term_background
+        )
+
+        return (
+            expected_long_term_background_evidence
+        )
+
     monkeypatch.setattr(
         athlete_state_service,
         "get_training_load_proxies",
@@ -169,6 +216,18 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         fake_build_capacity_evidence,
     )
 
+    monkeypatch.setattr(
+        athlete_state_service,
+        "get_long_term_background",
+        fake_get_long_term_background,
+    )
+
+    monkeypatch.setattr(
+        athlete_state_service,
+        "build_long_term_background_evidence",
+        fake_build_long_term_background_evidence,
+    )
+
     state = await athlete_state_service.get_athlete_state(
         db=db,
         user=user,
@@ -189,6 +248,12 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         ),
         "capacity_evidence": (
             expected_capacity_evidence
+        ),
+        "long_term_background": (
+            expected_long_term_background
+        ),
+        "long_term_background_evidence": (
+            expected_long_term_background_evidence
         ),
     }
 
@@ -215,6 +280,15 @@ async def test_get_athlete_state_allows_missing_readiness(
 
     expected_capacity_evidence = {
         "groups": [],
+    }
+
+    expected_long_term_background = {
+        "assessments": [],
+    }
+
+    expected_long_term_background_evidence = {
+        "by_sport": [],
+        "unscoped_assessments": [],
     }
 
     async def fake_get_training_load_proxies(
@@ -254,6 +328,26 @@ async def test_get_athlete_state_allows_missing_readiness(
 
         return expected_capacity_evidence
 
+    async def fake_get_long_term_background(
+        db,
+        user,
+        as_of_date,
+        timezone_name,
+    ):
+        return expected_long_term_background
+
+    def fake_build_long_term_background_evidence(
+        background,
+    ):
+        assert (
+            background
+            is expected_long_term_background
+        )
+
+        return (
+            expected_long_term_background_evidence
+        )
+
     monkeypatch.setattr(
         athlete_state_service,
         "get_training_load_proxies",
@@ -284,6 +378,18 @@ async def test_get_athlete_state_allows_missing_readiness(
         fake_build_capacity_evidence,
     )
 
+    monkeypatch.setattr(
+        athlete_state_service,
+        "get_long_term_background",
+        fake_get_long_term_background,
+    )
+
+    monkeypatch.setattr(
+        athlete_state_service,
+        "build_long_term_background_evidence",
+        fake_build_long_term_background_evidence,
+    )
+
     state = await athlete_state_service.get_athlete_state(
         db=db,
         user=user,
@@ -303,5 +409,12 @@ async def test_get_athlete_state_allows_missing_readiness(
         "capacity_observations": [],
         "capacity_evidence": {
             "groups": [],
+        },
+        "long_term_background": {
+            "assessments": [],
+        },
+        "long_term_background_evidence": {
+            "by_sport": [],
+            "unscoped_assessments": [],
         },
     }

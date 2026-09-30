@@ -1,0 +1,666 @@
+PaddleTrainer4ME – projektállapot / handoff mentés
+Dátum: 2026-09-30
+Munkastílus: egy módosítás → egy teszt → eredmény értelmezése → következő lépés. Ne találjunk ki jelenlegi kódot; ha bizonytalan, kérjünk friss fájlt.
+1. Termékvízió
+A PaddleTrainer4ME nem egyszerű edzésnaptár, hanem hosszú távú, adaptív sportolói edzéstervező/coach rendszer.
+Fő sportok jelenleg:
+- kajak
+- futás
+- úszás
+- erőnlét
+- később egyéb sportok
+Tervezési hierarchia:
+olimpiai / szezon cél
+→ szezon / periódus / blokk
+→ 3–6 hetes mezociklus
+→ hét
+→ edzés
+→ tényleges eredmény
+→ recovery / performance
+→ jövőbeli terv módosítása
+
+Fontos elv:
+LOAD DEFICIT != AUTOMATIC LOAD INCREASE
+
+Ha valaki kevesebbet teljesít a tervnél, nem szabad automatikusan „visszapótolni” a terhelést. Lehet fáradtság, betegség, stressz, utazás, iskola, rossz alvás stb.
+A rendszerben külön kell kezelni:
+Training Load State
+Capacity
+Readiness
+Long-term Background
+
+Továbbá:
+acute != fatigue
+chronic != fitness
+
+A hosszú távú cél egy személyre szabott, tanuló rendszer:
+GENERAL MODEL
++ ATHLETE HISTORY
++ CURRENT STATE
+→ PERSONALIZED RESPONSE MODEL
+→ TRAINING RECOMMENDATION
+→ ACTUAL RESULT
+→ MODEL UPDATE
+
+Az ML-nek bizonytalanságot/confidence-ot is kezelnie kell, nem hamis pontosságot.
+2. Technikai környezet
+Projekt:
+C:\Users\gyula\OneDrive\Dokumentumok\PaddleTrainerProject
+
+Backend:
+apps/api
+FastAPI
+PostgreSQL
+SQLAlchemy async
+Alembic
+Python 3.13
+
+DB:
+postgresql+asyncpg://paddle:paddle@localhost:5433/paddle
+
+FastAPI:
+http://127.0.0.1:8000
+Swagger:
+http://127.0.0.1:8000/docs
+
+Frontend:
+apps/web
+Next.js 16.3.6
+TypeScript
+Tailwind
+App Router
+
+Frontend indítás PowerShellben:
+cd C:\Users\gyula\OneDrive\Dokumentumok\PaddleTrainerProject\apps\web
+npm.cmd run dev
+
+Alembic parancsok:
+cd C:\Users\gyula\OneDrive\Dokumentumok\PaddleTrainerProject\apps\api
+..\..\.venv\Scripts\python.exe -m alembic ...
+
+3. Polar kapcsolat
+Polar OAuth működik.
+A kliens már Polar AccessLink v4-et használ:
+https://www.polaraccesslink.com/v4/data
+
+és az OAuth scope-listát a settingsből olvassa.   client   client
+Jelenlegi tényleges scope-ok:
+training_sessions:read
+training_targets:read
+sports:read
+
+Ezt a futtatott teszt is megerősítette:
+['training_sessions:read', 'training_targets:read', 'sports:read']
+
+
+A config.py defaultja jelenleg ugyanez.   config
+A polar.py callback már eltárolja a Polar által visszaadott scope-listát az ExternalConnection.scopes mezőbe.   polar
+Tervezett új Polar scope-ok:
+continuous_samples:read
+nightly_recharge:read
+sleep:read
+ppi_data:read
+
+Ezek még NINCSENEK hozzáadva.
+4. Polar session / target rendszer
+Működik:
+- training session import
+- training target calendar
+- structured workout parser
+- phase / repeat parser
+- exact Polar target ID matching
+- reconciliation
+- combined sync
+Endpoint:
+POST /api/v1/integrations/polar/sync?days=35
+
+90 napos session import is tesztelve volt.
+Fontos ismert anomáliák:
+- Polar target reschedule/edit semantics miatt egy target ID dátuma eltérhet az actual session dátumától.
+- Egy target neve és tényleges raw/parsed distance eltérhet.
+- Completed target nem jelenti automatikusan, hogy actual session linkelt.
+- Lehetnek spontaneous / unplanned actual sessionök.
+Ezeket nem szabad csendben „javítani”.
+5. Session ↔ plan provenance
+Enum:
+class WorkoutLinkSource(str, enum.Enum):    PROVIDER_EXACT = "PROVIDER_EXACT"    MANUAL_CONFIRMED = "MANUAL_CONFIRMED"    AUTO_MATCHED = "AUTO_MATCHED"
+
+
+Manuális linking endpoint létezik.
+Fontos szemantika:
+1. PaddleTrainer plan existed
+2. athlete manually confirms
+3. provider proves exact link
+4. adherence külön fogalom
+
+A provider exact link védett.
+Konkrét helyes linkek:
+RUN
+actual session:
+58e7f378-0b47-4b1f-be3e-3c61fdaf924c
+
+planned:
+7cf3ee61-26c5-452c-9f94-b1e96e76917e
+
+KAYAK
+actual:
+4063782a...
+
+planned:
+63c7896a...
+
+A 2026-09-27-i kajak session:
+20ad272f...
+
+szándékosan unlinked, mert valóban nem tervezett edzés volt.
+6. TrainingPeriod / mezociklus
+Enumok:
+OLYMPIC_CYCLESEASONMACROCYCLEMESOCYCLE
+
+
+Objective típusok:
+ENDURANCE
+SPEED
+STRENGTH
+TECHNIQUE
+RECOVERY
+MOBILITY
+RACE_SPECIFIC
+
+Első mezociklus:
+id:
+acee1ce3-de63-4f04-8886-72fe0b4e38c6
+
+title:
+Őszi alapozó ciklus 1
+
+2026-09-28 → 2026-10-25
+
+Objective súlyok:
+ENDURANCE 0.6
+STRENGTH  0.2
+TECHNIQUE 0.2
+
+Tervezett edzések:
+09/28 KAYAK
+30' zone 2 paddling
+id 63c7896a-095e-468f-9116-e1494d7890ae
+
+09/28 RUNNING
+1.67 km running
+id 7cf3ee61-26c5-452c-9f94-b1e96e76917e
+
+09/30 KAYAK
+8km kayaking
+id 4cd0fa5d-2f43-4e92-bfed-d42ee15c8f34
+
+7. Training Load modell
+Polar 90 napos history már be lett húzva.
+A jelenlegi load modell:
+NORMALIZED_EWMA
+
+exponenciális decay:
+exp(-age_days / time_constant_days)
+
+Nem hyperbolic.
+2026-09-30 körüli snapshot:
+acute daily     14.77
+acute weekly   103.38
+
+chronic daily   31.67
+chronic weekly 221.69
+
+balance       -118.31
+ratio            0.47
+diff           -53.4%
+
+Fontos:
+Training Load State
+
+és nem „fitness”.
+8. Athlete-state alapmodellek
+Már létrejöttek:
+Assessment
+Measurement
+AthleteCapacity
+AthleteReadiness
+AthleteResponse
+
+Enumok:
+AssessmentType
+CapacityType
+CapacitySource
+ResponseTiming
+
+ResponseTiming:
+IMMEDIATE
+SAME_DAY
+NEXT_MORNING
+FOLLOW_UP
+
+Az új athlete-state modellek UTC-aware timestamp defaultot használnak:
+default=lambda: datetime.now(timezone.utc)
+
+
+Ez tesztelve lett.
+Teszt eredmény:
+created_at tzinfo: UTC
+updated_at tzinfo: UTC
+delta_seconds: 3e-06
+ROLLBACK: OK
+
+9. Assessment API
+Működik:
+GET  /api/v1/assessments
+POST /api/v1/assessments
+
+Létrehozott training history assessment:
+id:
+6a0f27a0-9ec6-4049-b148-db9ec1f3e86d
+
+Tartalom:
+training_age_years = 12
+competition_level = INTERNATIONAL
+previous_weekly_hours = 11.5
+
+VO2max assessment:
+assessment:
+0c5fb1a3-182a-4d2f-b6d3-d12a07ba0755
+
+measurement:
+bce9b096-0c01-4983-8aff-ab04c6611079
+
+vo2max = 68.2 ml/kg/min
+
+10. AthleteCapacity API
+Működik:
+GET  /api/v1/athlete-capacities
+POST /api/v1/athlete-capacities
+
+A capacity már tud kapcsolódni:
+assessment_id
+measurement_id
+
+Valódi linked capacity:
+id:
+da3eda73-f923-42dc-ad45-8fccb3f4b60c
+
+capacity_type:
+GENERAL_AEROBIC
+
+value:
+68.2 ml/kg/min
+
+source:
+ASSESSMENT
+
+confidence:
+0.95
+
+11. AthleteReadiness API
+Működik:
+GET /api/v1/athlete-readiness
+
+PUT /api/v1/athlete-readiness/{recorded_date}
+
+Napi snapshot / upsert.
+Mezők:
+hrv_rmssd_ms
+resting_hr_bpm
+sleep_duration_sec
+sleep_score
+
+energy_score
+fatigue_score
+stress_score
+soreness_score
+readiness_score
+
+illness
+travel
+source
+extra_data
+
+Fontos:
+readiness_score
+
+jelenleg csak mező/test adat, még nem validált összetett algoritmus.
+12. AthleteResponse API
+Működik:
+GET  /api/v1/athlete-responses
+POST /api/v1/athlete-responses
+
+Szemantika:
+AthleteResponse = megfigyelés
+nem napi snapshot
+
+Ugyanahhoz az edzéshez több response rekord lehet.
+Teszt session:
+58e7f378-0b47-4b1f-be3e-3c61fdaf924c
+RUNNING
+2026-09-28T16:38:11+00:00
+
+Teszt response-ok:
+IMMEDIATE
+2026-09-28T16:50:00+00:00
+fatigue = 6
+soreness = 2
+energy = 5
+
+SAME_DAY
+2026-09-28T20:30:00+00:00
+fatigue = 4
+soreness = 3
+recovery = 6
+energy = 6
+
+Külön rekordként, időrendben visszajöttek.
+Ez a későbbi:
+response trajectory
+
+alapja.
+13. Fontos új koncepcionális döntés: fatigue
+Nem akarjuk összemosni:
+SUBJECTIVE FATIGUE
+PHYSIOLOGICAL RECOVERY
+ESTIMATED FATIGUE STATE
+
+A szubjektív fatigue csak egy jel.
+A jövőben objektív jeleket is használunk:
+HR recovery
+HR trajectory
+HRV
+resting HR
+PPI
+sleep
+activity
+respiratory rate
+temperature
+stb.
+
+A cél:
+LOAD
+→ physiological recovery trajectory
+→ subjective fatigue trajectory
+→ next-day readiness
+→ later performance
+
+Nem akarunk rögtön egyetlen „fatigue score”-ba mindent összenyomni.
+14. Providerfüggetlen architektúra
+Döntés:
+Polar
+Garmin
+Oura
+WHOOP
+stb.
+    ↓
+provider adapter
+    ↓
+PaddleTrainer normalized data
+    ↓
+Readiness / Response / Capacity / ML
+
+Fontos:
+provider
+metric_key
+
+nem DB enum.
+Így új provider vagy új biomarker nem igényel automatikusan migrációt.
+15. PhysiologicalMeasurement – elkészült
+Új providerfüggetlen normalizált modell:
+PhysiologicalMeasurement
+
+Mezők:
+id
+user_id
+provider
+metric_key
+value_float
+value_text
+unit
+measured_at
+period_start
+period_end
+device_id
+device_model
+quality
+source_record_id
+extra_data
+created_at
+
+Példa metric key-ek:
+heart_rate_bpm
+hrv_rmssd_ms
+resting_hr_bpm
+respiratory_rate
+sleep_duration_sec
+sleep_score
+skin_temperature_c
+hrr_60_bpm
+hrr_120_bpm
+blood_oxygen_percent
+
+Migration:
+5f4ea45abaea_add_physiological_measurements.py
+
+Revision chain:
+89e425c19a0e
+→ 5f4ea45abaea
+
+DB-be alkalmazva.
+DB inspect sikeres.
+Alembic:
+No new upgrade operations detected.
+
+16. ProviderDataRecord – elkészült
+Raw provider payload megőrzésére:
+ProviderDataRecord
+
+Mezők:
+id
+user_id
+provider
+data_type
+provider_record_id
+occurred_at
+period_start
+period_end
+raw_data
+fetched_at
+created_at
+
+provider és data_type string.
+Lehetséges data_type értékek később:
+TRAINING_SESSION
+CONTINUOUS_HEART_RATE
+NIGHTLY_RECHARGE
+SLEEP
+PPI
+ACTIVITY
+ORTHOSTATIC_TEST
+TEMPERATURE
+
+Nem enumok.
+Migration:
+e5f3ec7e1790_add_provider_data_records.py
+
+Revision chain:
+5f4ea45abaea
+→ e5f3ec7e1790
+
+Migration lefutott.
+DB inspect:
+TABLE EXISTS: True
+
+Indexek:
+data_type
+occurred_at
+provider
+provider_record_id
+user_id
+
+FK:
+user_id → users.id
+ON DELETE CASCADE
+
+Alembic check:
+No new upgrade operations detected.
+
+17. Jelenlegi adatarchitektúra
+Most már rendelkezésre áll:
+PROVIDER API
+    ↓
+ProviderDataRecord
+(raw, eredeti payload)
+    ↓
+PhysiologicalMeasurement
+(normalizált providerfüggetlen measurement)
+    ↓
+Readiness
+Response trajectory
+Capacity
+ML
+
+Ez tudatosan úgy lett kialakítva, hogy később ne kelljen a teljes rendszert átírni Garmin/Oura/WHOOP miatt.
+18. Aktuális releváns fájlok
+Polar route
+apps/api/app/api/routes/polar.py
+
+A /connect csak ezt hívja:
+PolarClient().authorization_url(state)
+
+
+A callback elmenti a visszakapott scope-okat.
+Polar client
+apps/api/app/integrations/polar/client.py
+
+Jelenleg van többek között:
+authorization_url
+exchange_code
+refresh_token
+list_training_sessions
+list_training_targets
+list_sport_profiles
+list_sports
+_get
+
+A _get() már általános bearer-tokenes v4 GET helper.
+Config
+apps/api/app/core/config.py
+
+A Polar scope-ok:
+polar_scopes: str = "training_sessions:read training_targets:read sports:read"
+
+
+A lista:
+@propertydef polar_scope_list(self) -> list[str]:    return [s for s in self.polar_scopes.split() if s]
+
+
+A .env is be van töltve a projektgyökérből.   config   config
+19. JELENLEGI EXACT NEXT STEP
+Itt tartunk most.
+Utolsó ellenőrzés:
+..\..\.venv\Scripts\python.exe -c "from app.core.config import get_settings; print(get_settings().polar_scope_list)"
+
+Eredmény:
+[    'training_sessions:read',    'training_targets:read',    'sports:read']
+
+
+Tehát a következő módosítás:
+Polar scope-ok bővítése
+Tervezett új teljes scope lista:
+training_sessions:read
+training_targets:read
+sports:read
+continuous_samples:read
+nightly_recharge:read
+sleep:read
+ppi_data:read
+
+MÉG NEM lett módosítva.
+A következő lépésben először azt kell eldönteni/ellenőrizni, hogy van-e a gyökér .env-ben:
+POLAR_SCOPES=...
+
+Ha nincs, elég lehet a config.py default bővítése.
+Ha van, akkor a .env értékét is módosítani kell, mert az felülírja a defaultot.
+Ezután:
+1. scope lista módosítása
+2. scope-lista lokális teszt
+3. Polar kapcsolat újraengedélyezése OAuth-on
+4. /status ellenőrzése, hogy az új scope-ok tényleg bekerültek
+5. csak utána új Polar physiological endpoint
+
+Első physiological adatforrásnak jó jelölt:
+Nightly Recharge
+vagy
+Sleep
+
+de egyszerre csak egyet építsünk be.
+20. Következő Polar adatút terve
+Az első új provider adatnál ezt az utat építjük:
+Polar API
+    ↓
+raw response
+    ↓
+ProviderDataRecord
+provider = "POLAR"
+data_type = "..."
+raw_data = eredeti JSON
+    ↓
+normalizer
+    ↓
+PhysiologicalMeasurement
+provider = "POLAR"
+metric_key = PaddleTrainer canonical key
+    ↓
+Readiness / később Response/ML
+
+Nem akarunk Polar-specifikus mezőneveket felvinni a coach/ML rétegbe.
+21. Fontos későbbi irányok
+Még nincs megépítve, de terv:
+Capability / availability semantics
+Ne legyen minden hiány egyszerűen null.
+Később megkülönböztetendő:
+AVAILABLE
+NO_DATA
+NOT_SUPPORTED
+NOT_AUTHORIZED
+NOT_SYNCED
+ERROR
+
+ResponseMeasurement / physiological response
+Az edzés utáni objektív recovery később pl.:
+heart_rate_end
+heart_rate_60s
+heart_rate_120s
+hrr_60
+hrr_120
+
+de ezeket providerfüggetlen measurementként akarjuk kezelni.
+HRR
+A 24/7 Polar HR önmagában valószínűleg nem elég precíz HRR60/120 számításhoz.
+Ideális esetben az edzés recordingban hagyunk 2–3 perc standardizált recovery szakaszt.
+ML
+Ne egyetlen fatigue score legyen a tanítójel.
+Inkább:
+load
+→ objective response trajectory
+→ subjective response trajectory
+→ next-day readiness
+→ future performance
+
+22. Munkamódszer
+Fontos a folytatásnál:
+- magyarul dolgozunk;
+- pontos path + pontos kód;
+- egyszerre egy változtatás;
+- utána teszt;
+- csak a teszt után következő lépés;
+- ne találjuk ki a jelenlegi fájl tartalmát;
+- ha a fájl azóta változhatott, kérjünk friss feltöltést;
+- ne csináljunk fölösleges előre-absztrakciót;
+- de providerfüggetlen adatmagot már tudatosan megtartjuk.
+Új beszélgetésben elég ezt az összefoglalót bemásolnod, majd a végére ezt írnod:
+Folytassuk a 19. ponttól, a Polar scope-ok bővítésével.
+
+És onnan pontosan tudjuk folytatni.

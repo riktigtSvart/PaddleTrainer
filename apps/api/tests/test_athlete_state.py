@@ -62,6 +62,29 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         "unlinked_observations": [],
     }
 
+    expected_capacity_observations = [
+        {
+            "capacity_type": "GENERAL_AEROBIC",
+            "sport": None,
+            "value": 68.2,
+            "unit": "ml/kg/min",
+            "source": "ASSESSMENT",
+            "confidence": 0.95,
+        },
+    ]
+
+    expected_capacity_evidence = {
+        "groups": [
+            {
+                "capacity_type": "GENERAL_AEROBIC",
+                "sport": None,
+                "observations": (
+                    expected_capacity_observations
+                ),
+            },
+        ],
+    }
+
     async def fake_get_training_load_proxies(
         db,
         user,
@@ -95,6 +118,27 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
 
         return expected_responses
 
+    async def fake_get_capacity_observations(
+        db,
+        user,
+        as_of_date,
+        timezone_name,
+    ):
+        assert as_of_date == date(2026, 9, 30)
+        assert timezone_name == "Europe/Budapest"
+
+        return expected_capacity_observations
+
+    def fake_build_capacity_evidence(
+        observations,
+    ):
+        assert (
+            observations
+            is expected_capacity_observations
+        )
+
+        return expected_capacity_evidence
+
     monkeypatch.setattr(
         athlete_state_service,
         "get_training_load_proxies",
@@ -113,6 +157,18 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         fake_get_daily_response_observations,
     )
 
+    monkeypatch.setattr(
+        athlete_state_service,
+        "get_capacity_observations",
+        fake_get_capacity_observations,
+    )
+
+    monkeypatch.setattr(
+        athlete_state_service,
+        "build_capacity_evidence",
+        fake_build_capacity_evidence,
+    )
+
     state = await athlete_state_service.get_athlete_state(
         db=db,
         user=user,
@@ -127,6 +183,12 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         "responses": expected_responses,
         "response_trajectories": (
             expected_trajectories
+        ),
+        "capacity_observations": (
+            expected_capacity_observations
+        ),
+        "capacity_evidence": (
+            expected_capacity_evidence
         ),
     }
 
@@ -151,6 +213,10 @@ async def test_get_athlete_state_allows_missing_readiness(
         },
     }
 
+    expected_capacity_evidence = {
+        "groups": [],
+    }
+
     async def fake_get_training_load_proxies(
         db,
         user,
@@ -173,6 +239,21 @@ async def test_get_athlete_state_allows_missing_readiness(
     ):
         return []
 
+    async def fake_get_capacity_observations(
+        db,
+        user,
+        as_of_date,
+        timezone_name,
+    ):
+        return []
+
+    def fake_build_capacity_evidence(
+        observations,
+    ):
+        assert observations == []
+
+        return expected_capacity_evidence
+
     monkeypatch.setattr(
         athlete_state_service,
         "get_training_load_proxies",
@@ -191,6 +272,18 @@ async def test_get_athlete_state_allows_missing_readiness(
         fake_get_daily_response_observations,
     )
 
+    monkeypatch.setattr(
+        athlete_state_service,
+        "get_capacity_observations",
+        fake_get_capacity_observations,
+    )
+
+    monkeypatch.setattr(
+        athlete_state_service,
+        "build_capacity_evidence",
+        fake_build_capacity_evidence,
+    )
+
     state = await athlete_state_service.get_athlete_state(
         db=db,
         user=user,
@@ -206,5 +299,9 @@ async def test_get_athlete_state_allows_missing_readiness(
         "response_trajectories": {
             "by_workout_session": [],
             "unlinked_observations": [],
+        },
+        "capacity_observations": [],
+        "capacity_evidence": {
+            "groups": [],
         },
     }

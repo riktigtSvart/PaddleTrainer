@@ -17,6 +17,10 @@ from app.services.response_observations import (
     build_response_trajectories,
     get_daily_response_observations,
 )
+from app.services.capacity_observations import (
+    build_capacity_evidence,
+    get_capacity_observations,
+)
 
 
 async def get_athlete_state(
@@ -59,6 +63,19 @@ async def get_athlete_state(
         )
     )
 
+    capacity_observations = (
+        await get_capacity_observations(
+            db=db,
+            user=user,
+            as_of_date=as_of_date,
+            timezone_name=timezone_name,
+        )
+    )
+
+    capacity_evidence = build_capacity_evidence(
+        capacity_observations
+    )
+
     return {
         "as_of_date": as_of_date,
         "training_load": training_load,
@@ -66,5 +83,11 @@ async def get_athlete_state(
         "responses": responses,
         "response_trajectories": (
             response_trajectories
+        ),
+        "capacity_observations": (
+            capacity_observations
+        ),
+        "capacity_evidence": (
+            capacity_evidence
         ),
     }

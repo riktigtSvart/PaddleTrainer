@@ -254,6 +254,19 @@ def _compare_metric_to_reference(
         else None
     )
 
+    relative_difference_from_reference = (
+        round(
+            difference_from_reference
+            / float(reference_value),
+            10,
+        )
+        if (
+                difference_from_reference is not None
+                and float(reference_value) != 0.0
+        )
+        else None
+    )
+
     return {
         "metric_key": metric_key,
         "current_value": current_value,
@@ -276,6 +289,9 @@ def _compare_metric_to_reference(
         ),
         "difference_from_reference": (
             difference_from_reference
+        ),
+        "relative_difference_from_reference": (
+            relative_difference_from_reference
         ),
     }
 

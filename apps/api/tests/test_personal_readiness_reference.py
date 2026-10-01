@@ -247,6 +247,7 @@ def test_compare_hrv_to_reference_describes_current_value_above_reference():
         },
         "reference_median_absolute_deviation": 7.5,
         "difference_from_reference": 4.4,
+        "relative_difference_from_reference": 0.0814814815,
     }
 
 
@@ -273,6 +274,7 @@ def test_compare_hrv_to_reference_does_not_infer_relation_without_reference():
         "reference_sample_support": None,
         "reference_median_absolute_deviation": None,
         "difference_from_reference": None,
+        "relative_difference_from_reference": None,
     }
 
 
@@ -299,6 +301,7 @@ def test_compare_hrv_to_reference_does_not_infer_relation_without_current_value(
         "reference_sample_support": None,
         "reference_median_absolute_deviation": None,
         "difference_from_reference": None,
+        "relative_difference_from_reference": None,
     }
 
 
@@ -482,6 +485,7 @@ def test_compare_sleep_duration_to_reference_preserves_single_sample_support():
         },
         "reference_median_absolute_deviation": None,
         "difference_from_reference": 6810.0,
+        "relative_difference_from_reference": 0.3275613276,
     }
 
 

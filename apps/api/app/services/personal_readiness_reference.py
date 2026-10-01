@@ -15,6 +15,31 @@ DEFAULT_HRV_REFERENCE_WINDOW_DAYS = 28
 DEFAULT_SLEEP_DURATION_REFERENCE_WINDOW_DAYS = 28
 
 
+def calculate_median_absolute_deviation(
+    values: Iterable[float],
+) -> float | None:
+    values = [
+        float(value)
+        for value in values
+    ]
+
+    if not values:
+        return None
+
+    center = float(
+        median(values)
+    )
+
+    absolute_deviations = [
+        abs(value - center)
+        for value in values
+    ]
+
+    return float(
+        median(absolute_deviations)
+    )
+
+
 def _build_recent_median_reference(
     readiness_records: Iterable[AthleteReadiness],
     as_of_date: date,

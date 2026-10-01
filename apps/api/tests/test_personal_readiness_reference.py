@@ -13,6 +13,7 @@ from app.services.personal_readiness_reference import (
     build_sleep_duration_reference,
     get_sleep_duration_reference,
     describe_reference_sample_support,
+    calculate_median_absolute_deviation,
 )
 
 def test_build_hrv_reference_uses_only_prior_values_inside_window():
@@ -462,3 +463,22 @@ def test_compare_sleep_duration_to_reference_preserves_single_sample_support():
             "state": "SINGLE_SAMPLE",
         },
     }
+
+
+def test_calculate_median_absolute_deviation_for_hrv_reference_values():
+    values = [
+        68.0,
+        73.0,
+        58.0,
+        49.0,
+        50.0,
+        44.0,
+    ]
+
+    result = (
+        calculate_median_absolute_deviation(
+            values
+        )
+    )
+
+    assert result == 7.5

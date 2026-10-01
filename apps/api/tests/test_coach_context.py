@@ -4,6 +4,7 @@ from app.services.coach_context import (
     build_coach_assessment,
     build_coach_context,
     build_coach_inputs,
+    build_coach_state,
     build_descriptive_flags,
     build_interpretation_facts,
     build_interpretation_signals,
@@ -1156,4 +1157,109 @@ def test_build_coach_assessment_does_not_infer_opposites_from_missing_signals():
         },
         "period_focus": None,
         "signal_codes": [],
+    }
+
+
+def test_build_coach_state_combines_assessment_dimensions_without_new_inference():
+    today_workouts = [
+        {
+            "id": "workout-1",
+            "sport": "KAYAK",
+            "title": "8km kayaking",
+            "has_actual": False,
+            "link_source": None,
+        },
+    ]
+
+    facts = {
+        "as_of_date": date(2026, 9, 30),
+        "plan": {
+            "today_workouts": today_workouts,
+        },
+    }
+
+    assessment = {
+        "as_of_date": date(2026, 9, 30),
+        "plan_execution": {
+            "state": "PENDING_TODAY",
+            "planned_today_count": 1,
+            "without_actual_count": 1,
+        },
+        "load_pattern": {
+            "state": "METHODS_DIVERGE",
+            "raw_acute_vs_chronic": "ABOVE",
+            "smoothed_acute_vs_chronic": "BELOW",
+        },
+        "readiness_evidence": {
+            "gaps": [
+                "ILLNESS_STATUS_UNKNOWN",
+                "TRAVEL_STATUS_UNKNOWN",
+            ],
+            "metric_provenance_state": (
+                "UNAVAILABLE"
+            ),
+            "legacy_inferred_subjective_metrics": [
+                "fatigue_score",
+            ],
+        },
+        "period_focus": {
+            "period_type": "MESOCYCLE",
+            "period_title": (
+                "Őszi alapozó ciklus 1"
+            ),
+            "objective_type": "ENDURANCE",
+            "weight": 0.6,
+        },
+        "signal_codes": [
+            "TODAY_WORKOUT_PENDING",
+            "LOAD_METHODS_DIVERGE",
+            "ILLNESS_STATUS_UNKNOWN",
+        ],
+    }
+
+    readiness_view = {
+        "available": True,
+        "source": "MANUAL",
+        "values": {
+            "objective": {},
+            "objective_context": {},
+            "subjective": {
+                "fatigue_score": 4.0,
+            },
+        },
+        "presence": {},
+        "provenance": {},
+    }
+
+    state = build_coach_state(
+        coach_assessment=assessment,
+        readiness_coach_view=readiness_view,
+        interpretation_facts=facts,
+    )
+
+    assert state == {
+        "as_of_date": date(2026, 9, 30),
+        "plan": {
+            "execution": assessment[
+                "plan_execution"
+            ],
+            "period_focus": assessment[
+                "period_focus"
+            ],
+            "today_workouts": today_workouts,
+        },
+        "load": {
+            "pattern": assessment[
+                "load_pattern"
+            ],
+        },
+        "readiness": {
+            "evidence": assessment[
+                "readiness_evidence"
+            ],
+            "view": readiness_view,
+        },
+        "signal_codes": assessment[
+            "signal_codes"
+        ],
     }

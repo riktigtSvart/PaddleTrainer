@@ -1158,3 +1158,47 @@ def build_coach_assessment(
             if signal.get("code") is not None
         ],
     }
+
+
+def build_coach_state(
+    coach_assessment: dict,
+    readiness_coach_view: dict,
+    interpretation_facts: dict,
+) -> dict:
+    plan_facts = interpretation_facts.get(
+        "plan",
+        {},
+    )
+
+    return {
+        "as_of_date": coach_assessment.get(
+            "as_of_date"
+        ),
+        "plan": {
+            "execution": coach_assessment.get(
+                "plan_execution"
+            ),
+            "period_focus": coach_assessment.get(
+                "period_focus"
+            ),
+            "today_workouts": plan_facts.get(
+                "today_workouts",
+                [],
+            ),
+        },
+        "load": {
+            "pattern": coach_assessment.get(
+                "load_pattern"
+            ),
+        },
+        "readiness": {
+            "evidence": coach_assessment.get(
+                "readiness_evidence"
+            ),
+            "view": readiness_coach_view,
+        },
+        "signal_codes": coach_assessment.get(
+            "signal_codes",
+            [],
+        ),
+    }

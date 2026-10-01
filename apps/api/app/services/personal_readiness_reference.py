@@ -241,6 +241,19 @@ def _compare_metric_to_reference(
         else:
             relation = "AT_PERSONAL_REFERENCE"
 
+    difference_from_reference = (
+        round(
+            float(current_value)
+            - float(reference_value),
+            10,
+        )
+        if (
+                current_value is not None
+                and reference_value is not None
+        )
+        else None
+    )
+
     return {
         "metric_key": metric_key,
         "current_value": current_value,
@@ -260,6 +273,9 @@ def _compare_metric_to_reference(
             reference.get(
                 "median_absolute_deviation"
             )
+        ),
+        "difference_from_reference": (
+            difference_from_reference
         ),
     }
 

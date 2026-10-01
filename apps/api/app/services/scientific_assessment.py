@@ -46,6 +46,10 @@ def build_scientific_assessment(
 
     readiness_objective_evidence = None
 
+    readiness_subjective_evidence = None
+
+    readiness_context_evidence = None
+
     readiness_view = readiness.get(
         "view",
         {},
@@ -60,6 +64,58 @@ def build_scientific_assessment(
             {},
         )
     )
+
+    subjective_presence = (
+        readiness_view.get(
+            "presence",
+            {},
+        ).get(
+            "subjective",
+            {},
+        )
+    )
+
+    context_presence = (
+        readiness_view.get(
+            "presence",
+            {},
+        ).get(
+            "objective_context",
+            {},
+        )
+    )
+
+    context_available_metrics = (
+        context_presence.get(
+            "available_metrics",
+            [],
+        )
+    )
+
+    if context_available_metrics:
+        readiness_context_evidence = {
+            "state": "CONTEXT_EVIDENCE_AVAILABLE",
+            "metrics": list(
+                context_available_metrics
+            ),
+        }
+
+    subjective_available_metrics = (
+        subjective_presence.get(
+            "available_metrics",
+            [],
+        )
+    )
+
+    if subjective_available_metrics:
+        readiness_subjective_evidence = {
+            "state": (
+                "SUBJECTIVE_EVIDENCE_AVAILABLE"
+            ),
+            "metrics": list(
+                subjective_available_metrics
+            ),
+        }
 
     objective_available_metrics = (
         objective_presence.get(
@@ -120,6 +176,12 @@ def build_scientific_assessment(
             ),
             "objective_evidence": (
                 readiness_objective_evidence
+            ),
+            "subjective_evidence": (
+                readiness_subjective_evidence
+            ),
+            "context_evidence": (
+                readiness_context_evidence
             ),
         },
     }

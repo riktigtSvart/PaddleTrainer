@@ -8,6 +8,7 @@ import pytest
 from app.services.personal_readiness_reference import (
     build_hrv_reference,
     get_hrv_reference,
+    compare_hrv_to_reference,
 )
 
 def test_build_hrv_reference_uses_only_prior_values_inside_window():
@@ -187,4 +188,73 @@ async def test_get_hrv_reference_builds_reference_from_database_records():
         "window_end": date(2026, 9, 29),
         "sample_count": 3,
         "reference_value": 49.0,
+    }
+
+
+def test_compare_hrv_to_reference_describes_current_value_above_reference():
+    reference = {
+        "metric_key": "hrv_rmssd_ms",
+        "method": "RECENT_MEDIAN",
+        "sample_count": 6,
+        "reference_value": 54.0,
+    }
+
+    result = compare_hrv_to_reference(
+        current_value=58.4,
+        reference=reference,
+    )
+
+    assert result == {
+        "metric_key": "hrv_rmssd_ms",
+        "current_value": 58.4,
+        "reference_value": 54.0,
+        "relation": "ABOVE_PERSONAL_REFERENCE",
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 6,
+    }
+
+
+def test_compare_hrv_to_reference_does_not_infer_relation_without_reference():
+    reference = {
+        "metric_key": "hrv_rmssd_ms",
+        "method": "RECENT_MEDIAN",
+        "sample_count": 0,
+        "reference_value": None,
+    }
+
+    result = compare_hrv_to_reference(
+        current_value=58.4,
+        reference=reference,
+    )
+
+    assert result == {
+        "metric_key": "hrv_rmssd_ms",
+        "current_value": 58.4,
+        "reference_value": None,
+        "relation": None,
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 0,
+    }
+
+
+def test_compare_hrv_to_reference_does_not_infer_relation_without_current_value():
+    reference = {
+        "metric_key": "hrv_rmssd_ms",
+        "method": "RECENT_MEDIAN",
+        "sample_count": 6,
+        "reference_value": 54.0,
+    }
+
+    result = compare_hrv_to_reference(
+        current_value=None,
+        reference=reference,
+    )
+
+    assert result == {
+        "metric_key": "hrv_rmssd_ms",
+        "current_value": None,
+        "reference_value": 54.0,
+        "relation": None,
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 6,
     }

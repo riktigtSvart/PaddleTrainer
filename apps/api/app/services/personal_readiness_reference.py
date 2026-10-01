@@ -93,3 +93,39 @@ async def get_hrv_reference(
         as_of_date=as_of_date,
         window_days=window_days,
     )
+
+
+def compare_hrv_to_reference(
+    current_value: float | None,
+    reference: dict,
+) -> dict:
+    reference_value = reference.get(
+        "reference_value"
+    )
+
+    relation = None
+
+    if (
+        current_value is not None
+        and reference_value is not None
+    ):
+        if current_value > reference_value:
+            relation = "ABOVE_PERSONAL_REFERENCE"
+        elif current_value < reference_value:
+            relation = "BELOW_PERSONAL_REFERENCE"
+        else:
+            relation = "AT_PERSONAL_REFERENCE"
+
+    return {
+        "metric_key": "hrv_rmssd_ms",
+        "current_value": current_value,
+        "reference_value": reference_value,
+        "relation": relation,
+        "reference_method": reference.get(
+            "method"
+        ),
+        "reference_sample_count": reference.get(
+            "sample_count",
+            0,
+        ),
+    }

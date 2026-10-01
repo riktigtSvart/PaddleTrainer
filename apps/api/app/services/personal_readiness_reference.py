@@ -183,9 +183,10 @@ async def get_sleep_duration_reference(
     )
 
 
-def compare_hrv_to_reference(
+def _compare_metric_to_reference(
     current_value: float | None,
     reference: dict,
+    metric_key: str,
 ) -> dict:
     reference_value = reference.get(
         "reference_value"
@@ -205,7 +206,7 @@ def compare_hrv_to_reference(
             relation = "AT_PERSONAL_REFERENCE"
 
     return {
-        "metric_key": "hrv_rmssd_ms",
+        "metric_key": metric_key,
         "current_value": current_value,
         "reference_value": reference_value,
         "relation": relation,
@@ -220,6 +221,28 @@ def compare_hrv_to_reference(
             "sample_support"
         ),
     }
+
+
+def compare_hrv_to_reference(
+    current_value: float | None,
+    reference: dict,
+) -> dict:
+    return _compare_metric_to_reference(
+        current_value=current_value,
+        reference=reference,
+        metric_key="hrv_rmssd_ms",
+    )
+
+
+def compare_sleep_duration_to_reference(
+    current_value: float | None,
+    reference: dict,
+) -> dict:
+    return _compare_metric_to_reference(
+        current_value=current_value,
+        reference=reference,
+        metric_key="sleep_duration_sec",
+    )
 
 
 def describe_reference_sample_support(

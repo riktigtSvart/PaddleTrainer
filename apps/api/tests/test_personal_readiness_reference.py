@@ -9,6 +9,7 @@ from app.services.personal_readiness_reference import (
     build_hrv_reference,
     get_hrv_reference,
     compare_hrv_to_reference,
+    compare_sleep_duration_to_reference,
     build_sleep_duration_reference,
     get_sleep_duration_reference,
     describe_reference_sample_support,
@@ -429,4 +430,35 @@ def test_sleep_reference_exposes_single_sample_support():
     assert result["sample_support"] == {
         "sample_count": 1,
         "state": "SINGLE_SAMPLE",
+    }
+
+
+def test_compare_sleep_duration_to_reference_preserves_single_sample_support():
+    reference = {
+        "metric_key": "sleep_duration_sec",
+        "method": "RECENT_MEDIAN",
+        "sample_count": 1,
+        "reference_value": 20790.0,
+        "sample_support": {
+            "sample_count": 1,
+            "state": "SINGLE_SAMPLE",
+        },
+    }
+
+    result = compare_sleep_duration_to_reference(
+        current_value=27600.0,
+        reference=reference,
+    )
+
+    assert result == {
+        "metric_key": "sleep_duration_sec",
+        "current_value": 27600.0,
+        "reference_value": 20790.0,
+        "relation": "ABOVE_PERSONAL_REFERENCE",
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 1,
+        "reference_sample_support": {
+            "sample_count": 1,
+            "state": "SINGLE_SAMPLE",
+        },
     }

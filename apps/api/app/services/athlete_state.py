@@ -25,6 +25,9 @@ from app.services.long_term_background import (
     build_long_term_background_evidence,
     get_long_term_background,
 )
+from app.services.plan_context import (
+    get_plan_context,
+)
 
 
 async def get_athlete_state(
@@ -95,6 +98,13 @@ async def get_athlete_state(
         )
     )
 
+    plan_context = await get_plan_context(
+        db=db,
+        user=user,
+        as_of_date=as_of_date,
+        timezone_name=timezone_name,
+    )
+
     return {
         "as_of_date": as_of_date,
         "training_load": training_load,
@@ -115,4 +125,5 @@ async def get_athlete_state(
         "long_term_background_evidence": (
             long_term_background_evidence
         ),
+        "plan_context": plan_context,
     }

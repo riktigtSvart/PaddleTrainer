@@ -109,6 +109,21 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         "unscoped_assessments": [],
     }
 
+    expected_plan_context = {
+        "as_of_date": as_of_date,
+        "active_periods": [
+            {
+                "period_type": "MESOCYCLE",
+                "title": "Őszi alapozó ciklus 1",
+            },
+        ],
+        "current_week": {
+            "week_start": date(2026, 9, 28),
+            "week_end": date(2026, 10, 4),
+            "planned_workouts": [],
+        },
+    }
+
     async def fake_get_training_load_proxies(
         db,
         user,
@@ -186,6 +201,17 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
             expected_long_term_background_evidence
         )
 
+    async def fake_get_plan_context(
+            db,
+            user,
+            as_of_date,
+            timezone_name,
+    ):
+        assert as_of_date == date(2026, 9, 30)
+        assert timezone_name == "Europe/Budapest"
+
+        return expected_plan_context
+
     monkeypatch.setattr(
         athlete_state_service,
         "get_training_load_proxies",
@@ -228,6 +254,12 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         fake_build_long_term_background_evidence,
     )
 
+    monkeypatch.setattr(
+        athlete_state_service,
+        "get_plan_context",
+        fake_get_plan_context,
+    )
+
     state = await athlete_state_service.get_athlete_state(
         db=db,
         user=user,
@@ -255,6 +287,7 @@ async def test_get_athlete_state_aggregates_load_and_readiness(
         "long_term_background_evidence": (
             expected_long_term_background_evidence
         ),
+        "plan_context": expected_plan_context,
     }
 
 
@@ -289,6 +322,16 @@ async def test_get_athlete_state_allows_missing_readiness(
     expected_long_term_background_evidence = {
         "by_sport": [],
         "unscoped_assessments": [],
+    }
+
+    expected_plan_context = {
+        "as_of_date": as_of_date,
+        "active_periods": [],
+        "current_week": {
+            "week_start": date(2026, 9, 28),
+            "week_end": date(2026, 10, 4),
+            "planned_workouts": [],
+        },
     }
 
     async def fake_get_training_load_proxies(
@@ -348,6 +391,14 @@ async def test_get_athlete_state_allows_missing_readiness(
             expected_long_term_background_evidence
         )
 
+    async def fake_get_plan_context(
+            db,
+            user,
+            as_of_date,
+            timezone_name,
+    ):
+        return expected_plan_context
+
     monkeypatch.setattr(
         athlete_state_service,
         "get_training_load_proxies",
@@ -390,6 +441,12 @@ async def test_get_athlete_state_allows_missing_readiness(
         fake_build_long_term_background_evidence,
     )
 
+    monkeypatch.setattr(
+        athlete_state_service,
+        "get_plan_context",
+        fake_get_plan_context,
+    )
+
     state = await athlete_state_service.get_athlete_state(
         db=db,
         user=user,
@@ -417,4 +474,5 @@ async def test_get_athlete_state_allows_missing_readiness(
             "by_sport": [],
             "unscoped_assessments": [],
         },
+        "plan_context": expected_plan_context,
     }

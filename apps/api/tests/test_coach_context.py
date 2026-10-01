@@ -3,8 +3,12 @@ from datetime import date
 from app.services.coach_context import (
     build_coach_context,
     build_coach_inputs,
+    build_descriptive_flags,
     build_interpretation_facts,
     build_today_plan,
+    build_readiness_coach_view,
+    build_readiness_presence_summary,
+    build_readiness_provenance_summary,
 )
 
 
@@ -359,3 +363,401 @@ def test_build_interpretation_facts_is_descriptive():
             },
         },
     }
+
+
+def test_build_descriptive_flags_remains_non_evaluative():
+    facts = {
+        "as_of_date": date(2026, 9, 30),
+        "plan": {
+            "planned_today_count": 1,
+            "today_workouts": [
+                {
+                    "id": "workout-1",
+                    "sport": "KAYAK",
+                    "title": "8km kayaking",
+                    "has_actual": False,
+                    "link_source": None,
+                },
+            ],
+        },
+        "athlete": {
+            "load_available": True,
+            "acute_weekly_load": 151.53,
+            "chronic_weekly_load": 110.09,
+            "smoothed_acute_weekly_equivalent": 103.38,
+            "smoothed_chronic_weekly_equivalent": 221.69,
+            "readiness_available": True,
+            "readiness_source": "MANUAL",
+            "readiness_presence": {
+                "objective": {
+                    "hrv_rmssd_ms": {
+                        "status": "AVAILABLE",
+                    },
+                    "sleep_score": {
+                        "status": "AVAILABLE",
+                    },
+                },
+                "objective_context": {},
+                "subjective": {
+                    "fatigue_score": {
+                        "status": "AVAILABLE",
+                    },
+                    "illness": {
+                        "status": "NO_DATA",
+                    },
+                    "travel": {
+                        "status": "NO_DATA",
+                    },
+                },
+            },
+        },
+    }
+
+    flags = build_descriptive_flags(
+        facts
+    )
+
+    assert flags == {
+        "as_of_date": date(2026, 9, 30),
+        "plan": {
+            "has_planned_workout_today": True,
+            "planned_today_count": 1,
+            "with_actual_count": 0,
+            "without_actual_count": 1,
+        },
+        "load": {
+            "available": True,
+            "raw_acute_vs_chronic": "ABOVE",
+            "smoothed_acute_vs_chronic": "BELOW",
+        },
+        "readiness": {
+            "available": True,
+            "source": "MANUAL",
+            "objective_available_metrics": [
+                "hrv_rmssd_ms",
+                "sleep_score",
+            ],
+            "subjective_available_metrics": [
+                "fatigue_score",
+            ],
+            "illness_status": "NO_DATA",
+            "travel_status": "NO_DATA",
+        },
+    }
+
+
+def test_build_readiness_presence_summary_preserves_reporting_semantics():
+    facts = {
+        "athlete": {
+            "readiness_available": True,
+            "readiness_source": "MANUAL",
+            "readiness_presence": {
+                "objective": {
+                    "hrv_rmssd_ms": {
+                        "status": "AVAILABLE",
+                    },
+                    "sleep_score": {
+                        "status": "AVAILABLE",
+                    },
+                },
+                "objective_context": {
+                    "background_hr_median_bpm": {
+                        "status": "NO_DATA",
+                    },
+                },
+                "subjective": {
+                    "fatigue_score": {
+                        "status": "AVAILABLE",
+                        "explicit": False,
+                        "legacy_inferred": True,
+                    },
+                    "energy_score": {
+                        "status": "AVAILABLE",
+                        "explicit": True,
+                        "legacy_inferred": False,
+                    },
+                    "illness": {
+                        "status": "NO_DATA",
+                        "explicit": False,
+                        "legacy_inferred": False,
+                    },
+                    "travel": {
+                        "status": "NO_DATA",
+                        "explicit": False,
+                        "legacy_inferred": False,
+                    },
+                },
+            },
+        },
+    }
+
+    summary = (
+        build_readiness_presence_summary(
+            facts
+        )
+    )
+
+    assert summary == {
+        "available": True,
+        "source": "MANUAL",
+        "objective": {
+            "available_metrics": [
+                "hrv_rmssd_ms",
+                "sleep_score",
+            ],
+            "no_data_metrics": [],
+        },
+        "objective_context": {
+            "available_metrics": [],
+            "no_data_metrics": [
+                "background_hr_median_bpm",
+            ],
+        },
+        "subjective": {
+            "available_metrics": [
+                "energy_score",
+                "fatigue_score",
+            ],
+            "explicit_metrics": [
+                "energy_score",
+            ],
+            "legacy_inferred_metrics": [
+                "fatigue_score",
+            ],
+            "no_data_metrics": [
+                "illness",
+                "travel",
+            ],
+        },
+    }
+
+
+def test_build_readiness_provenance_summary_preserves_metric_sources():
+    facts = {
+        "athlete": {
+            "readiness_source": (
+                "PHYSIOLOGICAL_MEASUREMENTS"
+            ),
+            "readiness_provenance": {
+                "hrv_rmssd_ms": {
+                    "provider": "POLAR",
+                    "measured_at": (
+                        "2026-09-29T04:56:33"
+                        ".006000+00:00"
+                    ),
+                    "measurement_id": (
+                        "measurement-1"
+                    ),
+                    "source_record_id": (
+                        "source-record-1"
+                    ),
+                    "availability": {
+                        "schema_version": 1,
+                        "total_observation_count": 1,
+                        "metric_observation_count": 1,
+                    },
+                },
+                "sleep_score": {
+                    "provider": "POLAR",
+                    "measured_at": (
+                        "2026-09-29T03:50:17"
+                        ".513000+00:00"
+                    ),
+                    "measurement_id": (
+                        "measurement-2"
+                    ),
+                    "source_record_id": (
+                        "source-record-2"
+                    ),
+                    "availability": {
+                        "schema_version": 1,
+                        "total_observation_count": 1,
+                        "metric_observation_count": 1,
+                    },
+                },
+            },
+        },
+    }
+
+    summary = (
+        build_readiness_provenance_summary(
+            facts
+        )
+    )
+
+    assert summary == {
+        "readiness_source": (
+            "PHYSIOLOGICAL_MEASUREMENTS"
+        ),
+        "metric_provenance_available": True,
+        "metric_count": 2,
+        "providers": [
+            "POLAR",
+        ],
+        "metrics": {
+            "hrv_rmssd_ms": {
+                "provider": "POLAR",
+                "measured_at": (
+                    "2026-09-29T04:56:33"
+                    ".006000+00:00"
+                ),
+                "measurement_id": (
+                    "measurement-1"
+                ),
+                "source_record_id": (
+                    "source-record-1"
+                ),
+                "availability": {
+                    "schema_version": 1,
+                    "total_observation_count": 1,
+                    "metric_observation_count": 1,
+                },
+            },
+            "sleep_score": {
+                "provider": "POLAR",
+                "measured_at": (
+                    "2026-09-29T03:50:17"
+                    ".513000+00:00"
+                ),
+                "measurement_id": (
+                    "measurement-2"
+                ),
+                "source_record_id": (
+                    "source-record-2"
+                ),
+                "availability": {
+                    "schema_version": 1,
+                    "total_observation_count": 1,
+                    "metric_observation_count": 1,
+                },
+            },
+        },
+    }
+
+
+def test_build_readiness_provenance_summary_handles_manual_without_metric_provenance():
+    facts = {
+        "athlete": {
+            "readiness_source": "MANUAL",
+            "readiness_provenance": {},
+        },
+    }
+
+    summary = (
+        build_readiness_provenance_summary(
+            facts
+        )
+    )
+
+    assert summary == {
+        "readiness_source": "MANUAL",
+        "metric_provenance_available": False,
+        "metric_count": 0,
+        "providers": [],
+        "metrics": {},
+    }
+
+
+def test_build_readiness_coach_view_combines_values_presence_and_provenance():
+    facts = {
+        "athlete": {
+            "readiness_available": True,
+            "readiness_source": (
+                "PHYSIOLOGICAL_MEASUREMENTS"
+            ),
+            "readiness_values": {
+                "objective": {
+                    "hrv_rmssd_ms": 44.0,
+                },
+                "objective_context": {},
+                "subjective": {},
+            },
+            "readiness_presence": {
+                "objective": {
+                    "hrv_rmssd_ms": {
+                        "status": "AVAILABLE",
+                    },
+                    "sleep_score": {
+                        "status": "NO_DATA",
+                    },
+                },
+                "objective_context": {
+                    "background_hr_median_bpm": {
+                        "status": "NO_DATA",
+                    },
+                },
+                "subjective": {
+                    "fatigue_score": {
+                        "status": "NO_DATA",
+                        "explicit": False,
+                        "legacy_inferred": False,
+                    },
+                },
+            },
+            "readiness_provenance": {
+                "hrv_rmssd_ms": {
+                    "provider": "POLAR",
+                    "measured_at": (
+                        "2026-09-29T04:56:33"
+                        ".006000+00:00"
+                    ),
+                    "measurement_id": (
+                        "measurement-1"
+                    ),
+                    "source_record_id": (
+                        "source-record-1"
+                    ),
+                    "availability": {
+                        "schema_version": 1,
+                        "total_observation_count": 1,
+                        "metric_observation_count": 1,
+                    },
+                },
+            },
+        },
+    }
+
+    view = build_readiness_coach_view(
+        facts
+    )
+
+    assert view["available"] is True
+
+    assert (
+        view["source"]
+        == "PHYSIOLOGICAL_MEASUREMENTS"
+    )
+
+    assert view["values"] == {
+        "objective": {
+            "hrv_rmssd_ms": 44.0,
+        },
+        "objective_context": {},
+        "subjective": {},
+    }
+
+    assert view["presence"]["objective"] == {
+        "available_metrics": [
+            "hrv_rmssd_ms",
+        ],
+        "no_data_metrics": [
+            "sleep_score",
+        ],
+    }
+
+    assert (
+        view["provenance"][
+            "metric_provenance_available"
+        ]
+        is True
+    )
+
+    assert view["provenance"][
+        "providers"
+    ] == [
+        "POLAR",
+    ]
+
+    assert view["provenance"][
+        "metric_count"
+    ] == 1

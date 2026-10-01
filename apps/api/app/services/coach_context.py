@@ -365,3 +365,378 @@ def build_interpretation_facts(
             ),
         },
     }
+
+
+def compare_optional_values(
+    left: float | None,
+    right: float | None,
+) -> str | None:
+    if left is None or right is None:
+        return None
+
+    if left > right:
+        return "ABOVE"
+
+    if left < right:
+        return "BELOW"
+
+    return "EQUAL"
+
+
+def build_descriptive_flags(
+    interpretation_facts: dict,
+) -> dict:
+    plan = interpretation_facts.get(
+        "plan",
+        {},
+    )
+
+    athlete = interpretation_facts.get(
+        "athlete",
+        {},
+    )
+
+    today_workouts = plan.get(
+        "today_workouts",
+        [],
+    )
+
+    readiness_presence = athlete.get(
+        "readiness_presence",
+        {},
+    )
+
+    objective_presence = (
+        readiness_presence.get(
+            "objective",
+            {},
+        )
+    )
+
+    subjective_presence = (
+        readiness_presence.get(
+            "subjective",
+            {},
+        )
+    )
+
+    return {
+        "as_of_date": interpretation_facts.get(
+            "as_of_date"
+        ),
+        "plan": {
+            "has_planned_workout_today": (
+                len(today_workouts) > 0
+            ),
+            "planned_today_count": len(
+                today_workouts
+            ),
+            "with_actual_count": sum(
+                1
+                for workout in today_workouts
+                if workout.get("has_actual")
+                is True
+            ),
+            "without_actual_count": sum(
+                1
+                for workout in today_workouts
+                if workout.get("has_actual")
+                is not True
+            ),
+        },
+        "load": {
+            "available": athlete.get(
+                "load_available",
+                False,
+            ),
+            "raw_acute_vs_chronic": (
+                compare_optional_values(
+                    athlete.get(
+                        "acute_weekly_load"
+                    ),
+                    athlete.get(
+                        "chronic_weekly_load"
+                    ),
+                )
+            ),
+            "smoothed_acute_vs_chronic": (
+                compare_optional_values(
+                    athlete.get(
+                        "smoothed_acute_weekly_equivalent"
+                    ),
+                    athlete.get(
+                        "smoothed_chronic_weekly_equivalent"
+                    ),
+                )
+            ),
+        },
+        "readiness": {
+            "available": athlete.get(
+                "readiness_available",
+                False,
+            ),
+            "source": athlete.get(
+                "readiness_source"
+            ),
+            "objective_available_metrics": sorted(
+                key
+                for key, presence
+                in objective_presence.items()
+                if (
+                    presence.get("status")
+                    == "AVAILABLE"
+                )
+            ),
+            "subjective_available_metrics": sorted(
+                key
+                for key, presence
+                in subjective_presence.items()
+                if (
+                    presence.get("status")
+                    == "AVAILABLE"
+                )
+            ),
+            "illness_status": (
+                subjective_presence.get(
+                    "illness",
+                    {},
+                ).get("status")
+            ),
+            "travel_status": (
+                subjective_presence.get(
+                    "travel",
+                    {},
+                ).get("status")
+            ),
+        },
+    }
+
+
+def build_readiness_presence_summary(
+    interpretation_facts: dict,
+) -> dict:
+    athlete = interpretation_facts.get(
+        "athlete",
+        {},
+    )
+
+    presence = athlete.get(
+        "readiness_presence",
+        {},
+    )
+
+    objective = presence.get(
+        "objective",
+        {},
+    )
+
+    objective_context = presence.get(
+        "objective_context",
+        {},
+    )
+
+    subjective = presence.get(
+        "subjective",
+        {},
+    )
+
+    return {
+        "available": athlete.get(
+            "readiness_available",
+            False,
+        ),
+        "source": athlete.get(
+            "readiness_source"
+        ),
+        "objective": {
+            "available_metrics": sorted(
+                key
+                for key, item in objective.items()
+                if item.get("status")
+                == "AVAILABLE"
+            ),
+            "no_data_metrics": sorted(
+                key
+                for key, item in objective.items()
+                if item.get("status")
+                == "NO_DATA"
+            ),
+        },
+        "objective_context": {
+            "available_metrics": sorted(
+                key
+                for key, item
+                in objective_context.items()
+                if item.get("status")
+                == "AVAILABLE"
+            ),
+            "no_data_metrics": sorted(
+                key
+                for key, item
+                in objective_context.items()
+                if item.get("status")
+                == "NO_DATA"
+            ),
+        },
+        "subjective": {
+            "available_metrics": sorted(
+                key
+                for key, item in subjective.items()
+                if item.get("status")
+                == "AVAILABLE"
+            ),
+            "explicit_metrics": sorted(
+                key
+                for key, item in subjective.items()
+                if (
+                    item.get("status")
+                    == "AVAILABLE"
+                    and item.get("explicit")
+                    is True
+                )
+            ),
+            "legacy_inferred_metrics": sorted(
+                key
+                for key, item in subjective.items()
+                if (
+                    item.get("status")
+                    == "AVAILABLE"
+                    and item.get(
+                        "legacy_inferred"
+                    )
+                    is True
+                )
+            ),
+            "no_data_metrics": sorted(
+                key
+                for key, item in subjective.items()
+                if item.get("status")
+                == "NO_DATA"
+            ),
+        },
+    }
+
+
+def build_readiness_provenance_summary(
+    interpretation_facts: dict,
+) -> dict:
+    athlete = interpretation_facts.get(
+        "athlete",
+        {},
+    )
+
+    provenance = athlete.get(
+        "readiness_provenance",
+        {},
+    ) or {}
+
+    metrics = {}
+
+    for metric_key, item in provenance.items():
+        metrics[metric_key] = {
+            "provider": item.get("provider"),
+            "measured_at": item.get(
+                "measured_at"
+            ),
+            "measurement_id": item.get(
+                "measurement_id"
+            ),
+            "source_record_id": item.get(
+                "source_record_id"
+            ),
+            "availability": item.get(
+                "availability"
+            ),
+        }
+
+    providers = sorted(
+        {
+            item["provider"]
+            for item in metrics.values()
+            if item["provider"] is not None
+        }
+    )
+
+    return {
+        "readiness_source": athlete.get(
+            "readiness_source"
+        ),
+        "metric_provenance_available": (
+            len(metrics) > 0
+        ),
+        "metric_count": len(metrics),
+        "providers": providers,
+        "metrics": metrics,
+    }
+
+
+def build_readiness_coach_view(
+    interpretation_facts: dict,
+) -> dict:
+    athlete = interpretation_facts.get(
+        "athlete",
+        {},
+    )
+
+    presence_summary = (
+        build_readiness_presence_summary(
+            interpretation_facts
+        )
+    )
+
+    provenance_summary = (
+        build_readiness_provenance_summary(
+            interpretation_facts
+        )
+    )
+
+    return {
+        "available": athlete.get(
+            "readiness_available",
+            False,
+        ),
+        "source": athlete.get(
+            "readiness_source"
+        ),
+        "values": athlete.get(
+            "readiness_values",
+            {
+                "objective": {},
+                "objective_context": {},
+                "subjective": {},
+            },
+        ),
+        "presence": {
+            "objective": presence_summary[
+                "objective"
+            ],
+            "objective_context": (
+                presence_summary[
+                    "objective_context"
+                ]
+            ),
+            "subjective": presence_summary[
+                "subjective"
+            ],
+        },
+        "provenance": {
+            "metric_provenance_available": (
+                provenance_summary[
+                    "metric_provenance_available"
+                ]
+            ),
+            "metric_count": (
+                provenance_summary[
+                    "metric_count"
+                ]
+            ),
+            "providers": (
+                provenance_summary[
+                    "providers"
+                ]
+            ),
+            "metrics": provenance_summary[
+                "metrics"
+            ],
+        },
+    }

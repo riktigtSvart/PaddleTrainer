@@ -254,6 +254,11 @@ def _compare_metric_to_reference(
         "reference_sample_support": reference.get(
             "sample_support"
         ),
+        "reference_median_absolute_deviation": (
+            reference.get(
+                "median_absolute_deviation"
+            )
+        ),
     }
 
 

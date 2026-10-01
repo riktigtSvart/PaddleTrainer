@@ -9,6 +9,8 @@ from app.services.personal_readiness_reference import (
     build_hrv_reference,
     get_hrv_reference,
     compare_hrv_to_reference,
+    build_sleep_duration_reference,
+    get_sleep_duration_reference,
 )
 
 def test_build_hrv_reference_uses_only_prior_values_inside_window():
@@ -257,4 +259,97 @@ def test_compare_hrv_to_reference_does_not_infer_relation_without_current_value(
         "relation": None,
         "reference_method": "RECENT_MEDIAN",
         "reference_sample_count": 6,
+    }
+
+
+def test_build_sleep_duration_reference_uses_only_prior_values_inside_window():
+    records = [
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 1),
+            sleep_duration_sec=99999,
+        ),
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 27),
+            sleep_duration_sec=25200,
+        ),
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 28),
+            sleep_duration_sec=27000,
+        ),
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 29),
+            sleep_duration_sec=23400,
+        ),
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 30),
+            sleep_duration_sec=1,
+        ),
+    ]
+
+    result = build_sleep_duration_reference(
+        readiness_records=records,
+        as_of_date=date(2026, 9, 30),
+    )
+
+    assert result == {
+        "metric_key": "sleep_duration_sec",
+        "method": "RECENT_MEDIAN",
+        "window_days": 28,
+        "window_start": date(2026, 9, 2),
+        "window_end": date(2026, 9, 29),
+        "sample_count": 3,
+        "reference_value": 25200.0,
+    }
+
+
+@pytest.mark.asyncio
+async def test_get_sleep_duration_reference_builds_reference_from_database_records():
+    records = [
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 27),
+            sleep_duration_sec=25200,
+        ),
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 28),
+            sleep_duration_sec=27000,
+        ),
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 29),
+            sleep_duration_sec=23400,
+        ),
+    ]
+
+    class FakeScalarResult:
+        def all(self):
+            return records
+
+    class FakeResult:
+        def scalars(self):
+            return FakeScalarResult()
+
+    class FakeDb:
+        async def execute(self, statement):
+            return FakeResult()
+
+    db = FakeDb()
+
+    user = SimpleNamespace(
+        id=uuid.uuid4(),
+    )
+
+    result = await get_sleep_duration_reference(
+        db=db,
+        user=user,
+        as_of_date=date(2026, 9, 30),
+        window_days=3,
+    )
+
+    assert result == {
+        "metric_key": "sleep_duration_sec",
+        "method": "RECENT_MEDIAN",
+        "window_days": 3,
+        "window_start": date(2026, 9, 27),
+        "window_end": date(2026, 9, 29),
+        "sample_count": 3,
+        "reference_value": 25200.0,
     }

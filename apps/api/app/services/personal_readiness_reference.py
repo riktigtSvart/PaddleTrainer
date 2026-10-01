@@ -12,12 +12,14 @@ from app.models.entities import (
 
 
 DEFAULT_HRV_REFERENCE_WINDOW_DAYS = 28
+DEFAULT_SLEEP_DURATION_REFERENCE_WINDOW_DAYS = 28
 
 
-def build_hrv_reference(
+def _build_recent_median_reference(
     readiness_records: Iterable[AthleteReadiness],
     as_of_date: date,
-    window_days: int = DEFAULT_HRV_REFERENCE_WINDOW_DAYS,
+    metric_key: str,
+    window_days: int,
 ) -> dict:
     window_start = (
         as_of_date
@@ -29,17 +31,26 @@ def build_hrv_reference(
         - timedelta(days=1)
     )
 
-    values = [
-        float(record.hrv_rmssd_ms)
-        for record in readiness_records
-        if (
+    values = []
+
+    for record in readiness_records:
+        if not (
             window_start
             <= record.recorded_date
             < as_of_date
-            and record.hrv_rmssd_ms
-            is not None
+        ):
+            continue
+
+        value = getattr(
+            record,
+            metric_key,
+            None,
         )
-    ]
+
+        if value is None:
+            continue
+
+        values.append(float(value))
 
     reference_value = (
         float(median(values))
@@ -48,7 +59,7 @@ def build_hrv_reference(
     )
 
     return {
-        "metric_key": "hrv_rmssd_ms",
+        "metric_key": metric_key,
         "method": "RECENT_MEDIAN",
         "window_days": window_days,
         "window_start": window_start,
@@ -58,12 +69,41 @@ def build_hrv_reference(
     }
 
 
-async def get_hrv_reference(
-    db: AsyncSession,
-    user: User,
+def build_hrv_reference(
+    readiness_records: Iterable[AthleteReadiness],
     as_of_date: date,
     window_days: int = DEFAULT_HRV_REFERENCE_WINDOW_DAYS,
 ) -> dict:
+    return _build_recent_median_reference(
+        readiness_records=readiness_records,
+        as_of_date=as_of_date,
+        metric_key="hrv_rmssd_ms",
+        window_days=window_days,
+    )
+
+
+def build_sleep_duration_reference(
+    readiness_records: Iterable[AthleteReadiness],
+    as_of_date: date,
+    window_days: int = (
+        DEFAULT_SLEEP_DURATION_REFERENCE_WINDOW_DAYS
+    ),
+) -> dict:
+    return _build_recent_median_reference(
+        readiness_records=readiness_records,
+        as_of_date=as_of_date,
+        metric_key="sleep_duration_sec",
+        window_days=window_days,
+    )
+
+
+async def _get_reference_records(
+    db: AsyncSession,
+    user: User,
+    as_of_date: date,
+    window_days: int,
+    metric_column,
+) -> list[AthleteReadiness]:
     window_start = (
         as_of_date
         - timedelta(days=window_days)
@@ -78,17 +118,60 @@ async def get_hrv_reference(
             >= window_start,
             AthleteReadiness.recorded_date
             < as_of_date,
-            AthleteReadiness.hrv_rmssd_ms
-            .is_not(None),
+            metric_column.is_not(None),
         )
         .order_by(
             AthleteReadiness.recorded_date
         )
     )
 
-    records = result.scalars().all()
+    return list(
+        result.scalars().all()
+    )
+
+
+async def get_hrv_reference(
+    db: AsyncSession,
+    user: User,
+    as_of_date: date,
+    window_days: int = DEFAULT_HRV_REFERENCE_WINDOW_DAYS,
+) -> dict:
+    records = await _get_reference_records(
+        db=db,
+        user=user,
+        as_of_date=as_of_date,
+        window_days=window_days,
+        metric_column=(
+            AthleteReadiness.hrv_rmssd_ms
+        ),
+    )
 
     return build_hrv_reference(
+        readiness_records=records,
+        as_of_date=as_of_date,
+        window_days=window_days,
+    )
+
+
+async def get_sleep_duration_reference(
+    db: AsyncSession,
+    user: User,
+    as_of_date: date,
+    window_days: int = (
+        DEFAULT_SLEEP_DURATION_REFERENCE_WINDOW_DAYS
+    ),
+) -> dict:
+    records = await _get_reference_records(
+        db=db,
+        user=user,
+        as_of_date=as_of_date,
+        window_days=window_days,
+        metric_column=(
+            AthleteReadiness.sleep_duration_sec
+        ),
+    )
+
+    return build_sleep_duration_reference(
         readiness_records=records,
         as_of_date=as_of_date,
         window_days=window_days,

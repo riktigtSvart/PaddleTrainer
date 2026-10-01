@@ -216,6 +216,10 @@ def test_compare_hrv_to_reference_describes_current_value_above_reference():
         "method": "RECENT_MEDIAN",
         "sample_count": 6,
         "reference_value": 54.0,
+        "sample_support": {
+            "sample_count": 6,
+            "state": "MULTIPLE_SAMPLES",
+        },
     }
 
     result = compare_hrv_to_reference(
@@ -230,6 +234,10 @@ def test_compare_hrv_to_reference_describes_current_value_above_reference():
         "relation": "ABOVE_PERSONAL_REFERENCE",
         "reference_method": "RECENT_MEDIAN",
         "reference_sample_count": 6,
+        "reference_sample_support": {
+            "sample_count": 6,
+            "state": "MULTIPLE_SAMPLES",
+        },
     }
 
 
@@ -253,6 +261,7 @@ def test_compare_hrv_to_reference_does_not_infer_relation_without_reference():
         "relation": None,
         "reference_method": "RECENT_MEDIAN",
         "reference_sample_count": 0,
+        "reference_sample_support": None,
     }
 
 
@@ -276,6 +285,7 @@ def test_compare_hrv_to_reference_does_not_infer_relation_without_current_value(
         "relation": None,
         "reference_method": "RECENT_MEDIAN",
         "reference_sample_count": 6,
+        "reference_sample_support": None,
     }
 
 

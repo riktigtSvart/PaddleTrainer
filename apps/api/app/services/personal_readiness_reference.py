@@ -216,6 +216,9 @@ def compare_hrv_to_reference(
             "sample_count",
             0,
         ),
+        "reference_sample_support": reference.get(
+            "sample_support"
+        ),
     }
 
 

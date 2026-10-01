@@ -5,6 +5,7 @@ from app.services.coach_context import (
     build_coach_inputs,
     build_descriptive_flags,
     build_interpretation_facts,
+    build_interpretation_signals,
     build_today_plan,
     build_readiness_coach_view,
     build_readiness_presence_summary,
@@ -761,3 +762,251 @@ def test_build_readiness_coach_view_combines_values_presence_and_provenance():
     assert view["provenance"][
         "metric_count"
     ] == 1
+
+
+def test_build_interpretation_signals_remains_non_prescriptive():
+    facts = {
+        "as_of_date": date(2026, 9, 30),
+        "plan": {
+            "active_periods": [
+                {
+                    "period_type": "MESOCYCLE",
+                    "title": "Őszi alapozó ciklus 1",
+                    "objectives": [
+                        {
+                            "objective_type": "ENDURANCE",
+                            "weight": 0.6,
+                        },
+                        {
+                            "objective_type": "STRENGTH",
+                            "weight": 0.2,
+                        },
+                        {
+                            "objective_type": "TECHNIQUE",
+                            "weight": 0.2,
+                        },
+                    ],
+                },
+            ],
+        },
+    }
+
+    flags = {
+        "plan": {
+            "planned_today_count": 1,
+            "with_actual_count": 0,
+            "without_actual_count": 1,
+        },
+        "load": {
+            "raw_acute_vs_chronic": "ABOVE",
+            "smoothed_acute_vs_chronic": "BELOW",
+        },
+        "readiness": {
+            "illness_status": "NO_DATA",
+            "travel_status": "NO_DATA",
+        },
+    }
+
+    readiness_view = {
+        "available": True,
+        "source": "MANUAL",
+        "presence": {
+            "objective": {
+                "available_metrics": [
+                    "hrv_rmssd_ms",
+                ],
+                "no_data_metrics": [],
+            },
+            "objective_context": {
+                "available_metrics": [],
+                "no_data_metrics": [
+                    "background_hr_median_bpm",
+                ],
+            },
+            "subjective": {
+                "available_metrics": [
+                    "fatigue_score",
+                ],
+                "explicit_metrics": [],
+                "legacy_inferred_metrics": [
+                    "fatigue_score",
+                ],
+                "no_data_metrics": [
+                    "illness",
+                    "travel",
+                ],
+            },
+        },
+        "provenance": {
+            "metric_provenance_available": False,
+            "metric_count": 0,
+            "providers": [],
+            "metrics": {},
+        },
+    }
+
+    result = build_interpretation_signals(
+        interpretation_facts=facts,
+        descriptive_flags=flags,
+        readiness_coach_view=readiness_view,
+    )
+
+    assert result == {
+        "as_of_date": date(2026, 9, 30),
+        "signals": [
+            {
+                "code": "TODAY_WORKOUT_PENDING",
+                "category": "PLAN",
+                "evidence": {
+                    "planned_today_count": 1,
+                    "without_actual_count": 1,
+                },
+            },
+            {
+                "code": "LOAD_METHODS_DIVERGE",
+                "category": "LOAD",
+                "evidence": {
+                    "raw_acute_vs_chronic": "ABOVE",
+                    "smoothed_acute_vs_chronic": "BELOW",
+                },
+            },
+            {
+                "code": "ILLNESS_STATUS_UNKNOWN",
+                "category": "READINESS",
+                "evidence": {
+                    "status": "NO_DATA",
+                },
+            },
+            {
+                "code": "TRAVEL_STATUS_UNKNOWN",
+                "category": "READINESS",
+                "evidence": {
+                    "status": "NO_DATA",
+                },
+            },
+            {
+                "code": (
+                    "READINESS_METRIC_PROVENANCE_UNAVAILABLE"
+                ),
+                "category": "EVIDENCE",
+                "evidence": {
+                    "readiness_source": "MANUAL",
+                    "metric_count": 0,
+                },
+            },
+            {
+                "code": (
+                    "SUBJECTIVE_VALUES_LEGACY_INFERRED"
+                ),
+                "category": "EVIDENCE",
+                "evidence": {
+                    "metrics": [
+                        "fatigue_score",
+                    ],
+                },
+            },
+            {
+                "code": (
+                    "ACTIVE_PERIOD_DOMINANT_OBJECTIVE"
+                ),
+                "category": "PLAN",
+                "evidence": {
+                    "period_type": "MESOCYCLE",
+                    "period_title": (
+                        "Őszi alapozó ciklus 1"
+                    ),
+                    "objective_type": "ENDURANCE",
+                    "weight": 0.6,
+                },
+            },
+        ],
+    }
+
+
+def test_build_interpretation_signals_does_not_flag_available_metric_provenance():
+    facts = {
+        "as_of_date": date(2026, 9, 29),
+        "plan": {
+            "active_periods": [],
+        },
+    }
+
+    flags = {
+        "plan": {
+            "planned_today_count": 0,
+            "with_actual_count": 0,
+            "without_actual_count": 0,
+        },
+        "load": {
+            "raw_acute_vs_chronic": None,
+            "smoothed_acute_vs_chronic": None,
+        },
+        "readiness": {
+            "illness_status": None,
+            "travel_status": None,
+        },
+    }
+
+    readiness_view = {
+        "available": True,
+        "source": "PHYSIOLOGICAL_MEASUREMENTS",
+        "presence": {
+            "objective": {
+                "available_metrics": [
+                    "hrv_rmssd_ms",
+                    "sleep_duration_sec",
+                    "sleep_score",
+                ],
+                "no_data_metrics": [],
+            },
+            "objective_context": {
+                "available_metrics": [],
+                "no_data_metrics": [],
+            },
+            "subjective": {
+                "available_metrics": [],
+                "explicit_metrics": [],
+                "legacy_inferred_metrics": [],
+                "no_data_metrics": [],
+            },
+        },
+        "provenance": {
+            "metric_provenance_available": True,
+            "metric_count": 3,
+            "providers": [
+                "POLAR",
+            ],
+            "metrics": {
+                "hrv_rmssd_ms": {
+                    "provider": "POLAR",
+                },
+                "sleep_duration_sec": {
+                    "provider": "POLAR",
+                },
+                "sleep_score": {
+                    "provider": "POLAR",
+                },
+            },
+        },
+    }
+
+    result = build_interpretation_signals(
+        interpretation_facts=facts,
+        descriptive_flags=flags,
+        readiness_coach_view=readiness_view,
+    )
+
+    codes = {
+        item["code"]
+        for item in result["signals"]
+    }
+
+    assert (
+        "READINESS_METRIC_PROVENANCE_UNAVAILABLE"
+        not in codes
+    )
+
+    assert (
+        "SUBJECTIVE_VALUES_LEGACY_INFERRED"
+        not in codes
+    )

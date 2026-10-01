@@ -740,3 +740,263 @@ def build_readiness_coach_view(
             ],
         },
     }
+
+
+def build_interpretation_signals(
+    interpretation_facts: dict,
+    descriptive_flags: dict,
+    readiness_coach_view: dict,
+) -> dict:
+    signals: list[dict] = []
+
+    plan_flags = descriptive_flags.get(
+        "plan",
+        {},
+    )
+
+    load_flags = descriptive_flags.get(
+        "load",
+        {},
+    )
+
+    readiness_flags = descriptive_flags.get(
+        "readiness",
+        {},
+    )
+
+    readiness_presence = (
+        readiness_coach_view.get(
+            "presence",
+            {},
+        )
+    )
+
+    readiness_provenance = (
+        readiness_coach_view.get(
+            "provenance",
+            {},
+        )
+    )
+
+    if (
+        plan_flags.get(
+            "without_actual_count",
+            0,
+        )
+        > 0
+    ):
+        signals.append(
+            {
+                "code": "TODAY_WORKOUT_PENDING",
+                "category": "PLAN",
+                "evidence": {
+                    "planned_today_count": (
+                        plan_flags.get(
+                            "planned_today_count",
+                            0,
+                        )
+                    ),
+                    "without_actual_count": (
+                        plan_flags.get(
+                            "without_actual_count",
+                            0,
+                        )
+                    ),
+                },
+            }
+        )
+
+    raw_comparison = load_flags.get(
+        "raw_acute_vs_chronic"
+    )
+
+    smoothed_comparison = load_flags.get(
+        "smoothed_acute_vs_chronic"
+    )
+
+    if (
+        raw_comparison is not None
+        and smoothed_comparison is not None
+        and raw_comparison
+        != smoothed_comparison
+    ):
+        signals.append(
+            {
+                "code": "LOAD_METHODS_DIVERGE",
+                "category": "LOAD",
+                "evidence": {
+                    "raw_acute_vs_chronic": (
+                        raw_comparison
+                    ),
+                    "smoothed_acute_vs_chronic": (
+                        smoothed_comparison
+                    ),
+                },
+            }
+        )
+
+    if (
+        readiness_flags.get(
+            "illness_status"
+        )
+        == "NO_DATA"
+    ):
+        signals.append(
+            {
+                "code": "ILLNESS_STATUS_UNKNOWN",
+                "category": "READINESS",
+                "evidence": {
+                    "status": "NO_DATA",
+                },
+            }
+        )
+
+    if (
+        readiness_flags.get(
+            "travel_status"
+        )
+        == "NO_DATA"
+    ):
+        signals.append(
+            {
+                "code": "TRAVEL_STATUS_UNKNOWN",
+                "category": "READINESS",
+                "evidence": {
+                    "status": "NO_DATA",
+                },
+            }
+        )
+
+        if (
+                readiness_coach_view.get(
+                    "available",
+                    False,
+                )
+                and readiness_provenance.get(
+            "metric_provenance_available"
+        )
+                is False
+        ):
+            signals.append(
+                {
+                    "code": (
+                        "READINESS_METRIC_PROVENANCE_UNAVAILABLE"
+                    ),
+                    "category": "EVIDENCE",
+                    "evidence": {
+                        "readiness_source": (
+                            readiness_coach_view.get(
+                                "source"
+                            )
+                        ),
+                        "metric_count": (
+                            readiness_provenance.get(
+                                "metric_count",
+                                0,
+                            )
+                        ),
+                    },
+                }
+            )
+
+        legacy_inferred_metrics = (
+            readiness_presence.get(
+                "subjective",
+                {},
+            ).get(
+                "legacy_inferred_metrics",
+                [],
+            )
+        )
+
+        if legacy_inferred_metrics:
+            signals.append(
+                {
+                    "code": (
+                        "SUBJECTIVE_VALUES_LEGACY_INFERRED"
+                    ),
+                    "category": "EVIDENCE",
+                    "evidence": {
+                        "metrics": (
+                            legacy_inferred_metrics
+                        ),
+                    },
+                }
+            )
+
+    active_periods = (
+        interpretation_facts.get(
+            "plan",
+            {},
+        ).get(
+            "active_periods",
+            [],
+        )
+    )
+
+    for period in active_periods:
+        objectives = period.get(
+            "objectives",
+            [],
+        )
+
+        if not objectives:
+            continue
+
+        max_weight = max(
+            objective.get(
+                "weight",
+                0.0,
+            )
+            for objective in objectives
+        )
+
+        dominant = [
+            objective
+            for objective in objectives
+            if (
+                objective.get(
+                    "weight"
+                )
+                == max_weight
+            )
+        ]
+
+        if len(dominant) != 1:
+            continue
+
+        objective = dominant[0]
+
+        signals.append(
+            {
+                "code": (
+                    "ACTIVE_PERIOD_DOMINANT_OBJECTIVE"
+                ),
+                "category": "PLAN",
+                "evidence": {
+                    "period_type": period.get(
+                        "period_type"
+                    ),
+                    "period_title": period.get(
+                        "title"
+                    ),
+                    "objective_type": (
+                        objective.get(
+                            "objective_type"
+                        )
+                    ),
+                    "weight": objective.get(
+                        "weight"
+                    ),
+                },
+            }
+        )
+
+    return {
+        "as_of_date": (
+            interpretation_facts.get(
+                "as_of_date"
+            )
+        ),
+        "signals": signals,
+    }

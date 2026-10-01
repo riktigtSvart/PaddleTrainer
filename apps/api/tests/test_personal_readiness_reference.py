@@ -73,6 +73,7 @@ def test_build_hrv_reference_uses_only_prior_values_inside_window():
             "state": "MULTIPLE_SAMPLES",
         },
         "reference_value": 54.0,
+        "median_absolute_deviation": 7.5,
     }
 
 
@@ -105,6 +106,7 @@ def test_build_hrv_reference_returns_no_value_when_window_has_no_hrv_samples():
             "state": "NO_SAMPLES",
         },
         "reference_value": None,
+        "median_absolute_deviation": None,
     }
 
 
@@ -146,6 +148,7 @@ def test_build_hrv_reference_respects_custom_window_days():
             "state": "MULTIPLE_SAMPLES",
         },
         "reference_value": 49.0,
+        "median_absolute_deviation": 1.0,
     }
 
 
@@ -209,6 +212,7 @@ async def test_get_hrv_reference_builds_reference_from_database_records():
             "state": "MULTIPLE_SAMPLES",
         },
         "reference_value": 49.0,
+        "median_absolute_deviation": 1.0,
     }
 
 
@@ -332,6 +336,7 @@ def test_build_sleep_duration_reference_uses_only_prior_values_inside_window():
             "state": "MULTIPLE_SAMPLES",
         },
         "reference_value": 25200.0,
+        "median_absolute_deviation": 1800.0,
     }
 
 
@@ -389,6 +394,7 @@ async def test_get_sleep_duration_reference_builds_reference_from_database_recor
             "state": "MULTIPLE_SAMPLES",
         },
         "reference_value": 25200.0,
+        "median_absolute_deviation": 1800.0,
     }
 
 

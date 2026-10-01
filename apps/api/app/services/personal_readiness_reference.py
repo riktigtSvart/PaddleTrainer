@@ -83,6 +83,12 @@ def _build_recent_median_reference(
         else None
     )
 
+    median_absolute_deviation = (
+        calculate_median_absolute_deviation(
+            values
+        )
+    )
+
     return {
         "metric_key": metric_key,
         "method": "RECENT_MEDIAN",
@@ -95,6 +101,9 @@ def _build_recent_median_reference(
             describe_reference_sample_support(
                 len(values)
             )
+        ),
+        "median_absolute_deviation": (
+            median_absolute_deviation
         ),
     }
 

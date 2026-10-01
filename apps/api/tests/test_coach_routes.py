@@ -149,54 +149,116 @@ def test_get_coach_state_returns_public_contract(
 def test_get_scientific_assessment_returns_public_contract(
     monkeypatch,
 ):
+    async def fake_get_or_create_demo_user(db):
+        return SimpleNamespace(
+            timezone="Europe/Budapest",
+        )
+
     async def fake_get_current_coach_state(
         as_of_date,
         db,
     ):
         return {
             "as_of_date": as_of_date,
+            "readiness": {
+                "view": {
+                    "values": {
+                        "objective": {
+                            "hrv_rmssd_ms": 58.4,
+                        },
+                    },
+                },
+            },
             "sentinel": "coach-state",
         }
+
+    hrv_reference = {
+        "metric_key": "hrv_rmssd_ms",
+        "method": "RECENT_MEDIAN",
+        "sample_count": 6,
+        "reference_value": 54.0,
+    }
+
+    async def fake_get_hrv_reference(
+        db,
+        user,
+        as_of_date,
+    ):
+        return hrv_reference
+
+    comparison = {
+        "metric_key": "hrv_rmssd_ms",
+        "current_value": 58.4,
+        "reference_value": 54.0,
+        "relation": (
+            "ABOVE_PERSONAL_REFERENCE"
+        ),
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 6,
+    }
+
+    def fake_compare_hrv_to_reference(
+        current_value,
+        reference,
+    ):
+        assert current_value == 58.4
+        assert reference == hrv_reference
+
+        return comparison
 
     expected = {
         "as_of_date": "2026-09-30",
         "load": {
-            "interpretation": {
-                "state": "METHOD_DEPENDENT",
-                "raw_acute_vs_chronic": "ABOVE",
-                "smoothed_acute_vs_chronic": "BELOW",
-            },
+            "interpretation": None,
         },
         "readiness": {
-            "interpretation": {
-                "state": "PARTIAL_EVIDENCE",
-                "gaps": [
-                    "ILLNESS_STATUS_UNKNOWN",
-                    "TRAVEL_STATUS_UNKNOWN",
-                ],
-            },
-            "traceability": {
-                "state": (
-                    "METRIC_PROVENANCE_UNAVAILABLE"
-                ),
-            },
+            "interpretation": None,
+            "traceability": None,
+            "objective_evidence": None,
+            "subjective_evidence": None,
+            "context_evidence": None,
+            "hrv_reference_comparison": comparison,
         },
     }
 
     def fake_build_scientific_assessment(
         coach_state,
+        hrv_reference_comparison,
     ):
         assert (
             coach_state["sentinel"]
             == "coach-state"
         )
 
+        assert (
+            hrv_reference_comparison
+            == comparison
+        )
+
         return expected
+
+    monkeypatch.setattr(
+        coach,
+        "get_or_create_demo_user",
+        fake_get_or_create_demo_user,
+    )
 
     monkeypatch.setattr(
         coach,
         "get_current_coach_state",
         fake_get_current_coach_state,
+    )
+
+    monkeypatch.setattr(
+        coach,
+        "get_hrv_reference",
+        fake_get_hrv_reference,
+    )
+
+    monkeypatch.setattr(
+        coach,
+        "compare_hrv_to_reference",
+        fake_compare_hrv_to_reference,
     )
 
     monkeypatch.setattr(

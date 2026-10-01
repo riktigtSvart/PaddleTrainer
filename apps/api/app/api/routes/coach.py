@@ -25,6 +25,10 @@ from app.services.coach_context import (
 from app.services.scientific_assessment import (
     build_scientific_assessment,
 )
+from app.services.personal_readiness_reference import (
+    compare_hrv_to_reference,
+    get_hrv_reference,
+)
 
 
 router = APIRouter(
@@ -168,11 +172,60 @@ async def get_current_scientific_assessment(
     as_of_date: date,
     db: AsyncSession = Depends(get_db),
 ):
+    user = await get_or_create_demo_user(db)
+
     coach_state = await get_current_coach_state(
         as_of_date=as_of_date,
         db=db,
     )
 
+    hrv_reference = await get_hrv_reference(
+        db=db,
+        user=user,
+        as_of_date=as_of_date,
+    )
+
+    readiness_view = (
+        coach_state.get(
+            "readiness",
+            {},
+        ).get(
+            "view",
+            {},
+        )
+        or {}
+    )
+
+    readiness_values = (
+        readiness_view.get(
+            "values",
+            {},
+        )
+        or {}
+    )
+
+    objective_values = (
+        readiness_values.get(
+            "objective",
+            {},
+        )
+        or {}
+    )
+
+    current_hrv = objective_values.get(
+        "hrv_rmssd_ms"
+    )
+
+    hrv_reference_comparison = (
+        compare_hrv_to_reference(
+            current_value=current_hrv,
+            reference=hrv_reference,
+        )
+    )
+
     return build_scientific_assessment(
-        coach_state
+        coach_state=coach_state,
+        hrv_reference_comparison=(
+            hrv_reference_comparison
+        ),
     )

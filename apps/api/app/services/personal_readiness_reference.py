@@ -66,6 +66,11 @@ def _build_recent_median_reference(
         "window_end": window_end,
         "sample_count": len(values),
         "reference_value": reference_value,
+        "sample_support": (
+            describe_reference_sample_support(
+                len(values)
+            )
+        ),
     }
 
 
@@ -211,4 +216,20 @@ def compare_hrv_to_reference(
             "sample_count",
             0,
         ),
+    }
+
+
+def describe_reference_sample_support(
+    sample_count: int,
+) -> dict:
+    if sample_count <= 0:
+        state = "NO_SAMPLES"
+    elif sample_count == 1:
+        state = "SINGLE_SAMPLE"
+    else:
+        state = "MULTIPLE_SAMPLES"
+
+    return {
+        "sample_count": sample_count,
+        "state": state,
     }

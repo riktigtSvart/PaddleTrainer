@@ -11,6 +11,7 @@ from app.services.personal_readiness_reference import (
     compare_hrv_to_reference,
     build_sleep_duration_reference,
     get_sleep_duration_reference,
+    describe_reference_sample_support,
 )
 
 def test_build_hrv_reference_uses_only_prior_values_inside_window():
@@ -65,6 +66,10 @@ def test_build_hrv_reference_uses_only_prior_values_inside_window():
         "window_start": date(2026, 9, 2),
         "window_end": date(2026, 9, 29),
         "sample_count": 6,
+        "sample_support": {
+            "sample_count": 6,
+            "state": "MULTIPLE_SAMPLES",
+        },
         "reference_value": 54.0,
     }
 
@@ -93,6 +98,10 @@ def test_build_hrv_reference_returns_no_value_when_window_has_no_hrv_samples():
         "window_start": date(2026, 9, 2),
         "window_end": date(2026, 9, 29),
         "sample_count": 0,
+        "sample_support": {
+            "sample_count": 0,
+            "state": "NO_SAMPLES",
+        },
         "reference_value": None,
     }
 
@@ -130,6 +139,10 @@ def test_build_hrv_reference_respects_custom_window_days():
         "window_start": date(2026, 9, 27),
         "window_end": date(2026, 9, 29),
         "sample_count": 3,
+        "sample_support": {
+            "sample_count": 3,
+            "state": "MULTIPLE_SAMPLES",
+        },
         "reference_value": 49.0,
     }
 
@@ -189,6 +202,10 @@ async def test_get_hrv_reference_builds_reference_from_database_records():
         "window_start": date(2026, 9, 27),
         "window_end": date(2026, 9, 29),
         "sample_count": 3,
+        "sample_support": {
+            "sample_count": 3,
+            "state": "MULTIPLE_SAMPLES",
+        },
         "reference_value": 49.0,
     }
 
@@ -298,6 +315,10 @@ def test_build_sleep_duration_reference_uses_only_prior_values_inside_window():
         "window_start": date(2026, 9, 2),
         "window_end": date(2026, 9, 29),
         "sample_count": 3,
+        "sample_support": {
+            "sample_count": 3,
+            "state": "MULTIPLE_SAMPLES",
+        },
         "reference_value": 25200.0,
     }
 
@@ -351,5 +372,51 @@ async def test_get_sleep_duration_reference_builds_reference_from_database_recor
         "window_start": date(2026, 9, 27),
         "window_end": date(2026, 9, 29),
         "sample_count": 3,
+        "sample_support": {
+            "sample_count": 3,
+            "state": "MULTIPLE_SAMPLES",
+        },
         "reference_value": 25200.0,
+    }
+
+
+def test_describe_reference_sample_support_is_descriptive_only():
+    assert describe_reference_sample_support(
+        0
+    ) == {
+        "sample_count": 0,
+        "state": "NO_SAMPLES",
+    }
+
+    assert describe_reference_sample_support(
+        1
+    ) == {
+        "sample_count": 1,
+        "state": "SINGLE_SAMPLE",
+    }
+
+    assert describe_reference_sample_support(
+        6
+    ) == {
+        "sample_count": 6,
+        "state": "MULTIPLE_SAMPLES",
+    }
+
+
+def test_sleep_reference_exposes_single_sample_support():
+    records = [
+        SimpleNamespace(
+            recorded_date=date(2026, 9, 29),
+            sleep_duration_sec=20790,
+        ),
+    ]
+
+    result = build_sleep_duration_reference(
+        readiness_records=records,
+        as_of_date=date(2026, 9, 30),
+    )
+
+    assert result["sample_support"] == {
+        "sample_count": 1,
+        "state": "SINGLE_SAMPLE",
     }

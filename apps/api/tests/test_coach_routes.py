@@ -165,6 +165,7 @@ def test_get_scientific_assessment_returns_public_contract(
                     "values": {
                         "objective": {
                             "hrv_rmssd_ms": 58.4,
+                            "sleep_duration_sec": 27600.0,
                         },
                     },
                 },
@@ -182,6 +183,24 @@ def test_get_scientific_assessment_returns_public_contract(
             "state": "MULTIPLE_SAMPLES",
         },
     }
+
+    sleep_duration_reference = {
+        "metric_key": "sleep_duration_sec",
+        "method": "RECENT_MEDIAN",
+        "sample_count": 1,
+        "reference_value": 20790.0,
+        "sample_support": {
+            "sample_count": 1,
+            "state": "SINGLE_SAMPLE",
+        },
+    }
+
+    async def fake_get_sleep_duration_reference(
+            db,
+            user,
+            as_of_date,
+    ):
+        return sleep_duration_reference
 
     async def fake_get_hrv_reference(
         db,
@@ -205,6 +224,28 @@ def test_get_scientific_assessment_returns_public_contract(
         },
     }
 
+    sleep_duration_comparison = {
+        "metric_key": "sleep_duration_sec",
+        "current_value": 27600.0,
+        "reference_value": 20790.0,
+        "relation": "ABOVE_PERSONAL_REFERENCE",
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 1,
+        "reference_sample_support": {
+            "sample_count": 1,
+            "state": "SINGLE_SAMPLE",
+        },
+    }
+
+    def fake_compare_sleep_duration_to_reference(
+            current_value,
+            reference,
+    ):
+        assert current_value == 27600.0
+        assert reference == sleep_duration_reference
+
+        return sleep_duration_comparison
+
     def fake_compare_hrv_to_reference(
         current_value,
         reference,
@@ -226,12 +267,16 @@ def test_get_scientific_assessment_returns_public_contract(
             "subjective_evidence": None,
             "context_evidence": None,
             "hrv_reference_comparison": comparison,
+            "sleep_duration_reference_comparison": (
+                sleep_duration_comparison
+            ),
         },
     }
 
     def fake_build_scientific_assessment(
-        coach_state,
-        hrv_reference_comparison,
+            coach_state,
+            hrv_reference_comparison,
+            sleep_duration_reference_comparison,
     ):
         assert (
             coach_state["sentinel"]
@@ -241,6 +286,11 @@ def test_get_scientific_assessment_returns_public_contract(
         assert (
             hrv_reference_comparison
             == comparison
+        )
+
+        assert (
+                sleep_duration_reference_comparison
+                == sleep_duration_comparison
         )
 
         return expected
@@ -273,6 +323,18 @@ def test_get_scientific_assessment_returns_public_contract(
         coach,
         "build_scientific_assessment",
         fake_build_scientific_assessment,
+    )
+
+    monkeypatch.setattr(
+        coach,
+        "get_sleep_duration_reference",
+        fake_get_sleep_duration_reference,
+    )
+
+    monkeypatch.setattr(
+        coach,
+        "compare_sleep_duration_to_reference",
+        fake_compare_sleep_duration_to_reference,
     )
 
     app.dependency_overrides[

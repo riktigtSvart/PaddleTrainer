@@ -27,7 +27,9 @@ from app.services.scientific_assessment import (
 )
 from app.services.personal_readiness_reference import (
     compare_hrv_to_reference,
+    compare_sleep_duration_to_reference,
     get_hrv_reference,
+    get_sleep_duration_reference,
 )
 
 
@@ -185,6 +187,14 @@ async def get_current_scientific_assessment(
         as_of_date=as_of_date,
     )
 
+    sleep_duration_reference = (
+        await get_sleep_duration_reference(
+            db=db,
+            user=user,
+            as_of_date=as_of_date,
+        )
+    )
+
     readiness_view = (
         coach_state.get(
             "readiness",
@@ -216,6 +226,10 @@ async def get_current_scientific_assessment(
         "hrv_rmssd_ms"
     )
 
+    current_sleep_duration = objective_values.get(
+        "sleep_duration_sec"
+    )
+
     hrv_reference_comparison = (
         compare_hrv_to_reference(
             current_value=current_hrv,
@@ -223,9 +237,19 @@ async def get_current_scientific_assessment(
         )
     )
 
+    sleep_duration_reference_comparison = (
+        compare_sleep_duration_to_reference(
+            current_value=current_sleep_duration,
+            reference=sleep_duration_reference,
+        )
+    )
+
     return build_scientific_assessment(
         coach_state=coach_state,
         hrv_reference_comparison=(
             hrv_reference_comparison
+        ),
+        sleep_duration_reference_comparison=(
+            sleep_duration_reference_comparison
         ),
     )

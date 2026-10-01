@@ -1,5 +1,6 @@
 def build_scientific_assessment(
     coach_state: dict,
+    hrv_reference_comparison: dict | None = None,
 ) -> dict:
     load = coach_state.get(
         "load",
@@ -182,6 +183,9 @@ def build_scientific_assessment(
             ),
             "context_evidence": (
                 readiness_context_evidence
+            ),
+            "hrv_reference_comparison": (
+                hrv_reference_comparison
             ),
         },
     }

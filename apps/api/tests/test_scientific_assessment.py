@@ -40,6 +40,7 @@ def test_scientific_assessment_describes_method_dependent_load():
             "objective_evidence": None,
             "subjective_evidence": None,
             "context_evidence": None,
+            "hrv_reference_comparison": None,
         },
     }
 
@@ -67,6 +68,7 @@ def test_scientific_assessment_does_not_infer_load_alignment_from_missing_patter
             "objective_evidence": None,
             "subjective_evidence": None,
             "context_evidence": None,
+            "hrv_reference_comparison": None,
         },
     }
 
@@ -108,6 +110,7 @@ def test_scientific_assessment_marks_readiness_as_partial_when_evidence_gaps_exi
             "objective_evidence": None,
             "subjective_evidence": None,
             "context_evidence": None,
+            "hrv_reference_comparison": None,
         },
     }
 
@@ -140,6 +143,7 @@ def test_scientific_assessment_does_not_infer_complete_readiness_from_no_gaps():
             "objective_evidence": None,
             "subjective_evidence": None,
             "context_evidence": None,
+            "hrv_reference_comparison": None,
         },
     }
 
@@ -179,6 +183,7 @@ def test_scientific_assessment_preserves_missing_metric_provenance_as_traceabili
             "objective_evidence": None,
             "subjective_evidence": None,
             "context_evidence": None,
+            "hrv_reference_comparison": None,
         },
     }
 
@@ -232,6 +237,7 @@ def test_scientific_assessment_preserves_available_objective_readiness_evidence(
             },
             "subjective_evidence": None,
             "context_evidence": None,
+            "hrv_reference_comparison": None,
         },
     }
 
@@ -286,6 +292,7 @@ def test_scientific_assessment_preserves_available_subjective_readiness_evidence
                 ],
             },
             "context_evidence": None,
+            "hrv_reference_comparison": None,
         },
     }
 
@@ -332,5 +339,42 @@ def test_scientific_assessment_preserves_available_context_readiness_evidence():
                     "background_hr_median_bpm",
                 ],
             },
+            "hrv_reference_comparison": None,
         },
     }
+
+
+def test_scientific_assessment_preserves_hrv_personal_reference_comparison():
+    coach_state = {
+        "as_of_date": date(2026, 9, 30),
+        "load": {
+            "pattern": None,
+        },
+        "readiness": {
+            "evidence": {
+                "gaps": [],
+            },
+        },
+    }
+
+    comparison = {
+        "metric_key": "hrv_rmssd_ms",
+        "current_value": 58.4,
+        "reference_value": 54.0,
+        "relation": (
+            "ABOVE_PERSONAL_REFERENCE"
+        ),
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 6,
+    }
+
+    result = build_scientific_assessment(
+        coach_state=coach_state,
+        hrv_reference_comparison=comparison,
+    )
+
+    assert result[
+        "readiness"
+    ][
+        "hrv_reference_comparison"
+    ] == comparison

@@ -44,6 +44,40 @@ def build_scientific_assessment(
 
     readiness_traceability = None
 
+    readiness_objective_evidence = None
+
+    readiness_view = readiness.get(
+        "view",
+        {},
+    ) or {}
+
+    objective_presence = (
+        readiness_view.get(
+            "presence",
+            {},
+        ).get(
+            "objective",
+            {},
+        )
+    )
+
+    objective_available_metrics = (
+        objective_presence.get(
+            "available_metrics",
+            [],
+        )
+    )
+
+    if objective_available_metrics:
+        readiness_objective_evidence = {
+            "state": (
+                "OBJECTIVE_EVIDENCE_AVAILABLE"
+            ),
+            "metrics": list(
+                objective_available_metrics
+            ),
+        }
+
     if readiness_evidence is not None:
         provenance_state = (
             readiness_evidence.get(
@@ -83,6 +117,9 @@ def build_scientific_assessment(
             ),
             "traceability": (
                 readiness_traceability
+            ),
+            "objective_evidence": (
+                readiness_objective_evidence
             ),
         },
     }

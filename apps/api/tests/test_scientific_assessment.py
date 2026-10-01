@@ -37,6 +37,7 @@ def test_scientific_assessment_describes_method_dependent_load():
         "readiness": {
             "interpretation": None,
             "traceability": None,
+            "objective_evidence": None,
         },
     }
 
@@ -61,6 +62,7 @@ def test_scientific_assessment_does_not_infer_load_alignment_from_missing_patter
         "readiness": {
             "interpretation": None,
             "traceability": None,
+            "objective_evidence": None,
         },
     }
 
@@ -99,6 +101,7 @@ def test_scientific_assessment_marks_readiness_as_partial_when_evidence_gaps_exi
                 ],
             },
             "traceability": None,
+            "objective_evidence": None,
         },
     }
 
@@ -128,6 +131,7 @@ def test_scientific_assessment_does_not_infer_complete_readiness_from_no_gaps():
         "readiness": {
             "interpretation": None,
             "traceability": None,
+            "objective_evidence": None,
         },
     }
 
@@ -163,6 +167,58 @@ def test_scientific_assessment_preserves_missing_metric_provenance_as_traceabili
                 "state": (
                     "METRIC_PROVENANCE_UNAVAILABLE"
                 ),
+            },
+            "objective_evidence": None,
+        },
+    }
+
+
+def test_scientific_assessment_preserves_available_objective_readiness_evidence():
+    coach_state = {
+        "as_of_date": date(2026, 9, 30),
+        "load": {
+            "pattern": None,
+        },
+        "readiness": {
+            "evidence": {
+                "gaps": [],
+            },
+            "view": {
+                "presence": {
+                    "objective": {
+                        "available_metrics": [
+                            "hrv_rmssd_ms",
+                            "sleep_duration_sec",
+                            "sleep_score",
+                        ],
+                        "no_data_metrics": [],
+                    },
+                },
+            },
+        },
+    }
+
+    result = build_scientific_assessment(
+        coach_state
+    )
+
+    assert result == {
+        "as_of_date": date(2026, 9, 30),
+        "load": {
+            "interpretation": None,
+        },
+        "readiness": {
+            "interpretation": None,
+            "traceability": None,
+            "objective_evidence": {
+                "state": (
+                    "OBJECTIVE_EVIDENCE_AVAILABLE"
+                ),
+                "metrics": [
+                    "hrv_rmssd_ms",
+                    "sleep_duration_sec",
+                    "sleep_score",
+                ],
             },
         },
     }

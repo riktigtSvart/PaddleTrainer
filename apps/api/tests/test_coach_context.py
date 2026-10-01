@@ -1263,3 +1263,66 @@ def test_build_coach_state_combines_assessment_dimensions_without_new_inference(
             "signal_codes"
         ],
     }
+
+
+def test_interpretation_evidence_signals_do_not_depend_on_travel_unknown():
+    facts = {
+        "as_of_date": date(2026, 9, 30),
+        "plan": {
+            "active_periods": [],
+        },
+    }
+
+    flags = {
+        "plan": {
+            "planned_today_count": 0,
+            "without_actual_count": 0,
+        },
+        "load": {
+            "raw_acute_vs_chronic": None,
+            "smoothed_acute_vs_chronic": None,
+        },
+        "readiness": {
+            "illness_status": "AVAILABLE",
+            "travel_status": "AVAILABLE",
+        },
+    }
+
+    readiness_view = {
+        "available": True,
+        "source": "MANUAL",
+        "presence": {
+            "subjective": {
+                "legacy_inferred_metrics": [
+                    "fatigue_score",
+                ],
+            },
+        },
+        "provenance": {
+            "metric_provenance_available": False,
+            "metric_count": 0,
+        },
+    }
+
+    result = build_interpretation_signals(
+        interpretation_facts=facts,
+        descriptive_flags=flags,
+        readiness_coach_view=readiness_view,
+    )
+
+    codes = [
+        signal["code"]
+        for signal in result["signals"]
+    ]
+
+    assert "TRAVEL_STATUS_UNKNOWN" not in codes
+
+    assert (
+        "READINESS_METRIC_PROVENANCE_UNAVAILABLE"
+        in codes
+    )
+
+    assert (
+        "SUBJECTIVE_VALUES_LEGACY_INFERRED"
+        in codes
+    )

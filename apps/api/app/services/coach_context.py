@@ -852,10 +852,10 @@ def build_interpretation_signals(
         )
 
     if (
-        readiness_flags.get(
-            "travel_status"
-        )
-        == "NO_DATA"
+            readiness_flags.get(
+                "travel_status"
+            )
+            == "NO_DATA"
     ):
         signals.append(
             {
@@ -867,62 +867,62 @@ def build_interpretation_signals(
             }
         )
 
-        if (
-                readiness_coach_view.get(
-                    "available",
-                    False,
-                )
-                and readiness_provenance.get(
-            "metric_provenance_available"
-        )
-                is False
-        ):
-            signals.append(
-                {
-                    "code": (
-                        "READINESS_METRIC_PROVENANCE_UNAVAILABLE"
+    if (
+            readiness_coach_view.get(
+                "available",
+                False,
+            )
+            and readiness_provenance.get(
+        "metric_provenance_available"
+    )
+            is False
+    ):
+        signals.append(
+            {
+                "code": (
+                    "READINESS_METRIC_PROVENANCE_UNAVAILABLE"
+                ),
+                "category": "EVIDENCE",
+                "evidence": {
+                    "readiness_source": (
+                        readiness_coach_view.get(
+                            "source"
+                        )
                     ),
-                    "category": "EVIDENCE",
-                    "evidence": {
-                        "readiness_source": (
-                            readiness_coach_view.get(
-                                "source"
-                            )
-                        ),
-                        "metric_count": (
-                            readiness_provenance.get(
-                                "metric_count",
-                                0,
-                            )
-                        ),
-                    },
-                }
-            )
-
-        legacy_inferred_metrics = (
-            readiness_presence.get(
-                "subjective",
-                {},
-            ).get(
-                "legacy_inferred_metrics",
-                [],
-            )
+                    "metric_count": (
+                        readiness_provenance.get(
+                            "metric_count",
+                            0,
+                        )
+                    ),
+                },
+            }
         )
 
-        if legacy_inferred_metrics:
-            signals.append(
-                {
-                    "code": (
-                        "SUBJECTIVE_VALUES_LEGACY_INFERRED"
+    legacy_inferred_metrics = (
+        readiness_presence.get(
+            "subjective",
+            {},
+        ).get(
+            "legacy_inferred_metrics",
+            [],
+        )
+    )
+
+    if legacy_inferred_metrics:
+        signals.append(
+            {
+                "code": (
+                    "SUBJECTIVE_VALUES_LEGACY_INFERRED"
+                ),
+                "category": "EVIDENCE",
+                "evidence": {
+                    "metrics": (
+                        legacy_inferred_metrics
                     ),
-                    "category": "EVIDENCE",
-                    "evidence": {
-                        "metrics": (
-                            legacy_inferred_metrics
-                        ),
-                    },
-                }
-            )
+                },
+            }
+        )
 
     active_periods = (
         interpretation_facts.get(

@@ -177,6 +177,10 @@ def test_get_scientific_assessment_returns_public_contract(
         "method": "RECENT_MEDIAN",
         "sample_count": 6,
         "reference_value": 54.0,
+        "sample_support": {
+            "sample_count": 6,
+            "state": "MULTIPLE_SAMPLES",
+        },
     }
 
     async def fake_get_hrv_reference(
@@ -195,6 +199,10 @@ def test_get_scientific_assessment_returns_public_contract(
         ),
         "reference_method": "RECENT_MEDIAN",
         "reference_sample_count": 6,
+        "reference_sample_support": {
+            "sample_count": 6,
+            "state": "MULTIPLE_SAMPLES",
+        },
     }
 
     def fake_compare_hrv_to_reference(

@@ -41,6 +41,7 @@ def test_scientific_assessment_describes_method_dependent_load():
             "subjective_evidence": None,
             "context_evidence": None,
             "hrv_reference_comparison": None,
+            "sleep_duration_reference_comparison": None,
         },
     }
 
@@ -69,6 +70,7 @@ def test_scientific_assessment_does_not_infer_load_alignment_from_missing_patter
             "subjective_evidence": None,
             "context_evidence": None,
             "hrv_reference_comparison": None,
+            "sleep_duration_reference_comparison": None,
         },
     }
 
@@ -111,6 +113,7 @@ def test_scientific_assessment_marks_readiness_as_partial_when_evidence_gaps_exi
             "subjective_evidence": None,
             "context_evidence": None,
             "hrv_reference_comparison": None,
+            "sleep_duration_reference_comparison": None,
         },
     }
 
@@ -144,6 +147,7 @@ def test_scientific_assessment_does_not_infer_complete_readiness_from_no_gaps():
             "subjective_evidence": None,
             "context_evidence": None,
             "hrv_reference_comparison": None,
+            "sleep_duration_reference_comparison": None,
         },
     }
 
@@ -184,6 +188,7 @@ def test_scientific_assessment_preserves_missing_metric_provenance_as_traceabili
             "subjective_evidence": None,
             "context_evidence": None,
             "hrv_reference_comparison": None,
+            "sleep_duration_reference_comparison": None,
         },
     }
 
@@ -238,6 +243,7 @@ def test_scientific_assessment_preserves_available_objective_readiness_evidence(
             "subjective_evidence": None,
             "context_evidence": None,
             "hrv_reference_comparison": None,
+            "sleep_duration_reference_comparison": None,
         },
     }
 
@@ -293,6 +299,7 @@ def test_scientific_assessment_preserves_available_subjective_readiness_evidence
             },
             "context_evidence": None,
             "hrv_reference_comparison": None,
+            "sleep_duration_reference_comparison": None,
         },
     }
 
@@ -340,6 +347,7 @@ def test_scientific_assessment_preserves_available_context_readiness_evidence():
                 ],
             },
             "hrv_reference_comparison": None,
+            "sleep_duration_reference_comparison": None,
         },
     }
 
@@ -378,3 +386,34 @@ def test_scientific_assessment_preserves_hrv_personal_reference_comparison():
     ][
         "hrv_reference_comparison"
     ] == comparison
+
+
+def test_scientific_assessment_preserves_sleep_duration_reference_comparison():
+    comparison = {
+        "metric_key": "sleep_duration_sec",
+        "current_value": 27600.0,
+        "reference_value": 20790.0,
+        "relation": "ABOVE_PERSONAL_REFERENCE",
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 1,
+        "reference_sample_support": {
+            "sample_count": 1,
+            "state": "SINGLE_SAMPLE",
+        },
+    }
+
+    result = build_scientific_assessment(
+        coach_state={
+            "as_of_date": "2026-09-30",
+        },
+        sleep_duration_reference_comparison=(
+            comparison
+        ),
+    )
+
+    assert (
+        result["readiness"][
+            "sleep_duration_reference_comparison"
+        ]
+        == comparison
+    )

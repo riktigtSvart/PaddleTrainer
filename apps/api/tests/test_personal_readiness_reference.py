@@ -510,3 +510,26 @@ def test_calculate_median_absolute_deviation_for_hrv_reference_values():
     )
 
     assert result == 7.5
+
+
+def test_compare_hrv_to_reference_does_not_scale_difference_when_mad_is_zero():
+    reference = {
+        "metric_key": "hrv_rmssd_ms",
+        "method": "RECENT_MEDIAN",
+        "sample_count": 3,
+        "reference_value": 50.0,
+        "sample_support": {
+            "sample_count": 3,
+            "state": "MULTIPLE_SAMPLES",
+        },
+        "median_absolute_deviation": 0.0,
+    }
+
+    result = compare_hrv_to_reference(
+        current_value=55.0,
+        reference=reference,
+    )
+
+    assert result["difference_from_reference"] == 5.0
+    assert result["relative_difference_from_reference"] == 0.1
+    assert result["difference_in_reference_mad_units"] is None

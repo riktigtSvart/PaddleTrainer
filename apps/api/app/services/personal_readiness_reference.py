@@ -267,6 +267,24 @@ def _compare_metric_to_reference(
         else None
     )
 
+    reference_mad = reference.get(
+        "median_absolute_deviation"
+    )
+
+    difference_in_reference_mad_units = (
+        round(
+            difference_from_reference
+            / float(reference_mad),
+            10,
+        )
+        if (
+                difference_from_reference is not None
+                and reference_mad is not None
+                and float(reference_mad) != 0.0
+        )
+        else None
+    )
+
     return {
         "metric_key": metric_key,
         "current_value": current_value,
@@ -292,6 +310,9 @@ def _compare_metric_to_reference(
         ),
         "relative_difference_from_reference": (
             relative_difference_from_reference
+        ),
+        "difference_in_reference_mad_units": (
+            difference_in_reference_mad_units
         ),
     }
 

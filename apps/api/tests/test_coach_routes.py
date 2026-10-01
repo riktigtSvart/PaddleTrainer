@@ -144,3 +144,84 @@ def test_get_coach_state_returns_public_contract(
     payload = response.json()
 
     assert payload == expected
+
+
+def test_get_scientific_assessment_returns_public_contract(
+    monkeypatch,
+):
+    async def fake_get_current_coach_state(
+        as_of_date,
+        db,
+    ):
+        return {
+            "as_of_date": as_of_date,
+            "sentinel": "coach-state",
+        }
+
+    expected = {
+        "as_of_date": "2026-09-30",
+        "load": {
+            "interpretation": {
+                "state": "METHOD_DEPENDENT",
+                "raw_acute_vs_chronic": "ABOVE",
+                "smoothed_acute_vs_chronic": "BELOW",
+            },
+        },
+        "readiness": {
+            "interpretation": {
+                "state": "PARTIAL_EVIDENCE",
+                "gaps": [
+                    "ILLNESS_STATUS_UNKNOWN",
+                    "TRAVEL_STATUS_UNKNOWN",
+                ],
+            },
+            "traceability": {
+                "state": (
+                    "METRIC_PROVENANCE_UNAVAILABLE"
+                ),
+            },
+        },
+    }
+
+    def fake_build_scientific_assessment(
+        coach_state,
+    ):
+        assert (
+            coach_state["sentinel"]
+            == "coach-state"
+        )
+
+        return expected
+
+    monkeypatch.setattr(
+        coach,
+        "get_current_coach_state",
+        fake_get_current_coach_state,
+    )
+
+    monkeypatch.setattr(
+        coach,
+        "build_scientific_assessment",
+        fake_build_scientific_assessment,
+    )
+
+    app.dependency_overrides[
+        get_db
+    ] = override_get_db
+
+    try:
+        with TestClient(app) as client:
+            response = client.get(
+                (
+                    "/api/v1/coach/"
+                    "scientific-assessment"
+                ),
+                params={
+                    "as_of_date": "2026-09-30",
+                },
+            )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert response.json() == expected

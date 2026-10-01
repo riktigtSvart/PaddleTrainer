@@ -22,6 +22,9 @@ from app.services.coach_context import (
     build_interpretation_signals,
     build_readiness_coach_view,
 )
+from app.services.scientific_assessment import (
+    build_scientific_assessment,
+)
 
 
 router = APIRouter(
@@ -157,4 +160,19 @@ async def get_current_coach_state(
         interpretation_facts=(
             interpretation_facts
         ),
+    )
+
+
+@router.get("/scientific-assessment")
+async def get_current_scientific_assessment(
+    as_of_date: date,
+    db: AsyncSession = Depends(get_db),
+):
+    coach_state = await get_current_coach_state(
+        as_of_date=as_of_date,
+        db=db,
+    )
+
+    return build_scientific_assessment(
+        coach_state
     )

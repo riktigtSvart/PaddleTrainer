@@ -443,6 +443,11 @@ def test_sleep_reference_exposes_single_sample_support():
         "state": "SINGLE_SAMPLE",
     }
 
+    assert (
+            result["median_absolute_deviation"]
+            is None
+    )
+
 
 def test_compare_sleep_duration_to_reference_preserves_single_sample_support():
     reference = {

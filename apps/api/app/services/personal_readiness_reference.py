@@ -87,6 +87,8 @@ def _build_recent_median_reference(
         calculate_median_absolute_deviation(
             values
         )
+        if len(values) >= 2
+        else None
     )
 
     return {

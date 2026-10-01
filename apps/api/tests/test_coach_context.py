@@ -1,6 +1,7 @@
 from datetime import date
 
 from app.services.coach_context import (
+    build_coach_assessment,
     build_coach_context,
     build_coach_inputs,
     build_descriptive_flags,
@@ -1010,3 +1011,149 @@ def test_build_interpretation_signals_does_not_flag_available_metric_provenance(
         "SUBJECTIVE_VALUES_LEGACY_INFERRED"
         not in codes
     )
+
+
+def test_build_coach_assessment_structures_signals_without_prescribing():
+    signals = {
+        "as_of_date": date(2026, 9, 30),
+        "signals": [
+            {
+                "code": "TODAY_WORKOUT_PENDING",
+                "category": "PLAN",
+                "evidence": {
+                    "planned_today_count": 1,
+                    "without_actual_count": 1,
+                },
+            },
+            {
+                "code": "LOAD_METHODS_DIVERGE",
+                "category": "LOAD",
+                "evidence": {
+                    "raw_acute_vs_chronic": "ABOVE",
+                    "smoothed_acute_vs_chronic": "BELOW",
+                },
+            },
+            {
+                "code": "ILLNESS_STATUS_UNKNOWN",
+                "category": "READINESS",
+                "evidence": {
+                    "status": "NO_DATA",
+                },
+            },
+            {
+                "code": "TRAVEL_STATUS_UNKNOWN",
+                "category": "READINESS",
+                "evidence": {
+                    "status": "NO_DATA",
+                },
+            },
+            {
+                "code": (
+                    "READINESS_METRIC_PROVENANCE_UNAVAILABLE"
+                ),
+                "category": "EVIDENCE",
+                "evidence": {
+                    "readiness_source": "MANUAL",
+                    "metric_count": 0,
+                },
+            },
+            {
+                "code": (
+                    "SUBJECTIVE_VALUES_LEGACY_INFERRED"
+                ),
+                "category": "EVIDENCE",
+                "evidence": {
+                    "metrics": [
+                        "energy_score",
+                        "fatigue_score",
+                    ],
+                },
+            },
+            {
+                "code": (
+                    "ACTIVE_PERIOD_DOMINANT_OBJECTIVE"
+                ),
+                "category": "PLAN",
+                "evidence": {
+                    "period_type": "MESOCYCLE",
+                    "period_title": (
+                        "Őszi alapozó ciklus 1"
+                    ),
+                    "objective_type": "ENDURANCE",
+                    "weight": 0.6,
+                },
+            },
+        ],
+    }
+
+    assessment = build_coach_assessment(
+        signals
+    )
+
+    assert assessment == {
+        "as_of_date": date(2026, 9, 30),
+        "plan_execution": {
+            "state": "PENDING_TODAY",
+            "planned_today_count": 1,
+            "without_actual_count": 1,
+        },
+        "load_pattern": {
+            "state": "METHODS_DIVERGE",
+            "raw_acute_vs_chronic": "ABOVE",
+            "smoothed_acute_vs_chronic": "BELOW",
+        },
+        "readiness_evidence": {
+            "gaps": [
+                "ILLNESS_STATUS_UNKNOWN",
+                "TRAVEL_STATUS_UNKNOWN",
+            ],
+            "metric_provenance_state": (
+                "UNAVAILABLE"
+            ),
+            "legacy_inferred_subjective_metrics": [
+                "energy_score",
+                "fatigue_score",
+            ],
+        },
+        "period_focus": {
+            "period_type": "MESOCYCLE",
+            "period_title": (
+                "Őszi alapozó ciklus 1"
+            ),
+            "objective_type": "ENDURANCE",
+            "weight": 0.6,
+        },
+        "signal_codes": [
+            "TODAY_WORKOUT_PENDING",
+            "LOAD_METHODS_DIVERGE",
+            "ILLNESS_STATUS_UNKNOWN",
+            "TRAVEL_STATUS_UNKNOWN",
+            "READINESS_METRIC_PROVENANCE_UNAVAILABLE",
+            "SUBJECTIVE_VALUES_LEGACY_INFERRED",
+            "ACTIVE_PERIOD_DOMINANT_OBJECTIVE",
+        ],
+    }
+
+
+def test_build_coach_assessment_does_not_infer_opposites_from_missing_signals():
+    signals = {
+        "as_of_date": date(2026, 9, 29),
+        "signals": [],
+    }
+
+    assessment = build_coach_assessment(
+        signals
+    )
+
+    assert assessment == {
+        "as_of_date": date(2026, 9, 29),
+        "plan_execution": None,
+        "load_pattern": None,
+        "readiness_evidence": {
+            "gaps": [],
+            "metric_provenance_state": None,
+            "legacy_inferred_subjective_metrics": [],
+        },
+        "period_focus": None,
+        "signal_codes": [],
+    }

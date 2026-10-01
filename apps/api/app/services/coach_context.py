@@ -1000,3 +1000,161 @@ def build_interpretation_signals(
         ),
         "signals": signals,
     }
+
+
+def build_coach_assessment(
+    interpretation_signals: dict,
+) -> dict:
+    signals = interpretation_signals.get(
+        "signals",
+        [],
+    )
+
+    signals_by_code = {
+        signal.get("code"): signal
+        for signal in signals
+        if signal.get("code") is not None
+    }
+
+    pending = signals_by_code.get(
+        "TODAY_WORKOUT_PENDING"
+    )
+
+    load_divergence = signals_by_code.get(
+        "LOAD_METHODS_DIVERGE"
+    )
+
+    provenance_missing = signals_by_code.get(
+        "READINESS_METRIC_PROVENANCE_UNAVAILABLE"
+    )
+
+    legacy_subjective = signals_by_code.get(
+        "SUBJECTIVE_VALUES_LEGACY_INFERRED"
+    )
+
+    dominant_objective = signals_by_code.get(
+        "ACTIVE_PERIOD_DOMINANT_OBJECTIVE"
+    )
+
+    readiness_gaps = [
+        code
+        for code in (
+            "ILLNESS_STATUS_UNKNOWN",
+            "TRAVEL_STATUS_UNKNOWN",
+        )
+        if code in signals_by_code
+    ]
+
+    return {
+        "as_of_date": interpretation_signals.get(
+            "as_of_date"
+        ),
+        "plan_execution": (
+            {
+                "state": "PENDING_TODAY",
+                "planned_today_count": (
+                    pending.get(
+                        "evidence",
+                        {},
+                    ).get(
+                        "planned_today_count"
+                    )
+                ),
+                "without_actual_count": (
+                    pending.get(
+                        "evidence",
+                        {},
+                    ).get(
+                        "without_actual_count"
+                    )
+                ),
+            }
+            if pending is not None
+            else None
+        ),
+        "load_pattern": (
+            {
+                "state": "METHODS_DIVERGE",
+                "raw_acute_vs_chronic": (
+                    load_divergence.get(
+                        "evidence",
+                        {},
+                    ).get(
+                        "raw_acute_vs_chronic"
+                    )
+                ),
+                "smoothed_acute_vs_chronic": (
+                    load_divergence.get(
+                        "evidence",
+                        {},
+                    ).get(
+                        "smoothed_acute_vs_chronic"
+                    )
+                ),
+            }
+            if load_divergence is not None
+            else None
+        ),
+        "readiness_evidence": {
+            "gaps": readiness_gaps,
+            "metric_provenance_state": (
+                "UNAVAILABLE"
+                if provenance_missing is not None
+                else None
+            ),
+            "legacy_inferred_subjective_metrics": (
+                legacy_subjective.get(
+                    "evidence",
+                    {},
+                ).get(
+                    "metrics",
+                    [],
+                )
+                if legacy_subjective is not None
+                else []
+            ),
+        },
+        "period_focus": (
+            {
+                "period_type": (
+                    dominant_objective.get(
+                        "evidence",
+                        {},
+                    ).get(
+                        "period_type"
+                    )
+                ),
+                "period_title": (
+                    dominant_objective.get(
+                        "evidence",
+                        {},
+                    ).get(
+                        "period_title"
+                    )
+                ),
+                "objective_type": (
+                    dominant_objective.get(
+                        "evidence",
+                        {},
+                    ).get(
+                        "objective_type"
+                    )
+                ),
+                "weight": (
+                    dominant_objective.get(
+                        "evidence",
+                        {},
+                    ).get(
+                        "weight"
+                    )
+                ),
+            }
+            if dominant_objective is not None
+            else None
+        ),
+        "signal_codes": [
+            signal.get("code")
+            for signal in signals
+            if signal.get("code") is not None
+        ],
+    }

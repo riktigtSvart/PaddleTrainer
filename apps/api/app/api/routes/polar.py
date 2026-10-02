@@ -61,6 +61,9 @@ from app.services.polar_training_samples import (
 from app.services.exercise_speed_gps_consistency import (
     build_exercise_speed_gps_consistency,
 )
+from app.services.route_motion_anomaly_evidence import (
+    build_route_motion_anomaly_evidence,
+)
 
 
 router = APIRouter(prefix="/integrations/polar", tags=["polar"])
@@ -1089,6 +1092,14 @@ async def inspect_training_session_routes(
             )
         )
 
+        motion_anomaly_evidence = (
+            build_route_motion_anomaly_evidence(
+                normalized,
+                motion,
+                speed_gps_consistency,
+            )
+        )
+
         speed_gps_consistency_summary = {
             **speed_gps_consistency,
             "exercises": [
@@ -1107,6 +1118,24 @@ async def inspect_training_session_routes(
             ],
         }
 
+        motion_anomaly_summary = {
+            **motion_anomaly_evidence,
+            "routes": [
+                {
+                    key: value
+                    for key, value in route.items()
+                    if key != "observations"
+                }
+                for route in (
+                        motion_anomaly_evidence.get(
+                            "routes"
+                        )
+                        or []
+                )
+                if isinstance(route, dict)
+            ],
+        }
+
         route_sessions.append(
             {
                 "external_id": external_id,
@@ -1118,6 +1147,9 @@ async def inspect_training_session_routes(
                 "motion_summary": motion_summary,
                 "speed_gps_consistency": (
                     speed_gps_consistency_summary
+                ),
+                "motion_anomaly_evidence": (
+                    motion_anomaly_summary
                 ),
             }
         )

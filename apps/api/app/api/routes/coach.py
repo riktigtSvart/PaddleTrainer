@@ -31,6 +31,9 @@ from app.services.personal_readiness_reference import (
     get_hrv_reference,
     get_sleep_duration_reference,
 )
+from app.services.athlete_state_scientific_view import (
+    build_athlete_state_scientific_view,
+)
 
 
 router = APIRouter(
@@ -252,4 +255,21 @@ async def get_current_scientific_assessment(
         sleep_duration_reference_comparison=(
             sleep_duration_reference_comparison
         ),
+    )
+
+
+@router.get("/athlete-state/scientific-view")
+async def get_current_athlete_state_scientific_view(
+    as_of_date: date,
+    db: AsyncSession = Depends(get_db),
+):
+    scientific_assessment = (
+        await get_current_scientific_assessment(
+            as_of_date=as_of_date,
+            db=db,
+        )
+    )
+
+    return build_athlete_state_scientific_view(
+        scientific_assessment
     )

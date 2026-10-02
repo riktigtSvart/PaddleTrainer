@@ -96,6 +96,7 @@ def _sport_from_session(
 
     return Sport.OTHER
 
+
 async def _enrich_training_load(
     db: AsyncSession,
     access_token: str,
@@ -175,6 +176,7 @@ async def _enrich_training_load(
     print("TRAINING LOAD UPDATED:", updated)
 
     return updated
+
 
 async def _enrich_statistics(
     db: AsyncSession,
@@ -282,6 +284,119 @@ async def _enrich_statistics(
     print("STATISTICS UPDATED COUNT:", updated)
 
     return updated
+
+
+async def _enrich_samples(
+    db: AsyncSession,
+    access_token: str,
+    sessions: list[dict[str, Any]],
+) -> int:
+    session_dates = set()
+
+    for item in sessions:
+        start_time = item.get("startTime")
+
+        if not start_time:
+            continue
+
+        session_date = datetime.fromisoformat(
+            start_time.replace(
+                "Z",
+                "+00:00",
+            )
+        ).date()
+
+        session_dates.add(session_date)
+
+    updated = 0
+    polar = PolarClient()
+
+    for session_date in sorted(
+        session_dates
+    ):
+        next_day = (
+            session_date
+            + timedelta(days=1)
+        )
+
+        print(
+            "SAMPLES ENRICHMENT DAY:",
+            session_date,
+        )
+
+        payload = (
+            await polar.list_training_sessions(
+                access_token,
+                session_date,
+                next_day,
+                features=["samples"],
+            )
+        )
+
+        for item in payload.get(
+            "trainingSessions",
+            [],
+        ):
+            external_id = (
+                item.get("identifier")
+                or {}
+            ).get("id")
+
+            if not external_id:
+                continue
+
+            existing = await db.scalar(
+                select(WorkoutSession).where(
+                    WorkoutSession.external_provider
+                    == "POLAR",
+                    WorkoutSession.external_id
+                    == external_id,
+                )
+            )
+
+            if not existing:
+                continue
+
+            exercises = (
+                item.get("exercises")
+                or []
+            )
+
+            if not exercises:
+                print(
+                    "NO EXERCISE SAMPLES:",
+                    external_id,
+                )
+                continue
+
+            # Preserve the provider payload.
+            #
+            # Do not collapse the time series into
+            # summary values here. Scientific
+            # interpretation happens downstream.
+            existing.raw_data = {
+                **(existing.raw_data or {}),
+                "exerciseSamples": exercises,
+            }
+
+            print(
+                "SAMPLES UPDATED:",
+                external_id,
+                "exercise_count=",
+                len(exercises),
+            )
+
+            updated += 1
+
+    await db.commit()
+
+    print(
+        "SAMPLES UPDATED COUNT:",
+        updated,
+    )
+
+    return updated
+
 
 async def sync_recent_sessions(
     db: AsyncSession,
@@ -403,6 +518,12 @@ async def sync_recent_sessions(
     )
 
     await _enrich_statistics(
+        db,
+        access_token,
+        sessions,
+    )
+
+    await _enrich_samples(
         db,
         access_token,
         sessions,

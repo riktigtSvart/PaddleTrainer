@@ -54,6 +54,13 @@ from app.services.route_motion import (
 from app.services.route_motion_summary import (
     build_route_motion_summary_evidence,
 )
+from app.services.polar_training_samples import (
+    normalize_polar_training_samples,
+)
+
+from app.services.exercise_speed_gps_consistency import (
+    build_exercise_speed_gps_consistency,
+)
 
 
 router = APIRouter(prefix="/integrations/polar", tags=["polar"])
@@ -905,7 +912,16 @@ async def inspect_training_session_samples(
     from_date = sample_date
     to_date = sample_date + timedelta(days=1)
 
-    payload = await PolarClient().list_training_sessions(
+    route_payload = await PolarClient().list_training_sessions(
+        access_token,
+        from_date,
+        to_date,
+        features=[
+            "routes",
+        ],
+    )
+
+    sample_payload = await PolarClient().list_training_sessions(
         access_token,
         from_date,
         to_date,
@@ -962,7 +978,7 @@ async def inspect_training_session_routes(
     from_date = route_date
     to_date = route_date + timedelta(days=1)
 
-    payload = await PolarClient().list_training_sessions(
+    route_payload = await PolarClient().list_training_sessions(
         access_token,
         from_date,
         to_date,
@@ -971,14 +987,61 @@ async def inspect_training_session_routes(
         ],
     )
 
+    sample_payload = await PolarClient().list_training_sessions(
+        access_token,
+        from_date,
+        to_date,
+        features=[
+            "samples",
+        ],
+    )
+
+    sample_sessions_by_external_id = {}
+
+    for sample_item in sample_payload.get(
+            "trainingSessions",
+            [],
+    ):
+        if not isinstance(sample_item, dict):
+            continue
+
+        sample_external_id = (
+            (
+                    sample_item.get("identifier")
+                    or {}
+            ).get("id")
+        )
+
+        if sample_external_id is None:
+            continue
+
+        sample_sessions_by_external_id[
+            str(sample_external_id)
+        ] = sample_item
+
     route_sessions = []
 
-    for item in payload.get(
+    for item in route_payload.get(
             "trainingSessions",
             [],
     ):
         if not isinstance(item, dict):
             continue
+
+        external_id = (
+            (
+                    item.get("identifier")
+                    or {}
+            ).get("id")
+        )
+
+        sample_item = (
+            sample_sessions_by_external_id.get(
+                str(external_id)
+            )
+            if external_id is not None
+            else None
+        )
 
         normalized = (
             normalize_polar_training_routes(
@@ -1005,18 +1068,56 @@ async def inspect_training_session_routes(
             )
         )
 
+        normalized_samples = (
+            normalize_polar_training_samples(
+                {
+                    "exerciseSamples": (
+                        sample_item.get(
+                            "exercises"
+                        )
+                        if sample_item is not None
+                        else []
+                    )
+                }
+            )
+        )
+
+        speed_gps_consistency = (
+            build_exercise_speed_gps_consistency(
+                normalized_samples,
+                motion,
+            )
+        )
+
+        speed_gps_consistency_summary = {
+            **speed_gps_consistency,
+            "exercises": [
+                {
+                    key: value
+                    for key, value in exercise.items()
+                    if key != "comparisons"
+                }
+                for exercise in (
+                        speed_gps_consistency.get(
+                            "exercises"
+                        )
+                        or []
+                )
+                if isinstance(exercise, dict)
+            ],
+        }
+
         route_sessions.append(
             {
-                "external_id": (
-                    (
-                            item.get("identifier")
-                            or {}
-                    ).get("id")
+                "external_id": external_id,
+                "sample_session_matched": (
+                        sample_item is not None
                 ),
                 "normalized": normalized,
                 "coverage": coverage,
-                "motion_summary": (
-                    motion_summary
+                "motion_summary": motion_summary,
+                "speed_gps_consistency": (
+                    speed_gps_consistency_summary
                 ),
             }
         )
@@ -1026,5 +1127,8 @@ async def inspect_training_session_routes(
         "from": from_date,
         "to": to_date,
         "route_sessions": route_sessions,
-        "raw": payload,
+        "raw": {
+            "routes": route_payload,
+            "samples": sample_payload,
+        },
     }

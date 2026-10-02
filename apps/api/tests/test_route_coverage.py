@@ -230,3 +230,55 @@ def test_reports_non_increasing_timestamps():
         route["nominal_interval_ms"]
         == 1000
     )
+
+
+def test_accepts_integer_valued_float_elapsed_ms():
+    result = build_route_coverage_evidence(
+        {
+            "provider": "POLAR",
+            "routes": [
+                {
+                    "exercise_index": 0,
+                    "points": [
+                        {
+                            "waypoint_index": 0,
+                            "exercise_elapsed_ms": 73763.0,
+                            "latitude_deg": 47.0,
+                            "longitude_deg": 19.0,
+                        },
+                        {
+                            "waypoint_index": 1,
+                            "exercise_elapsed_ms": 74764.0,
+                            "latitude_deg": 47.1,
+                            "longitude_deg": 19.1,
+                        },
+                    ],
+                }
+            ],
+        }
+    )
+
+    route = result["routes"][0]
+
+    assert (
+        route["timestamped_waypoint_count"]
+        == 2
+    )
+    assert (
+        route["first_exercise_elapsed_ms"]
+        == 73763
+    )
+    assert (
+        route["last_exercise_elapsed_ms"]
+        == 74764
+    )
+    assert (
+        route[
+            "adjacent_timestamp_interval_count"
+        ]
+        == 1
+    )
+    assert (
+        route["nominal_interval_ms"]
+        == 1001
+    )

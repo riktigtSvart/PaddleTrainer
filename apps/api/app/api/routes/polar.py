@@ -42,6 +42,13 @@ from app.services.polar_continuous_hr import (
     normalize_continuous_hr_measurements,
     save_continuous_hr_payload,
 )
+from app.services.polar_training_routes import (
+    normalize_polar_training_routes,
+)
+from app.services.route_coverage import (
+    build_route_coverage_evidence,
+)
+
 
 router = APIRouter(prefix="/integrations/polar", tags=["polar"])
 settings = get_settings()
@@ -958,9 +965,47 @@ async def inspect_training_session_routes(
         ],
     )
 
+    route_sessions = []
+
+    for item in payload.get(
+            "trainingSessions",
+            [],
+    ):
+        if not isinstance(item, dict):
+            continue
+
+        normalized = (
+            normalize_polar_training_routes(
+                item
+            )
+        )
+
+        coverage = (
+            build_route_coverage_evidence(
+                normalized,
+                session_duration_ms=(
+                    item.get("durationMillis")
+                ),
+            )
+        )
+
+        route_sessions.append(
+            {
+                "external_id": (
+                    (
+                            item.get("identifier")
+                            or {}
+                    ).get("id")
+                ),
+                "normalized": normalized,
+                "coverage": coverage,
+            }
+        )
+
     return {
         "route_date": route_date,
         "from": from_date,
         "to": to_date,
+        "route_sessions": route_sessions,
         "raw": payload,
     }

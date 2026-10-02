@@ -49,6 +49,15 @@ def test_normalizes_route_time_to_exercise_time():
         point["exercise_elapsed_ms"]
         == 73763
     )
+    assert isinstance(
+        route["route_start_offset_ms"],
+        int,
+    )
+
+    assert isinstance(
+        point["exercise_elapsed_ms"],
+        int,
+    )
 
 
 def test_preserves_waypoint_order_and_coordinates():

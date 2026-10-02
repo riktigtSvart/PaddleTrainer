@@ -35,10 +35,17 @@ def _elapsed_ms(
     if isinstance(value, bool):
         return None
 
-    if not isinstance(value, int):
-        return None
+    if isinstance(value, int):
+        return value
 
-    return value
+    if isinstance(value, float):
+        if (
+            math.isfinite(value)
+            and value.is_integer()
+        ):
+            return int(value)
+
+    return None
 
 
 def _has_valid_coordinate(

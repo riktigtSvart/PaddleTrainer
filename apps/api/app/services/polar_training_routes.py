@@ -93,10 +93,10 @@ def normalize_polar_training_routes(
             exercise_start is not None
             and route_start is not None
         ):
-            route_start_offset_ms = (
+            route_start_offset_ms = round(
                 (
-                    route_start
-                    - exercise_start
+                        route_start
+                        - exercise_start
                 ).total_seconds()
                 * 1000
             )

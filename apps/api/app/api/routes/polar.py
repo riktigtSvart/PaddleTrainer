@@ -48,6 +48,12 @@ from app.services.polar_training_routes import (
 from app.services.route_coverage import (
     build_route_coverage_evidence,
 )
+from app.services.route_motion import (
+    build_route_motion_evidence,
+)
+from app.services.route_motion_summary import (
+    build_route_motion_summary_evidence,
+)
 
 
 router = APIRouter(prefix="/integrations/polar", tags=["polar"])
@@ -989,6 +995,16 @@ async def inspect_training_session_routes(
             )
         )
 
+        motion = build_route_motion_evidence(
+            normalized
+        )
+
+        motion_summary = (
+            build_route_motion_summary_evidence(
+                motion
+            )
+        )
+
         route_sessions.append(
             {
                 "external_id": (
@@ -999,6 +1015,9 @@ async def inspect_training_session_routes(
                 ),
                 "normalized": normalized,
                 "coverage": coverage,
+                "motion_summary": (
+                    motion_summary
+                ),
             }
         )
 

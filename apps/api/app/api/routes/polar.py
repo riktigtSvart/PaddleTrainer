@@ -850,3 +850,60 @@ async def reconcile_completed_workouts(
         db,
         user,
     )
+
+
+@router.get("/sessions/samples/inspect")
+async def inspect_training_session_samples(
+    sample_date: date = Query(...),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await get_or_create_demo_user(db)
+
+    connection = await db.scalar(
+        select(ExternalConnection).where(
+            ExternalConnection.user_id == user.id,
+            ExternalConnection.provider == "POLAR",
+        )
+    )
+
+    if connection is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Polar connection not found",
+        )
+
+    if (
+        "training_sessions:read"
+        not in (connection.scopes or [])
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Polar training_sessions:read "
+                "scope not authorized"
+            ),
+        )
+
+    access_token = await get_valid_access_token(
+        db,
+        connection,
+    )
+
+    from_date = sample_date
+    to_date = sample_date + timedelta(days=1)
+
+    payload = await PolarClient().list_training_sessions(
+        access_token,
+        from_date,
+        to_date,
+        features=[
+            "samples",
+        ],
+    )
+
+    return {
+        "sample_date": sample_date,
+        "from": from_date,
+        "to": to_date,
+        "raw": payload,
+    }

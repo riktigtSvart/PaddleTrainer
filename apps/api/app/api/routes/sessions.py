@@ -11,6 +11,13 @@ from app.models.entities import (
     WorkoutLinkSource,
     WorkoutSession,
 )
+from app.services.exercise_hr_response import (
+    build_exercise_hr_response_evidence,
+)
+from app.services.polar_training_samples import (
+    normalize_polar_training_samples,
+)
+
 
 class SessionPlannedWorkoutUpdate(BaseModel):
     planned_workout_id: UUID | None
@@ -159,6 +166,81 @@ async def get_session(
     )
 
     return response
+
+
+@router.get(
+    "/{session_id}/exercise-hr-response"
+)
+async def get_exercise_hr_response(
+    session_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    user = await get_or_create_demo_user(db)
+
+    session = await db.scalar(
+        select(WorkoutSession).where(
+            WorkoutSession.id == session_id,
+            WorkoutSession.user_id == user.id,
+        )
+    )
+
+    if session is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found",
+        )
+
+    if session.external_provider != "POLAR":
+        return {
+            "session_id": str(session.id),
+            "external_provider": (
+                session.external_provider
+            ),
+            "external_id": session.external_id,
+            "sport": session.sport.value,
+            "started_at": session.started_at,
+            "duration_sec": session.duration_sec,
+            "evidence": {
+                "metric_key": (
+                    "heart_rate_bpm"
+                ),
+                "provider": (
+                    session.external_provider
+                ),
+                "available": False,
+                "exercise_count": 0,
+                "exercises": [],
+                "unavailability_reason": (
+                    "PROVIDER_NORMALIZER_"
+                    "UNAVAILABLE"
+                ),
+            },
+        }
+
+    normalized = (
+        normalize_polar_training_samples(
+            session.raw_data
+        )
+    )
+
+    evidence = (
+        build_exercise_hr_response_evidence(
+            normalized
+        )
+    )
+
+    return {
+        "session_id": str(session.id),
+        "external_provider": (
+            session.external_provider
+        ),
+        "external_id": session.external_id,
+        "sport": session.sport.value,
+        "started_at": session.started_at,
+        "duration_sec": session.duration_sec,
+        "evidence": evidence,
+    }
+
 
 @router.patch("/{session_id}/planned-workout")
 async def set_session_planned_workout(

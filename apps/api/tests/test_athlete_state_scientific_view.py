@@ -1,5 +1,4 @@
-from datetime import date
-
+from datetime import date, datetime, timezone
 from app.services.athlete_state_scientific_view import (
     build_athlete_state_scientific_view,
 )
@@ -67,9 +66,46 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
         },
     }
 
+    capacity_state = [
+        {
+            "id": "capacity-1",
+            "assessment_id": "assessment-1",
+            "measurement_id": "measurement-1",
+            "capacity_type": "GENERAL_AEROBIC",
+            "sport": None,
+            "value": 68.2,
+            "unit": "ml/kg/min",
+            "source": "ASSESSMENT",
+            "confidence": 0.95,
+            "estimated_at": datetime(
+                2026,
+                9,
+                30,
+                7,
+                0,
+                tzinfo=timezone.utc,
+            ),
+        },
+    ]
+
     result = build_athlete_state_scientific_view(
-        scientific_assessment
+        scientific_assessment,
+        capacity_state=capacity_state,
     )
+
+    assert result["capacity"] == {
+        "available": True,
+        "items": capacity_state,
+    }
+
+    assert result["evidence_inventory"][
+        "capacity_dimensions"
+    ] == [
+        {
+            "capacity_type": "GENERAL_AEROBIC",
+            "sport": None,
+        },
+    ]
 
     assert result == {
         "as_of_date": date(2026, 9, 30),
@@ -130,6 +166,10 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
                 },
             },
         },
+        "capacity": {
+            "available": True,
+            "items": capacity_state,
+        },
         "evidence_inventory": {
             "gaps": [
                 "ILLNESS_STATUS_UNKNOWN",
@@ -154,6 +194,12 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
                 "hrv_rmssd_ms",
                 "sleep_duration_sec",
             ],
+            "capacity_dimensions": [
+                {
+                    "capacity_type": "GENERAL_AEROBIC",
+                    "sport": None,
+                },
+            ],
         },
     }
 
@@ -177,6 +223,15 @@ def test_athlete_state_scientific_view_preserves_empty_evidence_inventory():
         scientific_assessment
     )
 
+    assert result["capacity"] == {
+        "available": False,
+        "items": [],
+    }
+
+    assert result["evidence_inventory"][
+               "capacity_dimensions"
+           ] == []
+
     assert result["evidence_inventory"] == {
         "gaps": [],
         "traceability": None,
@@ -184,4 +239,5 @@ def test_athlete_state_scientific_view_preserves_empty_evidence_inventory():
         "subjective_metrics": [],
         "context_metrics": [],
         "personal_reference_metrics": [],
+        "capacity_dimensions": [],
     }

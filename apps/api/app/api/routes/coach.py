@@ -34,6 +34,9 @@ from app.services.personal_readiness_reference import (
 from app.services.athlete_state_scientific_view import (
     build_athlete_state_scientific_view,
 )
+from app.services.capacity_state import (
+    get_current_capacity_state,
+)
 
 
 router = APIRouter(
@@ -270,6 +273,15 @@ async def get_current_athlete_state_scientific_view(
         )
     )
 
+    user = await get_or_create_demo_user(db)
+
+    capacity_state = await get_current_capacity_state(
+        db=db,
+        user=user,
+        as_of_date=as_of_date,
+    )
+
     return build_athlete_state_scientific_view(
-        scientific_assessment
+        scientific_assessment,
+        capacity_state=capacity_state,
     )

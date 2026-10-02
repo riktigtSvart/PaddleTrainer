@@ -1,6 +1,11 @@
 def build_athlete_state_scientific_view(
     scientific_assessment: dict,
+    capacity_state: list[dict] | None = None,
 ) -> dict:
+    capacity_items = list(
+        capacity_state or []
+    )
+
     training_load = scientific_assessment.get(
         "load",
         {},
@@ -77,6 +82,17 @@ def build_athlete_state_scientific_view(
         "personal_reference_metrics": list(
             personal_reference_evidence.keys()
         ),
+        "capacity_dimensions": [
+            {
+                "capacity_type": item.get(
+                    "capacity_type"
+                ),
+                "sport": item.get(
+                    "sport"
+                ),
+            }
+            for item in capacity_items
+        ],
     }
 
     return {
@@ -86,4 +102,8 @@ def build_athlete_state_scientific_view(
         "training_load": training_load,
         "recovery_readiness": recovery_readiness,
         "evidence_inventory": evidence_inventory,
+        "capacity": {
+            "available": bool(capacity_items),
+            "items": capacity_items,
+        },
     }

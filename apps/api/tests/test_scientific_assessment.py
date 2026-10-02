@@ -541,3 +541,47 @@ def test_scientific_assessment_preserves_hrv_trend_evidence():
     assert result["readiness"][
         "hrv_trend_evidence"
     ] == trend_evidence
+
+
+def test_scientific_assessment_preserves_resting_hr_reference_comparison():
+    comparison = {
+        "metric_key": "resting_hr_bpm",
+        "current_value": 52.0,
+        "reference_value": 48.0,
+        "relation": "ABOVE_PERSONAL_REFERENCE",
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 7,
+        "reference_sample_support": {
+            "sample_count": 7,
+            "state": "MULTIPLE_SAMPLES",
+        },
+        "reference_median_absolute_deviation": 2.0,
+        "difference_from_reference": 4.0,
+        "relative_difference_from_reference": (
+            0.0833333333
+        ),
+        "difference_in_reference_mad_units": 2.0,
+    }
+
+    result = build_scientific_assessment(
+        coach_state={
+            "as_of_date": "2026-09-30",
+        },
+        resting_hr_reference_comparison=(
+            comparison
+        ),
+    )
+
+    assert result["readiness"][
+        "resting_hr_reference_comparison"
+    ] == comparison
+
+    assert result["readiness"][
+        "personal_reference_evidence"
+    ] == {
+        "resting_hr_bpm": (
+            build_personal_reference_evidence(
+                comparison
+            )
+        ),
+    }

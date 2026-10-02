@@ -166,6 +166,7 @@ def test_get_scientific_assessment_returns_public_contract(
                         "objective": {
                             "hrv_rmssd_ms": 58.4,
                             "sleep_duration_sec": 27600.0,
+                            "resting_hr_bpm": 52.0,
                         },
                     },
                 },
@@ -209,6 +210,17 @@ def test_get_scientific_assessment_returns_public_contract(
         "rolling_cv_percent": 2.4,
     }
 
+    resting_hr_reference = {
+        "metric_key": "resting_hr_bpm",
+        "method": "RECENT_MEDIAN",
+        "sample_count": 7,
+        "reference_value": 48.0,
+        "sample_support": {
+            "sample_count": 7,
+            "state": "MULTIPLE_SAMPLES",
+        },
+    }
+
     async def fake_get_sleep_duration_reference(
             db,
             user,
@@ -229,6 +241,13 @@ def test_get_scientific_assessment_returns_public_contract(
             as_of_date,
     ):
         return hrv_trend_evidence_expected
+
+    async def fake_get_resting_hr_reference(
+            db,
+            user,
+            as_of_date,
+    ):
+        return resting_hr_reference
 
     comparison = {
         "metric_key": "hrv_rmssd_ms",
@@ -258,6 +277,19 @@ def test_get_scientific_assessment_returns_public_contract(
         },
     }
 
+    resting_hr_comparison = {
+        "metric_key": "resting_hr_bpm",
+        "current_value": 52.0,
+        "reference_value": 48.0,
+        "relation": "ABOVE_PERSONAL_REFERENCE",
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 7,
+        "reference_sample_support": {
+            "sample_count": 7,
+            "state": "MULTIPLE_SAMPLES",
+        },
+    }
+
     def fake_compare_sleep_duration_to_reference(
             current_value,
             reference,
@@ -276,6 +308,15 @@ def test_get_scientific_assessment_returns_public_contract(
 
         return comparison
 
+    def fake_compare_resting_hr_to_reference(
+            current_value,
+            reference,
+    ):
+        assert current_value == 52.0
+        assert reference == resting_hr_reference
+
+        return resting_hr_comparison
+
     expected = {
         "as_of_date": "2026-09-30",
         "load": {
@@ -292,6 +333,9 @@ def test_get_scientific_assessment_returns_public_contract(
                 sleep_duration_comparison
             ),
             "hrv_trend_evidence": hrv_trend_evidence_expected,
+            "resting_hr_reference_comparison": (
+                resting_hr_comparison
+            ),
         },
     }
 
@@ -300,6 +344,7 @@ def test_get_scientific_assessment_returns_public_contract(
             hrv_reference_comparison,
             sleep_duration_reference_comparison,
             hrv_trend_evidence,
+            resting_hr_reference_comparison,
     ):
         assert (
                 coach_state["sentinel"]
@@ -318,6 +363,11 @@ def test_get_scientific_assessment_returns_public_contract(
 
         assert hrv_trend_evidence == (
             hrv_trend_evidence_expected
+        )
+
+        assert (
+                resting_hr_reference_comparison
+                == resting_hr_comparison
         )
 
         return expected
@@ -368,6 +418,18 @@ def test_get_scientific_assessment_returns_public_contract(
         coach,
         "get_hrv_trend_evidence",
         fake_get_hrv_trend_evidence,
+    )
+
+    monkeypatch.setattr(
+        coach,
+        "get_resting_hr_reference",
+        fake_get_resting_hr_reference,
+    )
+
+    monkeypatch.setattr(
+        coach,
+        "compare_resting_hr_to_reference",
+        fake_compare_resting_hr_to_reference,
     )
 
     app.dependency_overrides[

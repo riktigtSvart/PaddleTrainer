@@ -14,6 +14,7 @@ from statistics import mean, median, stdev
 DEFAULT_HRV_REFERENCE_WINDOW_DAYS = 28
 DEFAULT_SLEEP_DURATION_REFERENCE_WINDOW_DAYS = 28
 DEFAULT_HRV_TREND_WINDOW_DAYS = 7
+DEFAULT_RESTING_HR_REFERENCE_WINDOW_DAYS = 28
 
 
 def calculate_median_absolute_deviation(
@@ -120,6 +121,21 @@ def build_hrv_reference(
         readiness_records=readiness_records,
         as_of_date=as_of_date,
         metric_key="hrv_rmssd_ms",
+        window_days=window_days,
+    )
+
+
+def build_resting_hr_reference(
+    readiness_records: Iterable[AthleteReadiness],
+    as_of_date: date,
+    window_days: int = (
+        DEFAULT_RESTING_HR_REFERENCE_WINDOW_DAYS
+    ),
+) -> dict:
+    return _build_recent_median_reference(
+        readiness_records=readiness_records,
+        as_of_date=as_of_date,
+        metric_key="resting_hr_bpm",
         window_days=window_days,
     )
 
@@ -319,6 +335,31 @@ async def get_sleep_duration_reference(
     )
 
 
+async def get_resting_hr_reference(
+    db: AsyncSession,
+    user: User,
+    as_of_date: date,
+    window_days: int = (
+        DEFAULT_RESTING_HR_REFERENCE_WINDOW_DAYS
+    ),
+) -> dict:
+    records = await _get_reference_records(
+        db=db,
+        user=user,
+        as_of_date=as_of_date,
+        window_days=window_days,
+        metric_column=(
+            AthleteReadiness.resting_hr_bpm
+        ),
+    )
+
+    return build_resting_hr_reference(
+        readiness_records=records,
+        as_of_date=as_of_date,
+        window_days=window_days,
+    )
+
+
 def _compare_metric_to_reference(
     current_value: float | None,
     reference: dict,
@@ -436,6 +477,17 @@ def compare_sleep_duration_to_reference(
         current_value=current_value,
         reference=reference,
         metric_key="sleep_duration_sec",
+    )
+
+
+def compare_resting_hr_to_reference(
+    current_value: float | None,
+    reference: dict,
+) -> dict:
+    return _compare_metric_to_reference(
+        current_value=current_value,
+        reference=reference,
+        metric_key="resting_hr_bpm",
     )
 
 

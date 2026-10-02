@@ -63,6 +63,7 @@ def build_scientific_assessment(
     hrv_reference_comparison: dict | None = None,
     sleep_duration_reference_comparison: dict | None = None,
     hrv_trend_evidence: dict | None = None,
+    resting_hr_reference_comparison: dict | None = None,
 ) -> dict:
     load = coach_state.get(
         "load",
@@ -244,9 +245,22 @@ def build_scientific_assessment(
             )
         )
 
-        if metric_key is not None:
-            if personal_reference_evidence is None:
-                personal_reference_evidence = {}
+        if resting_hr_reference_comparison is not None:
+            metric_key = (
+                resting_hr_reference_comparison.get(
+                    "metric_key"
+                )
+            )
+
+            if metric_key is not None:
+                if personal_reference_evidence is None:
+                    personal_reference_evidence = {}
+
+                personal_reference_evidence[
+                    metric_key
+                ] = build_personal_reference_evidence(
+                    resting_hr_reference_comparison
+                )
 
             personal_reference_evidence[
                 metric_key
@@ -268,12 +282,40 @@ def build_scientific_assessment(
         ),
     }
 
+    if resting_hr_reference_comparison is not None:
+        readiness_result[
+            "resting_hr_reference_comparison"
+        ] = resting_hr_reference_comparison
+
     if hrv_trend_evidence is not None:
         readiness_result[
             "hrv_trend_evidence"
         ] = hrv_trend_evidence
 
-    if personal_reference_evidence is not None:
+    personal_reference_evidence = {}
+
+    for comparison in (
+            hrv_reference_comparison,
+            sleep_duration_reference_comparison,
+            resting_hr_reference_comparison,
+    ):
+        if comparison is None:
+            continue
+
+        metric_key = comparison.get(
+            "metric_key"
+        )
+
+        if metric_key is None:
+            continue
+
+        personal_reference_evidence[
+            metric_key
+        ] = build_personal_reference_evidence(
+            comparison
+        )
+
+    if personal_reference_evidence:
         readiness_result[
             "personal_reference_evidence"
         ] = personal_reference_evidence

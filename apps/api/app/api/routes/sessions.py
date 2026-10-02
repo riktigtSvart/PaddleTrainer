@@ -20,7 +20,9 @@ from app.services.polar_training_samples import (
 from app.services.sample_coverage import (
     build_sample_coverage_evidence,
 )
-
+from app.services.exercise_hr_trajectory import (
+    build_exercise_hr_trajectory_evidence,
+)
 
 class SessionPlannedWorkoutUpdate(BaseModel):
     planned_workout_id: UUID | None
@@ -241,6 +243,12 @@ async def get_exercise_hr_response(
         )
     )
 
+    hr_trajectory = (
+        build_exercise_hr_trajectory_evidence(
+            normalized
+        )
+    )
+
     return {
         "session_id": str(session.id),
         "external_provider": (
@@ -254,6 +262,7 @@ async def get_exercise_hr_response(
             sample_coverage
         ),
         "evidence": evidence,
+        "hr_trajectory": hr_trajectory,
     }
 
 

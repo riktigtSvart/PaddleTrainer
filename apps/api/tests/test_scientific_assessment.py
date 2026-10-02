@@ -1,6 +1,7 @@
 from datetime import date
 
 from app.services.scientific_assessment import (
+    build_personal_reference_evidence,
     build_scientific_assessment,
 )
 
@@ -387,6 +388,16 @@ def test_scientific_assessment_preserves_hrv_personal_reference_comparison():
         "hrv_reference_comparison"
     ] == comparison
 
+    assert result["readiness"][
+               "personal_reference_evidence"
+           ] == {
+               "hrv_rmssd_ms": (
+                   build_personal_reference_evidence(
+                       comparison
+                   )
+               ),
+           }
+
 
 def test_scientific_assessment_preserves_sleep_duration_reference_comparison():
     comparison = {
@@ -417,3 +428,89 @@ def test_scientific_assessment_preserves_sleep_duration_reference_comparison():
         ]
         == comparison
     )
+
+    assert result["readiness"][
+               "personal_reference_evidence"
+           ] == {
+               "sleep_duration_sec": (
+                   build_personal_reference_evidence(
+                       comparison
+                   )
+               ),
+           }
+
+
+def test_personal_reference_evidence_describes_available_hrv_comparison_facts():
+    comparison = {
+        "metric_key": "hrv_rmssd_ms",
+        "current_value": 58.4,
+        "reference_value": 54.0,
+        "relation": "ABOVE_PERSONAL_REFERENCE",
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 6,
+        "reference_sample_support": {
+            "sample_count": 6,
+            "state": "MULTIPLE_SAMPLES",
+        },
+        "reference_median_absolute_deviation": 7.5,
+        "difference_from_reference": 4.4,
+        "relative_difference_from_reference": 0.0814814815,
+        "difference_in_reference_mad_units": 0.5866666667,
+    }
+
+    result = build_personal_reference_evidence(
+        comparison
+    )
+
+    assert result == {
+        "metric_key": "hrv_rmssd_ms",
+        "current_value_available": True,
+        "reference_value_available": True,
+        "reference_sample_count": 6,
+        "reference_sample_support": {
+            "sample_count": 6,
+            "state": "MULTIPLE_SAMPLES",
+        },
+        "reference_variability_available": True,
+        "absolute_difference_available": True,
+        "relative_difference_available": True,
+        "mad_scaled_difference_available": True,
+    }
+
+
+def test_personal_reference_evidence_preserves_missing_variability_for_single_sample_sleep():
+    comparison = {
+        "metric_key": "sleep_duration_sec",
+        "current_value": 27600.0,
+        "reference_value": 20790.0,
+        "relation": "ABOVE_PERSONAL_REFERENCE",
+        "reference_method": "RECENT_MEDIAN",
+        "reference_sample_count": 1,
+        "reference_sample_support": {
+            "sample_count": 1,
+            "state": "SINGLE_SAMPLE",
+        },
+        "reference_median_absolute_deviation": None,
+        "difference_from_reference": 6810.0,
+        "relative_difference_from_reference": 0.3275613276,
+        "difference_in_reference_mad_units": None,
+    }
+
+    result = build_personal_reference_evidence(
+        comparison
+    )
+
+    assert result == {
+        "metric_key": "sleep_duration_sec",
+        "current_value_available": True,
+        "reference_value_available": True,
+        "reference_sample_count": 1,
+        "reference_sample_support": {
+            "sample_count": 1,
+            "state": "SINGLE_SAMPLE",
+        },
+        "reference_variability_available": False,
+        "absolute_difference_available": True,
+        "relative_difference_available": True,
+        "mad_scaled_difference_available": False,
+    }

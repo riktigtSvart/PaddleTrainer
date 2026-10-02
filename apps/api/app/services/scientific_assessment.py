@@ -1,3 +1,63 @@
+def build_personal_reference_evidence(
+    comparison: dict | None,
+) -> dict | None:
+    if comparison is None:
+        return None
+
+    return {
+        "metric_key": comparison.get(
+            "metric_key"
+        ),
+        "current_value_available": (
+            comparison.get(
+                "current_value"
+            )
+            is not None
+        ),
+        "reference_value_available": (
+            comparison.get(
+                "reference_value"
+            )
+            is not None
+        ),
+        "reference_sample_count": (
+            comparison.get(
+                "reference_sample_count",
+                0,
+            )
+        ),
+        "reference_sample_support": (
+            comparison.get(
+                "reference_sample_support"
+            )
+        ),
+        "reference_variability_available": (
+            comparison.get(
+                "reference_median_absolute_deviation"
+            )
+            is not None
+        ),
+        "absolute_difference_available": (
+            comparison.get(
+                "difference_from_reference"
+            )
+            is not None
+        ),
+        "relative_difference_available": (
+            comparison.get(
+                "relative_difference_from_reference"
+            )
+            is not None
+        ),
+        "mad_scaled_difference_available": (
+            comparison.get(
+                "difference_in_reference_mad_units"
+            )
+            is not None
+        ),
+    }
+
+
 def build_scientific_assessment(
     coach_state: dict,
     hrv_reference_comparison: dict | None = None,
@@ -160,36 +220,64 @@ def build_scientific_assessment(
                 "gaps": list(gaps),
             }
 
+    personal_reference_evidence = None
+
+    if hrv_reference_comparison is not None:
+        metric_key = hrv_reference_comparison.get(
+            "metric_key"
+        )
+
+        if metric_key is not None:
+            personal_reference_evidence = {
+                metric_key: (
+                    build_personal_reference_evidence(
+                        hrv_reference_comparison
+                    )
+                ),
+            }
+
+    if sleep_duration_reference_comparison is not None:
+        metric_key = (
+            sleep_duration_reference_comparison.get(
+                "metric_key"
+            )
+        )
+
+        if metric_key is not None:
+            if personal_reference_evidence is None:
+                personal_reference_evidence = {}
+
+            personal_reference_evidence[
+                metric_key
+            ] = build_personal_reference_evidence(
+                sleep_duration_reference_comparison
+            )
+
+    readiness_result = {
+        "interpretation": readiness_interpretation,
+        "traceability": readiness_traceability,
+        "objective_evidence": readiness_objective_evidence,
+        "subjective_evidence": readiness_subjective_evidence,
+        "context_evidence": readiness_context_evidence,
+        "hrv_reference_comparison": (
+            hrv_reference_comparison
+        ),
+        "sleep_duration_reference_comparison": (
+            sleep_duration_reference_comparison
+        ),
+    }
+
+    if personal_reference_evidence is not None:
+        readiness_result[
+            "personal_reference_evidence"
+        ] = personal_reference_evidence
+
     return {
         "as_of_date": coach_state.get(
             "as_of_date"
         ),
         "load": {
-            "interpretation": (
-                load_interpretation
-            ),
+            "interpretation": load_interpretation,
         },
-        "readiness": {
-            "interpretation": (
-                readiness_interpretation
-            ),
-            "traceability": (
-                readiness_traceability
-            ),
-            "objective_evidence": (
-                readiness_objective_evidence
-            ),
-            "subjective_evidence": (
-                readiness_subjective_evidence
-            ),
-            "context_evidence": (
-                readiness_context_evidence
-            ),
-            "hrv_reference_comparison": (
-                hrv_reference_comparison
-            ),
-            "sleep_duration_reference_comparison": (
-                sleep_duration_reference_comparison
-            ),
-        },
+        "readiness": readiness_result,
     }

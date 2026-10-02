@@ -23,6 +23,10 @@ from app.services.sample_coverage import (
 from app.services.exercise_hr_trajectory import (
     build_exercise_hr_trajectory_evidence,
 )
+from app.services.exercise_hr_speed_alignment import (
+    build_exercise_hr_speed_alignment,
+)
+
 
 class SessionPlannedWorkoutUpdate(BaseModel):
     planned_workout_id: UUID | None
@@ -249,6 +253,12 @@ async def get_exercise_hr_response(
         )
     )
 
+    hr_speed_alignment = (
+        build_exercise_hr_speed_alignment(
+            normalized
+        )
+    )
+
     return {
         "session_id": str(session.id),
         "external_provider": (
@@ -263,6 +273,9 @@ async def get_exercise_hr_response(
         ),
         "evidence": evidence,
         "hr_trajectory": hr_trajectory,
+        "hr_speed_alignment": (
+            hr_speed_alignment
+        ),
     }
 
 

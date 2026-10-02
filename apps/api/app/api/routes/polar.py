@@ -907,3 +907,60 @@ async def inspect_training_session_samples(
         "to": to_date,
         "raw": payload,
     }
+
+
+@router.get("/sessions/routes/inspect")
+async def inspect_training_session_routes(
+    route_date: date = Query(...),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await get_or_create_demo_user(db)
+
+    connection = await db.scalar(
+        select(ExternalConnection).where(
+            ExternalConnection.user_id == user.id,
+            ExternalConnection.provider == "POLAR",
+        )
+    )
+
+    if connection is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Polar connection not found",
+        )
+
+    if (
+        "training_sessions:read"
+        not in (connection.scopes or [])
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Polar training_sessions:read "
+                "scope not authorized"
+            ),
+        )
+
+    access_token = await get_valid_access_token(
+        db,
+        connection,
+    )
+
+    from_date = route_date
+    to_date = route_date + timedelta(days=1)
+
+    payload = await PolarClient().list_training_sessions(
+        access_token,
+        from_date,
+        to_date,
+        features=[
+            "routes",
+        ],
+    )
+
+    return {
+        "route_date": route_date,
+        "from": from_date,
+        "to": to_date,
+        "raw": payload,
+    }

@@ -17,6 +17,9 @@ from app.services.exercise_hr_response import (
 from app.services.polar_training_samples import (
     normalize_polar_training_samples,
 )
+from app.services.sample_coverage import (
+    build_sample_coverage_evidence,
+)
 
 
 class SessionPlannedWorkoutUpdate(BaseModel):
@@ -229,6 +232,15 @@ async def get_exercise_hr_response(
         )
     )
 
+    sample_coverage = (
+        build_sample_coverage_evidence(
+            normalized,
+            session_duration_sec=(
+                session.duration_sec
+            ),
+        )
+    )
+
     return {
         "session_id": str(session.id),
         "external_provider": (
@@ -238,6 +250,9 @@ async def get_exercise_hr_response(
         "sport": session.sport.value,
         "started_at": session.started_at,
         "duration_sec": session.duration_sec,
+        "sample_coverage": (
+            sample_coverage
+        ),
         "evidence": evidence,
     }
 

@@ -26,6 +26,9 @@ from app.services.exercise_hr_trajectory import (
 from app.services.exercise_hr_speed_alignment import (
     build_exercise_hr_speed_alignment,
 )
+from app.services.exercise_hr_speed_segments import (
+    build_exercise_hr_speed_segments,
+)
 
 
 class SessionPlannedWorkoutUpdate(BaseModel):
@@ -259,6 +262,12 @@ async def get_exercise_hr_response(
         )
     )
 
+    hr_speed_segments = (
+        build_exercise_hr_speed_segments(
+            normalized
+        )
+    )
+
     return {
         "session_id": str(session.id),
         "external_provider": (
@@ -275,6 +284,9 @@ async def get_exercise_hr_response(
         "hr_trajectory": hr_trajectory,
         "hr_speed_alignment": (
             hr_speed_alignment
+        ),
+        "hr_speed_segments": (
+            hr_speed_segments
         ),
     }
 

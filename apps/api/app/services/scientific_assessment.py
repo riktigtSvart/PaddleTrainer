@@ -62,6 +62,7 @@ def build_scientific_assessment(
     coach_state: dict,
     hrv_reference_comparison: dict | None = None,
     sleep_duration_reference_comparison: dict | None = None,
+    hrv_trend_evidence: dict | None = None,
 ) -> dict:
     load = coach_state.get(
         "load",
@@ -266,6 +267,11 @@ def build_scientific_assessment(
             sleep_duration_reference_comparison
         ),
     }
+
+    if hrv_trend_evidence is not None:
+        readiness_result[
+            "hrv_trend_evidence"
+        ] = hrv_trend_evidence
 
     if personal_reference_evidence is not None:
         readiness_result[

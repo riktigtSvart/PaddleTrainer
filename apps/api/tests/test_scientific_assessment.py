@@ -514,3 +514,30 @@ def test_personal_reference_evidence_preserves_missing_variability_for_single_sa
         "relative_difference_available": True,
         "mad_scaled_difference_available": False,
     }
+
+
+def test_scientific_assessment_preserves_hrv_trend_evidence():
+    trend_evidence = {
+        "metric_key": "hrv_rmssd_ms",
+        "transform": "NATURAL_LOG",
+        "window_days": 7,
+        "sample_count": 5,
+        "sample_support": {
+            "sample_count": 5,
+            "state": "MULTIPLE_SAMPLES",
+        },
+        "current_ln_rmssd": 4.067316815,
+        "rolling_mean_ln_rmssd": 4.0123456789,
+        "rolling_cv_percent": 2.4,
+    }
+
+    result = build_scientific_assessment(
+        coach_state={
+            "as_of_date": date(2026, 9, 30),
+        },
+        hrv_trend_evidence=trend_evidence,
+    )
+
+    assert result["readiness"][
+        "hrv_trend_evidence"
+    ] == trend_evidence

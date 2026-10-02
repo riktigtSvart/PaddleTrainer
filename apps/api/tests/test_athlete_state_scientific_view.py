@@ -63,6 +63,14 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
                     "reference_sample_count": 1,
                 },
             },
+            "hrv_trend_evidence": {
+                "metric_key": "hrv_rmssd_ms",
+                "transform": "NATURAL_LOG",
+                "window_days": 7,
+                "sample_count": 5,
+                "rolling_mean_ln_rmssd": 4.01,
+                "rolling_cv_percent": 2.4,
+            },
         },
     }
 
@@ -179,6 +187,14 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
                     "reference_sample_count": 1,
                 },
             },
+            "hrv_trend_evidence": {
+                "metric_key": "hrv_rmssd_ms",
+                "transform": "NATURAL_LOG",
+                "window_days": 7,
+                "sample_count": 5,
+                "rolling_mean_ln_rmssd": 4.01,
+                "rolling_cv_percent": 2.4,
+            },
         },
         "capacity": {
             "available": True,
@@ -227,6 +243,9 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
                     "sport": None,
                 },
             ],
+            "trend_metrics": [
+                "hrv_rmssd_ms",
+            ],
         },
     }
 
@@ -268,6 +287,7 @@ def test_athlete_state_scientific_view_preserves_empty_evidence_inventory():
         "context_metrics": [],
         "personal_reference_metrics": [],
         "capacity_dimensions": [],
+        "trend_metrics": [],
     }
 
 

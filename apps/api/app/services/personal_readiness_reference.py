@@ -1,6 +1,5 @@
 from collections.abc import Iterable
 from datetime import date, timedelta
-from statistics import median
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,10 +8,12 @@ from app.models.entities import (
     AthleteReadiness,
     User,
 )
-
+from math import log
+from statistics import mean, median, stdev
 
 DEFAULT_HRV_REFERENCE_WINDOW_DAYS = 28
 DEFAULT_SLEEP_DURATION_REFERENCE_WINDOW_DAYS = 28
+DEFAULT_HRV_TREND_WINDOW_DAYS = 7
 
 
 def calculate_median_absolute_deviation(
@@ -136,6 +137,105 @@ def build_sleep_duration_reference(
         metric_key="sleep_duration_sec",
         window_days=window_days,
     )
+
+
+def calculate_ln_rmssd(
+    value: float | None,
+) -> float | None:
+    if value is None:
+        return None
+
+    numeric_value = float(value)
+
+    if numeric_value <= 0.0:
+        return None
+
+    return log(numeric_value)
+
+
+def build_hrv_trend_evidence(
+    readiness_records: Iterable[AthleteReadiness],
+    as_of_date: date,
+    window_days: int = DEFAULT_HRV_TREND_WINDOW_DAYS,
+) -> dict:
+    window_start = (
+        as_of_date
+        - timedelta(days=window_days - 1)
+    )
+
+    ln_values: list[float] = []
+    current_ln_rmssd = None
+
+    for record in readiness_records:
+        if not (
+            window_start
+            <= record.recorded_date
+            <= as_of_date
+        ):
+            continue
+
+        ln_rmssd = calculate_ln_rmssd(
+            record.hrv_rmssd_ms
+        )
+
+        if ln_rmssd is None:
+            continue
+
+        ln_values.append(ln_rmssd)
+
+        if record.recorded_date == as_of_date:
+            current_ln_rmssd = ln_rmssd
+
+    rolling_mean_ln_rmssd = (
+        round(
+            float(mean(ln_values)),
+            10,
+        )
+        if ln_values
+        else None
+    )
+
+    rolling_cv_percent = (
+        round(
+            float(stdev(ln_values))
+            / float(mean(ln_values))
+            * 100.0,
+            10,
+        )
+        if (
+            len(ln_values) >= 2
+            and float(mean(ln_values)) != 0.0
+        )
+        else None
+    )
+
+    return {
+        "metric_key": "hrv_rmssd_ms",
+        "transform": "NATURAL_LOG",
+        "window_days": window_days,
+        "window_start": window_start,
+        "window_end": as_of_date,
+        "sample_count": len(ln_values),
+        "sample_support": (
+            describe_reference_sample_support(
+                len(ln_values)
+            )
+        ),
+        "current_ln_rmssd": (
+            round(
+                current_ln_rmssd,
+                10,
+            )
+            if current_ln_rmssd is not None
+            else None
+        ),
+        "rolling_mean_ln_rmssd": (
+            rolling_mean_ln_rmssd
+        ),
+        "rolling_cv_percent": (
+            rolling_cv_percent
+        ),
+    }
 
 
 async def _get_reference_records(
@@ -353,3 +453,43 @@ def describe_reference_sample_support(
         "sample_count": sample_count,
         "state": state,
     }
+
+
+async def get_hrv_trend_evidence(
+    db: AsyncSession,
+    user: User,
+    as_of_date: date,
+    window_days: int = DEFAULT_HRV_TREND_WINDOW_DAYS,
+) -> dict:
+    window_start = (
+        as_of_date
+        - timedelta(days=window_days - 1)
+    )
+
+    result = await db.execute(
+        select(AthleteReadiness)
+        .where(
+            AthleteReadiness.user_id
+            == user.id,
+            AthleteReadiness.recorded_date
+            >= window_start,
+            AthleteReadiness.recorded_date
+            <= as_of_date,
+            AthleteReadiness.hrv_rmssd_ms.is_not(
+                None
+            ),
+        )
+        .order_by(
+            AthleteReadiness.recorded_date
+        )
+    )
+
+    records = list(
+        result.scalars().all()
+    )
+
+    return build_hrv_trend_evidence(
+        readiness_records=records,
+        as_of_date=as_of_date,
+        window_days=window_days,
+    )

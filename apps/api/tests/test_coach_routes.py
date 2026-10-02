@@ -195,6 +195,20 @@ def test_get_scientific_assessment_returns_public_contract(
         },
     }
 
+    hrv_trend_evidence_expected = {
+        "metric_key": "hrv_rmssd_ms",
+        "transform": "NATURAL_LOG",
+        "window_days": 7,
+        "sample_count": 5,
+        "sample_support": {
+            "sample_count": 5,
+            "state": "MULTIPLE_SAMPLES",
+        },
+        "current_ln_rmssd": 4.067316815,
+        "rolling_mean_ln_rmssd": 4.0123456789,
+        "rolling_cv_percent": 2.4,
+    }
+
     async def fake_get_sleep_duration_reference(
             db,
             user,
@@ -208,6 +222,13 @@ def test_get_scientific_assessment_returns_public_contract(
         as_of_date,
     ):
         return hrv_reference
+
+    async def fake_get_hrv_trend_evidence(
+            db,
+            user,
+            as_of_date,
+    ):
+        return hrv_trend_evidence_expected
 
     comparison = {
         "metric_key": "hrv_rmssd_ms",
@@ -270,6 +291,7 @@ def test_get_scientific_assessment_returns_public_contract(
             "sleep_duration_reference_comparison": (
                 sleep_duration_comparison
             ),
+            "hrv_trend_evidence": hrv_trend_evidence_expected,
         },
     }
 
@@ -277,20 +299,25 @@ def test_get_scientific_assessment_returns_public_contract(
             coach_state,
             hrv_reference_comparison,
             sleep_duration_reference_comparison,
+            hrv_trend_evidence,
     ):
         assert (
-            coach_state["sentinel"]
-            == "coach-state"
+                coach_state["sentinel"]
+                == "coach-state"
         )
 
         assert (
-            hrv_reference_comparison
-            == comparison
+                hrv_reference_comparison
+                == comparison
         )
 
         assert (
                 sleep_duration_reference_comparison
                 == sleep_duration_comparison
+        )
+
+        assert hrv_trend_evidence == (
+            hrv_trend_evidence_expected
         )
 
         return expected
@@ -335,6 +362,12 @@ def test_get_scientific_assessment_returns_public_contract(
         coach,
         "compare_sleep_duration_to_reference",
         fake_compare_sleep_duration_to_reference,
+    )
+
+    monkeypatch.setattr(
+        coach,
+        "get_hrv_trend_evidence",
+        fake_get_hrv_trend_evidence,
     )
 
     app.dependency_overrides[

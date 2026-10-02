@@ -109,6 +109,19 @@ def build_athlete_state_scientific_view(
         or {}
     )
 
+    hrv_trend_evidence = (
+        recovery_readiness.get(
+            "hrv_trend_evidence"
+        )
+        or {}
+    )
+
+    hrv_trend_metric_key = (
+        hrv_trend_evidence.get(
+            "metric_key"
+        )
+    )
+
     evidence_inventory = {
         "gaps": list(
             readiness_interpretation.get(
@@ -151,6 +164,11 @@ def build_athlete_state_scientific_view(
             }
             for item in capacity_items
         ],
+        "trend_metrics": (
+            [hrv_trend_metric_key]
+            if hrv_trend_metric_key is not None
+            else []
+        ),
     }
 
     return {

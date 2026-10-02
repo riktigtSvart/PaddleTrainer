@@ -30,6 +30,7 @@ from app.services.personal_readiness_reference import (
     compare_sleep_duration_to_reference,
     get_hrv_reference,
     get_sleep_duration_reference,
+    get_hrv_trend_evidence,
 )
 from app.services.athlete_state_scientific_view import (
     build_athlete_state_scientific_view,
@@ -201,6 +202,14 @@ async def get_current_scientific_assessment(
         )
     )
 
+    hrv_trend_evidence = (
+        await get_hrv_trend_evidence(
+            db=db,
+            user=user,
+            as_of_date=as_of_date,
+        )
+    )
+
     readiness_view = (
         coach_state.get(
             "readiness",
@@ -257,6 +266,9 @@ async def get_current_scientific_assessment(
         ),
         sleep_duration_reference_comparison=(
             sleep_duration_reference_comparison
+        ),
+        hrv_trend_evidence=(
+            hrv_trend_evidence
         ),
     )
 

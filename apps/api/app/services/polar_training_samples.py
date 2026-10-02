@@ -11,6 +11,14 @@ POLAR_SAMPLE_TYPE_MAP = {
         "metric_key": "heart_rate_bpm",
         "unit": "bpm",
     },
+    "SPEED": {
+        "metric_key": "speed_kmh",
+        "unit": "km/h",
+    },
+    "DISTANCE": {
+        "metric_key": "distance_m",
+        "unit": "m",
+    },
 }
 
 

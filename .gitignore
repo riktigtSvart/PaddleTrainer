@@ -26,3 +26,6 @@ Thumbs.db
 
 # Python packaging
 *.egg-info/
+
+# Local Polar API inspection payloads
+apps/api/polar-*-live.json

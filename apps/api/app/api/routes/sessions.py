@@ -29,6 +29,9 @@ from app.services.exercise_hr_speed_alignment import (
 from app.services.exercise_hr_speed_segments import (
     build_exercise_hr_speed_segments,
 )
+from app.services.exercise_speed_distance_consistency import (
+    build_exercise_speed_distance_consistency,
+)
 
 
 class SessionPlannedWorkoutUpdate(BaseModel):
@@ -268,6 +271,12 @@ async def get_exercise_hr_response(
         )
     )
 
+    speed_distance_consistency = (
+        build_exercise_speed_distance_consistency(
+            normalized
+        )
+    )
+
     return {
         "session_id": str(session.id),
         "external_provider": (
@@ -287,6 +296,9 @@ async def get_exercise_hr_response(
         ),
         "hr_speed_segments": (
             hr_speed_segments
+        ),
+        "speed_distance_consistency": (
+            speed_distance_consistency
         ),
     }
 

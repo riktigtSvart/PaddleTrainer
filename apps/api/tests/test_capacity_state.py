@@ -1,6 +1,8 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 
 from app.services.capacity_state import (
+    calculate_capacity_age_days,
     select_latest_capacity_records,
 )
 
@@ -61,3 +63,28 @@ def test_select_latest_capacity_records_keeps_latest_per_dimension():
         0,
         tzinfo=timezone.utc,
     )
+
+
+def test_capacity_age_days_uses_user_local_date():
+    estimated_at = datetime(
+        2026,
+        9,
+        29,
+        22,
+        30,
+        tzinfo=timezone.utc,
+    )
+
+    result = calculate_capacity_age_days(
+        estimated_at=estimated_at,
+        as_of_date=date(
+            2026,
+            9,
+            30,
+        ),
+        user_timezone=ZoneInfo(
+            "Europe/Budapest"
+        ),
+    )
+
+    assert result == 0

@@ -1,9 +1,67 @@
+def build_capacity_evidence(
+    capacity_items: list[dict],
+) -> list[dict]:
+    return [
+        {
+            "capacity_type": item.get(
+                "capacity_type"
+            ),
+            "sport": item.get(
+                "sport"
+            ),
+            "source": item.get(
+                "source"
+            ),
+            "assessment_link_available": (
+                item.get(
+                    "assessment_id"
+                )
+                is not None
+            ),
+            "measurement_link_available": (
+                item.get(
+                    "measurement_id"
+                )
+                is not None
+            ),
+            "confidence_available": (
+                item.get(
+                    "confidence"
+                )
+                is not None
+            ),
+            "estimated_at_available": (
+                item.get(
+                    "estimated_at"
+                )
+                is not None
+            ),
+            "age_days_available": (
+                item.get(
+                    "age_days"
+                )
+                is not None
+            ),
+            "age_days": item.get(
+                "age_days"
+            ),
+        }
+        for item in capacity_items
+    ]
+
+
 def build_athlete_state_scientific_view(
     scientific_assessment: dict,
     capacity_state: list[dict] | None = None,
 ) -> dict:
     capacity_items = list(
         capacity_state or []
+    )
+
+    capacity_evidence = (
+        build_capacity_evidence(
+            capacity_items
+        )
     )
 
     training_load = scientific_assessment.get(
@@ -105,5 +163,6 @@ def build_athlete_state_scientific_view(
         "capacity": {
             "available": bool(capacity_items),
             "items": capacity_items,
+            "evidence": capacity_evidence,
         },
     }

@@ -7,8 +7,29 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.entities import AthleteCapacity, User
 
 
+def calculate_capacity_age_days(
+    *,
+    estimated_at: datetime,
+    as_of_date: date,
+    user_timezone: ZoneInfo,
+) -> int:
+    estimated_local_date = (
+        estimated_at.astimezone(
+            user_timezone
+        ).date()
+    )
+
+    return (
+        as_of_date
+        - estimated_local_date
+    ).days
+
+
 def serialize_capacity_state_item(
     capacity: AthleteCapacity,
+    *,
+    as_of_date: date,
+    user_timezone: ZoneInfo,
 ) -> dict:
     return {
         "id": str(capacity.id),
@@ -33,6 +54,11 @@ def serialize_capacity_state_item(
         "source": capacity.source.value,
         "confidence": capacity.confidence,
         "estimated_at": capacity.estimated_at,
+        "age_days": calculate_capacity_age_days(
+            estimated_at=capacity.estimated_at,
+            as_of_date=as_of_date,
+            user_timezone=user_timezone,
+        ),
     }
 
 
@@ -97,8 +123,14 @@ async def get_current_capacity_state(
     )
 
     records = [
-        serialize_capacity_state_item(capacity)
+        serialize_capacity_state_item(
+            capacity,
+            as_of_date=as_of_date,
+            user_timezone=user_timezone,
+        )
         for capacity in result
     ]
 
-    return select_latest_capacity_records(records)
+    return select_latest_capacity_records(
+        records
+    )

@@ -85,6 +85,7 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
                 0,
                 tzinfo=timezone.utc,
             ),
+            "age_days": 0,
         },
     ]
 
@@ -96,6 +97,19 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
     assert result["capacity"] == {
         "available": True,
         "items": capacity_state,
+        "evidence": [
+            {
+                "capacity_type": "GENERAL_AEROBIC",
+                "sport": None,
+                "source": "ASSESSMENT",
+                "assessment_link_available": True,
+                "measurement_link_available": True,
+                "confidence_available": True,
+                "estimated_at_available": True,
+                "age_days_available": True,
+                "age_days": 0,
+            },
+        ],
     }
 
     assert result["evidence_inventory"][
@@ -169,6 +183,19 @@ def test_athlete_state_scientific_view_preserves_available_scientific_state():
         "capacity": {
             "available": True,
             "items": capacity_state,
+            "evidence": [
+                {
+                    "capacity_type": "GENERAL_AEROBIC",
+                    "sport": None,
+                    "source": "ASSESSMENT",
+                    "assessment_link_available": True,
+                    "measurement_link_available": True,
+                    "confidence_available": True,
+                    "estimated_at_available": True,
+                    "age_days_available": True,
+                    "age_days": 0,
+                },
+            ],
         },
         "evidence_inventory": {
             "gaps": [
@@ -226,6 +253,7 @@ def test_athlete_state_scientific_view_preserves_empty_evidence_inventory():
     assert result["capacity"] == {
         "available": False,
         "items": [],
+        "evidence": [],
     }
 
     assert result["evidence_inventory"][
@@ -241,3 +269,61 @@ def test_athlete_state_scientific_view_preserves_empty_evidence_inventory():
         "personal_reference_metrics": [],
         "capacity_dimensions": [],
     }
+
+
+def test_athlete_state_scientific_view_preserves_missing_capacity_provenance():
+    scientific_assessment = {
+        "as_of_date": date(2026, 9, 30),
+        "load": {
+            "interpretation": None,
+        },
+        "readiness": {
+            "interpretation": None,
+            "traceability": None,
+            "objective_evidence": None,
+            "subjective_evidence": None,
+            "context_evidence": None,
+        },
+    }
+
+    capacity_state = [
+        {
+            "id": "capacity-1",
+            "assessment_id": None,
+            "measurement_id": None,
+            "capacity_type": "STRENGTH",
+            "sport": None,
+            "value": 100.0,
+            "unit": "kg",
+            "source": "MANUAL",
+            "confidence": None,
+            "estimated_at": datetime(
+                2026,
+                9,
+                27,
+                8,
+                0,
+                tzinfo=timezone.utc,
+            ),
+            "age_days": 3,
+        },
+    ]
+
+    result = build_athlete_state_scientific_view(
+        scientific_assessment,
+        capacity_state=capacity_state,
+    )
+
+    assert result["capacity"]["evidence"] == [
+        {
+            "capacity_type": "STRENGTH",
+            "sport": None,
+            "source": "MANUAL",
+            "assessment_link_available": False,
+            "measurement_link_available": False,
+            "confidence_available": False,
+            "estimated_at_available": True,
+            "age_days_available": True,
+            "age_days": 3,
+        },
+    ]

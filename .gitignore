@@ -29,3 +29,7 @@ Thumbs.db
 
 # Local Polar API inspection payloads
 apps/api/polar-*-live.json
+
+# Local experiment / analysis exports
+apps/api/*experiment*.csv
+apps/api/route-first-*.csv

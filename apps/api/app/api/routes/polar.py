@@ -64,6 +64,13 @@ from app.services.exercise_speed_gps_consistency import (
 from app.services.route_motion_anomaly_evidence import (
     build_route_motion_anomaly_evidence,
 )
+from app.services.route_motion_startup_evidence import (
+    build_route_motion_startup_evidence,
+)
+
+from app.services.route_motion_artifact_policy import (
+    build_route_motion_artifact_policy,
+)
 from app.services.route_motion_evidence_windows import (
     build_route_motion_evidence_windows,
     build_route_motion_evidence_windows_summary,
@@ -76,6 +83,11 @@ from app.services.route_motion_evidence_ranking import (
 )
 from app.services.route_motion_speed_trajectory import (
     build_route_motion_speed_trajectories,
+)
+
+from app.services.polar_training_session_experiment import (
+    build_discovery_ranges,
+    build_training_session_experiment_sample,
 )
 
 
@@ -888,6 +900,151 @@ async def reconcile_completed_workouts(
     )
 
 
+
+@router.get("/sessions/routes/experiment-sample")
+async def inspect_training_session_experiment_sample(
+    from_date: date = Query(...),
+    to_date: date = Query(...),
+    sport_id: int = Query(
+        default=95,
+        ge=0,
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    if to_date <= from_date:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "to_date must be after from_date; "
+                "to_date is exclusive"
+            ),
+        )
+
+    user = await get_or_create_demo_user(
+        db
+    )
+
+    connection = await db.scalar(
+        select(ExternalConnection).where(
+            ExternalConnection.user_id
+            == user.id,
+            ExternalConnection.provider
+            == "POLAR",
+        )
+    )
+
+    if connection is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Polar connection not found"
+            ),
+        )
+
+    if (
+        "training_sessions:read"
+        not in (
+            connection.scopes
+            or []
+        )
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Polar training_sessions:read "
+                "scope not authorized"
+            ),
+        )
+
+    access_token = (
+        await get_valid_access_token(
+            db,
+            connection,
+        )
+    )
+
+    discovery_ranges = (
+        build_discovery_ranges(
+            from_date,
+            to_date,
+        )
+    )
+
+    catalog_payloads = []
+    catalog_requests = []
+
+    client = PolarClient()
+
+    for (
+        chunk_from,
+        chunk_to,
+    ) in discovery_ranges:
+        payload = (
+            await client
+            .list_training_sessions(
+                access_token,
+                chunk_from,
+                chunk_to,
+            )
+        )
+
+        catalog_payloads.append(
+            payload
+        )
+
+        catalog_requests.append(
+            {
+                "from": chunk_from,
+                "to": chunk_to,
+                "to_semantics": (
+                    "EXCLUSIVE"
+                ),
+                "day_count": (
+                    chunk_to
+                    - chunk_from
+                ).days,
+                "training_session_count": (
+                    len(
+                        payload.get(
+                            "trainingSessions",
+                            [],
+                        )
+                    )
+                    if isinstance(
+                        payload,
+                        dict,
+                    )
+                    else 0
+                ),
+            }
+        )
+
+    sample = (
+        build_training_session_experiment_sample(
+            catalog_payloads,
+            from_date=from_date,
+            to_date=to_date,
+            sport_id=sport_id,
+        )
+    )
+
+    return {
+        "from": from_date,
+        "to": to_date,
+        "to_semantics": "EXCLUSIVE",
+        "sport_id": sport_id,
+        "discovery_request_count": (
+            len(
+                catalog_requests
+            )
+        ),
+        "discovery_requests": (
+            catalog_requests
+        ),
+        "sample": sample,
+    }
+
+
 @router.get("/sessions/samples/inspect")
 async def inspect_training_session_samples(
     sample_date: date = Query(...),
@@ -948,8 +1105,28 @@ async def inspect_training_session_samples(
 @router.get("/sessions/routes/inspect")
 async def inspect_training_session_routes(
     route_date: date = Query(...),
+    artifact_policy_profile: str = Query(
+        default="BALANCED",
+    ),
     db: AsyncSession = Depends(get_db),
 ):
+    artifact_policy_profile = (
+        artifact_policy_profile.upper()
+    )
+
+    if artifact_policy_profile not in (
+        "SENSITIVE",
+        "BALANCED",
+        "CONSERVATIVE",
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "artifact_policy_profile must be "
+                "SENSITIVE, BALANCED, or CONSERVATIVE"
+            ),
+        )
+
     user = await get_or_create_demo_user(db)
 
     connection = await db.scalar(
@@ -1104,6 +1281,20 @@ async def inspect_training_session_routes(
             )
         )
 
+        motion_startup_evidence = (
+            build_route_motion_startup_evidence(
+                normalized,
+                motion_anomaly_evidence,
+            )
+        )
+
+        motion_artifact_policy = (
+            build_route_motion_artifact_policy(
+                motion_startup_evidence,
+                profile=artifact_policy_profile,
+            )
+        )
+
         motion_evidence_windows = (
             build_route_motion_evidence_windows(
                 motion_anomaly_evidence
@@ -1186,6 +1377,12 @@ async def inspect_training_session_routes(
                 ),
                 "motion_anomaly_evidence": (
                     motion_anomaly_summary
+                ),
+                "motion_startup_evidence": (
+                    motion_startup_evidence
+                ),
+                "motion_artifact_policy": (
+                    motion_artifact_policy
                 ),
                 "motion_evidence_windows": (
                     motion_evidence_windows_summary

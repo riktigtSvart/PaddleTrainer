@@ -405,6 +405,15 @@ def _build_trajectory_summary(
     }
 
 
+def build_speed_trajectory_summary(
+    trajectory: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Build the descriptive speed-trajectory summary for a supplied trajectory."""
+    return _build_trajectory_summary(
+        trajectory
+    )
+
+
 def _build_candidate_trajectory(
     candidate: dict[str, Any],
     observations_by_segment_index: dict[

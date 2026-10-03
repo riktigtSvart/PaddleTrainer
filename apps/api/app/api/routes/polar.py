@@ -71,6 +71,12 @@ from app.services.route_motion_evidence_windows import (
 from app.services.route_motion_evidence_regions import (
     build_route_motion_evidence_regions,
 )
+from app.services.route_motion_evidence_ranking import (
+    build_route_motion_evidence_ranking,
+)
+from app.services.route_motion_speed_trajectory import (
+    build_route_motion_speed_trajectories,
+)
 
 
 router = APIRouter(prefix="/integrations/polar", tags=["polar"])
@@ -1116,6 +1122,20 @@ async def inspect_training_session_routes(
             )
         )
 
+        motion_evidence_ranking = (
+            build_route_motion_evidence_ranking(
+                motion_evidence_windows,
+                motion_evidence_regions,
+            )
+        )
+
+        motion_speed_trajectories = (
+            build_route_motion_speed_trajectories(
+                motion_anomaly_evidence,
+                motion_evidence_ranking,
+            )
+        )
+
         speed_gps_consistency_summary = {
             **speed_gps_consistency,
             "exercises": [
@@ -1172,6 +1192,12 @@ async def inspect_training_session_routes(
                 ),
                 "motion_evidence_regions": (
                     motion_evidence_regions
+                ),
+                "motion_evidence_ranking": (
+                    motion_evidence_ranking
+                ),
+                "motion_speed_trajectories": (
+                    motion_speed_trajectories
                 ),
             }
         )

@@ -24,6 +24,9 @@ SUPPORTED_ACTIONS = (
     ACTION_REVIEW,
 )
 
+POLICY_VERSION = "0.4"
+
+
 SUPPORTED_PROFILES = (
     PROFILE_SENSITIVE,
     PROFILE_BALANCED,
@@ -451,6 +454,28 @@ def _route_policy(
             "first_route_waypoint_exercise_elapsed_ms": (
                 first_waypoint_ms
             ),
+            "trust_boundary": {
+                "status": (
+                    reconstruction_context.get(
+                        "trust_boundary_status"
+                    )
+                ),
+                "geometry_supported_usable_from_exercise_elapsed_ms": (
+                    reconstruction_context.get(
+                        "geometry_supported_usable_from_exercise_elapsed_ms"
+                    )
+                ),
+                "time_to_validated_forward_anchor_ms": (
+                    reconstruction_context.get(
+                        "time_to_validated_forward_anchor_ms"
+                    )
+                ),
+                "segments_to_validated_forward_anchor": (
+                    reconstruction_context.get(
+                        "segments_to_validated_forward_anchor"
+                    )
+                ),
+            },
         },
         "evidence": {
             "geometry": {
@@ -533,6 +558,11 @@ def _route_policy(
             "forward_anchor_available": (
                 forward_anchor_available
             ),
+            "forward_anchor_exercise_elapsed_ms": (
+                reconstruction_context.get(
+                    "forward_anchor_exercise_elapsed_ms"
+                )
+            ),
             "requires_backward_anchor": thresholds[
                 "reconstruction_requires_backward_anchor"
             ],
@@ -559,7 +589,7 @@ def build_route_motion_artifact_policy(
 ) -> dict[str, Any]:
     """Build a non-mutating policy decision over first-route-window evidence.
 
-    v0.1 deliberately separates evidence from action. It does not smooth,
+    v0.4 deliberately separates evidence from action. It does not smooth,
     delete, exclude, or reconstruct route data. It only emits the policy
     action that downstream processing may choose to apply.
     """
@@ -610,7 +640,7 @@ def build_route_motion_artifact_policy(
 
     return {
         "provider": startup_evidence.get("provider"),
-        "policy_version": "0.1",
+        "policy_version": POLICY_VERSION,
         "profile": normalized_profile,
         "available": bool(route_results),
         "route_count": len(route_results),

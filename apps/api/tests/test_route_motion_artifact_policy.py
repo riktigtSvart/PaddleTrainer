@@ -306,3 +306,109 @@ def test_first_route_window_anchor_states_distinguish_false_from_unknown():
     assert eligibility["backward_anchor_available"] is False
     assert eligibility["forward_anchor_available"] is None
     assert eligibility["eligible"] is False
+
+
+def test_policy_reports_current_version():
+    result = build_route_motion_artifact_policy(
+        _evidence(_route())
+    )
+
+    assert result["policy_version"] == "0.4"
+
+
+def test_forward_anchor_context_is_preserved_but_first_window_still_lacks_backward_anchor():
+    route = _route(
+        speed_range=8.0,
+        peak_drop=1.0,
+        sign_reversals=3,
+        cross_track=2.0,
+        path_minus_net=2.0,
+        cancellation=0.95,
+        cross_source_difference=6.0,
+    )
+    route["expected_segment_indices"] = [
+        0, 1, 2, 3, 4
+    ]
+
+    result = build_route_motion_artifact_policy(
+        _evidence(route),
+        reconstruction_context_by_route_index={
+            0: {
+                "forward_anchor_available": True,
+            }
+        },
+    )
+
+    policy = result["routes"][0]
+
+    assert (
+        policy[
+            "reconstruction_eligibility"
+        ][
+            "forward_anchor_available"
+        ]
+        is True
+    )
+    assert (
+        policy[
+            "reconstruction_eligibility"
+        ][
+            "backward_anchor_available"
+        ]
+        is False
+    )
+    assert policy["action"] == ACTION_EXCLUDE
+
+
+def test_policy_exposes_trust_boundary_context_without_changing_action_logic():
+    route = _route(
+        speed_range=8.0,
+        peak_drop=1.0,
+        sign_reversals=3,
+        cross_track=2.0,
+        path_minus_net=2.0,
+        cancellation=0.95,
+        cross_source_difference=6.0,
+    )
+    route["expected_segment_indices"] = [
+        0, 1, 2, 3, 4
+    ]
+
+    result = build_route_motion_artifact_policy(
+        _evidence(route),
+        reconstruction_context_by_route_index={
+            0: {
+                "forward_anchor_available": True,
+                "forward_anchor_exercise_elapsed_ms": 91_729,
+                "geometry_supported_usable_from_exercise_elapsed_ms": 91_729,
+                "time_to_validated_forward_anchor_ms": 11_000,
+                "segments_to_validated_forward_anchor": 11,
+                "trust_boundary_status": (
+                    "VALIDATED_FORWARD_ANCHOR_AVAILABLE"
+                ),
+            }
+        },
+    )
+
+    policy_route = result["routes"][0]
+
+    assert policy_route["action"] == ACTION_EXCLUDE
+    assert (
+        policy_route["context"]["trust_boundary"]
+        == {
+            "status": (
+                "VALIDATED_FORWARD_ANCHOR_AVAILABLE"
+            ),
+            "geometry_supported_usable_from_exercise_elapsed_ms": 91_729,
+            "time_to_validated_forward_anchor_ms": 11_000,
+            "segments_to_validated_forward_anchor": 11,
+        }
+    )
+    assert (
+        policy_route[
+            "reconstruction_eligibility"
+        ][
+            "forward_anchor_exercise_elapsed_ms"
+        ]
+        == 91_729
+    )

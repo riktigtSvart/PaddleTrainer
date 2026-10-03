@@ -68,6 +68,30 @@ from app.services.route_motion_startup_evidence import (
     build_route_motion_startup_evidence,
 )
 
+from app.services.route_motion_path_geometry import (
+    build_route_motion_path_geometry_evidence,
+    build_route_motion_path_geometry_summary,
+)
+from app.services.route_motion_forward_anchor_evidence import (
+    build_forward_anchor_reconstruction_context,
+    build_route_motion_forward_anchor_evidence,
+)
+
+from app.services.route_motion_trust_boundary import (
+    build_route_motion_trust_boundary_evidence,
+    build_trust_boundary_policy_context,
+)
+
+from app.services.route_motion_trust_mask import (
+    build_route_motion_trust_mask,
+    build_route_motion_trust_mask_summary,
+)
+
+from app.services.route_workload_input import (
+    build_route_workload_input,
+    build_route_workload_input_summary,
+)
+
 from app.services.route_motion_artifact_policy import (
     build_route_motion_artifact_policy,
 )
@@ -1288,10 +1312,130 @@ async def inspect_training_session_routes(
             )
         )
 
+        motion_path_geometry = (
+            build_route_motion_path_geometry_evidence(
+                normalized
+            )
+        )
+
+        motion_path_geometry_summary = (
+            build_route_motion_path_geometry_summary(
+                motion_path_geometry
+            )
+        )
+
+        motion_forward_anchor_evidence = (
+            build_route_motion_forward_anchor_evidence(
+                motion_path_geometry,
+                motion_startup_evidence,
+            )
+        )
+
+        motion_trust_boundary = (
+            build_route_motion_trust_boundary_evidence(
+                motion_startup_evidence,
+                motion_forward_anchor_evidence,
+            )
+        )
+
+        reconstruction_context_by_route_index = (
+            build_trust_boundary_policy_context(
+                motion_trust_boundary
+            )
+        )
+
         motion_artifact_policy = (
             build_route_motion_artifact_policy(
                 motion_startup_evidence,
                 profile=artifact_policy_profile,
+                reconstruction_context_by_route_index=(
+                    reconstruction_context_by_route_index
+                ),
+            )
+        )
+
+        trusted_normalized = (
+            build_route_motion_trust_mask(
+                normalized,
+                motion_trust_boundary,
+                motion_artifact_policy,
+            )
+        )
+
+        motion_trust_mask = (
+            build_route_motion_trust_mask_summary(
+                trusted_normalized
+            )
+        )
+
+        trusted_motion = (
+            build_route_motion_evidence(
+                trusted_normalized
+            )
+        )
+
+        trusted_motion_summary = (
+            build_route_motion_summary_evidence(
+                trusted_motion
+            )
+        )
+
+        trusted_speed_gps_consistency = (
+            build_exercise_speed_gps_consistency(
+                normalized_samples,
+                trusted_motion,
+            )
+        )
+
+        trusted_speed_gps_consistency_summary = {
+            **trusted_speed_gps_consistency,
+            "exercises": [
+                {
+                    key: value
+                    for key, value in exercise.items()
+                    if key != "comparisons"
+                }
+                for exercise in (
+                    trusted_speed_gps_consistency.get(
+                        "exercises"
+                    )
+                    or []
+                )
+                if isinstance(exercise, dict)
+            ],
+        }
+
+        route_workload_input = (
+            build_route_workload_input(
+                trusted_normalized,
+                trusted_motion,
+                trusted_motion_summary,
+                motion_summary,
+                motion_trust_boundary,
+                motion_artifact_policy,
+                motion_trust_mask,
+                speed_gps_consistency=(
+                    trusted_speed_gps_consistency
+                ),
+                provider_distance_evidence={
+                    "value_m": (
+                        item.get(
+                            "distanceMeters"
+                        )
+                    ),
+                    "scope": (
+                        "TRAINING_SESSION"
+                    ),
+                    "source": (
+                        "PROVIDER_SESSION_SUMMARY"
+                    ),
+                },
+            )
+        )
+
+        route_workload_input_summary = (
+            build_route_workload_input_summary(
+                route_workload_input
             )
         )
 
@@ -1381,8 +1525,29 @@ async def inspect_training_session_routes(
                 "motion_startup_evidence": (
                     motion_startup_evidence
                 ),
+                "motion_path_geometry": (
+                    motion_path_geometry_summary
+                ),
+                "motion_forward_anchor_evidence": (
+                    motion_forward_anchor_evidence
+                ),
+                "motion_trust_boundary": (
+                    motion_trust_boundary
+                ),
                 "motion_artifact_policy": (
                     motion_artifact_policy
+                ),
+                "motion_trust_mask": (
+                    motion_trust_mask
+                ),
+                "trusted_motion_summary": (
+                    trusted_motion_summary
+                ),
+                "trusted_speed_gps_consistency": (
+                    trusted_speed_gps_consistency_summary
+                ),
+                "route_workload_input": (
+                    route_workload_input_summary
                 ),
                 "motion_evidence_windows": (
                     motion_evidence_windows_summary

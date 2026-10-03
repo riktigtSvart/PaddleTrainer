@@ -64,6 +64,13 @@ from app.services.exercise_speed_gps_consistency import (
 from app.services.route_motion_anomaly_evidence import (
     build_route_motion_anomaly_evidence,
 )
+from app.services.route_motion_evidence_windows import (
+    build_route_motion_evidence_windows,
+    build_route_motion_evidence_windows_summary,
+)
+from app.services.route_motion_evidence_regions import (
+    build_route_motion_evidence_regions,
+)
 
 
 router = APIRouter(prefix="/integrations/polar", tags=["polar"])
@@ -915,16 +922,7 @@ async def inspect_training_session_samples(
     from_date = sample_date
     to_date = sample_date + timedelta(days=1)
 
-    route_payload = await PolarClient().list_training_sessions(
-        access_token,
-        from_date,
-        to_date,
-        features=[
-            "routes",
-        ],
-    )
-
-    sample_payload = await PolarClient().list_training_sessions(
+    payload = await PolarClient().list_training_sessions(
         access_token,
         from_date,
         to_date,
@@ -1100,6 +1098,24 @@ async def inspect_training_session_routes(
             )
         )
 
+        motion_evidence_windows = (
+            build_route_motion_evidence_windows(
+                motion_anomaly_evidence
+            )
+        )
+
+        motion_evidence_windows_summary = (
+            build_route_motion_evidence_windows_summary(
+                motion_evidence_windows
+            )
+        )
+
+        motion_evidence_regions = (
+            build_route_motion_evidence_regions(
+                motion_evidence_windows
+            )
+        )
+
         speed_gps_consistency_summary = {
             **speed_gps_consistency,
             "exercises": [
@@ -1151,6 +1167,12 @@ async def inspect_training_session_routes(
                 "motion_anomaly_evidence": (
                     motion_anomaly_summary
                 ),
+                "motion_evidence_windows": (
+                    motion_evidence_windows_summary
+                ),
+                "motion_evidence_regions": (
+                    motion_evidence_regions
+                ),
             }
         )
 
@@ -1164,3 +1186,5 @@ async def inspect_training_session_routes(
             "samples": sample_payload,
         },
     }
+
+

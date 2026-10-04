@@ -141,6 +141,10 @@ from app.services.route_environment_evidence_record import (
     build_route_environment_evidence_record_summary,
 )
 
+from app.services.environment_evidence_persistence import (
+    persist_route_environment_evidence,
+)
+
 from app.services.route_motion_artifact_policy import (
     build_route_motion_artifact_policy,
 )
@@ -1175,32 +1179,17 @@ async def inspect_training_session_samples(
     }
 
 
-@router.get("/sessions/routes/inspect")
-async def inspect_training_session_routes(
-    route_date: date = Query(...),
-    artifact_policy_profile: str = Query(
-        default="BALANCED",
-    ),
-    wind_speed_mps: float | None = Query(
-        default=None,
-        ge=0.0,
-    ),
-    wind_direction_from_deg: float | None = Query(
-        default=None,
-        ge=0.0,
-        lt=360.0,
-    ),
-    weather_provider: str | None = Query(
-        default=None,
-    ),
-    hydrology_provider: str | None = Query(
-        default=None,
-    ),
-    hydrology_station_registry_number: int | None = Query(
-        default=None,
-        ge=1,
-    ),
-    db: AsyncSession = Depends(get_db),
+async def _build_training_session_route_inspection(
+    *,
+    route_date: date,
+    artifact_policy_profile: str,
+    wind_speed_mps: float | None,
+    wind_direction_from_deg: float | None,
+    weather_provider: str | None,
+    hydrology_provider: str | None,
+    hydrology_station_registry_number: int | None,
+    persist_environment_evidence: bool,
+    db: AsyncSession,
 ):
     artifact_policy_profile = (
         artifact_policy_profile.upper()
@@ -2024,6 +2013,64 @@ async def inspect_training_session_routes(
             )
         )
 
+        environment_evidence_persistence = None
+
+        if persist_environment_evidence:
+            if external_id is None:
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        "Polar route session has no external "
+                        "identifier; environment evidence "
+                        "cannot be persisted"
+                    ),
+                )
+
+            workout_session = await db.scalar(
+                select(WorkoutSession).where(
+                    WorkoutSession.user_id
+                    == user.id,
+                    WorkoutSession.external_provider
+                    == "POLAR",
+                    WorkoutSession.external_id
+                    == str(
+                        external_id
+                    ),
+                )
+            )
+
+            if workout_session is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=(
+                        "WorkoutSession not found for Polar "
+                        f"session {external_id}. Sync training "
+                        "sessions before persisting route "
+                        "environment evidence."
+                    ),
+                )
+
+            try:
+                environment_evidence_persistence = (
+                    await persist_route_environment_evidence(
+                        db,
+                        user=user,
+                        workout_session=(
+                            workout_session
+                        ),
+                        evidence_record=(
+                            route_environment_evidence_record
+                        ),
+                    )
+                )
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=409,
+                    detail=str(
+                        exc
+                    ),
+                ) from exc
+
         motion_evidence_windows = (
             build_route_motion_evidence_windows(
                 motion_anomaly_evidence
@@ -2180,6 +2227,9 @@ async def inspect_training_session_routes(
                 "route_environment_evidence_record": (
                     route_environment_evidence_record_summary
                 ),
+                "environment_evidence_persistence": (
+                    environment_evidence_persistence
+                ),
                 "motion_evidence_windows": (
                     motion_evidence_windows_summary
                 ),
@@ -2206,4 +2256,108 @@ async def inspect_training_session_routes(
         },
     }
 
+@router.get("/sessions/routes/inspect")
+async def inspect_training_session_routes(
+    route_date: date = Query(...),
+    artifact_policy_profile: str = Query(
+        default="BALANCED",
+    ),
+    wind_speed_mps: float | None = Query(
+        default=None,
+        ge=0.0,
+    ),
+    wind_direction_from_deg: float | None = Query(
+        default=None,
+        ge=0.0,
+        lt=360.0,
+    ),
+    weather_provider: str | None = Query(
+        default=None,
+    ),
+    hydrology_provider: str | None = Query(
+        default=None,
+    ),
+    hydrology_station_registry_number: int | None = Query(
+        default=None,
+        ge=1,
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    return await _build_training_session_route_inspection(
+        route_date=route_date,
+        artifact_policy_profile=(
+            artifact_policy_profile
+        ),
+        wind_speed_mps=(
+            wind_speed_mps
+        ),
+        wind_direction_from_deg=(
+            wind_direction_from_deg
+        ),
+        weather_provider=(
+            weather_provider
+        ),
+        hydrology_provider=(
+            hydrology_provider
+        ),
+        hydrology_station_registry_number=(
+            hydrology_station_registry_number
+        ),
+        persist_environment_evidence=False,
+        db=db,
+    )
+
+
+@router.post(
+    "/sessions/routes/environment-evidence/persist"
+)
+async def persist_training_session_route_environment_evidence(
+    route_date: date = Query(...),
+    artifact_policy_profile: str = Query(
+        default="BALANCED",
+    ),
+    wind_speed_mps: float | None = Query(
+        default=None,
+        ge=0.0,
+    ),
+    wind_direction_from_deg: float | None = Query(
+        default=None,
+        ge=0.0,
+        lt=360.0,
+    ),
+    weather_provider: str | None = Query(
+        default=None,
+    ),
+    hydrology_provider: str | None = Query(
+        default=None,
+    ),
+    hydrology_station_registry_number: int | None = Query(
+        default=None,
+        ge=1,
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    return await _build_training_session_route_inspection(
+        route_date=route_date,
+        artifact_policy_profile=(
+            artifact_policy_profile
+        ),
+        wind_speed_mps=(
+            wind_speed_mps
+        ),
+        wind_direction_from_deg=(
+            wind_direction_from_deg
+        ),
+        weather_provider=(
+            weather_provider
+        ),
+        hydrology_provider=(
+            hydrology_provider
+        ),
+        hydrology_station_registry_number=(
+            hydrology_station_registry_number
+        ),
+        persist_environment_evidence=True,
+        db=db,
+    )
 

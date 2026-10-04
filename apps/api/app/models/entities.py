@@ -1048,3 +1048,900 @@ class ProviderDataRecord(Base):
     )
 
     user: Mapped["User"] = relationship()
+
+
+class RouteEnvironmentEvidenceSet(Base):
+    __tablename__ = "route_environment_evidence_sets"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "workout_session_id",
+            "evidence_hash",
+            name="uq_route_environment_session_hash",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+        index=True,
+    )
+
+    workout_session_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "workout_sessions.id",
+            ondelete="CASCADE",
+        ),
+        index=True,
+    )
+
+    schema_version: Mapped[str] = mapped_column(
+        String(32)
+    )
+
+    evidence_hash: Mapped[str] = mapped_column(
+        String(64)
+    )
+
+    provider: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+
+    session_external_id: Mapped[str | None] = mapped_column(
+        String(256),
+        nullable=True,
+        index=True,
+    )
+
+    is_current: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        index=True,
+    )
+
+    scope: Mapped[dict[str, Any]] = mapped_column(
+        JSON,
+        default=dict,
+    )
+
+    source_summary: Mapped[dict[str, Any]] = mapped_column(
+        JSON,
+        default=dict,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+    replaced_at: Mapped[
+        datetime | None
+    ] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+
+class RouteEnvironmentRoute(Base):
+    __tablename__ = "route_environment_routes"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "evidence_set_id",
+            "route_key",
+            name="uq_route_environment_route_key",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    evidence_set_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "route_environment_evidence_sets.id",
+            ondelete="CASCADE",
+        ),
+        index=True,
+    )
+
+    route_key: Mapped[str] = mapped_column(
+        String(64)
+    )
+
+    route_index: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    exercise_index: Mapped[
+        int | None
+    ] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    segment_record_count: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    quality_provenance: Mapped[
+        dict[str, Any]
+    ] = mapped_column(
+        JSON,
+        default=dict,
+    )
+
+    time_context: Mapped[
+        dict[str, Any]
+    ] = mapped_column(
+        JSON,
+        default=dict,
+    )
+
+    route_semantics: Mapped[
+        dict[str, Any]
+    ] = mapped_column(
+        JSON,
+        default=dict,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+class RouteEnvironmentWeatherSample(Base):
+    __tablename__ = "route_environment_weather_samples"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "evidence_set_id",
+            "source_provider",
+            "source_sample_id",
+            name="uq_route_environment_weather_source",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    evidence_set_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "route_environment_evidence_sets.id",
+            ondelete="CASCADE",
+        ),
+        index=True,
+    )
+
+    source_provider: Mapped[str] = mapped_column(
+        String(64)
+    )
+
+    source_product: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    source_type: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    source_sample_id: Mapped[str] = mapped_column(
+        String(512)
+    )
+
+    sampled_at: Mapped[
+        datetime | None
+    ] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
+
+    latitude_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    longitude_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    elevation_m: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    air_temperature_c: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    wind_speed_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    wind_direction_from_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    wind_gust_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    temporal_resolution_seconds: Mapped[
+        int | None
+    ] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    spatial_support: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    source_reference: Mapped[
+        str | None
+    ] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    extra_data: Mapped[
+        dict[str, Any]
+    ] = mapped_column(
+        JSON,
+        default=dict,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+class RouteEnvironmentHydrologyMeasurement(Base):
+    __tablename__ = "route_environment_hydrology_measurements"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "evidence_set_id",
+            "source_provider",
+            "source_measurement_id",
+            name="uq_route_environment_hydrology_source",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    evidence_set_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "route_environment_evidence_sets.id",
+            ondelete="CASCADE",
+        ),
+        index=True,
+    )
+
+    source_provider: Mapped[str] = mapped_column(
+        String(64)
+    )
+
+    source_product: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    source_type: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    source_measurement_id: Mapped[str] = mapped_column(
+        String(512)
+    )
+
+    observed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        index=True,
+    )
+
+    metric_key: Mapped[str] = mapped_column(
+        String(64),
+        index=True,
+    )
+
+    metric_code: Mapped[
+        str | None
+    ] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+
+    value: Mapped[float] = mapped_column(
+        Float
+    )
+
+    unit: Mapped[str] = mapped_column(
+        String(32)
+    )
+
+    provider_data_type: Mapped[
+        str | None
+    ] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+
+    data_quality_code: Mapped[
+        str | None
+    ] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+
+    field_quality_code: Mapped[
+        str | None
+    ] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+
+    station_registry_id: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    station_name: Mapped[
+        str | None
+    ] = mapped_column(
+        String(200),
+        nullable=True,
+    )
+
+    watercourse: Mapped[
+        str | None
+    ] = mapped_column(
+        String(200),
+        nullable=True,
+    )
+
+    municipality: Mapped[
+        str | None
+    ] = mapped_column(
+        String(200),
+        nullable=True,
+    )
+
+    station_latitude_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    station_longitude_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    river_km: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    extra_data: Mapped[
+        dict[str, Any]
+    ] = mapped_column(
+        JSON,
+        default=dict,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
+class RouteEnvironmentSegment(Base):
+    __tablename__ = "route_environment_segments"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "evidence_set_id",
+            "record_id",
+            name="uq_route_environment_segment_record",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    evidence_set_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "route_environment_evidence_sets.id",
+            ondelete="CASCADE",
+        ),
+        index=True,
+    )
+
+    route_evidence_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "route_environment_routes.id",
+            ondelete="CASCADE",
+        ),
+        index=True,
+    )
+
+    record_id: Mapped[str] = mapped_column(
+        String(512)
+    )
+
+    order_index: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    view_segment_index: Mapped[
+        int | None
+    ] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    segment_index_scope: Mapped[
+        str | None
+    ] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+
+    source_segment_index: Mapped[
+        int | None
+    ] = mapped_column(
+        Integer,
+        nullable=True,
+        index=True,
+    )
+
+    source_segment_index_scope: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    source_segment_index_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    source_waypoint_contiguous: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+    )
+
+    start_waypoint_index: Mapped[
+        int | None
+    ] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    end_waypoint_index: Mapped[
+        int | None
+    ] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    start_exercise_elapsed_ms: Mapped[
+        int | None
+    ] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    end_exercise_elapsed_ms: Mapped[
+        int | None
+    ] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    start_timestamp: Mapped[
+        datetime | None
+    ] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    midpoint_timestamp: Mapped[
+        datetime | None
+    ] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    end_timestamp: Mapped[
+        datetime | None
+    ] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    start_latitude_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    start_longitude_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    end_latitude_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    end_longitude_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    surface_distance_m: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    movement_bearing_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    position_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    gps_ground_speed_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    ground_speed_change_rate_mps2: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    cumulative_trusted_surface_distance_m: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    weather_sample_id: Mapped[
+        uuid.UUID | None
+    ] = mapped_column(
+        ForeignKey(
+            "route_environment_weather_samples.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
+    weather_match_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    weather_time_delta_seconds: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    weather_surface_distance_m: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    wind_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    headwind_component_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    tailwind_component_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    crosswind_magnitude_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    relative_air_velocity_along_course_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    relative_air_velocity_cross_course_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    relative_air_speed_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    water_level_measurement_id: Mapped[
+        uuid.UUID | None
+    ] = mapped_column(
+        ForeignKey(
+            "route_environment_hydrology_measurements.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
+    water_level_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    water_level_time_delta_seconds: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    discharge_measurement_id: Mapped[
+        uuid.UUID | None
+    ] = mapped_column(
+        ForeignKey(
+            "route_environment_hydrology_measurements.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
+    discharge_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    discharge_time_delta_seconds: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    water_temperature_measurement_id: Mapped[
+        uuid.UUID | None
+    ] = mapped_column(
+        ForeignKey(
+            "route_environment_hydrology_measurements.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
+    water_temperature_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    water_temperature_time_delta_seconds: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    station_surface_distance_m: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    current_speed_estimate_mps: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    current_direction_deg: Mapped[
+        float | None
+    ] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    waterbody_identity_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    waterbody_id: Mapped[
+        str | None
+    ] = mapped_column(
+        String(256),
+        nullable=True,
+    )
+
+    river_reach_id: Mapped[
+        str | None
+    ] = mapped_column(
+        String(256),
+        nullable=True,
+    )
+
+    flow_relation: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    route_corridor_id: Mapped[
+        str | None
+    ] = mapped_column(
+        String(256),
+        nullable=True,
+    )
+
+    route_choice_status: Mapped[
+        str | None
+    ] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    route_choice_intent: Mapped[
+        str | None
+    ] = mapped_column(
+        String(256),
+        nullable=True,
+    )
+
+    group_tactical_context: Mapped[
+        str | None
+    ] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    preferred_flow_line: Mapped[
+        str | None
+    ] = mapped_column(
+        String(256),
+        nullable=True,
+    )
+
+    extra_data: Mapped[
+        dict[str, Any]
+    ] = mapped_column(
+        JSON,
+        default=dict,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+

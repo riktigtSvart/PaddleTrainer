@@ -92,6 +92,55 @@ from app.services.route_workload_input import (
     build_route_workload_input_summary,
 )
 
+from app.services.route_external_workload_evidence import (
+    build_route_external_workload_evidence,
+    build_route_external_workload_evidence_summary,
+)
+
+from app.services.route_environment_context_input import (
+    build_route_environment_context_input,
+    build_route_environment_context_input_summary,
+)
+
+from app.services.route_weather_sample_matching import (
+    build_route_weather_sample_matching,
+    build_route_weather_sample_matching_summary,
+)
+
+from app.integrations.open_meteo.client import (
+    OpenMeteoAPIError,
+    OpenMeteoHistoricalWeatherClient,
+)
+from app.services.open_meteo_weather import (
+    normalize_open_meteo_historical_weather,
+)
+
+from app.integrations.ovf_vra.client import (
+    DATA_TYPE_OPERATIONAL,
+    METRIC_DISCHARGE,
+    METRIC_WATER_LEVEL,
+    METRIC_WATER_TEMPERATURE,
+    OVFVRAAPIError,
+    OVFVRAClient,
+)
+from app.services.ovf_hydrology import (
+    normalize_ovf_hydrology_measurements,
+)
+from app.services.route_hydrology_context import (
+    build_route_hydrology_context,
+    build_route_hydrology_context_summary,
+)
+
+from app.services.route_wind_context import (
+    build_route_wind_context,
+    build_route_wind_context_summary,
+)
+
+from app.services.route_environment_evidence_record import (
+    build_route_environment_evidence_record,
+    build_route_environment_evidence_record_summary,
+)
+
 from app.services.route_motion_artifact_policy import (
     build_route_motion_artifact_policy,
 )
@@ -1132,11 +1181,113 @@ async def inspect_training_session_routes(
     artifact_policy_profile: str = Query(
         default="BALANCED",
     ),
+    wind_speed_mps: float | None = Query(
+        default=None,
+        ge=0.0,
+    ),
+    wind_direction_from_deg: float | None = Query(
+        default=None,
+        ge=0.0,
+        lt=360.0,
+    ),
+    weather_provider: str | None = Query(
+        default=None,
+    ),
+    hydrology_provider: str | None = Query(
+        default=None,
+    ),
+    hydrology_station_registry_number: int | None = Query(
+        default=None,
+        ge=1,
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     artifact_policy_profile = (
         artifact_policy_profile.upper()
     )
+
+    weather_provider = (
+        weather_provider.upper()
+        if weather_provider
+        else None
+    )
+
+    hydrology_provider = (
+        hydrology_provider.upper()
+        if hydrology_provider
+        else None
+    )
+
+    if hydrology_provider not in (
+        None,
+        "OVF_VRAQUERY",
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "hydrology_provider must be "
+                "OVF_VRAQUERY or omitted"
+            ),
+        )
+
+    if (
+        (hydrology_provider is None)
+        != (
+            hydrology_station_registry_number
+            is None
+        )
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "hydrology_provider and "
+                "hydrology_station_registry_number "
+                "must be provided together"
+            ),
+        )
+
+    if weather_provider not in (
+        None,
+        "OPEN_METEO_HISTORICAL",
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "weather_provider must be "
+                "OPEN_METEO_HISTORICAL or omitted"
+            ),
+        )
+
+    if (
+        weather_provider is not None
+        and (
+            wind_speed_mps is not None
+            or wind_direction_from_deg is not None
+        )
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "weather_provider cannot be combined "
+                "with manual wind query parameters"
+            ),
+        )
+
+    if (
+        (wind_speed_mps is None)
+        != (
+            wind_direction_from_deg
+            is None
+        )
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "wind_speed_mps and "
+                "wind_direction_from_deg must "
+                "be provided together"
+            ),
+        )
 
     if artifact_policy_profile not in (
         "SENSITIVE",
@@ -1439,6 +1590,440 @@ async def inspect_training_session_routes(
             )
         )
 
+        route_external_workload_evidence = (
+            build_route_external_workload_evidence(
+                route_workload_input
+            )
+        )
+
+        route_external_workload_evidence_summary = (
+            build_route_external_workload_evidence_summary(
+                route_external_workload_evidence
+            )
+        )
+
+        route_environment_context_input = (
+            build_route_environment_context_input(
+                trusted_normalized,
+                route_external_workload_evidence,
+                session_time_context={
+                    "exercise_start_time": (
+                        item.get(
+                            "startTime"
+                        )
+                    ),
+                    "timezone_offset_minutes": (
+                        item.get(
+                            "timezoneOffsetMinutes"
+                        )
+                    ),
+                },
+            )
+        )
+
+        route_environment_context_input_summary = (
+            build_route_environment_context_input_summary(
+                route_environment_context_input
+            )
+        )
+
+        hydrology_source = None
+        route_hydrology_context = None
+        route_hydrology_context_summary = None
+
+        if (
+            hydrology_provider
+            == "OVF_VRAQUERY"
+            and hydrology_station_registry_number
+            is not None
+        ):
+            hydrology_anchor_segment = next(
+                (
+                    segment
+                    for route in (
+                        route_environment_context_input.get(
+                            "routes"
+                        )
+                        or []
+                    )
+                    if isinstance(
+                        route,
+                        dict,
+                    )
+                    for segment in (
+                        route.get(
+                            "segments"
+                        )
+                        or []
+                    )
+                    if isinstance(
+                        segment,
+                        dict,
+                    )
+                    and segment.get(
+                        "midpoint_timestamp"
+                    )
+                    is not None
+                ),
+                None,
+            )
+
+            if hydrology_anchor_segment is not None:
+                try:
+                    hydrology_anchor_datetime = (
+                        datetime.fromisoformat(
+                            str(
+                                hydrology_anchor_segment.get(
+                                    "midpoint_timestamp"
+                                )
+                            )
+                        )
+                    )
+                except ValueError:
+                    hydrology_anchor_datetime = None
+
+                if hydrology_anchor_datetime is not None:
+                    hydrology_start = (
+                        hydrology_anchor_datetime
+                        - timedelta(
+                            hours=12
+                        )
+                    )
+                    hydrology_end = (
+                        hydrology_anchor_datetime
+                        + timedelta(
+                            hours=12
+                        )
+                    )
+
+                    ovf_client = OVFVRAClient()
+
+                    try:
+                        ovf_station = (
+                            await ovf_client.get_surface_station(
+                                hydrology_station_registry_number
+                            )
+                        )
+
+                        ovf_series = []
+
+                        for metric_code in (
+                            METRIC_WATER_LEVEL,
+                            METRIC_DISCHARGE,
+                            METRIC_WATER_TEMPERATURE,
+                        ):
+                            ovf_series.append(
+                                await ovf_client.get_short_series(
+                                    station_registry_number=(
+                                        hydrology_station_registry_number
+                                    ),
+                                    metric_code=(
+                                        metric_code
+                                    ),
+                                    data_type_code=(
+                                        DATA_TYPE_OPERATIONAL
+                                    ),
+                                    start=(
+                                        hydrology_start
+                                    ),
+                                    end=(
+                                        hydrology_end
+                                    ),
+                                )
+                            )
+
+                    except OVFVRAAPIError as exc:
+                        raise HTTPException(
+                            status_code=502,
+                            detail=str(
+                                exc
+                            ),
+                        ) from exc
+
+                    hydrology_source = (
+                        normalize_ovf_hydrology_measurements(
+                            station=(
+                                ovf_station
+                            ),
+                            series_payloads=(
+                                ovf_series
+                            ),
+                        )
+                    )
+
+                    route_hydrology_context = (
+                        build_route_hydrology_context(
+                            route_environment_context_input,
+                            hydrology_source,
+                        )
+                    )
+
+                    route_hydrology_context_summary = (
+                        build_route_hydrology_context_summary(
+                            route_hydrology_context
+                        )
+                    )
+
+        weather_samples = []
+        weather_source = None
+
+        weather_anchor_segment = next(
+            (
+                segment
+                for route in (
+                    route_environment_context_input.get(
+                        "routes"
+                    )
+                    or []
+                )
+                if isinstance(
+                    route,
+                    dict,
+                )
+                for segment in (
+                    route.get(
+                        "segments"
+                    )
+                    or []
+                )
+                if isinstance(
+                    segment,
+                    dict,
+                )
+                and segment.get(
+                    "midpoint_timestamp"
+                )
+                is not None
+                and isinstance(
+                    segment.get(
+                        "start_position"
+                    ),
+                    dict,
+                )
+            ),
+            None,
+        )
+
+        if (
+            wind_speed_mps is not None
+            and wind_direction_from_deg is not None
+            and weather_anchor_segment
+            is not None
+        ):
+            anchor_position = (
+                weather_anchor_segment.get(
+                    "start_position"
+                )
+                or {}
+            )
+
+            weather_samples.append(
+                {
+                    "sample_id": (
+                        "INSPECT_QUERY_WEATHER_0"
+                    ),
+                    "sample_timestamp": (
+                        weather_anchor_segment.get(
+                            "midpoint_timestamp"
+                        )
+                    ),
+                    "latitude_deg": (
+                        anchor_position.get(
+                            "latitude_deg"
+                        )
+                    ),
+                    "longitude_deg": (
+                        anchor_position.get(
+                            "longitude_deg"
+                        )
+                    ),
+                    "wind_speed_mps": (
+                        wind_speed_mps
+                    ),
+                    "wind_direction_from_deg": (
+                        wind_direction_from_deg
+                    ),
+                    "source_provider": (
+                        "INSPECT_QUERY"
+                    ),
+                    "source_product": (
+                        "CONSTANT_WIND_TEST"
+                    ),
+                    "source_type": (
+                        "SYNTHETIC_TEST_WEATHER"
+                    ),
+                    "spatial_support": (
+                        "ROUTE_ANCHOR_POINT"
+                    ),
+                    "temporal_resolution_seconds": None,
+                    "source_reference": None,
+                }
+            )
+
+            weather_source = {
+                "provider": (
+                    "INSPECT_QUERY"
+                ),
+                "product": (
+                    "CONSTANT_WIND_TEST"
+                ),
+                "source_type": (
+                    "SYNTHETIC_TEST_WEATHER"
+                ),
+                "sample_count": 1,
+            }
+
+        elif (
+            weather_provider
+            == "OPEN_METEO_HISTORICAL"
+            and weather_anchor_segment
+            is not None
+        ):
+            anchor_position = (
+                weather_anchor_segment.get(
+                    "start_position"
+                )
+                or {}
+            )
+
+            anchor_latitude = (
+                anchor_position.get(
+                    "latitude_deg"
+                )
+            )
+            anchor_longitude = (
+                anchor_position.get(
+                    "longitude_deg"
+                )
+            )
+            anchor_timestamp = (
+                weather_anchor_segment.get(
+                    "midpoint_timestamp"
+                )
+            )
+
+            try:
+                anchor_datetime = (
+                    datetime.fromisoformat(
+                        str(
+                            anchor_timestamp
+                        )
+                    )
+                )
+            except ValueError:
+                anchor_datetime = None
+
+            if (
+                anchor_latitude is not None
+                and anchor_longitude is not None
+                and anchor_datetime is not None
+            ):
+                try:
+                    open_meteo_payload = (
+                        await OpenMeteoHistoricalWeatherClient().get_hourly_weather(
+                            latitude=float(
+                                anchor_latitude
+                            ),
+                            longitude=float(
+                                anchor_longitude
+                            ),
+                            start_date=(
+                                anchor_datetime.date()
+                            ),
+                            end_date=(
+                                anchor_datetime.date()
+                            ),
+                        )
+                    )
+                except OpenMeteoAPIError as exc:
+                    raise HTTPException(
+                        status_code=502,
+                        detail=str(
+                            exc
+                        ),
+                    ) from exc
+
+                weather_source = (
+                    normalize_open_meteo_historical_weather(
+                        open_meteo_payload
+                    )
+                )
+
+                weather_samples = list(
+                    weather_source.get(
+                        "samples"
+                    )
+                    or []
+                )
+
+        route_weather_sample_matching = (
+            build_route_weather_sample_matching(
+                route_environment_context_input,
+                weather_samples,
+            )
+        )
+
+        route_weather_sample_matching_summary = (
+            build_route_weather_sample_matching_summary(
+                route_weather_sample_matching
+            )
+        )
+
+        route_wind_context = (
+            build_route_wind_context(
+                route_environment_context_input,
+                weather_sample_matching=(
+                    route_weather_sample_matching
+                ),
+            )
+        )
+
+        route_wind_context_summary = (
+            build_route_wind_context_summary(
+                route_wind_context
+            )
+        )
+
+        route_environment_evidence_record = (
+            build_route_environment_evidence_record(
+                session_external_id=(
+                    str(
+                        external_id
+                    )
+                    if external_id
+                    is not None
+                    else None
+                ),
+                route_environment_context_input=(
+                    route_environment_context_input
+                ),
+                route_external_workload_evidence=(
+                    route_external_workload_evidence
+                ),
+                route_weather_sample_matching=(
+                    route_weather_sample_matching
+                ),
+                route_wind_context=(
+                    route_wind_context
+                ),
+                weather_source=(
+                    weather_source
+                ),
+                route_hydrology_context=(
+                    route_hydrology_context
+                ),
+                hydrology_source=(
+                    hydrology_source
+                ),
+            )
+        )
+
+        route_environment_evidence_record_summary = (
+            build_route_environment_evidence_record_summary(
+                route_environment_evidence_record
+            )
+        )
+
         motion_evidence_windows = (
             build_route_motion_evidence_windows(
                 motion_anomaly_evidence
@@ -1548,6 +2133,52 @@ async def inspect_training_session_routes(
                 ),
                 "route_workload_input": (
                     route_workload_input_summary
+                ),
+                "route_external_workload_evidence": (
+                    route_external_workload_evidence_summary
+                ),
+                "route_environment_context_input": (
+                    route_environment_context_input_summary
+                ),
+                "hydrology_source": (
+                    {
+                        key: value
+                        for key, value
+                        in (
+                            hydrology_source
+                            or {}
+                        ).items()
+                        if key != "measurements"
+                    }
+                    if hydrology_source
+                    is not None
+                    else None
+                ),
+                "route_hydrology_context": (
+                    route_hydrology_context_summary
+                ),
+                "weather_source": (
+                    {
+                        key: value
+                        for key, value
+                        in (
+                            weather_source
+                            or {}
+                        ).items()
+                        if key != "samples"
+                    }
+                    if weather_source
+                    is not None
+                    else None
+                ),
+                "route_weather_sample_matching": (
+                    route_weather_sample_matching_summary
+                ),
+                "route_wind_context": (
+                    route_wind_context_summary
+                ),
+                "route_environment_evidence_record": (
+                    route_environment_evidence_record_summary
                 ),
                 "motion_evidence_windows": (
                     motion_evidence_windows_summary

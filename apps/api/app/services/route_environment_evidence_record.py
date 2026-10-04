@@ -536,12 +536,40 @@ def build_route_environment_evidence_record(
                         order_index
                     ),
                     "source_locator": {
-                        "source_segment_index": (
+                        "view_segment_index": (
                             _integer(
                                 segment.get(
                                     "segment_index"
                                 )
                             )
+                        ),
+                        "segment_index_scope": (
+                            segment.get(
+                                "segment_index_scope"
+                            )
+                        ),
+                        "source_segment_index": (
+                            _integer(
+                                segment.get(
+                                    "source_segment_index"
+                                )
+                            )
+                        ),
+                        "source_segment_index_scope": (
+                            segment.get(
+                                "source_segment_index_scope"
+                            )
+                        ),
+                        "source_segment_index_status": (
+                            segment.get(
+                                "source_segment_index_status"
+                            )
+                        ),
+                        "source_waypoint_contiguous": (
+                            segment.get(
+                                "source_waypoint_contiguous"
+                            )
+                            is True
                         ),
                         "start_waypoint_index": (
                             start_waypoint_index
@@ -975,6 +1003,110 @@ def build_route_environment_evidence_record_summary(
                         )
                         or []
                     )
+                ),
+                "source_segment_index_available_count": (
+                    sum(
+                        1
+                        for segment
+                        in (
+                            route.get(
+                                "segments"
+                            )
+                            or []
+                        )
+                        if isinstance(
+                            segment,
+                            dict,
+                        )
+                        and isinstance(
+                            segment.get(
+                                "source_locator"
+                            ),
+                            dict,
+                        )
+                        and segment[
+                            "source_locator"
+                        ].get(
+                            "source_segment_index"
+                        )
+                        is not None
+                    )
+                ),
+                "source_waypoint_contiguous_count": (
+                    sum(
+                        1
+                        for segment
+                        in (
+                            route.get(
+                                "segments"
+                            )
+                            or []
+                        )
+                        if isinstance(
+                            segment,
+                            dict,
+                        )
+                        and isinstance(
+                            segment.get(
+                                "source_locator"
+                            ),
+                            dict,
+                        )
+                        and segment[
+                            "source_locator"
+                        ].get(
+                            "source_waypoint_contiguous"
+                        )
+                        is True
+                    )
+                ),
+                "first_segment_source_locator": (
+                    deepcopy(
+                        (
+                            route.get(
+                                "segments"
+                            )
+                            or []
+                        )[0].get(
+                            "source_locator"
+                        )
+                    )
+                    if (
+                        route.get(
+                            "segments"
+                        )
+                        and isinstance(
+                            route.get(
+                                "segments"
+                            )[0],
+                            dict,
+                        )
+                    )
+                    else None
+                ),
+                "last_segment_source_locator": (
+                    deepcopy(
+                        (
+                            route.get(
+                                "segments"
+                            )
+                            or []
+                        )[-1].get(
+                            "source_locator"
+                        )
+                    )
+                    if (
+                        route.get(
+                            "segments"
+                        )
+                        and isinstance(
+                            route.get(
+                                "segments"
+                            )[-1],
+                            dict,
+                        )
+                    )
+                    else None
                 ),
             }
             for route in (

@@ -465,6 +465,34 @@ def build_route_environment_context_input(
                                 )
                             )
                         ),
+                        "segment_index_scope": (
+                            observation.get(
+                                "segment_index_scope"
+                            )
+                        ),
+                        "source_segment_index": (
+                            _integer(
+                                observation.get(
+                                    "source_segment_index"
+                                )
+                            )
+                        ),
+                        "source_segment_index_scope": (
+                            observation.get(
+                                "source_segment_index_scope"
+                            )
+                        ),
+                        "source_segment_index_status": (
+                            observation.get(
+                                "source_segment_index_status"
+                            )
+                        ),
+                        "source_waypoint_contiguous": (
+                            observation.get(
+                                "source_waypoint_contiguous"
+                            )
+                            is True
+                        ),
                         "start_waypoint_index": (
                             start_waypoint_index
                         ),

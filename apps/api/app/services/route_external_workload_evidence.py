@@ -278,6 +278,34 @@ def _build_observations(
                         )
                     )
                 ),
+                "segment_index_scope": (
+                    segment.get(
+                        "segment_index_scope"
+                    )
+                ),
+                "source_segment_index": (
+                    _integer(
+                        segment.get(
+                            "source_segment_index"
+                        )
+                    )
+                ),
+                "source_segment_index_scope": (
+                    segment.get(
+                        "source_segment_index_scope"
+                    )
+                ),
+                "source_segment_index_status": (
+                    segment.get(
+                        "source_segment_index_status"
+                    )
+                ),
+                "source_waypoint_contiguous": (
+                    segment.get(
+                        "source_waypoint_contiguous"
+                    )
+                    is True
+                ),
                 "start_waypoint_index": (
                     _integer(
                         segment.get(
@@ -344,6 +372,16 @@ def _build_observations(
                     _integer(
                         previous_segment.get(
                             "segment_index"
+                        )
+                    )
+                    if previous_segment
+                    is not None
+                    else None
+                ),
+                "previous_source_segment_index": (
+                    _integer(
+                        previous_segment.get(
+                            "source_segment_index"
                         )
                     )
                     if previous_segment

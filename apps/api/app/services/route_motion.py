@@ -45,6 +45,42 @@ def _elapsed_ms(
     return None
 
 
+def _waypoint_index(
+    point: dict[str, Any],
+) -> int | None:
+    value = point.get(
+        "waypoint_index"
+    )
+
+    if isinstance(
+        value,
+        bool,
+    ):
+        return None
+
+    if isinstance(
+        value,
+        int,
+    ):
+        return value
+
+    if (
+        isinstance(
+            value,
+            float,
+        )
+        and math.isfinite(
+            value
+        )
+        and value.is_integer()
+    ):
+        return int(
+            value
+        )
+
+    return None
+
+
 def _coordinate(
     point: dict[str, Any],
 ) -> tuple[float, float] | None:
@@ -177,6 +213,54 @@ def build_route_motion_evidence(
             start_point = valid_points[index]
             end_point = valid_points[index + 1]
 
+            start_waypoint_index = (
+                _waypoint_index(
+                    start_point
+                )
+            )
+            end_waypoint_index = (
+                _waypoint_index(
+                    end_point
+                )
+            )
+
+            source_waypoint_contiguous = (
+                start_waypoint_index
+                is not None
+                and end_waypoint_index
+                is not None
+                and end_waypoint_index
+                == start_waypoint_index
+                + 1
+            )
+
+            source_segment_index = (
+                start_waypoint_index
+                if source_waypoint_contiguous
+                else None
+            )
+
+            if source_waypoint_contiguous:
+                source_segment_index_status = (
+                    "DIRECT_FROM_CONSECUTIVE_"
+                    "SOURCE_WAYPOINTS"
+                )
+            elif (
+                start_waypoint_index
+                is None
+                or end_waypoint_index
+                is None
+            ):
+                source_segment_index_status = (
+                    "UNAVAILABLE_SOURCE_"
+                    "WAYPOINT_INDEX"
+                )
+            else:
+                source_segment_index_status = (
+                    "UNAVAILABLE_NON_CONSECUTIVE_"
+                    "SOURCE_WAYPOINTS"
+                )
+
             start_ms = _elapsed_ms(
                 start_point
             )
@@ -264,15 +348,26 @@ def build_route_motion_evidence(
             segments.append(
                 {
                     "segment_index": index,
+                    "segment_index_scope": (
+                        "VIEW_LOCAL"
+                    ),
+                    "source_segment_index": (
+                        source_segment_index
+                    ),
+                    "source_segment_index_scope": (
+                        "NORMALIZED_ROUTE_SOURCE"
+                    ),
+                    "source_segment_index_status": (
+                        source_segment_index_status
+                    ),
+                    "source_waypoint_contiguous": (
+                        source_waypoint_contiguous
+                    ),
                     "start_waypoint_index": (
-                        start_point.get(
-                            "waypoint_index"
-                        )
+                        start_waypoint_index
                     ),
                     "end_waypoint_index": (
-                        end_point.get(
-                            "waypoint_index"
-                        )
+                        end_waypoint_index
                     ),
                     "start_exercise_elapsed_ms": (
                         start_ms
@@ -307,6 +402,13 @@ def build_route_motion_evidence(
                 ),
                 "segment_count": len(
                     segments
+                ),
+                "segment_index_scope": (
+                    "VIEW_LOCAL"
+                ),
+                "source_segment_index_semantics": (
+                    "START_WAYPOINT_INDEX_WHEN_"
+                    "SOURCE_WAYPOINTS_CONSECUTIVE"
                 ),
                 "motion_segment_count": sum(
                     1

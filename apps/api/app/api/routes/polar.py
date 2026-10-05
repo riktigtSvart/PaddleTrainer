@@ -130,6 +130,18 @@ from app.services.route_waterbody_trajectory_resolution import (
     build_route_waterbody_trajectory_resolution,
     build_route_waterbody_trajectory_resolution_summary,
 )
+from app.integrations.eea_msfd.client import (
+    EEAMSFDAPIError,
+)
+from app.services.eea_msfd_marine_surface_source import (
+    DEFAULT_BOUNDARY_NEAR_M as DEFAULT_MARINE_SURFACE_BOUNDARY_NEAR_M,
+    DEFAULT_QUERY_PADDING_M as DEFAULT_MARINE_SURFACE_QUERY_PADDING_M,
+    build_eea_msfd_route_marine_surface_evidence,
+)
+from app.services.route_marine_region_context import (
+    build_route_marine_region_context,
+    build_route_marine_region_context_summary,
+)
 
 from app.services.route_weather_sample_matching import (
     build_route_weather_sample_matching,
@@ -1230,6 +1242,13 @@ async def _build_training_session_route_inspection(
     water_surface_query_padding_m: float = (
         DEFAULT_WATER_SURFACE_QUERY_PADDING_M
     ),
+    marine_surface_provider: str | None = None,
+    marine_surface_boundary_near_m: float = (
+        DEFAULT_MARINE_SURFACE_BOUNDARY_NEAR_M
+    ),
+    marine_surface_query_padding_m: float = (
+        DEFAULT_MARINE_SURFACE_QUERY_PADDING_M
+    ),
 ):
     artifact_policy_profile = (
         artifact_policy_profile.upper()
@@ -1256,6 +1275,12 @@ async def _build_training_session_route_inspection(
     water_surface_provider = (
         water_surface_provider.upper()
         if water_surface_provider
+        else None
+    )
+
+    marine_surface_provider = (
+        marine_surface_provider.upper()
+        if marine_surface_provider
         else None
     )
 
@@ -1321,6 +1346,46 @@ async def _build_training_session_route_inspection(
             status_code=422,
             detail=(
                 "water_surface_query_padding_m must be "
+                "a finite number >= 0"
+            ),
+        )
+
+    if marine_surface_provider not in (
+        None,
+        "EEA_MSFD",
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "marine_surface_provider must be "
+                "EEA_MSFD or omitted"
+            ),
+        )
+
+    if (
+        not math.isfinite(
+            marine_surface_boundary_near_m
+        )
+        or marine_surface_boundary_near_m < 0.0
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "marine_surface_boundary_near_m must be "
+                "a finite number >= 0"
+            ),
+        )
+
+    if (
+        not math.isfinite(
+            marine_surface_query_padding_m
+        )
+        or marine_surface_query_padding_m < 0.0
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "marine_surface_query_padding_m must be "
                 "a finite number >= 0"
             ),
         )
@@ -1762,6 +1827,46 @@ async def _build_training_session_route_inspection(
             route_water_surface_evidence_summary = (
                 build_route_water_surface_evidence_summary(
                     route_water_surface_evidence
+                )
+            )
+
+        route_marine_surface_evidence = None
+        route_marine_surface_evidence_summary = None
+        route_marine_region_context = None
+        route_marine_region_context_summary = None
+
+        if marine_surface_provider == "EEA_MSFD":
+            try:
+                route_marine_surface_evidence = (
+                    await build_eea_msfd_route_marine_surface_evidence(
+                        route_environment_context_input,
+                        boundary_near_m=(
+                            marine_surface_boundary_near_m
+                        ),
+                        query_padding_m=(
+                            marine_surface_query_padding_m
+                        ),
+                    )
+                )
+            except EEAMSFDAPIError as exc:
+                raise HTTPException(
+                    status_code=502,
+                    detail=str(exc),
+                ) from exc
+
+            route_marine_surface_evidence_summary = (
+                build_route_water_surface_evidence_summary(
+                    route_marine_surface_evidence
+                )
+            )
+            route_marine_region_context = (
+                build_route_marine_region_context(
+                    route_marine_surface_evidence
+                )
+            )
+            route_marine_region_context_summary = (
+                build_route_marine_region_context_summary(
+                    route_marine_region_context
                 )
             )
 
@@ -2405,6 +2510,12 @@ async def _build_training_session_route_inspection(
                 "route_water_surface_evidence": (
                     route_water_surface_evidence_summary
                 ),
+                "route_marine_surface_evidence": (
+                    route_marine_surface_evidence_summary
+                ),
+                "route_marine_region_context": (
+                    route_marine_region_context_summary
+                ),
                 "waterbody_candidate_evidence": (
                     waterbody_candidate_evidence_summary
                 ),
@@ -2526,6 +2637,17 @@ async def inspect_training_session_routes(
         default=DEFAULT_WATER_SURFACE_QUERY_PADDING_M,
         ge=0.0,
     ),
+    marine_surface_provider: str | None = Query(
+        default=None,
+    ),
+    marine_surface_boundary_near_m: float = Query(
+        default=DEFAULT_MARINE_SURFACE_BOUNDARY_NEAR_M,
+        ge=0.0,
+    ),
+    marine_surface_query_padding_m: float = Query(
+        default=DEFAULT_MARINE_SURFACE_QUERY_PADDING_M,
+        ge=0.0,
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     return await _build_training_session_route_inspection(
@@ -2564,6 +2686,15 @@ async def inspect_training_session_routes(
         ),
         water_surface_query_padding_m=(
             water_surface_query_padding_m
+        ),
+        marine_surface_provider=(
+            marine_surface_provider
+        ),
+        marine_surface_boundary_near_m=(
+            marine_surface_boundary_near_m
+        ),
+        marine_surface_query_padding_m=(
+            marine_surface_query_padding_m
         ),
     )
 

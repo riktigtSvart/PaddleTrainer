@@ -1,4 +1,5 @@
 from datetime import date,datetime, timedelta, timezone
+import math
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -100,6 +101,34 @@ from app.services.route_external_workload_evidence import (
 from app.services.route_environment_context_input import (
     build_route_environment_context_input,
     build_route_environment_context_input_summary,
+)
+
+from app.integrations.eea_wise.client import (
+    EEAWiseAPIError,
+)
+from app.services.eea_wise_waterbody import (
+    DEFAULT_SEARCH_RADIUS_M as DEFAULT_WATERBODY_SEARCH_RADIUS_M,
+    build_eea_wise_waterbody_candidate_evidence,
+)
+from app.integrations.eu_hydro.client import (
+    EUHydroAPIError,
+)
+from app.services.eu_hydro_water_surface_source import (
+    DEFAULT_BOUNDARY_NEAR_M as DEFAULT_WATER_SURFACE_BOUNDARY_NEAR_M,
+    DEFAULT_QUERY_PADDING_M as DEFAULT_WATER_SURFACE_QUERY_PADDING_M,
+    build_eu_hydro_route_water_surface_evidence,
+)
+from app.services.route_water_surface_evidence import (
+    build_route_water_surface_evidence_summary,
+)
+from app.services.route_waterbody_context import (
+    build_route_waterbody_candidate_evidence_summary,
+    build_route_waterbody_context,
+    build_route_waterbody_context_summary,
+)
+from app.services.route_waterbody_trajectory_resolution import (
+    build_route_waterbody_trajectory_resolution,
+    build_route_waterbody_trajectory_resolution_summary,
 )
 
 from app.services.route_weather_sample_matching import (
@@ -1190,6 +1219,17 @@ async def _build_training_session_route_inspection(
     hydrology_station_registry_number: int | None,
     persist_environment_evidence: bool,
     db: AsyncSession,
+    waterbody_provider: str | None = None,
+    waterbody_search_radius_m: float = (
+        DEFAULT_WATERBODY_SEARCH_RADIUS_M
+    ),
+    water_surface_provider: str | None = None,
+    water_surface_boundary_near_m: float = (
+        DEFAULT_WATER_SURFACE_BOUNDARY_NEAR_M
+    ),
+    water_surface_query_padding_m: float = (
+        DEFAULT_WATER_SURFACE_QUERY_PADDING_M
+    ),
 ):
     artifact_policy_profile = (
         artifact_policy_profile.upper()
@@ -1206,6 +1246,84 @@ async def _build_training_session_route_inspection(
         if hydrology_provider
         else None
     )
+
+    waterbody_provider = (
+        waterbody_provider.upper()
+        if waterbody_provider
+        else None
+    )
+
+    water_surface_provider = (
+        water_surface_provider.upper()
+        if water_surface_provider
+        else None
+    )
+
+    if waterbody_provider not in (
+        None,
+        "EEA_WISE_WFD",
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "waterbody_provider must be "
+                "EEA_WISE_WFD or omitted"
+            ),
+        )
+
+    if (
+        not math.isfinite(
+            waterbody_search_radius_m
+        )
+        or waterbody_search_radius_m <= 0.0
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "waterbody_search_radius_m must be "
+                "a positive finite number"
+            ),
+        )
+
+    if water_surface_provider not in (
+        None,
+        "EEA_EU_HYDRO",
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "water_surface_provider must be "
+                "EEA_EU_HYDRO or omitted"
+            ),
+        )
+
+    if (
+        not math.isfinite(
+            water_surface_boundary_near_m
+        )
+        or water_surface_boundary_near_m < 0.0
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "water_surface_boundary_near_m must be "
+                "a finite number >= 0"
+            ),
+        )
+
+    if (
+        not math.isfinite(
+            water_surface_query_padding_m
+        )
+        or water_surface_query_padding_m < 0.0
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "water_surface_query_padding_m must be "
+                "a finite number >= 0"
+            ),
+        )
 
     if hydrology_provider not in (
         None,
@@ -1615,6 +1733,103 @@ async def _build_training_session_route_inspection(
                 route_environment_context_input
             )
         )
+
+        route_water_surface_evidence = None
+        route_water_surface_evidence_summary = None
+
+        if (
+            water_surface_provider
+            == "EEA_EU_HYDRO"
+        ):
+            try:
+                route_water_surface_evidence = (
+                    await build_eu_hydro_route_water_surface_evidence(
+                        route_environment_context_input,
+                        boundary_near_m=(
+                            water_surface_boundary_near_m
+                        ),
+                        query_padding_m=(
+                            water_surface_query_padding_m
+                        ),
+                    )
+                )
+            except EUHydroAPIError as exc:
+                raise HTTPException(
+                    status_code=502,
+                    detail=str(exc),
+                ) from exc
+
+            route_water_surface_evidence_summary = (
+                build_route_water_surface_evidence_summary(
+                    route_water_surface_evidence
+                )
+            )
+
+        waterbody_candidate_evidence = None
+        waterbody_candidate_evidence_summary = None
+        route_waterbody_context = None
+        route_waterbody_context_summary = None
+
+        if (
+            waterbody_provider
+            == "EEA_WISE_WFD"
+        ):
+            try:
+                waterbody_candidate_evidence = (
+                    await build_eea_wise_waterbody_candidate_evidence(
+                        route_environment_context_input,
+                        search_radius_m=(
+                            waterbody_search_radius_m
+                        ),
+                    )
+                )
+            except EEAWiseAPIError as exc:
+                raise HTTPException(
+                    status_code=502,
+                    detail=str(
+                        exc
+                    ),
+                ) from exc
+
+            waterbody_candidate_evidence_summary = (
+                build_route_waterbody_candidate_evidence_summary(
+                    waterbody_candidate_evidence
+                )
+            )
+
+            route_waterbody_context = (
+                build_route_waterbody_context(
+                    route_environment_context_input,
+                    waterbody_candidate_evidence=(
+                        waterbody_candidate_evidence
+                    ),
+                )
+            )
+
+            route_waterbody_context_summary = (
+                build_route_waterbody_context_summary(
+                    route_waterbody_context
+                )
+            )
+
+        route_waterbody_trajectory_resolution = None
+        route_waterbody_trajectory_resolution_summary = None
+
+        if (
+            route_waterbody_context is not None
+            and route_water_surface_evidence is not None
+        ):
+            route_waterbody_trajectory_resolution = (
+                build_route_waterbody_trajectory_resolution(
+                    route_waterbody_context,
+                    route_water_surface_evidence,
+                )
+            )
+            route_waterbody_trajectory_resolution_summary = (
+                build_route_waterbody_trajectory_resolution_summary(
+                    route_waterbody_trajectory_resolution
+                )
+            )
 
         hydrology_source = None
         route_hydrology_context = None
@@ -2187,6 +2402,18 @@ async def _build_training_session_route_inspection(
                 "route_environment_context_input": (
                     route_environment_context_input_summary
                 ),
+                "route_water_surface_evidence": (
+                    route_water_surface_evidence_summary
+                ),
+                "waterbody_candidate_evidence": (
+                    waterbody_candidate_evidence_summary
+                ),
+                "route_waterbody_context": (
+                    route_waterbody_context_summary
+                ),
+                "route_waterbody_trajectory_resolution": (
+                    route_waterbody_trajectory_resolution_summary
+                ),
                 "hydrology_source": (
                     {
                         key: value
@@ -2281,6 +2508,24 @@ async def inspect_training_session_routes(
         default=None,
         ge=1,
     ),
+    waterbody_provider: str | None = Query(
+        default=None,
+    ),
+    waterbody_search_radius_m: float = Query(
+        default=DEFAULT_WATERBODY_SEARCH_RADIUS_M,
+        gt=0.0,
+    ),
+    water_surface_provider: str | None = Query(
+        default=None,
+    ),
+    water_surface_boundary_near_m: float = Query(
+        default=DEFAULT_WATER_SURFACE_BOUNDARY_NEAR_M,
+        ge=0.0,
+    ),
+    water_surface_query_padding_m: float = Query(
+        default=DEFAULT_WATER_SURFACE_QUERY_PADDING_M,
+        ge=0.0,
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     return await _build_training_session_route_inspection(
@@ -2305,6 +2550,21 @@ async def inspect_training_session_routes(
         ),
         persist_environment_evidence=False,
         db=db,
+        waterbody_provider=(
+            waterbody_provider
+        ),
+        waterbody_search_radius_m=(
+            waterbody_search_radius_m
+        ),
+        water_surface_provider=(
+            water_surface_provider
+        ),
+        water_surface_boundary_near_m=(
+            water_surface_boundary_near_m
+        ),
+        water_surface_query_padding_m=(
+            water_surface_query_padding_m
+        ),
     )
 
 

@@ -186,6 +186,13 @@ from app.services.route_hydrology_source_resolution import (
     build_route_hydrology_source_resolution,
     build_route_hydrology_source_resolution_summary,
 )
+from app.services.route_hydrology_source_resolution_snapshot import (
+    bind_route_hydrology_source_resolution_snapshot_to_evidence_record,
+    build_route_hydrology_source_resolution_snapshot,
+)
+from app.services.hydrology_source_resolution_persistence import (
+    persist_route_hydrology_source_resolution_snapshot,
+)
 
 from app.services.route_wind_context import (
     build_route_wind_context,
@@ -1979,6 +1986,7 @@ async def _build_training_session_route_inspection(
         hydrology_source = None
         route_hydrology_source_resolution = None
         route_hydrology_source_resolution_summary = None
+        route_hydrology_source_resolution_snapshot = None
         route_hydrology_context = None
         route_hydrology_context_summary = None
 
@@ -2110,6 +2118,11 @@ async def _build_training_session_route_inspection(
                     )
                     route_hydrology_source_resolution_summary = (
                         build_route_hydrology_source_resolution_summary(
+                            route_hydrology_source_resolution
+                        )
+                    )
+                    route_hydrology_source_resolution_snapshot = (
+                        build_route_hydrology_source_resolution_snapshot(
                             route_hydrology_source_resolution
                         )
                     )
@@ -2389,6 +2402,14 @@ async def _build_training_session_route_inspection(
                 )
             )
 
+        if route_hydrology_source_resolution_snapshot is not None:
+            route_environment_evidence_record = (
+                bind_route_hydrology_source_resolution_snapshot_to_evidence_record(
+                    route_environment_evidence_record,
+                    route_hydrology_source_resolution_snapshot,
+                )
+            )
+
         route_environment_evidence_record_summary = (
             build_route_environment_evidence_record_summary(
                 route_environment_evidence_record
@@ -2397,6 +2418,7 @@ async def _build_training_session_route_inspection(
 
         environment_evidence_persistence = None
         water_environment_identity_persistence = None
+        hydrology_source_resolution_persistence = None
 
         if persist_environment_evidence:
             if external_id is None:
@@ -2447,28 +2469,44 @@ async def _build_training_session_route_inspection(
                     )
                 )
 
-                if route_water_environment_identity_snapshot is not None:
-                    evidence_set_id = (
-                        environment_evidence_persistence.get(
-                            "evidence_set_id"
-                        )
-                        if isinstance(
-                            environment_evidence_persistence,
-                            dict,
-                        )
-                        else None
+                evidence_set_id = (
+                    environment_evidence_persistence.get(
+                        "evidence_set_id"
                     )
-                    if evidence_set_id is None:
-                        raise ValueError(
-                            "Environment evidence persistence did not return "
-                            "an evidence_set_id for water identity snapshot"
-                        )
+                    if isinstance(
+                        environment_evidence_persistence,
+                        dict,
+                    )
+                    else None
+                )
+
+                if (
+                    route_water_environment_identity_snapshot is not None
+                    or route_hydrology_source_resolution_snapshot is not None
+                ) and evidence_set_id is None:
+                    raise ValueError(
+                        "Environment evidence persistence did not return "
+                        "an evidence_set_id for derived identity snapshots"
+                    )
+
+                if route_water_environment_identity_snapshot is not None:
                     water_environment_identity_persistence = (
                         await persist_route_water_environment_identity_snapshot(
                             db,
                             evidence_set_id=evidence_set_id,
                             snapshot=(
                                 route_water_environment_identity_snapshot
+                            ),
+                        )
+                    )
+
+                if route_hydrology_source_resolution_snapshot is not None:
+                    hydrology_source_resolution_persistence = (
+                        await persist_route_hydrology_source_resolution_snapshot(
+                            db,
+                            evidence_set_id=evidence_set_id,
+                            snapshot=(
+                                route_hydrology_source_resolution_snapshot
                             ),
                         )
                     )
@@ -2625,6 +2663,12 @@ async def _build_training_session_route_inspection(
                 ),
                 "route_hydrology_source_resolution": (
                     route_hydrology_source_resolution_summary
+                ),
+                "route_hydrology_source_resolution_snapshot": (
+                    route_hydrology_source_resolution_snapshot
+                ),
+                "hydrology_source_resolution_persistence": (
+                    hydrology_source_resolution_persistence
                 ),
                 "hydrology_source": (
                     {

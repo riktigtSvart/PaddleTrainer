@@ -49,6 +49,7 @@ def _semantic_hash_payload(
     hydrology_measurements: list[dict[str, Any]],
     routes: list[dict[str, Any]],
     water_environment_identity_hash: str | None,
+    hydrology_source_resolution_hash: str | None,
 ) -> dict[str, Any]:
     normalized_routes = []
 
@@ -84,7 +85,7 @@ def _semantic_hash_payload(
             normalized_route
         )
 
-    return {
+    payload = {
         "hash_semantics_version": (
             EVIDENCE_HASH_SEMANTICS_VERSION
         ),
@@ -117,6 +118,16 @@ def _semantic_hash_payload(
         ),
         "routes": normalized_routes,
     }
+
+    # V15 extends the existing v2 semantic payload only when a hydrology-source
+    # resolution exists.  Omitting the key entirely when absent preserves the
+    # exact pre-V15 evidence hash for routes without hydrology resolution.
+    if hydrology_source_resolution_hash is not None:
+        payload["hydrology_source_resolution_hash"] = (
+            hydrology_source_resolution_hash
+        )
+
+    return payload
 
 
 def _parse_datetime(
@@ -264,6 +275,39 @@ def _water_environment_identity_hash(
     ):
         raise ValueError(
             "route_water_environment_identity_snapshot has invalid identity_hash"
+        )
+
+    return normalized
+
+
+def _hydrology_source_resolution_hash(
+    evidence_record: dict[str, Any],
+) -> str | None:
+    snapshot = evidence_record.get(
+        "route_hydrology_source_resolution_snapshot"
+    )
+
+    if not isinstance(snapshot, dict):
+        return None
+
+    resolution_hash = _string_or_none(
+        snapshot.get("resolution_hash")
+    )
+    if resolution_hash is None:
+        raise ValueError(
+            "route_hydrology_source_resolution_snapshot is missing resolution_hash"
+        )
+
+    normalized = resolution_hash.lower()
+    if (
+        len(normalized) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in normalized
+        )
+    ):
+        raise ValueError(
+            "route_hydrology_source_resolution_snapshot has invalid resolution_hash"
         )
 
     return normalized
@@ -1511,6 +1555,12 @@ def build_environment_persistence_plan(
         )
     )
 
+    hydrology_source_resolution_hash = (
+        _hydrology_source_resolution_hash(
+            evidence_record
+        )
+    )
+
     evidence_hash = _canonical_hash(
         _semantic_hash_payload(
             schema_version=schema_version,
@@ -1529,10 +1579,13 @@ def build_environment_persistence_plan(
             water_environment_identity_hash=(
                 water_environment_identity_hash
             ),
+            hydrology_source_resolution_hash=(
+                hydrology_source_resolution_hash
+            ),
         )
     )
 
-    return {
+    plan = {
         "evidence_hash": evidence_hash,
         "hash_semantics_version": (
             EVIDENCE_HASH_SEMANTICS_VERSION
@@ -1561,6 +1614,13 @@ def build_environment_persistence_plan(
         ),
         "routes": routes,
     }
+
+    if hydrology_source_resolution_hash is not None:
+        plan["hydrology_source_resolution_hash"] = (
+            hydrology_source_resolution_hash
+        )
+
+    return plan
 
 
 async def _count_rows_for_evidence_set(

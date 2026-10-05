@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 import httpx
@@ -34,6 +35,64 @@ class EEAMSFDAPIError(RuntimeError):
 class EEAMSFDClient:
     """Small ArcGIS client for EEA MSFD marine region/subregion polygons."""
 
+    async def query_marine_region_object_ids(
+        self,
+        *,
+        xmin_lon: float,
+        ymin_lat: float,
+        xmax_lon: float,
+        ymax_lat: float,
+    ) -> tuple[str, ...]:
+        _validate_bounds(xmin_lon, ymin_lat, xmax_lon, ymax_lat)
+        payload = await self._request_json(
+            params={
+                "where": "1=1",
+                "geometry": f"{xmin_lon},{ymin_lat},{xmax_lon},{ymax_lat}",
+                "geometryType": "esriGeometryEnvelope",
+                "inSR": "4326",
+                "spatialRel": "esriSpatialRelIntersects",
+                "returnIdsOnly": "true",
+                "f": "json",
+            }
+        )
+        raw_ids = payload.get("objectIds")
+        if not isinstance(raw_ids, Sequence) or isinstance(raw_ids, (str, bytes)):
+            return ()
+        return tuple(
+            sorted(
+                {str(value) for value in raw_ids if value is not None},
+                key=_object_id_sort_key,
+            )
+        )
+
+    async def query_marine_region_features_by_object_ids(
+        self,
+        object_ids: Sequence[str | int],
+    ) -> dict[str, Any]:
+        normalized = tuple(dict.fromkeys(str(value) for value in object_ids))
+        if not normalized:
+            return {"features": []}
+
+        combined_features: list[Any] = []
+        for offset in range(0, len(normalized), 200):
+            batch = normalized[offset : offset + 200]
+            payload = await self._request_json(
+                params={
+                    "objectIds": ",".join(batch),
+                    "outSR": "4326",
+                    "outFields": OUT_FIELDS,
+                    "returnGeometry": "true",
+                    "returnZ": "false",
+                    "returnM": "false",
+                    "orderByFields": "OBJECTID",
+                    "f": "json",
+                }
+            )
+            features = payload.get("features")
+            if isinstance(features, list):
+                combined_features.extend(features)
+        return {"features": combined_features}
+
     async def query_marine_region_polygons(
         self,
         *,
@@ -42,6 +101,7 @@ class EEAMSFDClient:
         xmax_lon: float,
         ymax_lat: float,
     ) -> dict[str, Any]:
+        """Legacy direct bbox query retained for compatibility/fallback."""
         _validate_bounds(xmin_lon, ymin_lat, xmax_lon, ymax_lat)
 
         base_params = {
@@ -137,3 +197,10 @@ def _validate_bounds(
         raise ValueError("xmin_lon must be <= xmax_lon")
     if ymin_lat > ymax_lat:
         raise ValueError("ymin_lat must be <= ymax_lat")
+
+
+def _object_id_sort_key(value: str) -> tuple[int, int | str]:
+    try:
+        return (0, int(value))
+    except ValueError:
+        return (1, value)

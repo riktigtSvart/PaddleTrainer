@@ -79,3 +79,43 @@ def test_arcgis_error_is_raised(monkeypatch) -> None:
         pass
     else:
         raise AssertionError("EEAMSFDAPIError was not raised")
+
+
+def test_object_id_discovery_uses_return_ids_only(monkeypatch) -> None:
+    monkeypatch.setattr(module.httpx, "AsyncClient", _AsyncClient)
+    _AsyncClient.response = _Response({"objectIds": [9, 7, 7]})
+
+    result = asyncio.run(
+        EEAMSFDClient().query_marine_region_object_ids(
+            xmin_lon=15.19,
+            ymin_lat=44.24,
+            xmax_lon=15.22,
+            ymax_lat=44.28,
+        )
+    )
+
+    assert result == ("7", "9")
+    assert _AsyncClient.last_params["returnIdsOnly"] == "true"
+    assert _AsyncClient.last_params["geometryType"] == "esriGeometryEnvelope"
+    assert "returnGeometry" not in _AsyncClient.last_params
+
+
+def test_feature_download_queries_specific_object_ids(monkeypatch) -> None:
+    monkeypatch.setattr(module.httpx, "AsyncClient", _AsyncClient)
+    _AsyncClient.response = _Response(
+        {
+            "features": [
+                {"attributes": {"OBJECTID": 7}, "geometry": {"rings": []}},
+                {"attributes": {"OBJECTID": 9}, "geometry": {"rings": []}},
+            ]
+        }
+    )
+
+    result = asyncio.run(
+        EEAMSFDClient().query_marine_region_features_by_object_ids([7, 9])
+    )
+
+    assert len(result["features"]) == 2
+    assert _AsyncClient.last_params["objectIds"] == "7,9"
+    assert _AsyncClient.last_params["returnGeometry"] == "true"
+    assert "subregionName" in _AsyncClient.last_params["outFields"]

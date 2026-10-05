@@ -416,3 +416,85 @@ def test_long_gap_remains_ambiguous_when_competitor_distance_evidence_is_incompl
     assert route["ambiguous_segment_count"] == 5
     assert route["continuity_supported_segment_count"] == 0
     assert resolution["scope"]["treats_nearest_candidate_as_truth"] is False
+
+
+def test_direct_resolution_is_withheld_when_both_surface_endpoints_are_explicit_outside() -> None:
+    segments = [_segment(0, resolved="HRJKR00046_000000")]
+    surface = [
+        _surface_segment(
+            0,
+            start_containment="OUTSIDE",
+            end_containment="OUTSIDE",
+            relation="OUTSIDE",
+        )
+    ]
+
+    resolution = _resolve(segments, surface, min_anchor_segments=1)
+    route = resolution["routes"][0]
+    segment = route["segments"][0]
+
+    assert resolution["schema_version"] == "0.4"
+    assert route["source_direct_resolved_segment_count"] == 1
+    assert route["direct_resolution_withheld_by_surface_segment_count"] == 1
+    assert route["direct_resolved_segment_count"] == 0
+    assert route["unresolved_segment_count"] == 1
+    assert segment["direct_resolved_waterbody_identity"]["waterbody_id"] == "HRJKR00046_000000"
+    assert segment["resolved_waterbody_identity"] is None
+    assert segment["direct_surface_evidence_status"] == "EXPLICIT_OUTSIDE"
+    assert segment["direct_resolution_withheld_by_surface"] is True
+    assert "TRUSTED_DIRECT_RESOLUTION_WITHHELD" in segment["resolution_basis"]
+
+
+def test_mixed_surface_evidence_does_not_negate_direct_waterbody_resolution() -> None:
+    segments = [_segment(0, resolved="HUAOC752")]
+    surface = [_surface_segment(0)]
+    surface[0]["start_surface_evidence"] = {
+        "containment": "OUTSIDE",
+        "relation": "OUTSIDE",
+    }
+
+    resolution = _resolve(segments, surface, min_anchor_segments=1)
+    segment = resolution["routes"][0]["segments"][0]
+
+    assert segment["direct_surface_evidence_status"] == "INCONCLUSIVE"
+    assert segment["direct_resolution_withheld_by_surface"] is False
+    assert segment["resolution_status"] == STATUS_DIRECT_RESOLVED
+    assert segment["resolved_waterbody_identity"]["waterbody_id"] == "HUAOC752"
+
+
+def test_missing_surface_segment_does_not_negate_direct_waterbody_resolution() -> None:
+    segments = [_segment(0, resolved="HUAOC752")]
+    resolution = _resolve(segments, [], min_anchor_segments=1)
+    segment = resolution["routes"][0]["segments"][0]
+
+    assert segment["direct_surface_evidence_status"] == "UNAVAILABLE"
+    assert segment["direct_resolution_withheld_by_surface"] is False
+    assert segment["resolution_status"] == STATUS_DIRECT_RESOLVED
+
+
+def test_surface_withheld_direct_segment_cannot_act_as_continuity_anchor() -> None:
+    segments = [
+        _segment(0, resolved="HUAOC752"),
+        _segment(1, resolved="HUAOC752"),
+        _segment(2, candidates=("HUAOC752", "HUAOC845")),
+        _segment(3, resolved="HUAOC752"),
+        _segment(4, resolved="HUAOC752"),
+    ]
+    surface = [_surface_segment(i) for i in range(len(segments))]
+    surface[1] = _surface_segment(
+        1,
+        start_containment="OUTSIDE",
+        end_containment="OUTSIDE",
+        relation="OUTSIDE",
+    )
+
+    resolution = _resolve(segments, surface)
+    route = resolution["routes"][0]
+    run = route["resolution_runs"][0]
+
+    assert route["direct_resolution_withheld_by_surface_segment_count"] == 1
+    assert route["segments"][1]["resolution_status"] == STATUS_UNRESOLVED
+    assert run["left_anchor_identity"] is None
+    assert run["stable_anchor_requirement_met"] is False
+    assert run["resolution_status"] == STATUS_AMBIGUOUS
+    assert route["segments"][2]["resolution_status"] == STATUS_AMBIGUOUS

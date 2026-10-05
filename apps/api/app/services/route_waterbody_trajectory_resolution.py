@@ -3,13 +3,18 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping, Sequence
 
-SCHEMA_VERSION = "0.3"
+SCHEMA_VERSION = "0.4"
 
 STATUS_DIRECT_RESOLVED = "DIRECT_RESOLVED"
 STATUS_CONTINUITY_SUPPORTED = "CONTINUITY_SUPPORTED"
 STATUS_AMBIGUOUS = "AMBIGUOUS"
 STATUS_TRANSITION_CANDIDATE = "TRANSITION_CANDIDATE"
 STATUS_UNRESOLVED = "UNRESOLVED"
+
+SURFACE_SUPPORT_SUPPORTED = "SUPPORTED"
+SURFACE_SUPPORT_EXPLICIT_OUTSIDE = "EXPLICIT_OUTSIDE"
+SURFACE_SUPPORT_INCONCLUSIVE = "INCONCLUSIVE"
+SURFACE_SUPPORT_UNAVAILABLE = "UNAVAILABLE"
 
 DEFAULT_MAX_AMBIGUOUS_GAP_SEGMENTS = 30
 DEFAULT_MAX_AMBIGUOUS_GAP_MS = 30_000
@@ -359,6 +364,14 @@ def _endpoint_surface_continuous(endpoint: object) -> bool:
     )
 
 
+def _endpoint_surface_explicit_outside(endpoint: object) -> bool:
+    return (
+        isinstance(endpoint, Mapping)
+        and endpoint.get("containment") == "OUTSIDE"
+        and endpoint.get("relation") == "OUTSIDE"
+    )
+
+
 def _segment_surface_continuity(surface_segment: Mapping[str, object] | None) -> tuple[bool, bool]:
     if surface_segment is None:
         return False, False
@@ -381,6 +394,28 @@ def _segment_surface_continuity(surface_segment: Mapping[str, object] | None) ->
     return bool(continuous), boundary_near
 
 
+def _segment_surface_support_status(
+    surface_segment: Mapping[str, object] | None,
+) -> str:
+    """Classify structural surface evidence without inferring waterbody identity.
+
+    EXPLICIT_OUTSIDE is intentionally strict: both segment endpoints must carry
+    explicit OUTSIDE containment and OUTSIDE relation. Missing, mixed, or
+    boundary evidence is INCONCLUSIVE rather than negative evidence.
+    """
+    if surface_segment is None:
+        return SURFACE_SUPPORT_UNAVAILABLE
+    start = surface_segment.get("start_surface_evidence")
+    end = surface_segment.get("end_surface_evidence")
+    if not isinstance(start, Mapping) or not isinstance(end, Mapping):
+        return SURFACE_SUPPORT_INCONCLUSIVE
+    if _endpoint_surface_continuous(start) and _endpoint_surface_continuous(end):
+        return SURFACE_SUPPORT_SUPPORTED
+    if _endpoint_surface_explicit_outside(start) and _endpoint_surface_explicit_outside(end):
+        return SURFACE_SUPPORT_EXPLICIT_OUTSIDE
+    return SURFACE_SUPPORT_INCONCLUSIVE
+
+
 def _direct_identity(segment: Mapping[str, object]) -> dict[str, object] | None:
     if segment.get("waterbody_match_status") != "RESOLVED":
         return None
@@ -399,15 +434,14 @@ def _run_duration_ms(segments: Sequence[Mapping[str, object]], start: int, end: 
 
 
 def _anchor_span_left(
-    segments: Sequence[Mapping[str, object]],
+    trusted_direct_identities: Sequence[Mapping[str, object] | None],
     index: int,
     key: tuple[str | None, str | None, str],
 ) -> int:
     count = 0
     position = index
     while position >= 0:
-        identity = _direct_identity(segments[position])
-        if _waterbody_key(identity) != key:
+        if _waterbody_key(trusted_direct_identities[position]) != key:
             break
         count += 1
         position -= 1
@@ -415,15 +449,14 @@ def _anchor_span_left(
 
 
 def _anchor_span_right(
-    segments: Sequence[Mapping[str, object]],
+    trusted_direct_identities: Sequence[Mapping[str, object] | None],
     index: int,
     key: tuple[str | None, str | None, str],
 ) -> int:
     count = 0
     position = index
-    while position < len(segments):
-        identity = _direct_identity(segments[position])
-        if _waterbody_key(identity) != key:
+    while position < len(trusted_direct_identities):
+        if _waterbody_key(trusted_direct_identities[position]) != key:
             break
         count += 1
         position += 1
@@ -473,13 +506,16 @@ def build_route_waterbody_trajectory_resolution(
     """Resolve short WISE waterbody ambiguity using trajectory continuity.
 
     The function is intentionally conservative. It never mutates the direct
-    WISE context or EU-Hydro surface evidence. A segment is continuity-supported
-    through two evidence paths. Short ambiguous runs use the original bounded-gap
-    rule. Longer runs require the same stable directly resolved waterbody on both
-    sides, candidate compatibility, continuous EU-Hydro surface evidence, complete
-    candidate distance evidence, and common-anchor distance dominance in every
-    ambiguous segment. Nearest distance is corroborative only, never sufficient
-    by itself.
+    WISE context or EU-Hydro surface evidence. Direct WISE identity remains source
+    evidence, but trusted direct resolution is withheld when both segment endpoints
+    are explicitly OUTSIDE EU-Hydro structural water-surface geometry. Missing or
+    mixed surface evidence never negates WISE by itself. Ambiguous segments may be
+    continuity-supported through two evidence paths. Short ambiguous runs use the
+    original bounded-gap rule. Longer runs require the same stable trusted-direct
+    waterbody on both sides, candidate compatibility, continuous EU-Hydro surface
+    evidence, complete candidate distance evidence, and common-anchor distance
+    dominance in every ambiguous segment. Nearest distance is corroborative only,
+    never sufficient by itself.
     """
     if max_ambiguous_gap_segments < 1:
         raise ValueError("max_ambiguous_gap_segments must be >= 1")
@@ -505,6 +541,8 @@ def build_route_waterbody_trajectory_resolution(
         STATUS_TRANSITION_CANDIDATE: 0,
         STATUS_UNRESOLVED: 0,
     }
+    global_source_direct_resolved_count = 0
+    global_direct_withheld_by_surface_count = 0
 
     for route_position, raw_route in enumerate(routes):
         if not isinstance(raw_route, Mapping):
@@ -528,23 +566,59 @@ def build_route_waterbody_trajectory_resolution(
 
         segment_results: list[dict[str, object]] = []
         base_statuses: list[str] = []
+        trusted_direct_identities: list[dict[str, object] | None] = []
+        source_direct_resolved_count = 0
+        direct_withheld_by_surface_count = 0
         for position, segment in enumerate(source_segments):
             order_index = _integer(segment.get("order_index"))
             if order_index is None:
                 order_index = position
-            direct_identity = _direct_identity(segment)
-            direct_key = _waterbody_key(direct_identity)
-            if direct_key is not None:
+            source_direct_identity = _direct_identity(segment)
+            source_direct_key = _waterbody_key(source_direct_identity)
+
+            surface_segment = surface_segment_by_order.get(order_index)
+            surface_continuous, boundary_near_inside = _segment_surface_continuity(
+                surface_segment
+            )
+            surface_support_status = _segment_surface_support_status(surface_segment)
+            direct_withheld_by_surface = (
+                source_direct_key is not None
+                and surface_support_status == SURFACE_SUPPORT_EXPLICIT_OUTSIDE
+            )
+
+            if source_direct_key is not None:
+                source_direct_resolved_count += 1
+            if direct_withheld_by_surface:
+                direct_withheld_by_surface_count += 1
+
+            trusted_direct_identity = (
+                None if direct_withheld_by_surface else source_direct_identity
+            )
+            trusted_direct_key = _waterbody_key(trusted_direct_identity)
+
+            if trusted_direct_key is not None:
                 status = STATUS_DIRECT_RESOLVED
+            elif source_direct_key is not None and direct_withheld_by_surface:
+                status = STATUS_UNRESOLVED
             elif segment.get("waterbody_match_status") == "AMBIGUOUS":
                 status = STATUS_AMBIGUOUS
             else:
                 status = STATUS_UNRESOLVED
 
-            surface_continuous, boundary_near_inside = _segment_surface_continuity(
-                surface_segment_by_order.get(order_index)
-            )
             candidate_keys = _candidate_waterbody_keys(segment)
+
+            if direct_withheld_by_surface:
+                resolution_basis = [
+                    "DIRECT_WATERBODY_EVIDENCE_PRESERVED_AS_SOURCE",
+                    "EU_HYDRO_EXPLICIT_OUTSIDE_BOTH_ENDPOINTS",
+                    "TRUSTED_DIRECT_RESOLUTION_WITHHELD",
+                ]
+            elif status == STATUS_DIRECT_RESOLVED:
+                resolution_basis = ["DIRECT_WATERBODY_RESOLUTION"]
+                if surface_support_status == SURFACE_SUPPORT_SUPPORTED:
+                    resolution_basis.append("EU_HYDRO_SURFACE_SUPPORT")
+            else:
+                resolution_basis = []
 
             result = _copy_segment_provenance(segment)
             result.update(
@@ -552,23 +626,26 @@ def build_route_waterbody_trajectory_resolution(
                     "direct_match_status": segment.get("match_status"),
                     "direct_waterbody_match_status": segment.get("waterbody_match_status"),
                     "direct_source_feature_match_status": segment.get("source_feature_match_status"),
-                    "direct_resolved_waterbody_identity": deepcopy(direct_identity),
+                    "direct_resolved_waterbody_identity": deepcopy(source_direct_identity),
                     "candidate_waterbody_ids": sorted({key[2] for key in candidate_keys}),
                     "surface_continuity_available": order_index in surface_segment_by_order,
                     "surface_continuous": surface_continuous,
                     "surface_boundary_near_inside": boundary_near_inside,
+                    "direct_surface_evidence_status": surface_support_status,
+                    "direct_resolution_withheld_by_surface": direct_withheld_by_surface,
                     "resolution_status": status,
-                    "resolved_waterbody_identity": deepcopy(direct_identity),
-                    "resolution_basis": (
-                        ["DIRECT_WATERBODY_RESOLUTION"]
-                        if status == STATUS_DIRECT_RESOLVED
-                        else []
-                    ),
+                    "resolved_waterbody_identity": deepcopy(trusted_direct_identity),
+                    "resolution_basis": resolution_basis,
                     "continuity_run_index": None,
                 }
             )
             segment_results.append(result)
             base_statuses.append(status)
+            trusted_direct_identities.append(
+                deepcopy(trusted_direct_identity)
+                if trusted_direct_identity is not None
+                else None
+            )
 
         runs: list[dict[str, object]] = []
         run_index = 0
@@ -585,25 +662,25 @@ def build_route_waterbody_trajectory_resolution(
             left_index = start - 1
             right_index = end + 1
             left_identity = (
-                _direct_identity(source_segments[left_index])
+                trusted_direct_identities[left_index]
                 if left_index >= 0
                 else None
             )
             right_identity = (
-                _direct_identity(source_segments[right_index])
-                if right_index < len(source_segments)
+                trusted_direct_identities[right_index]
+                if right_index < len(trusted_direct_identities)
                 else None
             )
             left_key = _waterbody_key(left_identity)
             right_key = _waterbody_key(right_identity)
 
             left_anchor_segments = (
-                _anchor_span_left(source_segments, left_index, left_key)
+                _anchor_span_left(trusted_direct_identities, left_index, left_key)
                 if left_key is not None
                 else 0
             )
             right_anchor_segments = (
-                _anchor_span_right(source_segments, right_index, right_key)
+                _anchor_span_right(trusted_direct_identities, right_index, right_key)
                 if right_key is not None
                 else 0
             )
@@ -750,6 +827,9 @@ def build_route_waterbody_trajectory_resolution(
                 counts[status] += 1
                 global_counts[status] += 1
 
+        global_source_direct_resolved_count += source_direct_resolved_count
+        global_direct_withheld_by_surface_count += direct_withheld_by_surface_count
+
         route_results.append(
             {
                 "route_index": route_index,
@@ -757,6 +837,8 @@ def build_route_waterbody_trajectory_resolution(
                 "available": bool(segment_results),
                 "status": _route_status(counts),
                 "segment_count": len(segment_results),
+                "source_direct_resolved_segment_count": source_direct_resolved_count,
+                "direct_resolution_withheld_by_surface_segment_count": direct_withheld_by_surface_count,
                 "direct_resolved_segment_count": counts[STATUS_DIRECT_RESOLVED],
                 "continuity_supported_segment_count": counts[STATUS_CONTINUITY_SUPPORTED],
                 "ambiguous_segment_count": counts[STATUS_AMBIGUOUS],
@@ -782,6 +864,8 @@ def build_route_waterbody_trajectory_resolution(
         "available": bool(route_results),
         "status": _route_status(global_counts),
         "route_count": len(route_results),
+        "source_direct_resolved_segment_count": global_source_direct_resolved_count,
+        "direct_resolution_withheld_by_surface_segment_count": global_direct_withheld_by_surface_count,
         "direct_resolved_segment_count": global_counts[STATUS_DIRECT_RESOLVED],
         "continuity_supported_segment_count": global_counts[STATUS_CONTINUITY_SUPPORTED],
         "ambiguous_segment_count": global_counts[STATUS_AMBIGUOUS],
@@ -791,6 +875,9 @@ def build_route_waterbody_trajectory_resolution(
             "max_ambiguous_gap_segments": max_ambiguous_gap_segments,
             "max_ambiguous_gap_ms": max_ambiguous_gap_ms,
             "min_anchor_segments": min_anchor_segments,
+            "direct_resolution_surface_gate": (
+                "WITHHOLD_ONLY_WHEN_BOTH_ENDPOINTS_EXPLICIT_OUTSIDE"
+            ),
         },
         "input_provenance": {
             "route_waterbody_context_schema_version": route_waterbody_context.get("schema_version"),
@@ -801,6 +888,9 @@ def build_route_waterbody_trajectory_resolution(
             "preserves_direct_waterbody_evidence": True,
             "uses_temporal_continuity": True,
             "uses_surface_continuity": True,
+            "uses_surface_evidence_to_validate_direct_resolution": True,
+            "withholds_direct_resolution_only_for_both_endpoints_explicit_outside": True,
+            "does_not_treat_missing_or_mixed_surface_evidence_as_negative": True,
             "uses_candidate_compatibility": True,
             "uses_heading_transition_evidence": False,
             "uses_candidate_distance_for_long_gap_corroboration": True,

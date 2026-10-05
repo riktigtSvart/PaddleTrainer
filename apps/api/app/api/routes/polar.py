@@ -182,6 +182,10 @@ from app.services.route_hydrology_context import (
     build_route_hydrology_context,
     build_route_hydrology_context_summary,
 )
+from app.services.route_hydrology_source_resolution import (
+    build_route_hydrology_source_resolution,
+    build_route_hydrology_source_resolution_summary,
+)
 
 from app.services.route_wind_context import (
     build_route_wind_context,
@@ -1973,6 +1977,8 @@ async def _build_training_session_route_inspection(
             )
 
         hydrology_source = None
+        route_hydrology_source_resolution = None
+        route_hydrology_source_resolution_summary = None
         route_hydrology_context = None
         route_hydrology_context_summary = None
 
@@ -2093,6 +2099,18 @@ async def _build_training_session_route_inspection(
                             series_payloads=(
                                 ovf_series
                             ),
+                        )
+                    )
+
+                    route_hydrology_source_resolution = (
+                        build_route_hydrology_source_resolution(
+                            route_water_environment_identity,
+                            hydrology_source,
+                        )
+                    )
+                    route_hydrology_source_resolution_summary = (
+                        build_route_hydrology_source_resolution_summary(
+                            route_hydrology_source_resolution
                         )
                     )
 
@@ -2604,6 +2622,9 @@ async def _build_training_session_route_inspection(
                 ),
                 "water_environment_identity_persistence": (
                     water_environment_identity_persistence
+                ),
+                "route_hydrology_source_resolution": (
+                    route_hydrology_source_resolution_summary
                 ),
                 "hydrology_source": (
                     {

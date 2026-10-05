@@ -146,6 +146,13 @@ from app.services.route_water_environment_identity import (
     build_route_water_environment_identity,
     build_route_water_environment_identity_summary,
 )
+from app.services.route_water_environment_identity_snapshot import (
+    bind_route_water_environment_identity_snapshot_to_evidence_record,
+    build_route_water_environment_identity_snapshot,
+)
+from app.services.water_environment_identity_persistence import (
+    persist_route_water_environment_identity_snapshot,
+)
 
 from app.services.route_weather_sample_matching import (
     build_route_weather_sample_matching,
@@ -1942,6 +1949,7 @@ async def _build_training_session_route_inspection(
 
         route_water_environment_identity = None
         route_water_environment_identity_summary = None
+        route_water_environment_identity_snapshot = None
 
         if (
             route_waterbody_trajectory_resolution is not None
@@ -1955,6 +1963,11 @@ async def _build_training_session_route_inspection(
             )
             route_water_environment_identity_summary = (
                 build_route_water_environment_identity_summary(
+                    route_water_environment_identity
+                )
+            )
+            route_water_environment_identity_snapshot = (
+                build_route_water_environment_identity_snapshot(
                     route_water_environment_identity
                 )
             )
@@ -2350,6 +2363,14 @@ async def _build_training_session_route_inspection(
             )
         )
 
+        if route_water_environment_identity_snapshot is not None:
+            route_environment_evidence_record = (
+                bind_route_water_environment_identity_snapshot_to_evidence_record(
+                    route_environment_evidence_record,
+                    route_water_environment_identity_snapshot,
+                )
+            )
+
         route_environment_evidence_record_summary = (
             build_route_environment_evidence_record_summary(
                 route_environment_evidence_record
@@ -2357,6 +2378,7 @@ async def _build_training_session_route_inspection(
         )
 
         environment_evidence_persistence = None
+        water_environment_identity_persistence = None
 
         if persist_environment_evidence:
             if external_id is None:
@@ -2406,6 +2428,32 @@ async def _build_training_session_route_inspection(
                         ),
                     )
                 )
+
+                if route_water_environment_identity_snapshot is not None:
+                    evidence_set_id = (
+                        environment_evidence_persistence.get(
+                            "evidence_set_id"
+                        )
+                        if isinstance(
+                            environment_evidence_persistence,
+                            dict,
+                        )
+                        else None
+                    )
+                    if evidence_set_id is None:
+                        raise ValueError(
+                            "Environment evidence persistence did not return "
+                            "an evidence_set_id for water identity snapshot"
+                        )
+                    water_environment_identity_persistence = (
+                        await persist_route_water_environment_identity_snapshot(
+                            db,
+                            evidence_set_id=evidence_set_id,
+                            snapshot=(
+                                route_water_environment_identity_snapshot
+                            ),
+                        )
+                    )
             except ValueError as exc:
                 raise HTTPException(
                     status_code=409,
@@ -2550,6 +2598,12 @@ async def _build_training_session_route_inspection(
                 ),
                 "route_water_environment_identity": (
                     route_water_environment_identity_summary
+                ),
+                "route_water_environment_identity_snapshot": (
+                    route_water_environment_identity_snapshot
+                ),
+                "water_environment_identity_persistence": (
+                    water_environment_identity_persistence
                 ),
                 "hydrology_source": (
                     {
@@ -2752,6 +2806,35 @@ async def persist_training_session_route_environment_evidence(
         default=None,
         ge=1,
     ),
+    waterbody_provider: str | None = Query(
+        default=None,
+    ),
+    waterbody_search_radius_m: float = Query(
+        default=DEFAULT_WATERBODY_SEARCH_RADIUS_M,
+        gt=0.0,
+    ),
+    water_surface_provider: str | None = Query(
+        default=None,
+    ),
+    water_surface_boundary_near_m: float = Query(
+        default=DEFAULT_WATER_SURFACE_BOUNDARY_NEAR_M,
+        ge=0.0,
+    ),
+    water_surface_query_padding_m: float = Query(
+        default=DEFAULT_WATER_SURFACE_QUERY_PADDING_M,
+        ge=0.0,
+    ),
+    marine_surface_provider: str | None = Query(
+        default=None,
+    ),
+    marine_surface_boundary_near_m: float = Query(
+        default=DEFAULT_MARINE_SURFACE_BOUNDARY_NEAR_M,
+        ge=0.0,
+    ),
+    marine_surface_query_padding_m: float = Query(
+        default=DEFAULT_MARINE_SURFACE_QUERY_PADDING_M,
+        ge=0.0,
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     return await _build_training_session_route_inspection(
@@ -2776,5 +2859,29 @@ async def persist_training_session_route_environment_evidence(
         ),
         persist_environment_evidence=True,
         db=db,
+        waterbody_provider=(
+            waterbody_provider
+        ),
+        waterbody_search_radius_m=(
+            waterbody_search_radius_m
+        ),
+        water_surface_provider=(
+            water_surface_provider
+        ),
+        water_surface_boundary_near_m=(
+            water_surface_boundary_near_m
+        ),
+        water_surface_query_padding_m=(
+            water_surface_query_padding_m
+        ),
+        marine_surface_provider=(
+            marine_surface_provider
+        ),
+        marine_surface_boundary_near_m=(
+            marine_surface_boundary_near_m
+        ),
+        marine_surface_query_padding_m=(
+            marine_surface_query_padding_m
+        ),
     )
 

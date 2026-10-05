@@ -20,7 +20,7 @@ from app.models.entities import (
 )
 
 
-EVIDENCE_HASH_SEMANTICS_VERSION = "1"
+EVIDENCE_HASH_SEMANTICS_VERSION = "2"
 
 
 def _canonical_hash(
@@ -48,6 +48,7 @@ def _semantic_hash_payload(
     weather_samples: list[dict[str, Any]],
     hydrology_measurements: list[dict[str, Any]],
     routes: list[dict[str, Any]],
+    water_environment_identity_hash: str | None,
 ) -> dict[str, Any]:
     normalized_routes = []
 
@@ -93,6 +94,9 @@ def _semantic_hash_payload(
             session_external_id
         ),
         "scope": scope,
+        "water_environment_identity_hash": (
+            water_environment_identity_hash
+        ),
         "weather_samples": sorted(
             weather_samples,
             key=lambda item: (
@@ -223,6 +227,46 @@ def _string_or_none(
     return str(
         value
     )
+
+
+def _water_environment_identity_hash(
+    evidence_record: dict[str, Any],
+) -> str | None:
+    snapshot = evidence_record.get(
+        "route_water_environment_identity_snapshot"
+    )
+
+    if not isinstance(
+        snapshot,
+        dict,
+    ):
+        return None
+
+    identity_hash = _string_or_none(
+        snapshot.get(
+            "identity_hash"
+        )
+    )
+
+    if identity_hash is None:
+        raise ValueError(
+            "route_water_environment_identity_snapshot is missing identity_hash"
+        )
+
+    normalized = identity_hash.lower()
+
+    if (
+        len(normalized) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in normalized
+        )
+    ):
+        raise ValueError(
+            "route_water_environment_identity_snapshot has invalid identity_hash"
+        )
+
+    return normalized
 
 
 def _position_coordinate(
@@ -1461,6 +1505,12 @@ def build_environment_persistence_plan(
         hydrology_rows_by_id.values()
     )
 
+    water_environment_identity_hash = (
+        _water_environment_identity_hash(
+            evidence_record
+        )
+    )
+
     evidence_hash = _canonical_hash(
         _semantic_hash_payload(
             schema_version=schema_version,
@@ -1476,6 +1526,9 @@ def build_environment_persistence_plan(
                 hydrology_measurements
             ),
             routes=routes,
+            water_environment_identity_hash=(
+                water_environment_identity_hash
+            ),
         )
     )
 
@@ -1492,6 +1545,9 @@ def build_environment_persistence_plan(
             session_external_id
         ),
         "scope": scope,
+        "water_environment_identity_hash": (
+            water_environment_identity_hash
+        ),
         "source_summary": (
             _catalog_source_summary(
                 source_catalog

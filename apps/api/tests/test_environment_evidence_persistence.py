@@ -542,7 +542,7 @@ def test_hash_ignores_volatile_provider_runtime_metadata():
             "generationtime_ms"
         ]
     )
-    assert first["hash_semantics_version"] == "1"
+    assert first["hash_semantics_version"] == "2"
 
 
 def test_hash_changes_when_actual_weather_evidence_changes():

@@ -142,6 +142,10 @@ from app.services.route_marine_region_context import (
     build_route_marine_region_context,
     build_route_marine_region_context_summary,
 )
+from app.services.route_water_environment_identity import (
+    build_route_water_environment_identity,
+    build_route_water_environment_identity_summary,
+)
 
 from app.services.route_weather_sample_matching import (
     build_route_weather_sample_matching,
@@ -1936,6 +1940,25 @@ async def _build_training_session_route_inspection(
                 )
             )
 
+        route_water_environment_identity = None
+        route_water_environment_identity_summary = None
+
+        if (
+            route_waterbody_trajectory_resolution is not None
+            or route_marine_region_context is not None
+        ):
+            route_water_environment_identity = (
+                build_route_water_environment_identity(
+                    route_waterbody_trajectory_resolution,
+                    route_marine_region_context,
+                )
+            )
+            route_water_environment_identity_summary = (
+                build_route_water_environment_identity_summary(
+                    route_water_environment_identity
+                )
+            )
+
         hydrology_source = None
         route_hydrology_context = None
         route_hydrology_context_summary = None
@@ -2524,6 +2547,9 @@ async def _build_training_session_route_inspection(
                 ),
                 "route_waterbody_trajectory_resolution": (
                     route_waterbody_trajectory_resolution_summary
+                ),
+                "route_water_environment_identity": (
+                    route_water_environment_identity_summary
                 ),
                 "hydrology_source": (
                     {

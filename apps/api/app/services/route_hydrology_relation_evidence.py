@@ -446,6 +446,7 @@ def _evaluate_metric_relation(
         "calibration_evidence_required": calibration_required,
         "calibration_evidence_available": calibration_ok if calibration_required else None,
         "uncertainty": deepcopy(metric.get("uncertainty")),
+        "value_projection": deepcopy(metric.get("value_projection")),
         "limitations": limitations,
     }
 

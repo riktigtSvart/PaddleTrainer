@@ -99,6 +99,13 @@ def build_hydrology_relation_catalog(
                     f"relations[{position}].metrics[{metric_position}]."
                     "transfer_allowed must be boolean"
                 )
+            _validate_value_projection(
+                metric.get("value_projection"),
+                field=(
+                    f"relations[{position}].metrics[{metric_position}]."
+                    "value_projection"
+                ),
+            )
 
         normalized_relations.append(relation_copy)
 
@@ -158,6 +165,49 @@ def build_hydrology_relation_catalog_summary(
     result["relations_included"] = False
     return result
 
+
+
+def _validate_value_projection(value: Any, *, field: str) -> None:
+    if value is None:
+        return
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{field} must be a mapping")
+
+    projection_type = _required_text(value.get("projection_type"), f"{field}.projection_type")
+    if projection_type != "ADDITIVE_INTERVAL":
+        raise ValueError(f"{field}.projection_type unsupported: {projection_type}")
+
+    _required_text(value.get("projection_contract_version"), f"{field}.projection_contract_version")
+    source_unit = _required_text(value.get("source_unit"), f"{field}.source_unit")
+    target_unit = _required_text(value.get("target_unit"), f"{field}.target_unit")
+    if source_unit != target_unit:
+        raise ValueError(f"{field} requires identical source_unit and target_unit")
+
+    source_min = _finite_number(value.get("source_value_min"), f"{field}.source_value_min")
+    source_max = _finite_number(value.get("source_value_max"), f"{field}.source_value_max")
+    offset_min = _finite_number(value.get("offset_min"), f"{field}.offset_min")
+    offset_max = _finite_number(value.get("offset_max"), f"{field}.offset_max")
+    if source_min > source_max:
+        raise ValueError(f"{field}.source_value_min must be <= source_value_max")
+    if offset_min > offset_max:
+        raise ValueError(f"{field}.offset_min must be <= offset_max")
+    if value.get("scalar_value_established") is not False:
+        raise ValueError(f"{field}.scalar_value_established must be false")
+    if value.get("extrapolation_allowed") is not False:
+        raise ValueError(f"{field}.extrapolation_allowed must be false")
+    _required_text(value.get("target_semantics"), f"{field}.target_semantics")
+
+
+def _finite_number(value: Any, field: str) -> float:
+    if isinstance(value, bool):
+        raise ValueError(f"{field} must be a finite number")
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"{field} must be a finite number") from None
+    if number != number or number in {float("inf"), float("-inf")}:
+        raise ValueError(f"{field} must be a finite number")
+    return number
 
 def _required_text(value: Any, field: str) -> str:
     text = _text(value)

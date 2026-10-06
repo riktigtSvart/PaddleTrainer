@@ -4,13 +4,20 @@ from app.services.kdvvizig_hydrology_relation_catalog import (
     PROVIDER as KDVVIZIG_PROVIDER,
     build_kdvvizig_hydrology_relation_catalog,
 )
+from app.services.szentendre_flood_hydrology_relation_catalog import (
+    PROVIDER as SZENTENDRE_FLOOD_PROVIDER,
+    build_szentendre_flood_hydrology_relation_catalog,
+)
 from app.services.validation_hydrology_relation_catalog import (
     PROVIDER as VALIDATION_PROVIDER,
     build_validation_hydrology_relation_catalog,
 )
 
 
-PRODUCTION_HYDROLOGY_RELATION_PROVIDERS = (KDVVIZIG_PROVIDER,)
+PRODUCTION_HYDROLOGY_RELATION_PROVIDERS = (
+    KDVVIZIG_PROVIDER,
+    SZENTENDRE_FLOOD_PROVIDER,
+)
 VALIDATION_HYDROLOGY_RELATION_PROVIDERS = (VALIDATION_PROVIDER,)
 SUPPORTED_HYDROLOGY_RELATION_PROVIDERS = (
     *PRODUCTION_HYDROLOGY_RELATION_PROVIDERS,
@@ -28,6 +35,8 @@ def load_hydrology_relation_catalog(
     provider_value = str(provider).strip().upper()
     if provider_value == KDVVIZIG_PROVIDER:
         return build_kdvvizig_hydrology_relation_catalog()
+    if provider_value == SZENTENDRE_FLOOD_PROVIDER:
+        return build_szentendre_flood_hydrology_relation_catalog()
     if provider_value == VALIDATION_PROVIDER:
         if not allow_validation_provider:
             raise ValueError(

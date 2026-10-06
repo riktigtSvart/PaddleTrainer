@@ -253,6 +253,9 @@ from app.services.training_data_readiness_audit import (
     build_training_data_readiness_audit_summary,
     build_training_data_readiness_cohort_summary,
 )
+from app.services.heart_rate_sample_validation import (
+    build_training_session_heart_rate_validation,
+)
 from app.services.athlete_state_live_binding import (
     load_and_bind_athlete_state_scientific_views,
 )
@@ -2665,6 +2668,11 @@ async def _build_training_session_route_inspection(
         training_data_readiness_audit_summary = build_training_data_readiness_audit_summary(
             training_data_readiness_audit
         )
+        heart_rate_sample_validation = build_training_session_heart_rate_validation(
+            sample_item,
+            expected_session_external_id=external_id,
+            sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+        )
 
         route_environment_evidence_record = (
             build_route_environment_evidence_record(
@@ -3186,6 +3194,7 @@ async def _build_training_session_route_inspection(
                     route_expected_response_model_summary
                 ),
                 "training_data_readiness_audit": training_data_readiness_audit_summary,
+                "heart_rate_sample_validation": heart_rate_sample_validation,
                 "trusted_environment_context_snapshot": (
                     trusted_environment_context_snapshot
                 ),

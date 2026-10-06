@@ -212,6 +212,10 @@ from app.services.route_wind_context import (
     build_route_wind_context,
     build_route_wind_context_summary,
 )
+from app.services.trusted_route_environment_context import (
+    build_trusted_route_environment_context,
+    build_trusted_route_environment_context_summary,
+)
 
 from app.services.route_environment_evidence_record import (
     build_route_environment_evidence_record,
@@ -2404,6 +2408,22 @@ async def _build_training_session_route_inspection(
             )
         )
 
+        trusted_route_environment_context = (
+            build_trusted_route_environment_context(
+                route_environment_context_input,
+                route_water_environment_identity,
+                route_weather_sample_matching,
+                route_wind_context,
+                trusted_route_hydrology_context,
+                weather_source=weather_source,
+            )
+        )
+        trusted_route_environment_context_summary = (
+            build_trusted_route_environment_context_summary(
+                trusted_route_environment_context
+            )
+        )
+
         route_environment_evidence_record = (
             build_route_environment_evidence_record(
                 session_external_id=(
@@ -2802,6 +2822,9 @@ async def _build_training_session_route_inspection(
                 ),
                 "route_wind_context": (
                     route_wind_context_summary
+                ),
+                "trusted_route_environment_context": (
+                    trusted_route_environment_context_summary
                 ),
                 "route_environment_evidence_record": (
                     route_environment_evidence_record_summary

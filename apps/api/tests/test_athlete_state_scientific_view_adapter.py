@@ -226,3 +226,39 @@ def test_source_adapter_metadata_is_exposed_on_binding():
     assert binding["source_adapter"][
         "synthesizes_readiness_into_athlete_state"
     ] is False
+
+
+def test_actual_scientific_view_inventory_gaps_are_preserved():
+    view = {
+        "as_of_date": "2026-09-29",
+        "training_load": {},
+        "recovery_readiness": {},
+        "evidence_inventory": {
+            "gaps": ["ILLNESS_STATUS_UNKNOWN", "TRAVEL_STATUS_UNKNOWN"],
+            "traceability": {"state": "METRIC_PROVENANCE_UNAVAILABLE"},
+        },
+        "capacity": {"available": False, "items": [], "evidence": []},
+    }
+    candidate = build_athlete_state_candidate_from_scientific_view(
+        view,
+        state_timestamp="2026-09-30T00:00:00+02:00",
+    )
+    assert candidate["traceability_gaps"] == [
+        "ILLNESS_STATUS_UNKNOWN",
+        "TRAVEL_STATUS_UNKNOWN",
+    ]
+    assert candidate["adapter_provenance"][
+        "scientific_evidence_inventory_gaps_preserved"
+    ] is True
+
+
+def test_as_of_date_is_not_promoted_to_whole_state_timestamp():
+    view = {
+        "as_of_date": "2026-09-29",
+        "evidence_inventory": {"gaps": []},
+        "capacity": {"available": False, "items": [], "evidence": []},
+    }
+    candidate = build_athlete_state_candidate_from_scientific_view(view)
+    assert candidate["state_timestamp"] is None
+    assert candidate["available"] is False
+    assert candidate["source"]["source_view_timestamp_field"] is None

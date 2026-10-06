@@ -226,6 +226,13 @@ from app.services.route_expected_response_input import (
     build_route_expected_response_input,
     build_route_expected_response_input_summary,
 )
+from app.services.athlete_state_live_binding import (
+    load_and_bind_athlete_state_scientific_views,
+)
+from app.services.athlete_state_scientific_view_live_source import (
+    extract_route_athlete_state_target_timestamp,
+    load_prior_local_day_closed_scientific_view,
+)
 
 from app.services.route_environment_evidence_record import (
     build_route_environment_evidence_record,
@@ -2435,12 +2442,40 @@ async def _build_training_session_route_inspection(
             )
         )
 
+        athlete_state_target_timestamp = (
+            extract_route_athlete_state_target_timestamp(
+                route_environment_context_input
+            )
+        )
+        athlete_state_binding = (
+            await load_and_bind_athlete_state_scientific_views(
+                athlete_state_target_timestamp,
+                load_prior_local_day_closed_scientific_view,
+                loader_kwargs={
+                    "db": db,
+                    "user": user,
+                    "target_timestamp": (
+                        athlete_state_target_timestamp
+                    ),
+                },
+            )
+        )
+        athlete_state_context = (
+            athlete_state_binding.get(
+                "athlete_state_context"
+            )
+        )
+
         route_expected_response_input = (
             build_route_expected_response_input(
                 route_external_workload_evidence,
                 trusted_route_environment_context,
-                athlete_state_context=None,
-                athlete_state_binding=None,
+                athlete_state_context=(
+                    athlete_state_context
+                ),
+                athlete_state_binding=(
+                    athlete_state_binding
+                ),
             )
         )
         route_expected_response_input_summary = (

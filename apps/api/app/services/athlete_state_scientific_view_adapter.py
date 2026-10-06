@@ -60,8 +60,17 @@ def build_athlete_state_candidate_from_scientific_view(
         source_timestamp,
     )
 
+    evidence_inventory = (
+        view.get("evidence_inventory")
+        if isinstance(view.get("evidence_inventory"), Mapping)
+        else {}
+    )
+
     traceability_gaps = _unique_strings(
-        _string_list(view.get("traceability_gaps"))
+        [
+            *_string_list(view.get("traceability_gaps")),
+            *_string_list(evidence_inventory.get("gaps")),
+        ]
     )
 
     limitations = _unique_strings(
@@ -121,6 +130,9 @@ def build_athlete_state_candidate_from_scientific_view(
             "source_view_timestamp": deepcopy(source_timestamp),
             "source_view_timestamp_field": source_timestamp_field,
             "whole_view_timestamp_inferred_from_components": False,
+            "scientific_evidence_inventory_gaps_preserved": bool(
+                _string_list(evidence_inventory.get("gaps"))
+            ),
         },
     }
 

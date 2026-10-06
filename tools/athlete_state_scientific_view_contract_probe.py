@@ -5,14 +5,24 @@ import importlib
 import inspect
 from pathlib import Path
 import sys
-from typing import Any
 
 
 MODULE_NAMES = (
     "app.services.athlete_state_scientific_view",
     "app.services.athlete_state",
+    "app.services.scientific_assessment",
+    "app.services.capacity_state",
+    "app.api.routes.coach",
 )
-TEST_RELATIVE = Path("apps/api/tests/test_athlete_state_scientific_view.py")
+
+TEST_RELATIVES = (
+    Path("apps/api/tests/test_athlete_state_scientific_view.py"),
+    Path("apps/api/tests/test_athlete_state.py"),
+    Path("apps/api/tests/test_scientific_assessment.py"),
+    Path("apps/api/tests/test_capacity_state.py"),
+    Path("apps/api/tests/test_coach_routes.py"),
+)
+
 OUTPUT = Path("athlete_state_scientific_view_contract_report.txt")
 
 
@@ -42,8 +52,12 @@ def _describe_module(module_name: str) -> str:
             signature = str(inspect.signature(value))
         except (TypeError, ValueError):
             signature = "<signature unavailable>"
-        kind = "async-function" if inspect.iscoroutinefunction(value) else (
-            "function" if inspect.isfunction(value) else "class"
+        kind = (
+            "async-function"
+            if inspect.iscoroutinefunction(value)
+            else "function"
+            if inspect.isfunction(value)
+            else "class"
         )
         lines.append(f"  {kind} {name}{signature}")
 
@@ -53,36 +67,52 @@ def _describe_module(module_name: str) -> str:
     return "\n".join(lines)
 
 
+def _describe_test(repo: Path, relative: Path) -> str:
+    path = repo / relative
+    lines = [f"TEST_PATH: {path}"]
+    if not path.exists():
+        lines.append("TEST_SOURCE: <not found>")
+        return "\n".join(lines)
+
+    text = path.read_text(encoding="utf-8")
+    lines.append(f"TEST_SHA256: {_sha256(text)}")
+    lines.append("\n--- EXACT TEST SOURCE BEGIN ---")
+    lines.append(text)
+    lines.append("--- EXACT TEST SOURCE END ---\n")
+    return "\n".join(lines)
+
+
 def main() -> int:
     repo = Path.cwd()
     api_path = repo / "apps" / "api"
     if not api_path.exists():
-        print("Run this script from the PaddleTrainerProject repository root.", file=sys.stderr)
+        print(
+            "Run this script from the PaddleTrainerProject repository root.",
+            file=sys.stderr,
+        )
         return 2
 
     sys.path.insert(0, str(api_path))
     sections = [
-        "PaddleTrainer V22.2 scientific-view contract probe",
-        "READ_ONLY: imports modules and reads source files; calls no application function and writes no DB rows.",
+        "PaddleTrainer V22.2 complete AthleteState live-binding contract probe",
+        (
+            "READ_ONLY: imports modules and reads source files; calls no "
+            "application function and writes no DB rows."
+        ),
         "",
     ]
 
     for module_name in MODULE_NAMES:
         try:
             sections.append(_describe_module(module_name))
-        except Exception as exc:  # report import problems rather than hiding them
-            sections.append(f"MODULE: {module_name}\nERROR: {type(exc).__name__}: {exc}\n")
+        except Exception as exc:
+            sections.append(
+                f"MODULE: {module_name}\n"
+                f"ERROR: {type(exc).__name__}: {exc}\n"
+            )
 
-    test_path = repo / TEST_RELATIVE
-    sections.append(f"TEST_PATH: {test_path}")
-    if test_path.exists():
-        text = test_path.read_text(encoding="utf-8")
-        sections.append(f"TEST_SHA256: {_sha256(text)}")
-        sections.append("\n--- EXACT TEST SOURCE BEGIN ---")
-        sections.append(text)
-        sections.append("--- EXACT TEST SOURCE END ---\n")
-    else:
-        sections.append("TEST_SOURCE: <not found>")
+    for relative in TEST_RELATIVES:
+        sections.append(_describe_test(repo, relative))
 
     OUTPUT.write_text("\n".join(sections), encoding="utf-8")
     print(f"Wrote {OUTPUT.resolve()}")

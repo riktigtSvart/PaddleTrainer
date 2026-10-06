@@ -186,6 +186,10 @@ from app.services.route_hydrology_source_resolution import (
     build_route_hydrology_source_resolution,
     build_route_hydrology_source_resolution_summary,
 )
+from app.services.route_hydrology_representativeness import (
+    build_route_hydrology_representativeness,
+    build_route_hydrology_representativeness_summary,
+)
 from app.services.route_hydrology_source_resolution_snapshot import (
     bind_route_hydrology_source_resolution_snapshot_to_evidence_record,
     build_route_hydrology_source_resolution_snapshot,
@@ -1987,6 +1991,8 @@ async def _build_training_session_route_inspection(
         route_hydrology_source_resolution = None
         route_hydrology_source_resolution_summary = None
         route_hydrology_source_resolution_snapshot = None
+        route_hydrology_representativeness = None
+        route_hydrology_representativeness_summary = None
         route_hydrology_context = None
         route_hydrology_context_summary = None
 
@@ -2124,6 +2130,19 @@ async def _build_training_session_route_inspection(
                     route_hydrology_source_resolution_snapshot = (
                         build_route_hydrology_source_resolution_snapshot(
                             route_hydrology_source_resolution
+                        )
+                    )
+
+                    route_hydrology_representativeness = (
+                        build_route_hydrology_representativeness(
+                            route_environment_context_input,
+                            route_hydrology_source_resolution,
+                            hydrology_source,
+                        )
+                    )
+                    route_hydrology_representativeness_summary = (
+                        build_route_hydrology_representativeness_summary(
+                            route_hydrology_representativeness
                         )
                     )
 
@@ -2669,6 +2688,9 @@ async def _build_training_session_route_inspection(
                 ),
                 "hydrology_source_resolution_persistence": (
                     hydrology_source_resolution_persistence
+                ),
+                "route_hydrology_representativeness": (
+                    route_hydrology_representativeness_summary
                 ),
                 "hydrology_source": (
                     {

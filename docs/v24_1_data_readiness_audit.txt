@@ -1,0 +1,223 @@
+﻿PaddleTrainer V24.1 – adatkészültségi audit
+========================================
+
+Baseline: 576a8d20c58b5595cb7809e3c05a44733056ebc2
+Auditverzió: 0.1.0; séma: 0.1
+
+MIT TARTALMAZ EZ A CSOMAG?
+
+Az első retrospektív pulzuscélhoz szükséges adat-előkészítés auditját.
+A meglévő route-inspect válasz minden sessionjében új mező jelenik meg:
+  route_sessions[].training_data_readiness_audit
+A válasz gyökerében:
+  training_data_readiness_cohort
+
+Nincs új URL-paraméter, adatbázis-migráció vagy audit-adatbázisírás.
+A GET inspect továbbra is olvasási művelet. A közös builder miatt az eddigi
+environment-persist válaszban is megjelenik az audit; ott a meglévő
+environment-mentés továbbra is a régi működés szerint történik.
+
+Az audit újraellenőrzi a teljes V24 modellbemenet alkalmasságát, és vizsgálja:
+  - session- és sportolóazonosító, hiányzó vagy duplikált sample-session;
+  - gyakorlatok párosítása providerazonosítóval; annak hiányában kizárólag
+    egyértelmű kezdőidő + sportazonosító + időtartam alapján;
+  - kezdőidő időzónája, a két forrás metaadatainak egyezése;
+  - a normalizált minták egyezése a nyers sample-forrás újranormalizálásával;
+  - egyetlen HR-sorozat, egész pozitív mintavételi intervallum;
+  - pozitív, véges pulzusminták és GPS-szakaszok mintarács szerinti lefedése;
+  - hiányzó, nulla, negatív és hibás minták; nincs interpoláció;
+  - azonos session szakaszainak közös csoportazonosítója;
+  - a lekért sessionhalmaz különböző csoportjai, napjai és sportazonosítói.
+
+A szakaszablak [kezdőidő, végidő), azaz a végpont kizárt. A lefedési
+diagnosztika a projekt meglévő feltevését használja: a 0. HR-slot az exercise
+kezdetéhez tartozik. A provider első mintájának tényleges időeredetét ez nem
+igazolja. A Polar v4 dokumentáció HEART_RATE/intervalMillis/values mezőket
+ír le, de az intervallum önmagában nem bizonyítja az első minta időpontját.
+Forrás: https://www.polar.com/polar-api-v4/ (ellenőrizve: 2026-10-06).
+
+EREDMÉNYEK ÉRTELMEZÉSE
+
+CANDIDATE_WITH_LIMITATIONS:
+  Az azonosítók/metaadatok és a V24-bemenet ellenőrzése megfelelt, és legalább
+  egy szakasznak teljes a feltételezett HR-mintarács szerinti lefedése.
+  Az ilyen szakasz további adat-előkészítésre jelölt. A többi szakasz nem
+  kerül automatikusan a jelöltek közé. Ez nem tanítási készültség.
+WITHHELD:
+  Vannak route-adatok, de a felsorolt blocking_reasons blokkolják a jelölést.
+UNAVAILABLE:
+  Nincs vizsgálható V24-route a sessionben.
+
+A fully_covered_grid_segment_count diagnosztikai darabszám; blokkolt
+sessionnél is lehet pozitív. A candidate_segment_count már minden kaput
+figyelembe vesz. Hiányos HR-lefedésnél a teljesen lefedett szakaszok lehetnek
+jelöltek, a hiányosak nem. A pozitív/véges HR-érték csak technikai ellenőrzés,
+nem fiziológiai érvényességi vagy szenzorminőségi bizonyíték.
+
+A további tanítást minden esetben blokkolják a még nyitott feladatok:
+  HR_SAMPLE_TIME_ORIGIN_NOT_VERIFIED
+  HR_ACQUISITION_QUALITY_NOT_ESTABLISHED
+  HISTORICAL_FEATURE_AVAILABILITY_NOT_ESTABLISHED
+  DATASET_SPLIT_NOT_ASSIGNED
+  RETROSPECTIVE_GPS_IS_NOT_A_PRE_EXERCISE_PREDICTOR
+
+training_authorized = False és numeric_output_authorized = False.
+Nincs modellillesztés, pulzusbecslés vagy edzéstervgenerálás ebben a csomagban.
+A pulzusértékek nem kerülnek a V24 prediktorbemenetébe. Az audit csak
+lefedési számlálókat és diagnosztikát ad vissza, célértékeket nem exportál.
+
+A cohort kizárólag az adott lekérés sessionjeit jellemzi, nem a teljes
+sportolói történetet. A különböző sessionazonosítók száma önmagában nem
+bizonyítja az edzések statisztikai függetlenségét vagy a tanítóadatok
+elégségességét. A szakaszszámot nem tekinti különálló edzésszámnak.
+Duplikált sessioncsoportok kimaradnak a cohort jelölt számlálóiból.
+Kevesebb mint két különböző jelölt session: INSUFFICIENT_DISTINCT_SESSIONS.
+Legalább kettő: SPLIT_REVIEW_REQUIRED. Egyik állapot sem engedélyez tanítást;
+nem történik véletlen vagy időbeli train/test felosztás.
+
+Forrás- és döntési SHA256 rögzíti az audit bemenetét, verzióját és szabályait.
+A kompakt API-válasz megtartja a teljes döntés hashét, de elhagyja a részletes
+szakaszlistát. A teljes lista a tiszta service-függvény kimenetében elérhető.
+
+CSOMAG ALKALMAZÁSA – POWERSHELL
+
+A projekt gyökerében futtasd. A ZIP-et tedd a Downloads mappába.
+Az alábbi blokk kizárólag a csomag négy megadott fájlját másolja át.
+A csomag teljes fájlokat tartalmaz; ezért a pontos baseline szükséges.
+Ha a baseline vagy a helyi módosításellenőrzés eltérést jelez, állj meg;
+ne használj resetet vagy automatikus felülírást az ellenőrzés megkerülésére.
+
+$v241Root = (Get-Location).Path
+$v241Base = (git rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or $v241Base -ne '576a8d20c58b5595cb7809e3c05a44733056ebc2') {
+    throw 'V24.1: a csomag baseline-ja 576a8d2. Ellenorizd a checkoutot.'
+}
+git diff --quiet
+if ($LASTEXITCODE -ne 0) { throw 'Vannak helyi tracked modositasok.' }
+git diff --cached --quiet
+if ($LASTEXITCODE -ne 0) { throw 'Vannak staged modositasok.' }
+$v241Files = @(
+    'apps/api/app/api/routes/polar.py',
+    'apps/api/app/services/training_data_readiness_audit.py',
+    'apps/api/tests/test_training_data_readiness_audit.py',
+    'docs/v24_1_data_readiness_audit.txt'
+)
+if (@(git status --porcelain -- $v241Files).Count -ne 0) {
+    throw 'A celzott fajlok egyike mar modosult vagy letezik untrackedkent.'
+}
+$v241Zip = Join-Path $env:USERPROFILE 'Downloads\paddletrainer_v24_1_data_readiness_audit.zip'
+Get-FileHash -Algorithm SHA256 -Path $v241Zip | Format-List
+
+Ellenőrizd, hogy a ZIP SHA256 egyezik a kísérő válaszban megadott értékkel.
+Ezután:
+
+$v241Stage = Join-Path $env:TEMP ('paddletrainer_v24_1_' + [guid]::NewGuid().ToString('N'))
+Expand-Archive -LiteralPath $v241Zip -DestinationPath $v241Stage
+$v241Manifest = Get-Content -LiteralPath (Join-Path $v241Stage 'MANIFEST.json') -Raw | ConvertFrom-Json
+if ($v241Manifest.baseline_commit -ne $v241Base) { throw 'Hibas manifest baseline.' }
+if ($v241Manifest.files.Count -ne $v241Files.Count) { throw 'Hibas manifest fajlszam.' }
+foreach ($v241Entry in $v241Manifest.files) {
+    if ($v241Entry.path -notin $v241Files) { throw 'Nem vart fajl a manifestben.' }
+    $v241Source = Join-Path $v241Stage $v241Entry.path
+    $v241ActualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $v241Source).Hash
+    if ($v241ActualHash -ne $v241Entry.sha256) { throw 'Eltero fajlhash a csomagban.' }
+}
+$v241Backup = Join-Path $v241Stage '_backup'
+foreach ($v241File in $v241Files) {
+    $v241Destination = Join-Path $v241Root $v241File
+    if (Test-Path -LiteralPath $v241Destination) {
+        $v241BackupFile = Join-Path $v241Backup $v241File
+        New-Item -ItemType Directory -Force -Path (Split-Path $v241BackupFile -Parent) | Out-Null
+        Copy-Item -LiteralPath $v241Destination -Destination $v241BackupFile
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path $v241Destination -Parent) | Out-Null
+    Copy-Item -LiteralPath (Join-Path $v241Stage $v241File) -Destination $v241Destination
+}
+Write-Host "Alkalmazva. Korabbi fajlok mentese: $v241Backup"
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Diff whitespace ellenorzes sikertelen.' }
+git status --short
+
+A három szándékosan untracked fájl érintetlen marad:
+  athlete_state_scientific_view_contract_report.txt
+  eu_hydro_live_probe.py
+  project_structure.txt
+Ezeket később se add hozzá ehhez a commithoz.
+
+TESZTEK
+
+$env:PYTHONPATH = Join-Path (Get-Location).Path 'apps/api'
+.\.venv\Scripts\python.exe -m pytest apps/api/tests/test_training_data_readiness_audit.py apps/api/tests/test_route_expected_response_model.py -q
+if ($LASTEXITCODE -ne 0) { throw 'V24.1 focused teszt sikertelen.' }
+.\.venv\Scripts\python.exe -m pytest apps/api/tests -q
+if ($LASTEXITCODE -ne 0) { throw 'V24.1 teljes regresszio sikertelen.' }
+
+Itt ellenőrizve Python 3.12-n: 109 passed célzott; 789 passed, 1 warning teljes.
+Az egy warning a meglévő Starlette/httpx deprecation; száma/szövege függhet
+a helyi függőségverzióktól. 61 új auditteszt van a 728-as baseline fölött.
+
+ÉLŐ ELLENŐRZÉS – MEGLÉVŐ DUNA KONTROLL
+
+Indítsd újra az API-t külön PowerShell-ablakban, a projekt gyökeréből:
+
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir apps/api --host 127.0.0.1 --port 8000
+
+Az ellenőrző ablakban:
+
+$v241Url = 'http://127.0.0.1:8000/api/v1/integrations/polar/sessions/routes/inspect?route_date=2026-09-30&weather_provider=OPEN_METEO_HISTORICAL&hydrology_provider=OVF_VRAQUERY&hydrology_station_registry_number=1026&waterbody_provider=EEA_WISE_WFD&water_surface_provider=EEA_EU_HYDRO'
+$v241Result = Invoke-RestMethod -Uri $v241Url
+if ($null -eq $v241Result.training_data_readiness_cohort) { throw 'Hianyzik az audit: ellenorizd az API ujrainditasat.' }
+$v241Result.training_data_readiness_cohort | Format-List
+foreach ($v241Session in $v241Result.route_sessions) {
+    $v241Audit = $v241Session.training_data_readiness_audit
+    $v241Model = $v241Session.route_expected_response_model
+    [PSCustomObject]@{
+        ExternalId = $v241Session.external_id
+        AuditStatus = $v241Audit.status
+        CandidateRoutes = $v241Audit.candidate_route_count
+        CandidateSegments = $v241Audit.candidate_segment_count
+        TrainingAuthorized = $v241Audit.training_authorized
+        NumericAuthorized = $v241Audit.numeric_output_authorized
+        SourceHash = $v241Audit.input_provenance.source_hash
+        AuditHash = $v241Audit.decision_hash
+        ModelStatus = $v241Model.status
+        ResponseAvailable = $v241Model.response_available
+        StateSourcePolicy = $v241Model.input_provenance.athlete_state_binding.selected_snapshot.source.source_reference.source_policy
+    } | Format-List
+    $v241Audit.blocking_reasons
+    $v241Audit.limitations
+    $v241Audit.routes | Select-Object route_index, exercise_index, sample_exercise_index, exercise_match_basis, sport_id, exercise_start_utc, input_eligible, status, candidate_segment_count, fully_covered_grid_segment_count, blocking_reasons, limitations | Format-List
+    $v241Audit.routes.hr_inventory | Format-List
+    if ($v241Audit.training_authorized -ne $false -or $v241Audit.numeric_output_authorized -ne $false) { throw 'Az audit nem engedelyezhet tanitast/becslest.' }
+    if ($v241Model.response_available -ne $false -or $v241Model.estimated_route_count -ne 0) { throw 'Varatlan V24 fiziologiai becsles.' }
+}
+
+Nem állítunk előre pozitív HR-alkalmasságot az élő trackre: a tényleges
+Polar-metaadatok, azonosítók és minták döntik el. WITHHELD esetén a blokkoló
+ok a szükséges további adatmunka eredménye; ne lazítsunk kaput a pozitív státuszért.
+A korábbi pozitív Duna V24 modell továbbra is NOT_ESTIMATED és FOUNDATION_ONLY,
+ha az upstream források és a bemenet továbbra is használhatók.
+
+Negatív kontroll ugyanarra a napra környezeti providerek nélkül:
+
+$v241Negative = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/v1/integrations/polar/sessions/routes/inspect?route_date=2026-09-30'
+$v241Negative.route_sessions.training_data_readiness_audit | Select-Object status, candidate_route_count, candidate_segment_count, training_authorized | Format-List
+$v241Negative.route_sessions.training_data_readiness_audit.routes | Select-Object status, input_eligible, blocking_reasons | Format-List
+
+Meglévő route, de nem használható környezet esetén WITHHELD, nulla jelölt és
+input/environment blokkoló ok várható. Külső szolgáltatáshiba nem igazolja
+sikeresen az élő ellenőrzést; azt külön ki kell vizsgálni.
+
+Küldd vissza a tesztek végét, a cohort kimenetet, az audit route-diagnosztikát
+és a negatív kontrollt. Ezekből láthatjuk a következő adat-előkészítési feladatot.
+
+GIT CHECKPOINT – CSAK A WINDOWS-TESZTEK ÉS AZ ÉLŐ ELLENŐRZÉS UTÁN
+
+git diff --check
+git add -- apps/api/app/api/routes/polar.py apps/api/app/services/training_data_readiness_audit.py apps/api/tests/test_training_data_readiness_audit.py docs/v24_1_data_readiness_audit.txt
+git diff --cached --stat
+git commit -m "Add retrospective training data readiness audit"
+git status --short
+
+Következő lépés az audit valós blokkoló okainak megoldása, a HR-időeredet és
+adatminőség ellenőrzése, majd a tanítási adatkontraktus és a felosztás tervezése.

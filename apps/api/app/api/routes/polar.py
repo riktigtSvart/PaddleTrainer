@@ -248,6 +248,11 @@ from app.services.route_expected_response_model import (
     build_route_expected_response_model,
     build_route_expected_response_model_summary,
 )
+from app.services.training_data_readiness_audit import (
+    build_route_training_data_readiness_audit,
+    build_training_data_readiness_audit_summary,
+    build_training_data_readiness_cohort_summary,
+)
 from app.services.athlete_state_live_binding import (
     load_and_bind_athlete_state_scientific_views,
 )
@@ -1680,6 +1685,7 @@ async def _build_training_session_route_inspection(
     )
 
     sample_sessions_by_external_id = {}
+    sample_session_match_counts = {}
 
     for sample_item in sample_payload.get(
             "trainingSessions",
@@ -1697,6 +1703,11 @@ async def _build_training_session_route_inspection(
 
         if sample_external_id is None:
             continue
+
+        sample_key = str(sample_external_id)
+        sample_session_match_counts[sample_key] = (
+            sample_session_match_counts.get(sample_key, 0) + 1
+        )
 
         sample_sessions_by_external_id[
             str(sample_external_id)
@@ -2642,6 +2653,18 @@ async def _build_training_session_route_inspection(
         route_expected_response_model_summary = (
             build_route_expected_response_model_summary(route_expected_response_model)
         )
+        training_data_readiness_audit = build_route_training_data_readiness_audit(
+            route_expected_response_input,
+            normalized_samples,
+            session_external_id=external_id,
+            athlete_id=str(user.id),
+            route_session=item,
+            sample_session=sample_item,
+            sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+        )
+        training_data_readiness_audit_summary = build_training_data_readiness_audit_summary(
+            training_data_readiness_audit
+        )
 
         route_environment_evidence_record = (
             build_route_environment_evidence_record(
@@ -3162,6 +3185,7 @@ async def _build_training_session_route_inspection(
                 "route_expected_response_model": (
                     route_expected_response_model_summary
                 ),
+                "training_data_readiness_audit": training_data_readiness_audit_summary,
                 "trusted_environment_context_snapshot": (
                     trusted_environment_context_snapshot
                 ),
@@ -3194,6 +3218,9 @@ async def _build_training_session_route_inspection(
         "from": from_date,
         "to": to_date,
         "route_sessions": route_sessions,
+        "training_data_readiness_cohort": build_training_data_readiness_cohort_summary(
+            [session["training_data_readiness_audit"] for session in route_sessions]
+        ),
         "raw": {
             "routes": route_payload,
             "samples": sample_payload,

@@ -194,6 +194,17 @@ from app.services.trusted_route_hydrology_context import (
     build_trusted_route_hydrology_context,
     build_trusted_route_hydrology_context_summary,
 )
+from app.services.hydrology_relation_catalog import (
+    build_hydrology_relation_catalog_summary,
+)
+from app.services.hydrology_relation_catalog_source import (
+    SUPPORTED_HYDROLOGY_RELATION_PROVIDERS,
+    load_hydrology_relation_catalog,
+)
+from app.services.route_hydrology_relation_live_projection import (
+    build_route_hydrology_relation_live_projection,
+    build_route_hydrology_relation_live_projection_summary,
+)
 from app.services.route_hydrology_source_resolution_snapshot import (
     bind_route_hydrology_source_resolution_snapshot_to_evidence_record,
     build_route_hydrology_source_resolution_snapshot,
@@ -1286,6 +1297,7 @@ async def _build_training_session_route_inspection(
     weather_provider: str | None,
     hydrology_provider: str | None,
     hydrology_station_registry_number: int | None,
+    hydrology_relation_provider: str | None,
     persist_environment_evidence: bool,
     db: AsyncSession,
     waterbody_provider: str | None = None,
@@ -1320,6 +1332,12 @@ async def _build_training_session_route_inspection(
     hydrology_provider = (
         hydrology_provider.upper()
         if hydrology_provider
+        else None
+    )
+
+    hydrology_relation_provider = (
+        hydrology_relation_provider.upper()
+        if hydrology_relation_provider
         else None
     )
 
@@ -1474,6 +1492,58 @@ async def _build_training_session_route_inspection(
                 "must be provided together"
             ),
         )
+
+    if hydrology_relation_provider not in (
+        None,
+        *SUPPORTED_HYDROLOGY_RELATION_PROVIDERS,
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "hydrology_relation_provider must be one of "
+                f"{', '.join(SUPPORTED_HYDROLOGY_RELATION_PROVIDERS)} "
+                "or omitted"
+            ),
+        )
+
+    if (
+        hydrology_relation_provider is not None
+        and hydrology_provider is None
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "hydrology_relation_provider requires an explicit "
+                "hydrology_provider and hydrology_station_registry_number; "
+                "relation evidence never selects a nearest station"
+            ),
+        )
+
+    if (
+        persist_environment_evidence
+        and hydrology_relation_provider is not None
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "hydrology relation providers are inspect-only in V23.2; "
+                "relation-derived trusted hydrology persistence requires "
+                "dedicated relation lineage"
+            ),
+        )
+
+    hydrology_relation_catalog = (
+        load_hydrology_relation_catalog(
+            hydrology_relation_provider
+        )
+        if hydrology_relation_provider is not None
+        else None
+    )
+    hydrology_relation_catalog_summary = (
+        build_hydrology_relation_catalog_summary(
+            hydrology_relation_catalog
+        )
+    )
 
     if weather_provider not in (
         None,
@@ -2028,6 +2098,11 @@ async def _build_training_session_route_inspection(
         route_hydrology_context_summary = None
         trusted_route_hydrology_context = None
         trusted_route_hydrology_context_summary = None
+        route_hydrology_relation_live_projection = None
+        route_hydrology_relation_live_projection_summary = None
+        route_hydrology_relation_evidence_summary = None
+        relation_aware_trusted_route_hydrology_context_summary = None
+        effective_trusted_route_hydrology_context = None
         hydrology_trust_decision_snapshot = None
         trusted_environment_context_snapshot = None
 
@@ -2205,6 +2280,46 @@ async def _build_training_session_route_inspection(
                             trusted_route_hydrology_context
                         )
                     )
+
+        route_hydrology_relation_live_projection = (
+            build_route_hydrology_relation_live_projection(
+                route_environment_context_input=(
+                    route_environment_context_input
+                ),
+                route_hydrology_source_resolution=(
+                    route_hydrology_source_resolution
+                ),
+                route_hydrology_context=(
+                    route_hydrology_context
+                ),
+                trusted_route_hydrology_context=(
+                    trusted_route_hydrology_context
+                ),
+                relation_catalog=(
+                    hydrology_relation_catalog
+                ),
+            )
+        )
+        route_hydrology_relation_live_projection_summary = (
+            build_route_hydrology_relation_live_projection_summary(
+                route_hydrology_relation_live_projection
+            )
+        )
+        route_hydrology_relation_evidence_summary = (
+            route_hydrology_relation_live_projection.get(
+                "route_hydrology_relation_evidence_summary"
+            )
+        )
+        relation_aware_trusted_route_hydrology_context_summary = (
+            route_hydrology_relation_live_projection.get(
+                "relation_aware_trusted_route_hydrology_context_summary"
+            )
+        )
+        effective_trusted_route_hydrology_context = (
+            route_hydrology_relation_live_projection.get(
+                "effective_trusted_route_hydrology_context"
+            )
+        )
 
         weather_samples = []
         weather_source = None
@@ -2432,7 +2547,7 @@ async def _build_training_session_route_inspection(
                 route_water_environment_identity,
                 route_weather_sample_matching,
                 route_wind_context,
-                trusted_route_hydrology_context,
+                effective_trusted_route_hydrology_context,
                 weather_source=weather_source,
             )
         )
@@ -2897,6 +3012,18 @@ async def _build_training_session_route_inspection(
                 "trusted_route_hydrology_context": (
                     trusted_route_hydrology_context_summary
                 ),
+                "hydrology_relation_catalog": (
+                    hydrology_relation_catalog_summary
+                ),
+                "route_hydrology_relation_evidence": (
+                    route_hydrology_relation_evidence_summary
+                ),
+                "relation_aware_trusted_route_hydrology_context": (
+                    relation_aware_trusted_route_hydrology_context_summary
+                ),
+                "route_hydrology_relation_live_projection": (
+                    route_hydrology_relation_live_projection_summary
+                ),
                 "hydrology_trust_decision_snapshot": (
                     hydrology_trust_decision_snapshot
                 ),
@@ -2992,6 +3119,9 @@ async def inspect_training_session_routes(
         default=None,
         ge=1,
     ),
+    hydrology_relation_provider: str | None = Query(
+        default=None,
+    ),
     waterbody_provider: str | None = Query(
         default=None,
     ),
@@ -3042,6 +3172,9 @@ async def inspect_training_session_routes(
         ),
         hydrology_station_registry_number=(
             hydrology_station_registry_number
+        ),
+        hydrology_relation_provider=(
+            hydrology_relation_provider
         ),
         persist_environment_evidence=False,
         db=db,
@@ -3099,6 +3232,9 @@ async def persist_training_session_route_environment_evidence(
         default=None,
         ge=1,
     ),
+    hydrology_relation_provider: str | None = Query(
+        default=None,
+    ),
     waterbody_provider: str | None = Query(
         default=None,
     ),
@@ -3149,6 +3285,9 @@ async def persist_training_session_route_environment_evidence(
         ),
         hydrology_station_registry_number=(
             hydrology_station_registry_number
+        ),
+        hydrology_relation_provider=(
+            hydrology_relation_provider
         ),
         persist_environment_evidence=True,
         db=db,

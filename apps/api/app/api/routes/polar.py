@@ -222,6 +222,10 @@ from app.services.trusted_environment_context_snapshot import (
 from app.services.trusted_environment_context_persistence import (
     persist_trusted_route_environment_context_snapshot,
 )
+from app.services.route_expected_response_input import (
+    build_route_expected_response_input,
+    build_route_expected_response_input_summary,
+)
 
 from app.services.route_environment_evidence_record import (
     build_route_environment_evidence_record,
@@ -2431,6 +2435,20 @@ async def _build_training_session_route_inspection(
             )
         )
 
+        route_expected_response_input = (
+            build_route_expected_response_input(
+                route_external_workload_evidence,
+                trusted_route_environment_context,
+                athlete_state_context=None,
+                athlete_state_binding=None,
+            )
+        )
+        route_expected_response_input_summary = (
+            build_route_expected_response_input_summary(
+                route_expected_response_input
+            )
+        )
+
         route_environment_evidence_record = (
             build_route_environment_evidence_record(
                 session_external_id=(
@@ -2872,6 +2890,9 @@ async def _build_training_session_route_inspection(
                 ),
                 "trusted_route_environment_context": (
                     trusted_route_environment_context_summary
+                ),
+                "route_expected_response_input": (
+                    route_expected_response_input_summary
                 ),
                 "trusted_environment_context_snapshot": (
                     trusted_environment_context_snapshot

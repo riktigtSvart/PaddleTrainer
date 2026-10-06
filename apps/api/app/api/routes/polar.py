@@ -190,6 +190,10 @@ from app.services.route_hydrology_representativeness import (
     build_route_hydrology_representativeness,
     build_route_hydrology_representativeness_summary,
 )
+from app.services.trusted_route_hydrology_context import (
+    build_trusted_route_hydrology_context,
+    build_trusted_route_hydrology_context_summary,
+)
 from app.services.route_hydrology_source_resolution_snapshot import (
     bind_route_hydrology_source_resolution_snapshot_to_evidence_record,
     build_route_hydrology_source_resolution_snapshot,
@@ -1995,6 +1999,8 @@ async def _build_training_session_route_inspection(
         route_hydrology_representativeness_summary = None
         route_hydrology_context = None
         route_hydrology_context_summary = None
+        trusted_route_hydrology_context = None
+        trusted_route_hydrology_context_summary = None
 
         if (
             hydrology_provider
@@ -2156,6 +2162,18 @@ async def _build_training_session_route_inspection(
                     route_hydrology_context_summary = (
                         build_route_hydrology_context_summary(
                             route_hydrology_context
+                        )
+                    )
+
+                    trusted_route_hydrology_context = (
+                        build_trusted_route_hydrology_context(
+                            route_hydrology_context,
+                            route_hydrology_representativeness,
+                        )
+                    )
+                    trusted_route_hydrology_context_summary = (
+                        build_trusted_route_hydrology_context_summary(
+                            trusted_route_hydrology_context
                         )
                     )
 
@@ -2708,6 +2726,9 @@ async def _build_training_session_route_inspection(
                 ),
                 "route_hydrology_context": (
                     route_hydrology_context_summary
+                ),
+                "trusted_route_hydrology_context": (
+                    trusted_route_hydrology_context_summary
                 ),
                 "weather_source": (
                     {

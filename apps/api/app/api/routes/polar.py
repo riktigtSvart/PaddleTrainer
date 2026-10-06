@@ -216,6 +216,12 @@ from app.services.trusted_route_environment_context import (
     build_trusted_route_environment_context,
     build_trusted_route_environment_context_summary,
 )
+from app.services.trusted_environment_context_snapshot import (
+    build_trusted_route_environment_context_snapshot,
+)
+from app.services.trusted_environment_context_persistence import (
+    persist_trusted_route_environment_context_snapshot,
+)
 
 from app.services.route_environment_evidence_record import (
     build_route_environment_evidence_record,
@@ -2012,6 +2018,7 @@ async def _build_training_session_route_inspection(
         trusted_route_hydrology_context = None
         trusted_route_hydrology_context_summary = None
         hydrology_trust_decision_snapshot = None
+        trusted_environment_context_snapshot = None
 
         if (
             hydrology_provider
@@ -2484,6 +2491,7 @@ async def _build_training_session_route_inspection(
         water_environment_identity_persistence = None
         hydrology_source_resolution_persistence = None
         hydrology_trust_decision_persistence = None
+        trusted_environment_context_persistence = None
 
         if persist_environment_evidence:
             if external_id is None:
@@ -2549,6 +2557,7 @@ async def _build_training_session_route_inspection(
                     route_water_environment_identity_snapshot is not None
                     or route_hydrology_source_resolution_snapshot is not None
                     or trusted_route_hydrology_context is not None
+                    or trusted_route_environment_context is not None
                 ) and evidence_set_id is None:
                     raise ValueError(
                         "Environment evidence persistence did not return "
@@ -2611,6 +2620,44 @@ async def _build_training_session_route_inspection(
                                 evidence_set_id=evidence_set_id,
                                 snapshot=(
                                     hydrology_trust_decision_snapshot
+                                ),
+                            )
+                        )
+
+                if trusted_route_environment_context is not None:
+                    trusted_environment_context_snapshot = (
+                        build_trusted_route_environment_context_snapshot(
+                            environment_evidence_set_id=str(
+                                evidence_set_id
+                            ),
+                            environment_evidence_hash=(
+                                environment_evidence_persistence.get(
+                                    "evidence_hash"
+                                )
+                                if isinstance(
+                                    environment_evidence_persistence,
+                                    dict,
+                                )
+                                else None
+                            ),
+                            route_water_environment_identity_snapshot=(
+                                route_water_environment_identity_snapshot
+                            ),
+                            hydrology_trust_decision_snapshot=(
+                                hydrology_trust_decision_snapshot
+                            ),
+                            trusted_route_environment_context=(
+                                trusted_route_environment_context
+                            ),
+                        )
+                    )
+                    if trusted_environment_context_snapshot is not None:
+                        trusted_environment_context_persistence = (
+                            await persist_trusted_route_environment_context_snapshot(
+                                db,
+                                evidence_set_id=evidence_set_id,
+                                snapshot=(
+                                    trusted_environment_context_snapshot
                                 ),
                             )
                         )
@@ -2825,6 +2872,12 @@ async def _build_training_session_route_inspection(
                 ),
                 "trusted_route_environment_context": (
                     trusted_route_environment_context_summary
+                ),
+                "trusted_environment_context_snapshot": (
+                    trusted_environment_context_snapshot
+                ),
+                "trusted_environment_context_persistence": (
+                    trusted_environment_context_persistence
                 ),
                 "route_environment_evidence_record": (
                     route_environment_evidence_record_summary

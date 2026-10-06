@@ -199,6 +199,7 @@ from app.services.hydrology_relation_catalog import (
 )
 from app.services.hydrology_relation_catalog_source import (
     SUPPORTED_HYDROLOGY_RELATION_PROVIDERS,
+    VALIDATION_HYDROLOGY_RELATION_PROVIDERS,
     load_hydrology_relation_catalog,
 )
 from app.services.route_hydrology_relation_live_projection import (
@@ -1304,6 +1305,7 @@ async def _build_training_session_route_inspection(
     hydrology_provider: str | None,
     hydrology_station_registry_number: int | None,
     hydrology_relation_provider: str | None,
+    hydrology_relation_validation_mode: bool,
     persist_environment_evidence: bool,
     db: AsyncSession,
     waterbody_provider: str | None = None,
@@ -1525,9 +1527,35 @@ async def _build_training_session_route_inspection(
             ),
         )
 
+    if (
+        hydrology_relation_provider in VALIDATION_HYDROLOGY_RELATION_PROVIDERS
+        and not hydrology_relation_validation_mode
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "validation hydrology relation providers require "
+                "hydrology_relation_validation_mode=true; synthetic validation "
+                "relations are never enabled implicitly"
+            ),
+        )
+
+    if (
+        hydrology_relation_validation_mode
+        and hydrology_relation_provider not in VALIDATION_HYDROLOGY_RELATION_PROVIDERS
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "hydrology_relation_validation_mode is only valid with an explicit "
+                "validation hydrology relation provider"
+            ),
+        )
+
     hydrology_relation_catalog = (
         load_hydrology_relation_catalog(
-            hydrology_relation_provider
+            hydrology_relation_provider,
+            allow_validation_provider=hydrology_relation_validation_mode,
         )
         if hydrology_relation_provider is not None
         else None
@@ -3068,6 +3096,9 @@ async def _build_training_session_route_inspection(
                 "trusted_route_hydrology_context": (
                     trusted_route_hydrology_context_summary
                 ),
+                "hydrology_relation_validation_mode": (
+                    hydrology_relation_validation_mode
+                ),
                 "hydrology_relation_catalog": (
                     hydrology_relation_catalog_summary
                 ),
@@ -3184,6 +3215,9 @@ async def inspect_training_session_routes(
     hydrology_relation_provider: str | None = Query(
         default=None,
     ),
+    hydrology_relation_validation_mode: bool = Query(
+        default=False,
+    ),
     waterbody_provider: str | None = Query(
         default=None,
     ),
@@ -3237,6 +3271,9 @@ async def inspect_training_session_routes(
         ),
         hydrology_relation_provider=(
             hydrology_relation_provider
+        ),
+        hydrology_relation_validation_mode=(
+            hydrology_relation_validation_mode
         ),
         persist_environment_evidence=False,
         db=db,
@@ -3297,6 +3334,9 @@ async def persist_training_session_route_environment_evidence(
     hydrology_relation_provider: str | None = Query(
         default=None,
     ),
+    hydrology_relation_validation_mode: bool = Query(
+        default=False,
+    ),
     waterbody_provider: str | None = Query(
         default=None,
     ),
@@ -3350,6 +3390,9 @@ async def persist_training_session_route_environment_evidence(
         ),
         hydrology_relation_provider=(
             hydrology_relation_provider
+        ),
+        hydrology_relation_validation_mode=(
+            hydrology_relation_validation_mode
         ),
         persist_environment_evidence=True,
         db=db,

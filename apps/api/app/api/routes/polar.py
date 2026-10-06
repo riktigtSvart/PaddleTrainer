@@ -244,6 +244,10 @@ from app.services.route_expected_response_input import (
     build_route_expected_response_input,
     build_route_expected_response_input_summary,
 )
+from app.services.route_expected_response_model import (
+    build_route_expected_response_model,
+    build_route_expected_response_model_summary,
+)
 from app.services.athlete_state_live_binding import (
     load_and_bind_athlete_state_scientific_views,
 )
@@ -2632,6 +2636,12 @@ async def _build_training_session_route_inspection(
                 route_expected_response_input
             )
         )
+        route_expected_response_model = build_route_expected_response_model(
+            route_expected_response_input
+        )
+        route_expected_response_model_summary = (
+            build_route_expected_response_model_summary(route_expected_response_model)
+        )
 
         route_environment_evidence_record = (
             build_route_environment_evidence_record(
@@ -3148,6 +3158,9 @@ async def _build_training_session_route_inspection(
                 ),
                 "route_expected_response_input": (
                     route_expected_response_input_summary
+                ),
+                "route_expected_response_model": (
+                    route_expected_response_model_summary
                 ),
                 "trusted_environment_context_snapshot": (
                     trusted_environment_context_snapshot

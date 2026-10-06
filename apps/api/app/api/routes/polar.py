@@ -201,6 +201,12 @@ from app.services.route_hydrology_source_resolution_snapshot import (
 from app.services.hydrology_source_resolution_persistence import (
     persist_route_hydrology_source_resolution_snapshot,
 )
+from app.services.hydrology_trust_decision_snapshot import (
+    build_hydrology_trust_decision_snapshot,
+)
+from app.services.hydrology_trust_decision_persistence import (
+    persist_hydrology_trust_decision_snapshot,
+)
 
 from app.services.route_wind_context import (
     build_route_wind_context,
@@ -2001,6 +2007,7 @@ async def _build_training_session_route_inspection(
         route_hydrology_context_summary = None
         trusted_route_hydrology_context = None
         trusted_route_hydrology_context_summary = None
+        hydrology_trust_decision_snapshot = None
 
         if (
             hydrology_provider
@@ -2456,6 +2463,7 @@ async def _build_training_session_route_inspection(
         environment_evidence_persistence = None
         water_environment_identity_persistence = None
         hydrology_source_resolution_persistence = None
+        hydrology_trust_decision_persistence = None
 
         if persist_environment_evidence:
             if external_id is None:
@@ -2520,10 +2528,11 @@ async def _build_training_session_route_inspection(
                 if (
                     route_water_environment_identity_snapshot is not None
                     or route_hydrology_source_resolution_snapshot is not None
+                    or trusted_route_hydrology_context is not None
                 ) and evidence_set_id is None:
                     raise ValueError(
                         "Environment evidence persistence did not return "
-                        "an evidence_set_id for derived identity snapshots"
+                        "an evidence_set_id for derived evidence lineage"
                     )
 
                 if route_water_environment_identity_snapshot is not None:
@@ -2547,6 +2556,44 @@ async def _build_training_session_route_inspection(
                             ),
                         )
                     )
+
+                if trusted_route_hydrology_context is not None:
+                    hydrology_trust_decision_snapshot = (
+                        build_hydrology_trust_decision_snapshot(
+                            environment_evidence_set_id=str(
+                                evidence_set_id
+                            ),
+                            environment_evidence_hash=(
+                                environment_evidence_persistence.get(
+                                    "evidence_hash"
+                                )
+                                if isinstance(
+                                    environment_evidence_persistence,
+                                    dict,
+                                )
+                                else None
+                            ),
+                            route_hydrology_source_resolution_snapshot=(
+                                route_hydrology_source_resolution_snapshot
+                            ),
+                            route_hydrology_representativeness=(
+                                route_hydrology_representativeness
+                            ),
+                            trusted_route_hydrology_context=(
+                                trusted_route_hydrology_context
+                            ),
+                        )
+                    )
+                    if hydrology_trust_decision_snapshot is not None:
+                        hydrology_trust_decision_persistence = (
+                            await persist_hydrology_trust_decision_snapshot(
+                                db,
+                                evidence_set_id=evidence_set_id,
+                                snapshot=(
+                                    hydrology_trust_decision_snapshot
+                                ),
+                            )
+                        )
             except ValueError as exc:
                 raise HTTPException(
                     status_code=409,
@@ -2729,6 +2776,12 @@ async def _build_training_session_route_inspection(
                 ),
                 "trusted_route_hydrology_context": (
                     trusted_route_hydrology_context_summary
+                ),
+                "hydrology_trust_decision_snapshot": (
+                    hydrology_trust_decision_snapshot
+                ),
+                "hydrology_trust_decision_persistence": (
+                    hydrology_trust_decision_persistence
                 ),
                 "weather_source": (
                     {

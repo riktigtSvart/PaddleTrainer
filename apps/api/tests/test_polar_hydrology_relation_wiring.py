@@ -44,4 +44,6 @@ def test_polar_internal_builder_uses_relation_live_projection_before_environment
         trusted_env_call,
     )
     assert effective_use > trusted_env_call
-    assert "hydrology relation providers are inspect-only in V23.2" in source
+    assert "build_hydrology_relation_decision_snapshot(" in source
+    assert "persist_hydrology_relation_decision_snapshot(" in source
+    assert "hydrology relation providers are inspect-only in V23.2" not in source

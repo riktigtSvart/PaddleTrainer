@@ -6,7 +6,7 @@ import json
 from typing import Any, Mapping, Sequence
 
 
-SNAPSHOT_SCHEMA_VERSION = "0.1"
+SNAPSHOT_SCHEMA_VERSION = "0.2"
 PROJECTION_POLICY_SCHEMA_VERSION = "0.1"
 COMPONENT_NAMES = (
     "water_identity",
@@ -22,7 +22,8 @@ def build_trusted_route_environment_context_snapshot(
     environment_evidence_hash: str | None,
     route_water_environment_identity_snapshot: Mapping[str, Any] | None,
     hydrology_trust_decision_snapshot: Mapping[str, Any] | None,
-    trusted_route_environment_context: Mapping[str, Any] | None,
+    hydrology_relation_decision_snapshot: Mapping[str, Any] | None = None,
+    trusted_route_environment_context: Mapping[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Build compact immutable lineage for the trusted environment projection.
 
@@ -170,6 +171,10 @@ def build_trusted_route_environment_context_snapshot(
             hydrology_trust_decision_snapshot,
             "decision_hash",
         ),
+        "hydrology_relation_decision_hash": _upstream_hash(
+            hydrology_relation_decision_snapshot,
+            "relation_decision_hash",
+        ),
         "trusted_environment_context_schema_version": _string(
             trusted_route_environment_context.get("schema_version")
         ),
@@ -216,6 +221,7 @@ def build_trusted_route_environment_context_snapshot(
             "stores_full_environment_context_payload": False,
             "stores_component_segment_masks_as_hash_commitments": True,
             "allows_multiple_projections_per_environment_evidence_set": True,
+            "links_relation_derived_hydrology_lineage_when_present": True,
             "promotes_component_trust": False,
             "resolves_new_provider_evidence": False,
             "estimates_local_current_velocity": False,

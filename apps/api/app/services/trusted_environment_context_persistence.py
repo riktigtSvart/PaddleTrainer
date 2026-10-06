@@ -77,6 +77,7 @@ async def persist_trusted_route_environment_context_snapshot(
                 projection_status,
                 water_environment_identity_hash,
                 hydrology_trust_decision_hash,
+                hydrology_relation_decision_hash,
                 projection_policy_hash,
                 water_identity_mask_hash,
                 weather_mask_hash,
@@ -94,6 +95,7 @@ async def persist_trusted_route_environment_context_snapshot(
                 :projection_status,
                 :water_environment_identity_hash,
                 :hydrology_trust_decision_hash,
+                :hydrology_relation_decision_hash,
                 :projection_policy_hash,
                 :water_identity_mask_hash,
                 :weather_mask_hash,
@@ -121,6 +123,9 @@ async def persist_trusted_route_environment_context_snapshot(
             ),
             "hydrology_trust_decision_hash": snapshot.get(
                 "hydrology_trust_decision_hash"
+            ),
+            "hydrology_relation_decision_hash": snapshot.get(
+                "hydrology_relation_decision_hash"
             ),
             "projection_policy_hash": snapshot.get("projection_policy_hash"),
             "water_identity_mask_hash": (
@@ -188,6 +193,7 @@ async def load_trusted_route_environment_context_snapshot(
                 projection_status,
                 water_environment_identity_hash,
                 hydrology_trust_decision_hash,
+                hydrology_relation_decision_hash,
                 projection_policy_hash,
                 water_identity_mask_hash,
                 weather_mask_hash,
@@ -231,6 +237,9 @@ async def load_trusted_route_environment_context_snapshot(
         ),
         "hydrology_trust_decision_hash": row.get(
             "hydrology_trust_decision_hash"
+        ),
+        "hydrology_relation_decision_hash": row.get(
+            "hydrology_relation_decision_hash"
         ),
         "projection_policy_hash": row.get("projection_policy_hash"),
         "water_identity_mask_hash": row.get("water_identity_mask_hash"),

@@ -176,6 +176,9 @@ def _snapshot(**kwargs):
         hydrology_trust_decision_snapshot=kwargs.get(
             "hydrology_trust_decision_snapshot", _hydrology_snapshot()
         ),
+        hydrology_relation_decision_snapshot=kwargs.get(
+            "hydrology_relation_decision_snapshot"
+        ),
         trusted_route_environment_context=kwargs.get(
             "trusted_route_environment_context", _trusted_context()
         ),
@@ -290,6 +293,31 @@ def test_withheld_hydrology_is_first_class_projection_state():
     assert route["hydrology_usable_segment_count"] == 0
     assert verify_trusted_environment_context_snapshot(snapshot)
 
+
+
+
+def test_relation_decision_hash_is_linked_when_present():
+    snapshot = _snapshot(
+        hydrology_relation_decision_snapshot={
+            "relation_decision_hash": "r" * 64
+        }
+    )
+    assert snapshot["hydrology_relation_decision_hash"] == "r" * 64
+    assert verify_trusted_environment_context_snapshot(snapshot)
+
+
+def test_changed_relation_decision_hash_changes_projection_hash():
+    first = _snapshot(
+        hydrology_relation_decision_snapshot={
+            "relation_decision_hash": "r" * 64
+        }
+    )
+    second = _snapshot(
+        hydrology_relation_decision_snapshot={
+            "relation_decision_hash": "q" * 64
+        }
+    )
+    assert first["projection_hash"] != second["projection_hash"]
 
 def test_tampered_snapshot_fails_verification():
     snapshot = _snapshot()

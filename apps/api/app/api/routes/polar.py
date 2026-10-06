@@ -218,6 +218,12 @@ from app.services.hydrology_trust_decision_snapshot import (
 from app.services.hydrology_trust_decision_persistence import (
     persist_hydrology_trust_decision_snapshot,
 )
+from app.services.hydrology_relation_decision_snapshot import (
+    build_hydrology_relation_decision_snapshot,
+)
+from app.services.hydrology_relation_decision_persistence import (
+    persist_hydrology_relation_decision_snapshot,
+)
 
 from app.services.route_wind_context import (
     build_route_wind_context,
@@ -1519,19 +1525,6 @@ async def _build_training_session_route_inspection(
             ),
         )
 
-    if (
-        persist_environment_evidence
-        and hydrology_relation_provider is not None
-    ):
-        raise HTTPException(
-            status_code=409,
-            detail=(
-                "hydrology relation providers are inspect-only in V23.2; "
-                "relation-derived trusted hydrology persistence requires "
-                "dedicated relation lineage"
-            ),
-        )
-
     hydrology_relation_catalog = (
         load_hydrology_relation_catalog(
             hydrology_relation_provider
@@ -2100,10 +2093,13 @@ async def _build_training_session_route_inspection(
         trusted_route_hydrology_context_summary = None
         route_hydrology_relation_live_projection = None
         route_hydrology_relation_live_projection_summary = None
+        route_hydrology_relation_evidence = None
         route_hydrology_relation_evidence_summary = None
+        relation_aware_trusted_route_hydrology_context = None
         relation_aware_trusted_route_hydrology_context_summary = None
         effective_trusted_route_hydrology_context = None
         hydrology_trust_decision_snapshot = None
+        hydrology_relation_decision_snapshot = None
         trusted_environment_context_snapshot = None
 
         if (
@@ -2305,9 +2301,19 @@ async def _build_training_session_route_inspection(
                 route_hydrology_relation_live_projection
             )
         )
+        route_hydrology_relation_evidence = (
+            route_hydrology_relation_live_projection.get(
+                "route_hydrology_relation_evidence"
+            )
+        )
         route_hydrology_relation_evidence_summary = (
             route_hydrology_relation_live_projection.get(
                 "route_hydrology_relation_evidence_summary"
+            )
+        )
+        relation_aware_trusted_route_hydrology_context = (
+            route_hydrology_relation_live_projection.get(
+                "relation_aware_trusted_route_hydrology_context"
             )
         )
         relation_aware_trusted_route_hydrology_context_summary = (
@@ -2659,6 +2665,7 @@ async def _build_training_session_route_inspection(
         water_environment_identity_persistence = None
         hydrology_source_resolution_persistence = None
         hydrology_trust_decision_persistence = None
+        hydrology_relation_decision_persistence = None
         trusted_environment_context_persistence = None
 
         if persist_environment_evidence:
@@ -2725,6 +2732,7 @@ async def _build_training_session_route_inspection(
                     route_water_environment_identity_snapshot is not None
                     or route_hydrology_source_resolution_snapshot is not None
                     or trusted_route_hydrology_context is not None
+                    or hydrology_relation_catalog is not None
                     or trusted_route_environment_context is not None
                 ) and evidence_set_id is None:
                     raise ValueError(
@@ -2792,6 +2800,51 @@ async def _build_training_session_route_inspection(
                             )
                         )
 
+                if hydrology_relation_catalog is not None:
+                    hydrology_relation_decision_snapshot = (
+                        build_hydrology_relation_decision_snapshot(
+                            environment_evidence_set_id=str(
+                                evidence_set_id
+                            ),
+                            environment_evidence_hash=(
+                                environment_evidence_persistence.get(
+                                    "evidence_hash"
+                                )
+                                if isinstance(
+                                    environment_evidence_persistence,
+                                    dict,
+                                )
+                                else None
+                            ),
+                            route_hydrology_source_resolution_snapshot=(
+                                route_hydrology_source_resolution_snapshot
+                            ),
+                            hydrology_relation_catalog=(
+                                hydrology_relation_catalog
+                            ),
+                            route_hydrology_relation_evidence=(
+                                route_hydrology_relation_evidence
+                            ),
+                            relation_aware_trusted_route_hydrology_context=(
+                                relation_aware_trusted_route_hydrology_context
+                            ),
+                        )
+                    )
+                    if hydrology_relation_decision_snapshot is None:
+                        raise ValueError(
+                            "Hydrology relation provider was enabled but no "
+                            "relation decision snapshot could be built"
+                        )
+                    hydrology_relation_decision_persistence = (
+                        await persist_hydrology_relation_decision_snapshot(
+                            db,
+                            evidence_set_id=evidence_set_id,
+                            snapshot=(
+                                hydrology_relation_decision_snapshot
+                            ),
+                        )
+                    )
+
                 if trusted_route_environment_context is not None:
                     trusted_environment_context_snapshot = (
                         build_trusted_route_environment_context_snapshot(
@@ -2813,6 +2866,9 @@ async def _build_training_session_route_inspection(
                             ),
                             hydrology_trust_decision_snapshot=(
                                 hydrology_trust_decision_snapshot
+                            ),
+                            hydrology_relation_decision_snapshot=(
+                                hydrology_relation_decision_snapshot
                             ),
                             trusted_route_environment_context=(
                                 trusted_route_environment_context
@@ -3029,6 +3085,12 @@ async def _build_training_session_route_inspection(
                 ),
                 "hydrology_trust_decision_persistence": (
                     hydrology_trust_decision_persistence
+                ),
+                "hydrology_relation_decision_snapshot": (
+                    hydrology_relation_decision_snapshot
+                ),
+                "hydrology_relation_decision_persistence": (
+                    hydrology_relation_decision_persistence
                 ),
                 "weather_source": (
                     {

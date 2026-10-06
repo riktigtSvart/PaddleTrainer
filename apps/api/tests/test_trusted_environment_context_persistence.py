@@ -80,6 +80,9 @@ class FakeAsyncSession:
                 "hydrology_trust_decision_hash": params[
                     "hydrology_trust_decision_hash"
                 ],
+                "hydrology_relation_decision_hash": params[
+                    "hydrology_relation_decision_hash"
+                ],
                 "projection_policy_hash": params["projection_policy_hash"],
                 "water_identity_mask_hash": params["water_identity_mask_hash"],
                 "weather_mask_hash": params["weather_mask_hash"],
@@ -166,12 +169,17 @@ def _context(policy_any=True):
     }
 
 
-def _snapshot(policy_any=True):
+def _snapshot(policy_any=True, relation_hash=None):
     return build_trusted_route_environment_context_snapshot(
         environment_evidence_set_id=EVIDENCE_SET_ID,
         environment_evidence_hash="e" * 64,
         route_water_environment_identity_snapshot={"identity_hash": "a" * 64},
         hydrology_trust_decision_snapshot={"decision_hash": "b" * 64},
+        hydrology_relation_decision_snapshot=(
+            {"relation_decision_hash": relation_hash}
+            if relation_hash is not None
+            else None
+        ),
         trusted_route_environment_context=_context(policy_any=policy_any),
     )
 
@@ -227,6 +235,22 @@ async def test_changed_projection_policy_creates_second_lineage_version():
     assert second["lineage_snapshot_count"] == 2
     assert db.commit_count == 2
 
+
+
+
+@pytest.mark.asyncio
+async def test_changed_relation_lineage_creates_second_environment_projection():
+    db = FakeAsyncSession()
+    first = await persist_trusted_route_environment_context_snapshot(
+        db, evidence_set_id=EVIDENCE_SET_ID, snapshot=_snapshot(relation_hash="r" * 64)
+    )
+    second = await persist_trusted_route_environment_context_snapshot(
+        db, evidence_set_id=EVIDENCE_SET_ID, snapshot=_snapshot(relation_hash="q" * 64)
+    )
+    assert first["status"] == "CREATED"
+    assert second["status"] == "CREATED"
+    assert first["projection_hash"] != second["projection_hash"]
+    assert second["lineage_snapshot_count"] == 2
 
 @pytest.mark.asyncio
 async def test_snapshot_cannot_be_persisted_under_different_evidence_set():

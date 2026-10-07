@@ -9,10 +9,11 @@ from datetime import UTC, date, datetime, timedelta, timezone
 from typing import Any
 
 from app.services.hr_timebase_snapshot import resolve_hr_timebase_snapshots
+from app.services.hr_acquisition_declarations import resolve_hr_acquisition_declarations
 from app.services.polar_training_samples import normalize_polar_training_samples
 from app.services.route_expected_response_model import build_route_expected_response_model
 
-AUDIT_VERSION = "0.2.0"
+AUDIT_VERSION = "0.3.0"
 LIMITATIONS = [
     "HR_SAMPLE_TIME_ORIGIN_NOT_VERIFIED",
     "HR_ACQUISITION_QUALITY_NOT_ESTABLISHED",
@@ -32,6 +33,7 @@ def build_route_training_data_readiness_audit(
     sample_session: Mapping[str, Any] | None,
     sample_session_match_count: int,
     hr_timebase_snapshots: list[Mapping[str, Any]] | None = None,
+    hr_acquisition_declarations: list[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Audit retrospective HR label candidates; never authorize model training.
 
@@ -46,6 +48,11 @@ def build_route_training_data_readiness_audit(
         hr_timebase_snapshots,
         raw_sample,
         athlete_id=athlete_id,
+        session_external_id=session_external_id,
+        sample_session_match_count=sample_session_match_count,
+    )
+    acquisition_resolution = resolve_hr_acquisition_declarations(
+        hr_acquisition_declarations, raw_sample, athlete_id=athlete_id,
         session_external_id=session_external_id,
         sample_session_match_count=sample_session_match_count,
     )
@@ -74,6 +81,7 @@ def build_route_training_data_readiness_audit(
             "session_external_id": session_external_id,
             "athlete_id": athlete_id,
             "hr_timebase_snapshots": hr_timebase_snapshots,
+            "hr_acquisition_declarations": hr_acquisition_declarations,
         }
     )
     if source_hash is None:
@@ -117,6 +125,17 @@ def build_route_training_data_readiness_audit(
             _mapping(sample_exercises[matched_index]) if matched_index is not None else {}
         )
         saved_timebase = timebase_resolution["by_exercise"].get(_identifier(matched_exercise), {})
+        acquisition = acquisition_resolution["by_exercise"].get(_identifier(matched_exercise), {})
+        acquisition_applied = (
+            acquisition.get("source_binding_verified") is True
+            and not reasons and not match_reasons
+        )
+        if acquisition_resolution["blocking_reasons"] or acquisition.get("status") in (
+            "WITHHELD", "REVIEW_REQUIRED",
+        ):
+            blockers.append("HR_ACQUISITION_DECLARATION_UNUSABLE")
+        if acquisition_applied:
+            blockers.extend(acquisition["blocking_reasons"])
         timebase_verified = (
             saved_timebase.get("export_timebase_verified") is True
             and not reasons
@@ -169,6 +188,26 @@ def build_route_training_data_readiness_audit(
                     "interval_ms": interval,
                 },
                 "export_timebase_verified": timebase_verified,
+                "user_declared_acquisition_applied": acquisition_applied,
+                "hr_acquisition": {
+                    "status": acquisition.get("status", acquisition_resolution["status"])
+                    if acquisition_applied or not acquisition.get("source_binding_verified")
+                    else "NOT_APPLIED",
+                    "source_binding_verified": acquisition_applied,
+                    "declaration_source": "USER_DECLARATION" if acquisition_applied else None,
+                    "declared_sensor": acquisition.get("declared_sensor")
+                    if acquisition_applied else None,
+                    "active_declaration_ids": acquisition.get("active_declaration_ids", [])
+                    if acquisition_applied else [],
+                    "reported_issue_codes": acquisition.get("reported_issue_codes", [])
+                    if acquisition_applied else [],
+                    "sensor_identity_verified": False,
+                    "acquisition_quality_verified": False,
+                    "blocking_reasons": [
+                        *acquisition_resolution["blocking_reasons"],
+                        *acquisition.get("blocking_reasons", []),
+                    ],
+                },
                 "hr_timebase": {
                     "status": saved_timebase.get("status", timebase_resolution["status"]),
                     "sample_grid_source": "VERIFIED_SAVED_EXPORT"
@@ -204,6 +243,11 @@ def build_route_training_data_readiness_audit(
                         else []
                     ),
                     *(["PARTIAL_HR_GRID_COVERAGE"] if full_count < len(segments) else []),
+                    "HR_SENSOR_IDENTITY_NOT_ESTABLISHED",
+                    "HR_SENSOR_DETAILS_USER_DECLARED_NOT_PROVIDER_VERIFIED"
+                    if acquisition_applied else "HR_SENSOR_DETAILS_NOT_DECLARED",
+                    *(["HR_USER_REPORTED_ISSUES_ARE_NOT_VALIDATED_ARTIFACT_DETECTION"]
+                      if acquisition_applied and acquisition.get("reported_issue_codes") else []),
                 ],
                 "segments": segments,
             }
@@ -232,6 +276,13 @@ def build_route_training_data_readiness_audit(
         "candidate_route_count": candidates,
         "candidate_segment_count": sum(r["candidate_segment_count"] for r in routes),
         "export_timebase_verified_route_count": sum(r["export_timebase_verified"] for r in routes),
+        "user_declared_acquisition_route_count": sum(
+            r["user_declared_acquisition_applied"] for r in routes
+        ),
+        "hr_acquisition_evidence": {
+            key: value for key, value in acquisition_resolution.items()
+            if key not in ("by_exercise", "exercises")
+        },
         "hr_timebase_evidence": {
             key: value for key, value in timebase_resolution.items() if key != "by_exercise"
         },
@@ -251,6 +302,8 @@ def build_route_training_data_readiness_audit(
             "sample_grid": "EXERCISE_SPECIFIC_EXPORT_OR_PROJECT_ZERO_ORIGIN_CONVENTION",
             "provider_time_origin_verified": False,
             "verified_export_timebase_used_when_current_source_matches": True,
+            "sensor_declarations_do_not_certify_hr_quality": True,
+            "reported_acquisition_issues_require_preparation_review": True,
             "segment_window": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
             "exercise_matching_by_position_allowed": False,
             "missing_labels_interpolated": False,

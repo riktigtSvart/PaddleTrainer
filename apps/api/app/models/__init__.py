@@ -6,9 +6,11 @@ from app.models.entities import (
     WorkoutSession,
 )
 from app.models.hr_timebase_snapshot import HeartRateTimebaseSnapshot
+from app.models.hr_acquisition_declaration import HRAcquisitionDeclaration
 
 __all__ = [
     "ExternalConnection",
+    "HRAcquisitionDeclaration",
     "HeartRateTimebaseSnapshot",
     "PlannedWorkout",
     "User",

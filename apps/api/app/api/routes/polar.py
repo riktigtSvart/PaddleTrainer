@@ -59,6 +59,8 @@ from app.services.polar_training_samples import (
     normalize_polar_training_samples,
 )
 from app.services.hr_timebase_persistence import load_current_hr_timebase_snapshots
+from app.services.hr_acquisition_persistence import load_current_hr_acquisition_declarations
+from app.services.hr_acquisition_declarations import resolve_hr_acquisition_declarations
 
 from app.services.exercise_speed_gps_consistency import (
     build_exercise_speed_gps_consistency,
@@ -2662,6 +2664,15 @@ async def _build_training_session_route_inspection(
             athlete_id=str(user.id), session_external_id=external_id,
             sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
         )
+        saved_hr_acquisition_declarations = await load_current_hr_acquisition_declarations(
+            db, sample_item, athlete_id=str(user.id), session_external_id=external_id,
+            sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+        )
+        heart_rate_acquisition_context = resolve_hr_acquisition_declarations(
+            saved_hr_acquisition_declarations, sample_item,
+            athlete_id=str(user.id), session_external_id=external_id,
+            sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+        )
         training_data_readiness_audit = build_route_training_data_readiness_audit(
             route_expected_response_input,
             normalized_samples,
@@ -2671,6 +2682,7 @@ async def _build_training_session_route_inspection(
             sample_session=sample_item,
             sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
             hr_timebase_snapshots=saved_hr_timebase_snapshots,
+            hr_acquisition_declarations=saved_hr_acquisition_declarations,
         )
         training_data_readiness_audit_summary = build_training_data_readiness_audit_summary(
             training_data_readiness_audit
@@ -3202,6 +3214,7 @@ async def _build_training_session_route_inspection(
                 ),
                 "training_data_readiness_audit": training_data_readiness_audit_summary,
                 "heart_rate_sample_validation": heart_rate_sample_validation,
+                "heart_rate_acquisition_context": heart_rate_acquisition_context,
                 "trusted_environment_context_snapshot": (
                     trusted_environment_context_snapshot
                 ),
@@ -3477,4 +3490,3 @@ async def persist_training_session_route_environment_evidence(
             marine_surface_query_padding_m
         ),
     )
-

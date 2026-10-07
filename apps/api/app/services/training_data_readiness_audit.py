@@ -8,10 +8,11 @@ from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta, timezone
 from typing import Any
 
+from app.services.hr_timebase_snapshot import resolve_hr_timebase_snapshots
 from app.services.polar_training_samples import normalize_polar_training_samples
 from app.services.route_expected_response_model import build_route_expected_response_model
 
-AUDIT_VERSION = "0.1.0"
+AUDIT_VERSION = "0.2.0"
 LIMITATIONS = [
     "HR_SAMPLE_TIME_ORIGIN_NOT_VERIFIED",
     "HR_ACQUISITION_QUALITY_NOT_ESTABLISHED",
@@ -30,16 +31,24 @@ def build_route_training_data_readiness_audit(
     route_session: Mapping[str, Any] | None,
     sample_session: Mapping[str, Any] | None,
     sample_session_match_count: int,
+    hr_timebase_snapshots: list[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Audit retrospective HR label candidates; never authorize model training.
 
-    Sample zero at exercise elapsed zero is only a project grid convention.
-    Its coverage is diagnostic, not verified physiological time alignment.
+    A current, athlete-bound export proof supplies this exercise's grid origin.
+    Without it, sample zero at exercise zero is an unverified project convention.
     Raw provider identities are matched before looking up normalized series.
     """
     source = _mapping(expected_response_input)
     samples = _mapping(normalized_samples)
     raw_route, raw_sample = _mapping(route_session), _mapping(sample_session)
+    timebase_resolution = resolve_hr_timebase_snapshots(
+        hr_timebase_snapshots,
+        raw_sample,
+        athlete_id=athlete_id,
+        session_external_id=session_external_id,
+        sample_session_match_count=sample_session_match_count,
+    )
     boundary = build_route_expected_response_model(source)
     identity, athlete = _id(session_external_id), _id(athlete_id)
     reasons = []
@@ -64,6 +73,7 @@ def build_route_training_data_readiness_audit(
             "sample_session_match_count": sample_session_match_count,
             "session_external_id": session_external_id,
             "athlete_id": athlete_id,
+            "hr_timebase_snapshots": hr_timebase_snapshots,
         }
     )
     if source_hash is None:
@@ -103,8 +113,27 @@ def build_route_training_data_readiness_audit(
         if not _integer(interval, positive=True) or hr_series.get("unit") != "bpm":
             blockers.append("HEART_RATE_GRID_INVALID")
         duration = exercise.get("durationMillis")
+        matched_exercise = (
+            _mapping(sample_exercises[matched_index]) if matched_index is not None else {}
+        )
+        saved_timebase = timebase_resolution["by_exercise"].get(_identifier(matched_exercise), {})
+        timebase_verified = (
+            saved_timebase.get("export_timebase_verified") is True
+            and not reasons
+            and not match_reasons
+        )
+        origin_us = (
+            saved_timebase["timebase"]["first_sample_offset_from_api_exercise_start_us"]
+            if timebase_verified
+            else 0
+        )
+        if (
+            timebase_resolution["status"] == "WITHHELD"
+            or saved_timebase.get("status") == "WITHHELD"
+        ):
+            blockers.append("SAVED_HR_TIMEBASE_UNUSABLE")
         segments = [
-            _coverage(segment, values, interval, duration)
+            _coverage(segment, values, interval, duration, origin_us=origin_us)
             for segment in _list(input_route.get("segments"))
         ]
         full_count = sum(s["grid_coverage_status"] == "COMPLETE" for s in segments)
@@ -139,8 +168,41 @@ def build_route_training_data_readiness_audit(
                     "invalid_or_missing_sample_count": sum(not _positive(v) for v in values),
                     "interval_ms": interval,
                 },
+                "export_timebase_verified": timebase_verified,
+                "hr_timebase": {
+                    "status": saved_timebase.get("status", timebase_resolution["status"]),
+                    "sample_grid_source": "VERIFIED_SAVED_EXPORT"
+                    if timebase_verified
+                    else "PROJECT_ZERO_ORIGIN_CONVENTION",
+                    "sample_grid_origin_us": origin_us,
+                    "snapshot_id": saved_timebase.get("snapshot_id") if timebase_verified else None,
+                    "snapshot_hash": saved_timebase.get("snapshot_hash")
+                    if timebase_verified
+                    else None,
+                    "verification_decision_hash": saved_timebase.get("verification_decision_hash")
+                    if timebase_verified
+                    else None,
+                    "blocking_reasons": [
+                        *timebase_resolution["blocking_reasons"],
+                        *saved_timebase.get("blocking_reasons", []),
+                    ],
+                },
                 "limitations": [
-                    *LIMITATIONS,
+                    *[
+                        limitation
+                        for limitation in LIMITATIONS
+                        if not (
+                            timebase_verified and limitation == "HR_SAMPLE_TIME_ORIGIN_NOT_VERIFIED"
+                        )
+                    ],
+                    *(
+                        [
+                            "HR_API_NATIVE_SAMPLE_CLOCK_SEMANTICS_NOT_VERIFIED",
+                            "HR_PAUSE_CLOCK_SEMANTICS_NOT_VERIFIED",
+                        ]
+                        if timebase_verified
+                        else []
+                    ),
                     *(["PARTIAL_HR_GRID_COVERAGE"] if full_count < len(segments) else []),
                 ],
                 "segments": segments,
@@ -169,8 +231,16 @@ def build_route_training_data_readiness_audit(
         "route_count": len(routes),
         "candidate_route_count": candidates,
         "candidate_segment_count": sum(r["candidate_segment_count"] for r in routes),
+        "export_timebase_verified_route_count": sum(r["export_timebase_verified"] for r in routes),
+        "hr_timebase_evidence": {
+            key: value for key, value in timebase_resolution.items() if key != "by_exercise"
+        },
         "blocking_reasons": reasons,
-        "limitations": list(LIMITATIONS),
+        "limitations": list(
+            dict.fromkeys(limitation for route in routes for limitation in route["limitations"])
+        )
+        if routes
+        else list(LIMITATIONS),
         "input_provenance": {
             "source_hash": source_hash,
             "expected_response_input_hash": boundary["input_provenance"][
@@ -178,8 +248,9 @@ def build_route_training_data_readiness_audit(
             ],
         },
         "policy": {
-            "sample_grid": "PROJECT_CONVENTION_FIRST_SLOT_AT_EXERCISE_ZERO",
+            "sample_grid": "EXERCISE_SPECIFIC_EXPORT_OR_PROJECT_ZERO_ORIGIN_CONVENTION",
             "provider_time_origin_verified": False,
+            "verified_export_timebase_used_when_current_source_matches": True,
             "segment_window": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
             "exercise_matching_by_position_allowed": False,
             "missing_labels_interpolated": False,
@@ -240,7 +311,13 @@ def build_training_data_readiness_cohort_summary(audits: list[Mapping[str, Any]]
         "training_authorized": False,
         "split_assigned": False,
         "limitations": [
-            *LIMITATIONS,
+            *list(
+                dict.fromkeys(
+                    limitation
+                    for audit in audits
+                    for limitation in audit.get("limitations", LIMITATIONS)
+                )
+            ),
             "SESSION_COUNT_IS_NOT_EVIDENCE_OF_MODEL_VALIDITY",
             "PROVIDED_COHORT_IS_NOT_FULL_TRAINING_HISTORY",
         ],
@@ -286,7 +363,7 @@ def _match_exercise(exercise, route_exercises, sample_exercises, route_session, 
     return index, basis, []
 
 
-def _coverage(segment, values, interval, duration):
+def _coverage(segment, values, interval, duration, *, origin_us=0):
     segment = _mapping(segment)
     workload = _mapping(segment.get("external_workload"))
     start, end = workload.get("start_exercise_elapsed_ms"), workload.get("end_exercise_elapsed_ms")
@@ -300,7 +377,9 @@ def _coverage(segment, values, interval, duration):
     )
     expected = observed = 0
     if valid:
-        first, stop = (start + interval - 1) // interval, (end + interval - 1) // interval
+        period_us = interval * 1000
+        first = max(0, -(-(start * 1000 - origin_us) // period_us))
+        stop = max(0, -(-(end * 1000 - origin_us) // period_us))
         expected = stop - first
         observed = sum(
             _positive(v) for v in values[min(first, len(values)) : min(stop, len(values))]
@@ -309,6 +388,7 @@ def _coverage(segment, values, interval, duration):
         "order_index": segment.get("order_index"),
         "start_exercise_elapsed_ms": start,
         "end_exercise_elapsed_ms": end,
+        "sample_grid_origin_us": origin_us,
         "expected_grid_slot_count": expected,
         "positive_finite_grid_sample_count": observed,
         "missing_or_invalid_grid_slot_count": expected - observed,

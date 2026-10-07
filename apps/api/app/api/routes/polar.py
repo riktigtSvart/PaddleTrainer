@@ -58,6 +58,7 @@ from app.services.route_motion_summary import (
 from app.services.polar_training_samples import (
     normalize_polar_training_samples,
 )
+from app.services.hr_timebase_persistence import load_current_hr_timebase_snapshots
 
 from app.services.exercise_speed_gps_consistency import (
     build_exercise_speed_gps_consistency,
@@ -2656,6 +2657,11 @@ async def _build_training_session_route_inspection(
         route_expected_response_model_summary = (
             build_route_expected_response_model_summary(route_expected_response_model)
         )
+        saved_hr_timebase_snapshots = await load_current_hr_timebase_snapshots(
+            db, sample_item,
+            athlete_id=str(user.id), session_external_id=external_id,
+            sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+        )
         training_data_readiness_audit = build_route_training_data_readiness_audit(
             route_expected_response_input,
             normalized_samples,
@@ -2664,6 +2670,7 @@ async def _build_training_session_route_inspection(
             route_session=item,
             sample_session=sample_item,
             sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+            hr_timebase_snapshots=saved_hr_timebase_snapshots,
         )
         training_data_readiness_audit_summary = build_training_data_readiness_audit_summary(
             training_data_readiness_audit

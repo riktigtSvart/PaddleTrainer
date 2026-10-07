@@ -1,4 +1,4 @@
-"""Optional, read-only TCX/ZIP comparison against the connected Polar account."""
+"""TCX/ZIP verification and immutable evidence for the connected Polar account."""
 
 from datetime import date, timedelta
 from typing import Annotated
@@ -10,6 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.integrations.polar.client import PolarAPIError, PolarClient
 from app.models.entities import ExternalConnection
+from app.services.hr_timebase_persistence import (
+    load_current_hr_timebase_snapshots,
+    persist_hr_timebase_snapshot,
+)
+from app.services.hr_timebase_snapshot import current_hr_source_hash, resolve_hr_timebase_snapshots
 from app.services.polar_tokens import get_valid_access_token
 from app.services.tcx_heart_rate_timebase import (
     MAX_IMPORT_BYTES,
@@ -42,6 +47,111 @@ async def verify_training_session_tcx_timebase(
     """Send a TCX or ZIP as the raw request body; no database evidence is saved."""
     if sample_date == date.max:
         raise HTTPException(422, "Sample date cannot be the last representable date.")
+    body = await _read_tcx_body(request)
+    _, sample_session, match_count = await _fetch_sample_session(
+        db, session_external_id, sample_date
+    )
+    return build_tcx_heart_rate_timebase(
+        body,
+        sample_session,
+        expected_session_external_id=session_external_id,
+        sample_session_match_count=match_count,
+        expected_exercise_external_id=exercise_external_id,
+    )
+
+
+@router.post(
+    "/sessions/{session_external_id}/hr-timebase/persist-tcx",
+    openapi_extra={
+        "requestBody": {
+            "required": True,
+            "content": {
+                kind: {"schema": {"type": "string", "format": "binary"}}
+                for kind in ("application/xml", "application/zip", "application/octet-stream")
+            },
+        }
+    },
+)
+async def persist_training_session_tcx_timebase(
+    session_external_id: str,
+    request: Request,
+    sample_date: Annotated[date, Query()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    exercise_external_id: Annotated[str | None, Query()] = None,
+):
+    """Persist only a freshly verified, immutable export-timebase snapshot."""
+    if sample_date == date.max:
+        raise HTTPException(422, "Sample date cannot be the last representable date.")
+    body = await _read_tcx_body(request)
+    user, sample_session, match_count = await _fetch_sample_session(
+        db, session_external_id, sample_date
+    )
+    verification = build_tcx_heart_rate_timebase(
+        body,
+        sample_session,
+        expected_session_external_id=session_external_id,
+        sample_session_match_count=match_count,
+        expected_exercise_external_id=exercise_external_id,
+    )
+    persistence = {"status": "NOT_STORED", "persists_timebase_evidence": False}
+    if verification["export_timebase_verified"]:
+        try:
+            persistence = await persist_hr_timebase_snapshot(
+                db,
+                verification,
+                sample_session,
+                athlete_id=str(user.id),
+                session_external_id=session_external_id,
+                sample_session_match_count=match_count,
+            )
+        except ValueError:
+            raise HTTPException(
+                409, "HR timebase snapshot source or round-trip verification failed."
+            ) from None
+    return {"verification": verification, "persistence": persistence}
+
+
+@router.get("/sessions/{session_external_id}/hr-timebase/saved")
+async def inspect_saved_training_session_hr_timebase(
+    session_external_id: str,
+    sample_date: Annotated[date, Query()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Revalidate saved proof against current source data; no TCX is required."""
+    user, sample_session, match_count = await _fetch_sample_session(
+        db, session_external_id, sample_date
+    )
+    records = await load_current_hr_timebase_snapshots(
+        db,
+        sample_session,
+        athlete_id=str(user.id),
+        session_external_id=session_external_id,
+        sample_session_match_count=match_count,
+    )
+    resolved = resolve_hr_timebase_snapshots(
+        records,
+        sample_session,
+        athlete_id=str(user.id),
+        session_external_id=session_external_id,
+        sample_session_match_count=match_count,
+    )
+    source_hash = current_hr_source_hash(
+        sample_session,
+        session_external_id=session_external_id,
+        sample_session_match_count=match_count,
+    )
+    return {
+        "session_external_id": session_external_id,
+        "source_binding_verified": source_hash is not None,
+        "current_api_source_hash": source_hash,
+        "stored_current_source_snapshot_count": len(records),
+        "saved_timebase": resolved,
+        "training_authorized": False,
+        "numeric_prediction_authorized": False,
+    }
+
+
+async def _read_tcx_body(request):
     media_type = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
     if media_type not in (
         "application/xml",
@@ -67,6 +177,12 @@ async def verify_training_session_tcx_timebase(
         if len(body) + len(chunk) > MAX_IMPORT_BYTES:
             raise HTTPException(413, "TCX/ZIP upload exceeds the 16 MiB limit.")
         body.extend(chunk)
+    return bytes(body)
+
+
+async def _fetch_sample_session(db, session_external_id, sample_date):
+    if sample_date == date.max:
+        raise HTTPException(422, "Sample date cannot be the last representable date.")
     user = await get_or_create_demo_user(db)
     connection = await db.scalar(
         select(ExternalConnection).where(
@@ -95,10 +211,4 @@ async def verify_training_session_tcx_timebase(
         and isinstance(s.get("identifier"), dict)
         and str(s["identifier"].get("id")) == session_external_id
     ]
-    return build_tcx_heart_rate_timebase(
-        bytes(body),
-        matched[0] if len(matched) == 1 else None,
-        expected_session_external_id=session_external_id,
-        sample_session_match_count=len(matched),
-        expected_exercise_external_id=exercise_external_id,
-    )
+    return user, matched[0] if len(matched) == 1 else None, len(matched)

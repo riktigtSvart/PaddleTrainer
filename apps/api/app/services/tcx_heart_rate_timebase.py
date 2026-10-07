@@ -482,3 +482,194 @@ def _finish(result):
     result["blocking_reasons"] = sorted(set(result["blocking_reasons"]))
     result["decision_hash"] = _hash(result)
     return result
+
+
+def verify_tcx_heart_rate_timebase_evidence(
+    evidence,
+    sample_session,
+    *,
+    expected_session_external_id,
+    sample_session_match_count,
+    expected_exercise_external_id=None,
+) -> bool:
+    """Recheck stored export evidence against its current, complete API source.
+
+    The original TCX is not replayed here. Its immutable verification decision
+    must retain its hash; values, identities, clocks and every sample timestamp
+    are checked again against the currently supplied API source.
+    """
+    try:
+        if not isinstance(evidence, Mapping):
+            return False
+        body = dict(evidence)
+        claimed_hash = body.pop("decision_hash", None)
+        if claimed_hash != _hash(body):
+            return False
+        if (
+            evidence.get("provider") != "PADDLETRAINER"
+            or evidence.get("schema_version") != "0.1"
+            or evidence.get("timebase_version") != TIMEBASE_VERSION
+            or evidence.get("status") != "VERIFIED_EXPORT_TIMEBASE_WITH_LIMITATIONS"
+            or evidence.get("export_timebase_verified") is not True
+            or evidence.get("blocking_reasons") != []
+        ):
+            return False
+        if any(
+            evidence.get(flag) is not False
+            for flag in (
+                "training_authorized",
+                "numeric_prediction_authorized",
+                "acquisition_quality_verified",
+                "api_native_time_origin_verified",
+                "pause_clock_semantics_verified",
+            )
+        ):
+            return False
+        source = build_training_session_heart_rate_validation(
+            sample_session,
+            expected_session_external_id=expected_session_external_id,
+            sample_session_match_count=sample_session_match_count,
+        )
+        provenance = evidence["input_provenance"]
+        if (
+            source["blocking_reasons"]
+            or evidence["session_external_id"] != _identity(expected_session_external_id)
+            or provenance["api_source_hash"] != source["input_provenance"]["source_hash"]
+            or provenance["api_validation_decision_hash"] != source["decision_hash"]
+        ):
+            return False
+        binding, timebase = evidence["binding"], evidence["timebase"]
+        if (
+            type(evidence.get("matching_candidate_count")) is not int
+            or evidence["matching_candidate_count"] != 1
+        ):
+            return False
+        if any(
+            type(timebase.get(key)) is not int
+            for key in (
+                "sample_count",
+                "interval_ms",
+                "first_sample_offset_from_api_exercise_start_us",
+            )
+        ) or any(
+            isinstance(timebase.get(key), bool)
+            for key in (
+                "first_sample_offset_from_api_exercise_start_ms",
+                "sample_grid_span_ms",
+            )
+        ):
+            return False
+        index = binding["api_exercise_index"]
+        if not isinstance(index, int) or isinstance(index, bool) or index < 0:
+            return False
+        ids = [
+            _identity(_mapping(_mapping(e).get("identifier")).get("id"))
+            for e in sample_session["exercises"]
+        ]
+        if not ids or len(ids) > 64 or None in ids or len(set(ids)) != len(ids):
+            return False
+        activity_index = binding["tcx_activity_index"]
+        if (
+            type(activity_index) is not int
+            or activity_index < 0
+            or binding.get("match_basis")
+            != "UNIQUE_ID_BOUND_SESSION_FULL_ORDERED_HR_AND_START_METADATA"
+        ):
+            return False
+        matched = [c for c in evidence["candidates"] if c.get("matched") is True]
+        if len(matched) != 1 or matched[0] != {
+            "api_exercise_index": index,
+            "api_exercise_external_id": ids[index],
+            "tcx_activity_index": activity_index,
+            "matched": True,
+            "blocking_reasons": [],
+        }:
+            return False
+        summary = evidence["source_import"]
+        if (
+            summary["tcx_xml_sha256"] != provenance["tcx_xml_sha256"]
+            or summary["activity_count"] != len(summary["activities"])
+            or activity_index >= summary["activity_count"]
+        ):
+            return False
+        activity_summary = summary["activities"][activity_index]
+        if (
+            activity_summary["blocking_reasons"] != []
+            or activity_summary["activity_start_utc"] != binding["tcx_activity_start_utc"]
+            or activity_summary["positive_finite_hr_count"] != timebase["sample_count"]
+        ):
+            return False
+        exercise = sample_session["exercises"][index]
+        identity = _identity(_mapping(exercise.get("identifier")).get("id"))
+        if (
+            identity is None
+            or evidence["exercise_external_id"] != identity
+            or (
+                expected_exercise_external_id is not None
+                and identity != _identity(expected_exercise_external_id)
+            )
+        ):
+            return False
+        container = exercise["samples"]
+        series = container if isinstance(container, list) else container["samples"]
+        raw_hr = [s for s in series if s.get("type") == "HEART_RATE"]
+        if len(raw_hr) != 1:
+            return False
+        values = raw_hr[0]["values"]
+        strings = timebase["sample_timestamps_utc"]
+        if not isinstance(strings, list) or len(strings) != len(values):
+            return False
+        times = [_time(s) for s in strings]
+        if None in times or len(times) < 2:
+            return False
+        activity_start = _time(binding["tcx_activity_start_utc"])
+        activity = {
+            "start": activity_start,
+            "point_times": times,
+            "hr_times": times,
+            "values": [Decimal(str(v)) for v in values],
+            "reasons": [],
+        }
+        if activity_start is None or times[0] < activity_start:
+            return False
+        reasons, start, stop, _, interval = _compare(
+            activity, exercise, sample_session, source["exercises"][index]
+        )
+        if (
+            reasons
+            or binding["api_exercise_start_utc"] != start.isoformat()
+            or binding["api_exercise_stop_utc"] != stop.isoformat()
+        ):
+            return False
+        offset = _us(times[0] - start)
+        expected = {
+            "source": "VALUE_MATCHED_TCX_EXPORT_TIMESTAMPS",
+            "sample_count": len(times),
+            "interval_ms": interval,
+            "first_sample_timestamp_utc": times[0].isoformat(),
+            "last_sample_timestamp_utc": times[-1].isoformat(),
+            "first_sample_offset_from_api_exercise_start_us": offset,
+            "first_sample_offset_from_api_exercise_start_ms": _ms(offset),
+            "sample_grid_span_ms": _ms(_us(times[-1] - times[0])),
+            "sample_timestamps_utc": [t.isoformat() for t in times],
+        }
+        if timebase != expected:
+            return False
+        return (
+            type(binding.get("matched_hr_sample_count")) is int
+            and binding["matched_hr_sample_count"] == len(values)
+            and type(binding.get("ordered_value_mismatch_count")) is int
+            and binding["ordered_value_mismatch_count"] == 0
+            and binding["normalized_hr_values_sha256"]
+            == _hash([str(Decimal(str(v)).normalize()) for v in values])
+        )
+    except (
+        KeyError,
+        IndexError,
+        AttributeError,
+        TypeError,
+        ValueError,
+        OverflowError,
+        InvalidOperation,
+    ):
+        return False

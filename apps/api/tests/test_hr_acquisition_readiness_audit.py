@@ -36,7 +36,7 @@ def test_declaration_informs_audit_without_certifying_labels_or_promoting_prepar
     baseline = audit(sources)
     result = audit(sources, hr_acquisition_declarations=records(sources))
     assert sources == before
-    assert result["audit_version"] == "0.3.0"
+    assert result["audit_version"] == "0.4.0"
     assert result["user_declared_acquisition_route_count"] == 1
     assert result["candidate_segment_count"] == baseline["candidate_segment_count"] == 2
     assert result["routes"][0]["hr_acquisition"]["declaration_source"] == "USER_DECLARATION"

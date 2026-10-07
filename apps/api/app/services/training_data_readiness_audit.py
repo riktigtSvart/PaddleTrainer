@@ -10,10 +10,16 @@ from typing import Any
 
 from app.services.hr_timebase_snapshot import resolve_hr_timebase_snapshots
 from app.services.hr_acquisition_declarations import resolve_hr_acquisition_declarations
+from app.services.heart_rate_signal_diagnostics import (
+    build_training_session_hr_signal_diagnostics,
+    build_hr_segment_diagnostics,
+    summarize_hr_signal_diagnostics,
+    summarize_hr_exercise_diagnostics,
+)
 from app.services.polar_training_samples import normalize_polar_training_samples
 from app.services.route_expected_response_model import build_route_expected_response_model
 
-AUDIT_VERSION = "0.3.0"
+AUDIT_VERSION = "0.4.0"
 LIMITATIONS = [
     "HR_SAMPLE_TIME_ORIGIN_NOT_VERIFIED",
     "HR_ACQUISITION_QUALITY_NOT_ESTABLISHED",
@@ -55,6 +61,12 @@ def build_route_training_data_readiness_audit(
         hr_acquisition_declarations, raw_sample, athlete_id=athlete_id,
         session_external_id=session_external_id,
         sample_session_match_count=sample_session_match_count,
+    )
+    signal_diagnostics = build_training_session_hr_signal_diagnostics(
+        sample_session, athlete_id=athlete_id, session_external_id=session_external_id,
+        sample_session_match_count=sample_session_match_count,
+        hr_timebase_snapshots=hr_timebase_snapshots,
+        hr_acquisition_declarations=hr_acquisition_declarations,
     )
     boundary = build_route_expected_response_model(source)
     identity, athlete = _id(session_external_id), _id(athlete_id)
@@ -155,6 +167,23 @@ def build_route_training_data_readiness_audit(
             _coverage(segment, values, interval, duration, origin_us=origin_us)
             for segment in _list(input_route.get("segments"))
         ]
+        diagnostic_exercises = signal_diagnostics["exercises"]
+        exercise_diagnostics = (
+            diagnostic_exercises[matched_index]
+            if matched_index is not None and matched_index < len(diagnostic_exercises)
+            else {}
+        )
+        diagnostics_applied = (
+            signal_diagnostics["source_binding_verified"] is True
+            and exercise_diagnostics.get("source_binding_verified") is True
+            and not reasons and not match_reasons
+        )
+        diagnostic_windows = build_hr_segment_diagnostics(
+            matched_exercise, exercise_diagnostics if diagnostics_applied else {},
+            saved_clock=saved_timebase if timebase_verified else {}, windows=segments,
+        )
+        for segment, diagnostic_window in zip(segments, diagnostic_windows):
+            segment["hr_signal_diagnostics"] = diagnostic_window
         full_count = sum(s["grid_coverage_status"] == "COMPLETE" for s in segments)
         if not full_count:
             blockers.append("NO_FULLY_COVERED_HR_SEGMENT")
@@ -189,6 +218,14 @@ def build_route_training_data_readiness_audit(
                 },
                 "export_timebase_verified": timebase_verified,
                 "user_declared_acquisition_applied": acquisition_applied,
+                "hr_diagnostics_applied": diagnostics_applied,
+                "hr_signal_diagnostics": summarize_hr_exercise_diagnostics(
+                    exercise_diagnostics if diagnostics_applied else {
+                        "status": "NOT_APPLIED", "source_binding_verified": False,
+                        "acquisition_quality_verified": False, "artifact_status": "NOT_ASSESSED",
+                    },
+                    diagnostic_windows,
+                ),
                 "hr_acquisition": {
                     "status": acquisition.get("status", acquisition_resolution["status"])
                     if acquisition_applied or not acquisition.get("source_binding_verified")
@@ -279,6 +316,16 @@ def build_route_training_data_readiness_audit(
         "user_declared_acquisition_route_count": sum(
             r["user_declared_acquisition_applied"] for r in routes
         ),
+        "diagnostics_available_route_count": sum(
+            r["hr_diagnostics_applied"] and r["hr_signal_diagnostics"].get("available", False)
+            for r in routes
+        ),
+        "diagnostics_verified_clock_route_count": sum(
+            r["hr_diagnostics_applied"]
+            and r["hr_signal_diagnostics"].get("timebase", {}).get("time_mapping_available", False)
+            for r in routes
+        ),
+        "hr_signal_diagnostics_evidence": summarize_hr_signal_diagnostics(signal_diagnostics),
         "hr_acquisition_evidence": {
             key: value for key, value in acquisition_resolution.items()
             if key not in ("by_exercise", "exercises")
@@ -294,6 +341,7 @@ def build_route_training_data_readiness_audit(
         else list(LIMITATIONS),
         "input_provenance": {
             "source_hash": source_hash,
+            "hr_signal_diagnostics_decision_hash": signal_diagnostics["decision_hash"],
             "expected_response_input_hash": boundary["input_provenance"][
                 "expected_response_input_hash"
             ],
@@ -304,6 +352,8 @@ def build_route_training_data_readiness_audit(
             "verified_export_timebase_used_when_current_source_matches": True,
             "sensor_declarations_do_not_certify_hr_quality": True,
             "reported_acquisition_issues_require_preparation_review": True,
+            "signal_diagnostics_promote_eligibility": False,
+            "descriptive_patterns_certify_hr_quality": False,
             "segment_window": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
             "exercise_matching_by_position_allowed": False,
             "missing_labels_interpolated": False,

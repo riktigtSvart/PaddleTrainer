@@ -259,6 +259,9 @@ from app.services.training_data_readiness_audit import (
 from app.services.heart_rate_sample_validation import (
     build_training_session_heart_rate_validation,
 )
+from app.services.heart_rate_signal_diagnostics import (
+    build_training_session_hr_signal_diagnostics,
+)
 from app.services.athlete_state_live_binding import (
     load_and_bind_athlete_state_scientific_views,
 )
@@ -2692,6 +2695,12 @@ async def _build_training_session_route_inspection(
             expected_session_external_id=external_id,
             sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
         )
+        heart_rate_signal_diagnostics = build_training_session_hr_signal_diagnostics(
+            sample_item, athlete_id=str(user.id), session_external_id=external_id,
+            sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+            hr_timebase_snapshots=saved_hr_timebase_snapshots,
+            hr_acquisition_declarations=saved_hr_acquisition_declarations,
+        )
 
         route_environment_evidence_record = (
             build_route_environment_evidence_record(
@@ -3214,6 +3223,7 @@ async def _build_training_session_route_inspection(
                 ),
                 "training_data_readiness_audit": training_data_readiness_audit_summary,
                 "heart_rate_sample_validation": heart_rate_sample_validation,
+                "heart_rate_signal_diagnostics": heart_rate_signal_diagnostics,
                 "heart_rate_acquisition_context": heart_rate_acquisition_context,
                 "trusted_environment_context_snapshot": (
                     trusted_environment_context_snapshot

@@ -6,6 +6,7 @@ from app.api.routes import (
     coach,
     health,
     polar,
+    polar_tcx,
     readiness,
     responses,
     sessions,
@@ -13,11 +14,11 @@ from app.api.routes import (
     workouts,
 )
 
-
 api_router = APIRouter()
 
 api_router.include_router(health.router)
 api_router.include_router(polar.router)
+api_router.include_router(polar_tcx.router)
 api_router.include_router(workouts.router)
 api_router.include_router(sessions.router)
 api_router.include_router(coach.router)

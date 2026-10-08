@@ -1,0 +1,70 @@
+{
+  "schema_version": "0.1",
+  "manifest_id": "synthetic-cohort-requested-split-001",
+  "task": "RETROSPECTIVE_HR_RESPONSE_WITHIN_ATHLETE",
+  "members": [
+    {
+      "provider": "POLAR",
+      "athlete_id": "athlete-example-1",
+      "session_external_id": "training-example-001",
+      "route_date": "2026-01-10",
+      "replay_snapshot_id": "00000000-0000-0000-0000-000000000001",
+      "expected_snapshot_hash": "0000000000000000000000000000000000000000000000000000000000000001",
+      "expected_evidence_set_id": "00000000-0000-0000-0000-000000000065",
+      "expected_evidence_hash": "0000000000000000000000000000000000000000000000000000000000000065",
+      "expected_unassigned_replay_package_hash": "00000000000000000000000000000000000000000000000000000000000000c9",
+      "expected_dataset_version": "0.1.0",
+      "expected_snapshot_schema_version": "0.1"
+    },
+    {
+      "provider": "POLAR",
+      "athlete_id": "athlete-example-1",
+      "session_external_id": "training-example-002",
+      "route_date": "2026-01-12",
+      "replay_snapshot_id": "00000000-0000-0000-0000-000000000002",
+      "expected_snapshot_hash": "0000000000000000000000000000000000000000000000000000000000000002",
+      "expected_evidence_set_id": "00000000-0000-0000-0000-000000000066",
+      "expected_evidence_hash": "0000000000000000000000000000000000000000000000000000000000000066",
+      "expected_unassigned_replay_package_hash": "00000000000000000000000000000000000000000000000000000000000000ca",
+      "expected_dataset_version": "0.1.0",
+      "expected_snapshot_schema_version": "0.1"
+    },
+    {
+      "provider": "POLAR",
+      "athlete_id": "athlete-example-1",
+      "session_external_id": "training-example-003",
+      "route_date": "2026-01-14",
+      "replay_snapshot_id": "00000000-0000-0000-0000-000000000003",
+      "expected_snapshot_hash": "0000000000000000000000000000000000000000000000000000000000000003",
+      "expected_evidence_set_id": "00000000-0000-0000-0000-000000000067",
+      "expected_evidence_hash": "0000000000000000000000000000000000000000000000000000000000000067",
+      "expected_unassigned_replay_package_hash": "00000000000000000000000000000000000000000000000000000000000000cb",
+      "expected_dataset_version": "0.1.0",
+      "expected_snapshot_schema_version": "0.1"
+    }
+  ],
+  "split_manifest": {
+    "schema_version": "0.1",
+    "manifest_id": "synthetic-split-001",
+    "assignments": [
+      {
+        "provider": "POLAR",
+        "athlete_id": "athlete-example-1",
+        "session_external_id": "training-example-001",
+        "split": "TRAIN"
+      },
+      {
+        "provider": "POLAR",
+        "athlete_id": "athlete-example-1",
+        "session_external_id": "training-example-002",
+        "split": "VALIDATION"
+      },
+      {
+        "provider": "POLAR",
+        "athlete_id": "athlete-example-1",
+        "session_external_id": "training-example-003",
+        "split": "TEST"
+      }
+    ]
+  }
+}

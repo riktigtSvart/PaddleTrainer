@@ -9,6 +9,7 @@ from app.api.routes import (
     polar_environment_replay,
     polar_hr_acquisition,
     polar_hr_diagnostics,
+    polar_response_cohort,
     polar_response_dataset,
     polar_tcx,
     readiness,
@@ -25,6 +26,7 @@ api_router.include_router(polar.router)
 api_router.include_router(polar_environment_replay.router)
 api_router.include_router(polar_hr_acquisition.router)
 api_router.include_router(polar_hr_diagnostics.router)
+api_router.include_router(polar_response_cohort.router)
 api_router.include_router(polar_response_dataset.router)
 api_router.include_router(polar_tcx.router)
 api_router.include_router(workouts.router)

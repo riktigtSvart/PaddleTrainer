@@ -8,18 +8,23 @@ from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta, timezone
 from typing import Any
 
-from app.services.hr_timebase_snapshot import resolve_hr_timebase_snapshots
-from app.services.hr_acquisition_declarations import resolve_hr_acquisition_declarations
 from app.services.heart_rate_signal_diagnostics import (
-    build_training_session_hr_signal_diagnostics,
     build_hr_segment_diagnostics,
-    summarize_hr_signal_diagnostics,
+    build_training_session_hr_signal_diagnostics,
     summarize_hr_exercise_diagnostics,
+    summarize_hr_signal_diagnostics,
 )
+from app.services.hr_acquisition_declarations import resolve_hr_acquisition_declarations
+from app.services.hr_response_temporal_context import (
+    build_hr_response_temporal_context,
+    hr_response_temporal_policy,
+)
+from app.services.hr_timebase_snapshot import resolve_hr_timebase_snapshots
 from app.services.polar_training_samples import normalize_polar_training_samples
 from app.services.route_expected_response_model import build_route_expected_response_model
+from app.services.route_input_diagnostics import build_route_input_diagnostics
 
-AUDIT_VERSION = "0.4.0"
+AUDIT_VERSION = "0.5.0"
 LIMITATIONS = [
     "HR_SAMPLE_TIME_ORIGIN_NOT_VERIFIED",
     "HR_ACQUISITION_QUALITY_NOT_ESTABLISHED",
@@ -40,6 +45,9 @@ def build_route_training_data_readiness_audit(
     sample_session_match_count: int,
     hr_timebase_snapshots: list[Mapping[str, Any]] | None = None,
     hr_acquisition_declarations: list[Mapping[str, Any]] | None = None,
+    trusted_environment: Mapping[str, Any] | None = None,
+    provider_selection: Mapping[str, Any] | None = None,
+    weather_source: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Audit retrospective HR label candidates; never authorize model training.
 
@@ -58,12 +66,16 @@ def build_route_training_data_readiness_audit(
         sample_session_match_count=sample_session_match_count,
     )
     acquisition_resolution = resolve_hr_acquisition_declarations(
-        hr_acquisition_declarations, raw_sample, athlete_id=athlete_id,
+        hr_acquisition_declarations,
+        raw_sample,
+        athlete_id=athlete_id,
         session_external_id=session_external_id,
         sample_session_match_count=sample_session_match_count,
     )
     signal_diagnostics = build_training_session_hr_signal_diagnostics(
-        sample_session, athlete_id=athlete_id, session_external_id=session_external_id,
+        sample_session,
+        athlete_id=athlete_id,
+        session_external_id=session_external_id,
         sample_session_match_count=sample_session_match_count,
         hr_timebase_snapshots=hr_timebase_snapshots,
         hr_acquisition_declarations=hr_acquisition_declarations,
@@ -94,6 +106,9 @@ def build_route_training_data_readiness_audit(
             "athlete_id": athlete_id,
             "hr_timebase_snapshots": hr_timebase_snapshots,
             "hr_acquisition_declarations": hr_acquisition_declarations,
+            "trusted_environment": trusted_environment,
+            "provider_selection": provider_selection,
+            "weather_source": weather_source,
         }
     )
     if source_hash is None:
@@ -139,11 +154,11 @@ def build_route_training_data_readiness_audit(
         saved_timebase = timebase_resolution["by_exercise"].get(_identifier(matched_exercise), {})
         acquisition = acquisition_resolution["by_exercise"].get(_identifier(matched_exercise), {})
         acquisition_applied = (
-            acquisition.get("source_binding_verified") is True
-            and not reasons and not match_reasons
+            acquisition.get("source_binding_verified") is True and not reasons and not match_reasons
         )
         if acquisition_resolution["blocking_reasons"] or acquisition.get("status") in (
-            "WITHHELD", "REVIEW_REQUIRED",
+            "WITHHELD",
+            "REVIEW_REQUIRED",
         ):
             blockers.append("HR_ACQUISITION_DECLARATION_UNUSABLE")
         if acquisition_applied:
@@ -176,21 +191,58 @@ def build_route_training_data_readiness_audit(
         diagnostics_applied = (
             signal_diagnostics["source_binding_verified"] is True
             and exercise_diagnostics.get("source_binding_verified") is True
-            and not reasons and not match_reasons
+            and not reasons
+            and not match_reasons
         )
         diagnostic_windows = build_hr_segment_diagnostics(
-            matched_exercise, exercise_diagnostics if diagnostics_applied else {},
-            saved_clock=saved_timebase if timebase_verified else {}, windows=segments,
+            matched_exercise,
+            exercise_diagnostics if diagnostics_applied else {},
+            saved_clock=saved_timebase if timebase_verified else {},
+            windows=segments,
         )
         for segment, diagnostic_window in zip(segments, diagnostic_windows):
             segment["hr_signal_diagnostics"] = diagnostic_window
+        temporal_contexts, temporal_summary = build_hr_response_temporal_context(
+            segments,
+            [_mapping(s) for s in _list(input_route.get("segments"))],
+            duration_ms=duration,
+        )
+        blockers.extend(temporal_summary["blocking_reasons"])
+        for segment, temporal_context in zip(segments, temporal_contexts):
+            segment["temporal_context"] = temporal_context
         full_count = sum(s["grid_coverage_status"] == "COMPLETE" for s in segments)
         if not full_count:
             blockers.append("NO_FULLY_COVERED_HR_SEGMENT")
         blockers = list(dict.fromkeys(blockers))
         for segment in segments:
             segment["candidate_for_data_preparation"] = (
-                not blockers and segment["grid_coverage_status"] == "COMPLETE"
+                not blockers
+                and segment["grid_coverage_status"] == "COMPLETE"
+                and segment["temporal_context"]["status"] == "OBSERVED_WORKLOAD_SEQUENCE"
+            )
+        input_diagnostics = build_route_input_diagnostics(
+            input_route,
+            model_route,
+            segments,
+            trusted_environment=trusted_environment,
+            provider_selection=provider_selection,
+            weather_source=weather_source,
+            audit_source_hash=source_hash,
+        )
+        if input_diagnostics["binding_blocking_reasons"]:
+            blockers = list(
+                dict.fromkeys([*blockers, *input_diagnostics["binding_blocking_reasons"]])
+            )
+            for segment in segments:
+                segment["candidate_for_data_preparation"] = False
+            input_diagnostics = build_route_input_diagnostics(
+                input_route,
+                model_route,
+                segments,
+                trusted_environment=trusted_environment,
+                provider_selection=provider_selection,
+                weather_source=weather_source,
+                audit_source_hash=source_hash,
             )
         routes.append(
             {
@@ -216,13 +268,19 @@ def build_route_training_data_readiness_audit(
                     "invalid_or_missing_sample_count": sum(not _positive(v) for v in values),
                     "interval_ms": interval,
                 },
+                "input_diagnostics": input_diagnostics,
+                "temporal_context": temporal_summary,
                 "export_timebase_verified": timebase_verified,
                 "user_declared_acquisition_applied": acquisition_applied,
                 "hr_diagnostics_applied": diagnostics_applied,
                 "hr_signal_diagnostics": summarize_hr_exercise_diagnostics(
-                    exercise_diagnostics if diagnostics_applied else {
-                        "status": "NOT_APPLIED", "source_binding_verified": False,
-                        "acquisition_quality_verified": False, "artifact_status": "NOT_ASSESSED",
+                    exercise_diagnostics
+                    if diagnostics_applied
+                    else {
+                        "status": "NOT_APPLIED",
+                        "source_binding_verified": False,
+                        "acquisition_quality_verified": False,
+                        "artifact_status": "NOT_ASSESSED",
                     },
                     diagnostic_windows,
                 ),
@@ -233,11 +291,14 @@ def build_route_training_data_readiness_audit(
                     "source_binding_verified": acquisition_applied,
                     "declaration_source": "USER_DECLARATION" if acquisition_applied else None,
                     "declared_sensor": acquisition.get("declared_sensor")
-                    if acquisition_applied else None,
+                    if acquisition_applied
+                    else None,
                     "active_declaration_ids": acquisition.get("active_declaration_ids", [])
-                    if acquisition_applied else [],
+                    if acquisition_applied
+                    else [],
                     "reported_issue_codes": acquisition.get("reported_issue_codes", [])
-                    if acquisition_applied else [],
+                    if acquisition_applied
+                    else [],
                     "sensor_identity_verified": False,
                     "acquisition_quality_verified": False,
                     "blocking_reasons": [
@@ -280,11 +341,17 @@ def build_route_training_data_readiness_audit(
                         else []
                     ),
                     *(["PARTIAL_HR_GRID_COVERAGE"] if full_count < len(segments) else []),
+                    "PHYSIOLOGICAL_HR_RESPONSE_KINETICS_NOT_ESTIMATED",
+                    "OBSERVED_SEQUENCE_BOUNDARIES_ARE_NOT_VERIFIED_PHYSIOLOGICAL_RESETS",
                     "HR_SENSOR_IDENTITY_NOT_ESTABLISHED",
                     "HR_SENSOR_DETAILS_USER_DECLARED_NOT_PROVIDER_VERIFIED"
-                    if acquisition_applied else "HR_SENSOR_DETAILS_NOT_DECLARED",
-                    *(["HR_USER_REPORTED_ISSUES_ARE_NOT_VALIDATED_ARTIFACT_DETECTION"]
-                      if acquisition_applied and acquisition.get("reported_issue_codes") else []),
+                    if acquisition_applied
+                    else "HR_SENSOR_DETAILS_NOT_DECLARED",
+                    *(
+                        ["HR_USER_REPORTED_ISSUES_ARE_NOT_VALIDATED_ARTIFACT_DETECTION"]
+                        if acquisition_applied and acquisition.get("reported_issue_codes")
+                        else []
+                    ),
                 ],
                 "segments": segments,
             }
@@ -305,6 +372,7 @@ def build_route_training_data_readiness_audit(
         },
         "training_authorized": False,
         "numeric_output_authorized": False,
+        "hr_response_temporal_policy": hr_response_temporal_policy(),
         "session_external_id": identity,
         "athlete_id": athlete,
         "session_group_key": _hash(["POLAR", athlete, identity]) if athlete and identity else None,
@@ -327,7 +395,8 @@ def build_route_training_data_readiness_audit(
         ),
         "hr_signal_diagnostics_evidence": summarize_hr_signal_diagnostics(signal_diagnostics),
         "hr_acquisition_evidence": {
-            key: value for key, value in acquisition_resolution.items()
+            key: value
+            for key, value in acquisition_resolution.items()
             if key not in ("by_exercise", "exercises")
         },
         "hr_timebase_evidence": {

@@ -388,6 +388,21 @@ async def test_real_inspection_wires_audit_without_writing(monkeypatch, sources,
     monkeypatch.setattr(
         polar, "build_route_expected_response_input", lambda *args, **kwargs: source
     )
+    monkeypatch.setattr(
+        polar,
+        "build_trusted_route_environment_context",
+        lambda *args, **kwargs: {
+            "routes": [
+                {
+                    "route_index": 0,
+                    "exercise_index": 0,
+                    "segments": [
+                        deepcopy(s["environment_context"]) for s in source["routes"][0]["segments"]
+                    ],
+                }
+            ],
+        },
+    )
     writes = AsyncMock(side_effect=AssertionError("read-only inspection"))
     monkeypatch.setattr(polar, "persist_route_environment_evidence", writes)
     result = await polar._build_training_session_route_inspection(

@@ -82,7 +82,13 @@ def test_verified_current_source_uses_export_origin_and_keeps_remaining_limits(s
 )
 def test_export_offset_respects_exact_half_open_segment_boundaries(sources, start, end, expected):
     records = evidence_records(sources)
-    segment = sources[0]["routes"][0]["segments"][0]["external_workload"]
+    input_route = sources[0]["routes"][0]
+    # This test isolates one coverage window. Sequence overlap/order is tested
+    # separately by V24.7; the second fixture window must not overlap this one.
+    input_route["segments"] = input_route["segments"][:1]
+    for key in ("segment_count", "workload_segment_count", "aligned_usable_segment_count"):
+        input_route[key] = 1
+    segment = input_route["segments"][0]["external_workload"]
     segment.update(start_exercise_elapsed_ms=start, end_exercise_elapsed_ms=end)
     result = audit(sources, hr_timebase_snapshots=records)
     coverage = result["routes"][0]["segments"][0]

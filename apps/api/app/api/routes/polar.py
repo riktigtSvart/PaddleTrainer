@@ -2686,6 +2686,18 @@ async def _build_training_session_route_inspection(
             sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
             hr_timebase_snapshots=saved_hr_timebase_snapshots,
             hr_acquisition_declarations=saved_hr_acquisition_declarations,
+            trusted_environment=trusted_route_environment_context,
+            provider_selection={
+                "weather_provider": weather_provider,
+                "synthetic_wind_selected": wind_speed_mps is not None and wind_direction_from_deg is not None,
+                "waterbody_provider": waterbody_provider,
+                "water_surface_provider": water_surface_provider,
+                "marine_surface_provider": marine_surface_provider,
+                "hydrology_provider": hydrology_provider,
+                "hydrology_station_registry_number": hydrology_station_registry_number,
+                "hydrology_relation_provider": hydrology_relation_provider,
+            },
+            weather_source=weather_source,
         )
         training_data_readiness_audit_summary = build_training_data_readiness_audit_summary(
             training_data_readiness_audit

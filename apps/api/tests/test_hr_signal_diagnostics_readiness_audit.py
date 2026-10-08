@@ -20,7 +20,7 @@ sources = _sources_fixture
 def test_diagnostics_enrich_the_audit_without_promoting_preparation_or_training(sources):
     before = deepcopy(sources)
     result = audit(sources)
-    assert result["audit_version"] == "0.4.0"
+    assert result["audit_version"] == "0.5.0"
     assert result["candidate_segment_count"] == 2
     assert result["diagnostics_available_route_count"] == 1
     assert result["diagnostics_verified_clock_route_count"] == 0

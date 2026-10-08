@@ -20,7 +20,7 @@ REVISION = "a6d2c4e91b70"
 def test_alembic_has_one_linked_head_and_resolves_paths_from_project_root():
     config = Config(str(API_ROOT / "alembic.ini"))
     scripts = ScriptDirectory.from_config(config)
-    assert scripts.get_heads() == ["c5e83a9d2714"]
+    assert scripts.get_heads() == ["d83b9c61f204"]
     assert scripts.get_revision(REVISION).down_revision == "f3c91ab84d27"
     assert Path(config.get_main_option("prepend_sys_path")) == API_ROOT
 

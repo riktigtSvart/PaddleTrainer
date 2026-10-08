@@ -6,6 +6,7 @@ from app.api.routes import (
     coach,
     health,
     polar,
+    polar_environment_replay,
     polar_hr_acquisition,
     polar_hr_diagnostics,
     polar_response_dataset,
@@ -21,6 +22,7 @@ api_router = APIRouter()
 
 api_router.include_router(health.router)
 api_router.include_router(polar.router)
+api_router.include_router(polar_environment_replay.router)
 api_router.include_router(polar_hr_acquisition.router)
 api_router.include_router(polar_hr_diagnostics.router)
 api_router.include_router(polar_response_dataset.router)

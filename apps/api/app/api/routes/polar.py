@@ -260,6 +260,8 @@ from app.services.route_response_dataset import (
     build_route_response_dataset,
     summarize_route_response_dataset,
 )
+from app.services.environment_replay_snapshot import build_environment_replay_snapshot
+from app.services.environment_replay_persistence import persist_environment_replay_snapshot
 from app.services.heart_rate_sample_validation import (
     build_training_session_heart_rate_validation,
 )
@@ -1349,6 +1351,7 @@ async def _build_training_session_route_inspection(
         DEFAULT_MARINE_SURFACE_QUERY_PADDING_M
     ),
     response_dataset_session_id: str | None = None,
+    capture_environment_replay: bool = False,
     response_dataset_manifest: dict | None = None,
     include_response_dataset_payload: bool = False,
 ):
@@ -2807,6 +2810,7 @@ async def _build_training_session_route_inspection(
         hydrology_trust_decision_persistence = None
         hydrology_relation_decision_persistence = None
         trusted_environment_context_persistence = None
+        environment_replay_snapshot_persistence = None
 
         if persist_environment_evidence:
             if external_id is None:
@@ -3025,6 +3029,30 @@ async def _build_training_session_route_inspection(
                                 ),
                             )
                         )
+                if capture_environment_replay:
+                    replay_snapshot = build_environment_replay_snapshot(
+                        athlete_id=str(user.id), session_external_id=str(external_id),
+                        evidence_set_id=str(evidence_set_id),
+                        evidence_hash=environment_evidence_persistence["evidence_hash"],
+                        evidence_record=route_environment_evidence_record,
+                        expected_response_input=route_expected_response_input,
+                        trusted_environment=trusted_route_environment_context,
+                        provider_selection=selected_environment_providers,
+                        weather_source=weather_source, route_session=item, sample_session=sample_item,
+                        sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+                        hr_timebase_snapshots=saved_hr_timebase_snapshots,
+                        hr_acquisition_declarations=saved_hr_acquisition_declarations,
+                        lineage={
+                            "water_identity": route_water_environment_identity_snapshot,
+                            "hydrology_resolution": route_hydrology_source_resolution_snapshot,
+                            "hydrology_trust": hydrology_trust_decision_snapshot,
+                            "hydrology_relation": hydrology_relation_decision_snapshot,
+                            "trusted_projection": trusted_environment_context_snapshot,
+                        },
+                    )
+                    environment_replay_snapshot_persistence = await persist_environment_replay_snapshot(
+                        db, user_id=user.id, workout_session_id=workout_session.id, snapshot=replay_snapshot,
+                    )
             except ValueError as exc:
                 raise HTTPException(
                     status_code=409,
@@ -3275,6 +3303,7 @@ async def _build_training_session_route_inspection(
                 "trusted_environment_context_persistence": (
                     trusted_environment_context_persistence
                 ),
+                "environment_replay_snapshot_persistence": environment_replay_snapshot_persistence,
                 "route_environment_evidence_record": (
                     route_environment_evidence_record_summary
                 ),

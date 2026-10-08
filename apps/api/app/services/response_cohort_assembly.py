@@ -23,6 +23,11 @@ from app.services.environment_replay_snapshot import (
 from app.services.hr_acquisition_persistence import load_current_hr_acquisition_declarations
 from app.services.hr_timebase_persistence import load_current_hr_timebase_snapshots
 from app.services.polar_tokens import get_valid_access_token
+from app.services.response_cohort_temporal import (
+    MAX_TEMPORAL_EXERCISES,
+    audit_cohort_temporal_metadata,
+    build_session_temporal_evidence,
+)
 from app.services.response_dataset_integrity import (
     MAX_DATASET_BYTES,
     MAX_HR_SLOTS,
@@ -148,7 +153,9 @@ async def _current_session(client, token, member, feature):
     return matches[0]
 
 
-async def _member_index(db, user_id, member, split_manifest, client, token, start):
+async def _member_index(
+    db, user_id, member, split_manifest, client, token, start, *, verify_chronology=False
+):
     saved = await load_environment_replay_snapshot(
         db,
         user_id=user_id,
@@ -280,6 +287,14 @@ async def _member_index(db, user_id, member, split_manifest, client, token, star
         },
         "training_blocking_reasons": dataset["training_blocking_reasons"],
     }
+    if verify_chronology:
+        result["temporal_evidence"] = build_session_temporal_evidence(route, sample)
+        result["temporal_evidence"]["binding_scope"] = (
+            "ACTUALLY_VERIFIED_CURRENT_POLAR_SOURCES_AND_PINNED_UNASSIGNED_REPLAY"
+        )
+        result["temporal_evidence"]["temporal_evidence_hash"] = canonical_hash(
+            {k: v for k, v in result["temporal_evidence"].items() if k != "temporal_evidence_hash"}
+        )
     # Only small references and counts escape this scope; full arrays remain in the member package.
     return result
 
@@ -327,7 +342,7 @@ def _base(manifest):
     }
 
 
-async def assemble_response_cohort(db, manifest, *, user_id):
+async def assemble_response_cohort(db, manifest, *, user_id, verify_chronology=False):
     """user_id is supplied by trusted server/local auth, never selected by the manifest.
 
     No environmental provider calls or scientific writes. The existing Polar
@@ -339,6 +354,10 @@ async def assemble_response_cohort(db, manifest, *, user_id):
         else manifest
     )
     base = _base(manifest)
+    if verify_chronology:
+        base.update(assembly_version="0.2.0", chronological_split_verified=False)
+        base["execution_limits"]["max_temporal_exercises_per_member"] = MAX_TEMPORAL_EXERCISES
+        base["policy"]["declared_whole_session_chronology_evaluated"] = True
     started = monotonic()
     failing_member = None
     try:
@@ -377,7 +396,14 @@ async def assemble_response_cohort(db, manifest, *, user_id):
                 failing_member = position
                 verified.append(
                     await _member_index(
-                        db, user_id, member, normalized["split_manifest"], client, token, started
+                        db,
+                        user_id,
+                        member,
+                        normalized["split_manifest"],
+                        client,
+                        token,
+                        started,
+                        verify_chronology=verify_chronology,
                     )
                 )
                 _deadline(started)
@@ -407,6 +433,27 @@ async def assemble_response_cohort(db, manifest, *, user_id):
                     "RESPONSE_MODEL_NOT_CONFIGURED",
                 ],
             }
+            if verify_chronology:
+                temporal = audit_cohort_temporal_metadata(verified)
+                # The pure audit cannot promote source proof. This point is reached
+                # only after every member passed the actual owner/DB/provider checks.
+                result["temporal_audit"] = temporal
+                result["chronological_cohort_order_verified"] = temporal[
+                    "chronological_order_supported"
+                ]
+                result["chronological_split_verified"] = temporal["chronological_split_supported"]
+                result["chronology_claim_scope"] = (
+                    "ACTUALLY_SOURCE_BOUND_DECLARED_WALL_CLOCK_METADATA_ONLY"
+                )
+                result["training_blocking_reasons"] = list(
+                    dict.fromkeys(
+                        temporal["split_blocking_reasons"]
+                        + [
+                            "HR_ACQUISITION_QUALITY_NOT_ESTABLISHED",
+                            "RESPONSE_MODEL_NOT_CONFIGURED",
+                        ]
+                    )
+                )
             _deadline(started)
             result["cohort_index_hash"] = canonical_hash(result)
             require_json_size(result, MAX_INDEX_BYTES, "COHORT_INDEX_SIZE_LIMIT")
@@ -434,7 +481,7 @@ async def assemble_response_cohort(db, manifest, *, user_id):
     except (SQLAlchemyError, RuntimeError, OSError, KeyError, TypeError, AttributeError):
         # Do not echo DB URLs, raw payloads or secret-bearing provider exceptions.
         reason, upstream = "COHORT_DEPENDENCY_FAILURE", None
-    return {
+    failed = {
         **base,
         "status": "WITHHELD",
         "claim_scope": "NO_COHORT_SOURCE_PROOF_ISSUED",
@@ -447,6 +494,9 @@ async def assemble_response_cohort(db, manifest, *, user_id):
         "upstream_reason": upstream,
         "failed_member_canonical_index": failing_member,
     }
+    if verify_chronology:
+        failed["temporal_audit"] = None
+    return failed
 
 
 def verify_cohort_index_integrity(index):

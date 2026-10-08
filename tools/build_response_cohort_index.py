@@ -78,7 +78,7 @@ def prepare_manifest(members, manifest_id):
     )
 
 
-async def verify_configured_owner(manifest):
+async def verify_configured_owner(manifest, *, verify_chronology=False):
     # Lazy imports keep prepare and malformed-input checks completely offline.
     from app.core.config import get_settings
     from app.db.session import SessionLocal, engine
@@ -91,7 +91,9 @@ async def verify_configured_owner(manifest):
             ).scalar_one_or_none()
             if user is None:
                 raise ValueError("Configured existing demo user not found")
-            return await assemble_response_cohort(db, manifest, user_id=user.id)
+            return await assemble_response_cohort(
+                db, manifest, user_id=user.id, verify_chronology=verify_chronology
+            )
     finally:
         await engine.dispose()
 
@@ -108,6 +110,11 @@ def main(argv=None):
     verify = commands.add_parser("verify", help="Check selected real DB and current Polar sources")
     verify.add_argument("manifest", type=Path)
     verify.add_argument("--output", type=Path)
+    verify.add_argument(
+        "--chronology",
+        action="store_true",
+        help="Also check source-bound whole-session intervals and requested chronological splits",
+    )
     args = parser.parse_args(argv)
     try:
         if args.command == "prepare":
@@ -125,9 +132,22 @@ def main(argv=None):
             if args.output is not None and args.output.exists():
                 raise ValueError("Output already exists; use a new output path")
             manifest = ResponseCohortManifest.model_validate(read_json(args.manifest, 1024 * 1024))
-            result = asyncio.run(verify_configured_owner(manifest))
+            result = asyncio.run(
+                verify_configured_owner(manifest, verify_chronology=True)
+                if args.chronology
+                else verify_configured_owner(manifest)
+            )
             if args.output is not None and result["source_evidence_verified"] is True:
                 write_new_json(args.output, result)
+                chronology_summary = (
+                    {
+                        "chronological_split_verified": result["chronological_split_verified"],
+                        "temporal_audit": result["temporal_audit"],
+                        "chronology_claim_scope": result["chronology_claim_scope"],
+                    }
+                    if args.chronology
+                    else {}
+                )
                 result = {
                     key: result[key]
                     for key in (
@@ -146,6 +166,7 @@ def main(argv=None):
                         "numeric_output_authorized",
                     )
                 }
+                result.update(chronology_summary)
     except ValidationError as exc:
         result = {
             "status": "REJECTED",

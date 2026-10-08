@@ -31,14 +31,22 @@ OWNER = UUID(int=101)
 EVIDENCE_ID = UUID(int=202)
 
 
-def capture_inputs(sources, *, owner=OWNER, evidence_id=EVIDENCE_ID, clocks=None):
+def capture_inputs(
+    sources,
+    *,
+    owner=OWNER,
+    evidence_id=EVIDENCE_ID,
+    clocks=None,
+    session_external_id="session-1",
+    start=None,
+):
     expected, route_session, sample_session = deepcopy(sources)
     clock_records = (
         evidence_records((expected, route_session, sample_session), owner=str(owner))
         if clocks is None
         else clocks
     )
-    start = datetime(2026, 9, 30, 15, tzinfo=UTC)
+    start = start or datetime(2026, 9, 30, 15, tzinfo=UTC)
     segments = []
     for row in expected["routes"][0]["segments"]:
         motion, order = row["external_workload"], row["order_index"]
@@ -249,7 +257,7 @@ def capture_inputs(sources, *, owner=OWNER, evidence_id=EVIDENCE_ID, clocks=None
         row["environment_context"] = deepcopy(environment)
     identity = build_route_water_environment_identity_snapshot(water)
     record = build_route_environment_evidence_record(
-        session_external_id="session-1",
+        session_external_id=session_external_id,
         route_environment_context_input=context,
         route_external_workload_evidence=workload,
         route_weather_sample_matching=weather_matches,
@@ -276,7 +284,7 @@ def capture_inputs(sources, *, owner=OWNER, evidence_id=EVIDENCE_ID, clocks=None
     )
     return {
         "athlete_id": str(owner),
-        "session_external_id": "session-1",
+        "session_external_id": session_external_id,
         "evidence_set_id": str(evidence_id),
         "evidence_hash": plan["evidence_hash"],
         "evidence_record": record,

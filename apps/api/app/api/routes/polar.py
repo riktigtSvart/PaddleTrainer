@@ -256,6 +256,10 @@ from app.services.training_data_readiness_audit import (
     build_training_data_readiness_audit_summary,
     build_training_data_readiness_cohort_summary,
 )
+from app.services.route_response_dataset import (
+    build_route_response_dataset,
+    summarize_route_response_dataset,
+)
 from app.services.heart_rate_sample_validation import (
     build_training_session_heart_rate_validation,
 )
@@ -1344,6 +1348,9 @@ async def _build_training_session_route_inspection(
     marine_surface_query_padding_m: float = (
         DEFAULT_MARINE_SURFACE_QUERY_PADDING_M
     ),
+    response_dataset_session_id: str | None = None,
+    response_dataset_manifest: dict | None = None,
+    include_response_dataset_payload: bool = False,
 ):
     artifact_policy_profile = (
         artifact_policy_profile.upper()
@@ -1722,12 +1729,20 @@ async def _build_training_session_route_inspection(
             str(sample_external_id)
         ] = sample_item
 
+    route_items = [item for item in route_payload.get("trainingSessions", [])
+                   if isinstance(item, dict)]
+    if response_dataset_session_id is not None:
+        route_items = [item for item in route_items
+                       if str((item.get("identifier") or {}).get("id"))
+                       == response_dataset_session_id]
+        if len(route_items) != 1:
+            raise HTTPException(
+                status_code=404 if not route_items else 409,
+                detail="Requested Polar route session not found or ambiguous",
+            )
     route_sessions = []
 
-    for item in route_payload.get(
-            "trainingSessions",
-            [],
-    ):
+    for item in route_items:
         if not isinstance(item, dict):
             continue
 
@@ -2676,6 +2691,16 @@ async def _build_training_session_route_inspection(
             athlete_id=str(user.id), session_external_id=external_id,
             sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
         )
+        selected_environment_providers = {
+            "weather_provider": weather_provider,
+            "synthetic_wind_selected": wind_speed_mps is not None and wind_direction_from_deg is not None,
+            "waterbody_provider": waterbody_provider,
+            "water_surface_provider": water_surface_provider,
+            "marine_surface_provider": marine_surface_provider,
+            "hydrology_provider": hydrology_provider,
+            "hydrology_station_registry_number": hydrology_station_registry_number,
+            "hydrology_relation_provider": hydrology_relation_provider,
+        }
         training_data_readiness_audit = build_route_training_data_readiness_audit(
             route_expected_response_input,
             normalized_samples,
@@ -2687,20 +2712,26 @@ async def _build_training_session_route_inspection(
             hr_timebase_snapshots=saved_hr_timebase_snapshots,
             hr_acquisition_declarations=saved_hr_acquisition_declarations,
             trusted_environment=trusted_route_environment_context,
-            provider_selection={
-                "weather_provider": weather_provider,
-                "synthetic_wind_selected": wind_speed_mps is not None and wind_direction_from_deg is not None,
-                "waterbody_provider": waterbody_provider,
-                "water_surface_provider": water_surface_provider,
-                "marine_surface_provider": marine_surface_provider,
-                "hydrology_provider": hydrology_provider,
-                "hydrology_station_registry_number": hydrology_station_registry_number,
-                "hydrology_relation_provider": hydrology_relation_provider,
-            },
+            provider_selection=selected_environment_providers,
             weather_source=weather_source,
         )
         training_data_readiness_audit_summary = build_training_data_readiness_audit_summary(
             training_data_readiness_audit
+        )
+        response_dataset = build_route_response_dataset(
+            route_expected_response_input, normalized_samples,
+            session_external_id=external_id, athlete_id=str(user.id),
+            route_session=item, sample_session=sample_item,
+            sample_session_match_count=sample_session_match_counts.get(str(external_id), 0),
+            hr_timebase_snapshots=saved_hr_timebase_snapshots,
+            hr_acquisition_declarations=saved_hr_acquisition_declarations,
+            trusted_environment=trusted_route_environment_context,
+            provider_selection=selected_environment_providers,
+            weather_source=weather_source, split_manifest=response_dataset_manifest,
+        )
+        response_dataset_contract = (
+            response_dataset if include_response_dataset_payload
+            else summarize_route_response_dataset(response_dataset)
         )
         heart_rate_sample_validation = build_training_session_heart_rate_validation(
             sample_item,
@@ -3234,6 +3265,7 @@ async def _build_training_session_route_inspection(
                     route_expected_response_model_summary
                 ),
                 "training_data_readiness_audit": training_data_readiness_audit_summary,
+                "response_dataset_contract": response_dataset_contract,
                 "heart_rate_sample_validation": heart_rate_sample_validation,
                 "heart_rate_signal_diagnostics": heart_rate_signal_diagnostics,
                 "heart_rate_acquisition_context": heart_rate_acquisition_context,

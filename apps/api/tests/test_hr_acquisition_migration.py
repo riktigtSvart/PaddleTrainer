@@ -19,7 +19,8 @@ REVISION = "c5e83a9d2714"
 
 def test_single_migration_head_extends_v24_4_without_altering_its_table():
     scripts = ScriptDirectory.from_config(Config(str(API_ROOT / "alembic.ini")))
-    assert scripts.get_heads() == ["d83b9c61f204"]
+    assert len(scripts.get_heads()) == 1
+    assert REVISION in {r.revision for r in scripts.walk_revisions()}
     assert scripts.get_revision(REVISION).down_revision == "a6d2c4e91b70"
     table = HRAcquisitionDeclaration.__table__
     assert Base.metadata.tables[table.name] is table

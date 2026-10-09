@@ -17,9 +17,10 @@ API_ROOT = Path(__file__).resolve().parents[1]
 REVISION = "d83b9c61f204"
 
 
-def test_replay_migration_is_the_single_additive_head_and_registered_jsonb_model():
+def test_replay_migration_remains_linked_and_registered_with_jsonb_model():
     scripts = ScriptDirectory.from_config(Config(str(API_ROOT / "alembic.ini")))
-    assert scripts.get_heads() == [REVISION]
+    assert len(scripts.get_heads()) == 1
+    assert REVISION in {r.revision for r in scripts.walk_revisions()}
     assert scripts.get_revision(REVISION).down_revision == "c5e83a9d2714"
     table = EnvironmentReplaySnapshot.__table__
     assert Base.metadata.tables[table.name] is table

@@ -1,0 +1,505 @@
+{
+  "$defs": {
+    "ExperimentCohortReference": {
+      "additionalProperties": false,
+      "properties": {
+        "cohort_index_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Cohort Index Hash",
+          "type": "string"
+        },
+        "owner_id": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "record_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Record Hash",
+          "type": "string"
+        },
+        "record_schema_version": {
+          "const": "0.1",
+          "default": "0.1",
+          "title": "Record Schema Version",
+          "type": "string"
+        },
+        "request_manifest_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Manifest Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_hash",
+        "cohort_index_hash",
+        "request_manifest_hash",
+        "owner_id"
+      ],
+      "title": "ExperimentCohortReference",
+      "type": "object"
+    },
+    "ExperimentContext": {
+      "additionalProperties": false,
+      "properties": {
+        "declared_modality": {
+          "const": "KAYAK_WATER",
+          "default": "KAYAK_WATER",
+          "title": "Declared Modality",
+          "type": "string"
+        },
+        "modality_claim_scope": {
+          "const": "REQUEST_DECLARATION_ONLY",
+          "default": "REQUEST_DECLARATION_ONLY",
+          "title": "Modality Claim Scope",
+          "type": "string"
+        },
+        "response_scope": {
+          "const": "RECORDED_SENSOR_HR_ONLY",
+          "default": "RECORDED_SENSOR_HR_ONLY",
+          "title": "Response Scope",
+          "type": "string"
+        },
+        "sensor_identity_or_quality_promoted": {
+          "const": false,
+          "default": false,
+          "title": "Sensor Identity Or Quality Promoted",
+          "type": "boolean"
+        },
+        "workload_semantics": {
+          "const": "OBSERVED_GPS_MOTION_PROXY_NOT_MEASURED_POWER",
+          "default": "OBSERVED_GPS_MOTION_PROXY_NOT_MEASURED_POWER",
+          "title": "Workload Semantics",
+          "type": "string"
+        }
+      },
+      "title": "ExperimentContext",
+      "type": "object"
+    },
+    "ExperimentEvaluationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "data_driven_feature_selection_scope": {
+          "const": "TRAIN_ONLY",
+          "default": "TRAIN_ONLY",
+          "title": "Data Driven Feature Selection Scope",
+          "type": "string"
+        },
+        "fitted_preprocessing_scope": {
+          "const": "TRAIN_ONLY",
+          "default": "TRAIN_ONLY",
+          "title": "Fitted Preprocessing Scope",
+          "type": "string"
+        },
+        "independence_between_sessions_claimed": {
+          "const": false,
+          "default": false,
+          "title": "Independence Between Sessions Claimed",
+          "type": "boolean"
+        },
+        "reporting_unit": {
+          "const": "PER_SESSION_WITH_LABEL_AND_INPUT_COVERAGE",
+          "default": "PER_SESSION_WITH_LABEL_AND_INPUT_COVERAGE",
+          "title": "Reporting Unit",
+          "type": "string"
+        },
+        "requested_metrics": {
+          "items": {
+            "enum": [
+              "MAE_BPM",
+              "RMSE_BPM",
+              "MEAN_SIGNED_ERROR_BPM"
+            ],
+            "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Requested Metrics",
+          "type": "array"
+        },
+        "split_scope": {
+          "const": "EXACT_ARCHIVED_WHOLE_SESSION_ASSIGNMENTS",
+          "default": "EXACT_ARCHIVED_WHOLE_SESSION_ASSIGNMENTS",
+          "title": "Split Scope",
+          "type": "string"
+        },
+        "test_role": {
+          "const": "FINAL_FROZEN_EVALUATION_ONLY",
+          "default": "FINAL_FROZEN_EVALUATION_ONLY",
+          "title": "Test Role",
+          "type": "string"
+        },
+        "validation_role": {
+          "const": "MODEL_SELECTION_ONLY",
+          "default": "MODEL_SELECTION_ONLY",
+          "title": "Validation Role",
+          "type": "string"
+        }
+      },
+      "title": "ExperimentEvaluationPolicy",
+      "type": "object"
+    },
+    "ExperimentInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "environment_features": {
+          "items": {
+            "enum": [
+              "air_temperature_c",
+              "weather_wind_speed_mps",
+              "weather_wind_direction_from_deg",
+              "weather_wind_gust_mps",
+              "headwind_component_mps",
+              "tailwind_component_mps",
+              "crosswind_magnitude_mps",
+              "relative_air_speed_mps",
+              "water_level_cm",
+              "discharge_m3_s",
+              "water_temperature_c"
+            ],
+            "type": "string"
+          },
+          "maxItems": 11,
+          "title": "Environment Features",
+          "type": "array"
+        },
+        "missing_value_imputation": {
+          "const": "NONE",
+          "default": "NONE",
+          "title": "Missing Value Imputation",
+          "type": "string"
+        },
+        "model_row_requirement": {
+          "const": "ALL_SELECTED_VALUES_AVAILABLE_FINITE",
+          "default": "ALL_SELECTED_VALUES_AVAILABLE_FINITE",
+          "title": "Model Row Requirement",
+          "type": "string"
+        },
+        "raw_observations_preserved": {
+          "const": true,
+          "default": true,
+          "title": "Raw Observations Preserved",
+          "type": "boolean"
+        },
+        "source_masks": {
+          "const": "PRESERVE_AVAILABLE_MISSING_WITHHELD_NOT_APPLICABLE",
+          "default": "PRESERVE_AVAILABLE_MISSING_WITHHELD_NOT_APPLICABLE",
+          "title": "Source Masks",
+          "type": "string"
+        },
+        "unlabelled_workload_history": {
+          "const": "PRESERVE_FOR_CONDITIONING",
+          "default": "PRESERVE_FOR_CONDITIONING",
+          "title": "Unlabelled Workload History",
+          "type": "string"
+        },
+        "withheld_values_promoted": {
+          "const": false,
+          "default": false,
+          "title": "Withheld Values Promoted",
+          "type": "boolean"
+        },
+        "workload_features": {
+          "items": {
+            "enum": [
+              "gps_ground_speed_mps",
+              "ground_speed_change_from_previous_mps",
+              "ground_speed_change_rate_mps2",
+              "absolute_bearing_change_from_previous_deg"
+            ],
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Workload Features",
+          "type": "array"
+        }
+      },
+      "title": "ExperimentInputs",
+      "type": "object"
+    },
+    "ExperimentMember": {
+      "additionalProperties": false,
+      "properties": {
+        "athlete_id": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Athlete Id",
+          "type": "string"
+        },
+        "provider": {
+          "const": "POLAR",
+          "default": "POLAR",
+          "title": "Provider",
+          "type": "string"
+        },
+        "session_external_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Session External Id",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "TRAIN",
+            "VALIDATION",
+            "TEST"
+          ],
+          "title": "Split",
+          "type": "string"
+        }
+      },
+      "required": [
+        "athlete_id",
+        "session_external_id",
+        "split"
+      ],
+      "title": "ExperimentMember",
+      "type": "object"
+    },
+    "ExperimentTemporalPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "censored_history_and_recovery_preserved": {
+          "const": true,
+          "default": true,
+          "title": "Censored History And Recovery Preserved",
+          "type": "boolean"
+        },
+        "export_clock_mapping_role": {
+          "const": "TECHNICAL_TIMESTAMP_ALIGNMENT_ONLY",
+          "default": "TECHNICAL_TIMESTAMP_ALIGNMENT_ONLY",
+          "title": "Export Clock Mapping Role",
+          "type": "string"
+        },
+        "fixed_hr_shift_applied": {
+          "const": false,
+          "default": false,
+          "title": "Fixed Hr Shift Applied",
+          "type": "boolean"
+        },
+        "future_workload_used": {
+          "const": false,
+          "default": false,
+          "title": "Future Workload Used",
+          "type": "boolean"
+        },
+        "history_anchor": {
+          "const": "TARGET_WINDOW_END_RETROSPECTIVE_CONDITIONING",
+          "default": "TARGET_WINDOW_END_RETROSPECTIVE_CONDITIONING",
+          "title": "History Anchor",
+          "type": "string"
+        },
+        "history_coverage": {
+          "const": "REQUIRE_COMPLETE_SELECTED_LOOKBACKS",
+          "default": "REQUIRE_COMPLETE_SELECTED_LOOKBACKS",
+          "title": "History Coverage",
+          "type": "string"
+        },
+        "history_scope": {
+          "const": "SAME_SESSION_ROUTE_EXERCISE_SEQUENCE_ONLY",
+          "default": "SAME_SESSION_ROUTE_EXERCISE_SEQUENCE_ONLY",
+          "title": "History Scope",
+          "type": "string"
+        },
+        "initial_physiological_state": {
+          "const": "UNKNOWN_RETAINED",
+          "default": "UNKNOWN_RETAINED",
+          "title": "Initial Physiological State",
+          "type": "string"
+        },
+        "lookback_windows_ms": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "maximum": 600000,
+            "type": "integer"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Lookback Windows Ms",
+          "type": "array"
+        },
+        "physiological_lag_ms": {
+          "default": null,
+          "title": "Physiological Lag Ms",
+          "type": "null"
+        },
+        "sequence_boundaries_preserved": {
+          "const": true,
+          "default": true,
+          "title": "Sequence Boundaries Preserved",
+          "type": "boolean"
+        }
+      },
+      "title": "ExperimentTemporalPolicy",
+      "type": "object"
+    },
+    "PftIntegrationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "fitness_or_fatigue_targets_used": {
+          "const": false,
+          "default": false,
+          "title": "Fitness Or Fatigue Targets Used",
+          "type": "boolean"
+        },
+        "future_baseline_cutoff": {
+          "const": "REFERENCE_AVAILABLE_STRICTLY_BEFORE_TARGET_SESSION",
+          "default": "REFERENCE_AVAILABLE_STRICTLY_BEFORE_TARGET_SESSION",
+          "title": "Future Baseline Cutoff",
+          "type": "string"
+        },
+        "future_baseline_grouping": {
+          "const": "ATHLETE_MODALITY_PROTOCOL_FEATURE_STIMULUS",
+          "default": "ATHLETE_MODALITY_PROTOCOL_FEATURE_STIMULUS",
+          "title": "Future Baseline Grouping",
+          "type": "string"
+        },
+        "future_baseline_update_order": {
+          "const": "COMPARE_THEN_ELIGIBLE_UPDATE",
+          "default": "COMPARE_THEN_ELIGIBLE_UPDATE",
+          "title": "Future Baseline Update Order",
+          "type": "string"
+        },
+        "measurement_and_interpretation_separated": {
+          "const": true,
+          "default": true,
+          "title": "Measurement And Interpretation Separated",
+          "type": "boolean"
+        },
+        "pft_features_used": {
+          "const": false,
+          "default": false,
+          "title": "Pft Features Used",
+          "type": "boolean"
+        },
+        "readiness_score_computed": {
+          "const": false,
+          "default": false,
+          "title": "Readiness Score Computed",
+          "type": "boolean"
+        }
+      },
+      "title": "PftIntegrationPolicy",
+      "type": "object"
+    },
+    "RecordedHrTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "aggregation": {
+          "const": "MEAN_OF_POSITIVE_FINITE_SAMPLES",
+          "default": "MEAN_OF_POSITIVE_FINITE_SAMPLES",
+          "title": "Aggregation",
+          "type": "string"
+        },
+        "coverage": {
+          "const": "COMPLETE_VERIFIED_EXPORT_GRID_WINDOW",
+          "default": "COMPLETE_VERIFIED_EXPORT_GRID_WINDOW",
+          "title": "Coverage",
+          "type": "string"
+        },
+        "hr_derived_predictors_used": {
+          "const": false,
+          "default": false,
+          "title": "Hr Derived Predictors Used",
+          "type": "boolean"
+        },
+        "label_used_as_predictor": {
+          "const": false,
+          "default": false,
+          "title": "Label Used As Predictor",
+          "type": "boolean"
+        },
+        "physiological_ground_truth_claimed": {
+          "const": false,
+          "default": false,
+          "title": "Physiological Ground Truth Claimed",
+          "type": "boolean"
+        },
+        "unit": {
+          "const": "bpm",
+          "default": "bpm",
+          "title": "Unit",
+          "type": "string"
+        },
+        "variable": {
+          "const": "recorded_hr_bpm",
+          "default": "recorded_hr_bpm",
+          "title": "Variable",
+          "type": "string"
+        },
+        "window_semantics": {
+          "const": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
+          "default": "HALF_OPEN_START_INCLUSIVE_END_EXCLUSIVE",
+          "title": "Window Semantics",
+          "type": "string"
+        }
+      },
+      "title": "RecordedHrTarget",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cohort": {
+      "$ref": "#/$defs/ExperimentCohortReference"
+    },
+    "context": {
+      "$ref": "#/$defs/ExperimentContext"
+    },
+    "evaluation": {
+      "$ref": "#/$defs/ExperimentEvaluationPolicy"
+    },
+    "experiment_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Experiment Id",
+      "type": "string"
+    },
+    "experiment_manifest_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Experiment Manifest Hash",
+      "type": "string"
+    },
+    "inputs": {
+      "$ref": "#/$defs/ExperimentInputs"
+    },
+    "members": {
+      "items": {
+        "$ref": "#/$defs/ExperimentMember"
+      },
+      "maxItems": 20,
+      "minItems": 3,
+      "title": "Members",
+      "type": "array"
+    },
+    "pft": {
+      "$ref": "#/$defs/PftIntegrationPolicy"
+    },
+    "schema_version": {
+      "const": "0.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "target": {
+      "$ref": "#/$defs/RecordedHrTarget"
+    },
+    "task": {
+      "const": "RETROSPECTIVE_HR_RESPONSE_WITHIN_ATHLETE",
+      "default": "RETROSPECTIVE_HR_RESPONSE_WITHIN_ATHLETE",
+      "title": "Task",
+      "type": "string"
+    },
+    "temporal": {
+      "$ref": "#/$defs/ExperimentTemporalPolicy"
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "cohort",
+    "members",
+    "experiment_manifest_hash"
+  ],
+  "title": "ResponseExperimentManifest",
+  "type": "object"
+}

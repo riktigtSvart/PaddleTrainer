@@ -1,0 +1,189 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "adapter": {
+      "const": "DURATION_WEIGHTED_MEAN_PER_SELECTED_LOOKBACK",
+      "default": "DURATION_WEIGHTED_MEAN_PER_SELECTED_LOOKBACK",
+      "title": "Adapter",
+      "type": "string"
+    },
+    "automatic_model_selection_performed": {
+      "const": false,
+      "default": false,
+      "title": "Automatic Model Selection Performed",
+      "type": "boolean"
+    },
+    "baseline_version": {
+      "const": "0.1.0",
+      "default": "0.1.0",
+      "title": "Baseline Version",
+      "type": "string"
+    },
+    "cohort_index_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Cohort Index Hash",
+      "type": "string"
+    },
+    "cohort_record_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Cohort Record Hash",
+      "type": "string"
+    },
+    "constant_baseline": {
+      "const": "SESSION_BALANCED_TRAIN_HR_MEAN",
+      "default": "SESSION_BALANCED_TRAIN_HR_MEAN",
+      "title": "Constant Baseline",
+      "type": "string"
+    },
+    "experiment_manifest_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Experiment Manifest Hash",
+      "type": "string"
+    },
+    "fatigue_target_used": {
+      "const": false,
+      "default": false,
+      "title": "Fatigue Target Used",
+      "type": "boolean"
+    },
+    "fit_scope": {
+      "const": "TRAIN_ONLY",
+      "default": "TRAIN_ONLY",
+      "title": "Fit Scope",
+      "type": "string"
+    },
+    "fixed_hr_shift_applied": {
+      "const": false,
+      "default": false,
+      "title": "Fixed Hr Shift Applied",
+      "type": "boolean"
+    },
+    "generalization_evidence_verified": {
+      "const": false,
+      "default": false,
+      "title": "Generalization Evidence Verified",
+      "type": "boolean"
+    },
+    "hyperparameter_search_performed": {
+      "const": false,
+      "default": false,
+      "title": "Hyperparameter Search Performed",
+      "type": "boolean"
+    },
+    "input_package_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Input Package Hash",
+      "type": "string"
+    },
+    "missing_values_imputed": {
+      "const": false,
+      "default": false,
+      "title": "Missing Values Imputed",
+      "type": "boolean"
+    },
+    "numeric_output_authorized": {
+      "const": false,
+      "default": false,
+      "title": "Numeric Output Authorized",
+      "type": "boolean"
+    },
+    "numerical_constant_rule": {
+      "const": "TRAIN_RANGE_LE_1E_MINUS_12_TIMES_MAX_1_ABS",
+      "default": "TRAIN_RANGE_LE_1E_MINUS_12_TIMES_MAX_1_ABS",
+      "title": "Numerical Constant Rule",
+      "type": "string"
+    },
+    "pft_data_used": {
+      "const": false,
+      "default": false,
+      "title": "Pft Data Used",
+      "type": "boolean"
+    },
+    "physiological_lag_ms": {
+      "default": null,
+      "title": "Physiological Lag Ms",
+      "type": "null"
+    },
+    "plan_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Plan Hash",
+      "type": "string"
+    },
+    "preprocessing": {
+      "const": "TRAIN_WEIGHTED_MEAN_AND_POPULATION_STD",
+      "default": "TRAIN_WEIGHTED_MEAN_AND_POPULATION_STD",
+      "title": "Preprocessing",
+      "type": "string"
+    },
+    "request_manifest_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Request Manifest Hash",
+      "type": "string"
+    },
+    "ridge_alpha": {
+      "const": 10.0,
+      "default": 10.0,
+      "title": "Ridge Alpha",
+      "type": "number"
+    },
+    "ridge_intercept": {
+      "const": "UNPENALIZED_TRAIN_TARGET_MEAN",
+      "default": "UNPENALIZED_TRAIN_TARGET_MEAN",
+      "title": "Ridge Intercept",
+      "type": "string"
+    },
+    "ridge_min_nonempty_train_sessions": {
+      "const": 2,
+      "default": 2,
+      "title": "Ridge Min Nonempty Train Sessions",
+      "type": "integer"
+    },
+    "run_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.1",
+      "default": "0.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_weighting": {
+      "const": "EQUAL_TOTAL_WEIGHT_PER_NONEMPTY_TRAIN_SESSION",
+      "default": "EQUAL_TOTAL_WEIGHT_PER_NONEMPTY_TRAIN_SESSION",
+      "title": "Session Weighting",
+      "type": "string"
+    },
+    "test_role": {
+      "const": "PAYLOAD_INTEGRITY_ONLY_NOT_ADAPTED_OR_SCORED",
+      "default": "PAYLOAD_INTEGRITY_ONLY_NOT_ADAPTED_OR_SCORED",
+      "title": "Test Role",
+      "type": "string"
+    },
+    "training_authorized": {
+      "const": false,
+      "default": false,
+      "title": "Training Authorized",
+      "type": "boolean"
+    },
+    "validation_role": {
+      "const": "DESCRIPTIVE_DEVELOPMENT_METRICS_ONLY",
+      "default": "DESCRIPTIVE_DEVELOPMENT_METRICS_ONLY",
+      "title": "Validation Role",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "experiment_manifest_hash",
+    "input_package_hash",
+    "cohort_record_hash",
+    "cohort_index_hash",
+    "request_manifest_hash",
+    "plan_hash"
+  ],
+  "title": "ResponseBaselinePlan",
+  "type": "object"
+}

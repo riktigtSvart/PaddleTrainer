@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.integrations.polar.client import PolarClient
 from app.models.entities import ExternalConnection, Sport, User, WorkoutSession
 from app.services.polar_tokens import get_valid_access_token
+from app.services.polar_raw_preservation import merge_polar_raw, polar_session_time, PolarRawPreservationError
 
 
 POLAR_NAME_TO_SPORT = {
@@ -101,6 +102,7 @@ async def _enrich_training_load(
     db: AsyncSession,
     access_token: str,
     sessions: list[dict[str, Any]],
+    *, user_id,
 ) -> int:
     session_dates = set()
 
@@ -145,20 +147,21 @@ async def _enrich_training_load(
                 select(WorkoutSession).where(
                     WorkoutSession.external_provider == "POLAR",
                     WorkoutSession.external_id == external_id,
+                    WorkoutSession.user_id == user_id,
                 )
             )
 
             if not existing:
                 continue
 
-            existing.cardio_load = load.get("cardioLoad")
-            existing.perceived_load = load.get("perceivedLoad")
+            merged_raw = merge_polar_raw(existing.raw_data, item, external_id, feature="training-load-report")
+            if load.get("cardioLoad") is not None:
+                existing.cardio_load = load["cardioLoad"]
+            if load.get("perceivedLoad") is not None:
+                existing.perceived_load = load["perceivedLoad"]
 
             # Keep the base Polar data and add the enrichment.
-            existing.raw_data = {
-                **(existing.raw_data or {}),
-                "trainingLoadReport": load,
-            }
+            existing.raw_data = merged_raw
 
             print(
                 "TRAINING LOAD:",
@@ -182,6 +185,7 @@ async def _enrich_statistics(
     db: AsyncSession,
     access_token: str,
     sessions: list[dict[str, Any]],
+    *, user_id,
 ) -> int:
     session_dates = set()
 
@@ -220,6 +224,7 @@ async def _enrich_statistics(
                 select(WorkoutSession).where(
                     WorkoutSession.external_provider == "POLAR",
                     WorkoutSession.external_id == external_id,
+                    WorkoutSession.user_id == user_id,
                 )
             )
 
@@ -244,6 +249,8 @@ async def _enrich_statistics(
             statistics_container = exercise.get("statistics") or {}
             statistics = statistics_container.get("statistics") or []
 
+            merged_raw = merge_polar_raw(existing.raw_data, item, external_id, feature="statistics")
+
             for stat in statistics:
                 stat_type = stat.get("type")
 
@@ -255,14 +262,13 @@ async def _enrich_statistics(
                         existing.max_hr = stat.get("max")
 
                 elif stat_type == "STATISTICS_TYPE_SPEED":
-                    existing.avg_speed = stat.get("avg")
-                    existing.max_speed = stat.get("max")
+                    if stat.get("avg") is not None:
+                        existing.avg_speed = stat["avg"]
+                    if stat.get("max") is not None:
+                        existing.max_speed = stat["max"]
 
             # Preserve statistics in raw_data as well.
-            existing.raw_data = {
-                **(existing.raw_data or {}),
-                "exerciseStatistics": exercises,
-            }
+            existing.raw_data = merged_raw
 
             print(
                 "STATISTICS UPDATED:",
@@ -290,6 +296,7 @@ async def _enrich_samples(
     db: AsyncSession,
     access_token: str,
     sessions: list[dict[str, Any]],
+    *, user_id,
 ) -> int:
     session_dates = set()
 
@@ -351,6 +358,7 @@ async def _enrich_samples(
                     == "POLAR",
                     WorkoutSession.external_id
                     == external_id,
+                    WorkoutSession.user_id == user_id,
                 )
             )
 
@@ -374,10 +382,7 @@ async def _enrich_samples(
             # Do not collapse the time series into
             # summary values here. Scientific
             # interpretation happens downstream.
-            existing.raw_data = {
-                **(existing.raw_data or {}),
-                "exerciseSamples": exercises,
-            }
+            existing.raw_data = merge_polar_raw(existing.raw_data, item, external_id, feature="samples")
 
             print(
                 "SAMPLES UPDATED:",
@@ -447,11 +452,11 @@ async def sync_recent_sessions(
         if not external_id:
             continue
 
-        start = _parse_dt(item.get("startTime"))
+        start = polar_session_time(item, "startTime")
         if not start:
             continue
 
-        stop = _parse_dt(item.get("stopTime"))
+        stop = polar_session_time(item, "stopTime")
         duration_ms = item.get("durationMillis")
         mapped_sport = _sport_from_session(item, polar_sport_map)
 
@@ -463,17 +468,22 @@ async def sync_recent_sessions(
         )
 
         if existing:
-            existing.sport = mapped_sport
+            if existing.user_id != user.id:
+                raise PolarRawPreservationError("POLAR_SESSION_RESERVED_BY_ANOTHER_OWNER")
+            merged_raw = merge_polar_raw(existing.raw_data, item, external_id)
+            existing.sport = mapped_sport if mapped_sport != Sport.OTHER else existing.sport
             existing.name = item.get("name")
             existing.started_at = start
             existing.ended_at = stop
-            existing.duration_sec = int(duration_ms / 1000) if duration_ms else None
-            existing.distance_m = item.get("distanceMeters")
-            existing.calories = item.get("calories")
-            existing.avg_hr = item.get("hrAvg")
-            existing.max_hr = item.get("hrMax")
-            existing.cardio_load = item.get("trainingLoad")
-            existing.raw_data = item
+            if duration_ms is not None:
+                existing.duration_sec = int(duration_ms // 1000)
+            for source_key, field in (("distanceMeters", "distance_m"), ("calories", "calories"),
+                                      ("hrAvg", "avg_hr"), ("hrMax", "max_hr")):
+                if item.get(source_key) is not None:
+                    setattr(existing, field, item[source_key])
+            if item.get("trainingLoad") is not None:
+                existing.cardio_load = item["trainingLoad"]
+            existing.raw_data = merged_raw
 
             updated += 1
             continue
@@ -515,18 +525,21 @@ async def sync_recent_sessions(
         db,
         access_token,
         sessions,
+        user_id=user.id,
     )
 
     await _enrich_statistics(
         db,
         access_token,
         sessions,
+        user_id=user.id,
     )
 
     await _enrich_samples(
         db,
         access_token,
         sessions,
+        user_id=user.id,
     )
 
     return imported

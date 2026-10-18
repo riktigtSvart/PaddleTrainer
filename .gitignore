@@ -33,3 +33,26 @@ apps/api/polar-*-live.json
 # Local experiment / analysis exports
 apps/api/*experiment*.csv
 apps/api/route-first-*.csv
+
+# Local project snapshots, overlays, backup captures and generated inventories
+/PaddleTrainer_API_*.zip
+/apps/api/PaddleTrainer_API_*.zip
+/*_Backup_*/
+/*_API_Check_*/
+/project_structure.txt
+/athlete_state_scientific_view_contract_report.txt
+/SHA256SUMS.txt
+/P0_*_INSTALL.md
+/P0_*_TEST_RESULTS.txt
+/P0_*_HOTFIX.md
+/P1_*_INSTALL.md
+/P1_*_TEST_RESULTS.txt
+/P1_*_HOTFIX.md
+/PaddleTrainer_Project_Memo_*.md
+
+# Private/raw athlete and provider data. Public fixtures must be synthetic/sanitized.
+/polar_samples_*.json
+# Private/local real-derived regression evidence (never commit)
+/apps/api/tests/fixtures/phase_reconciliation/
+/apps/api/tests/fixtures/flow_phase_time_evidence/
+/apps/api/app/phase_evidence/flow_display_catalog_v01.json

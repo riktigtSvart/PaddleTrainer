@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.paddletrainer.example/contracts/0.1/ExecutedWorkout.schema.json",
+  "$ref": "integration-contracts.schema.json#/$defs/ExecutedWorkout"
+}

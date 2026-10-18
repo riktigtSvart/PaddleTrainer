@@ -29,7 +29,10 @@ def migration():
 
 def test_single_migration_head_adds_cohorts_after_replay_without_changing_prior_chain():
     scripts = ScriptDirectory.from_config(Config(str(API_ROOT / "alembic.ini")))
-    assert scripts.get_heads() == [REVISION]
+    assert scripts.get_heads() == ["f14c7b2e9d01"]
+    assert scripts.get_revision("da7e4c92b610").down_revision == "c91f7a3e2d40"
+    assert scripts.get_revision("c91f7a3e2d40").down_revision == "b8e4d6a10f32"
+    assert scripts.get_revision("b8e4d6a10f32").down_revision == REVISION
     assert scripts.get_revision(REVISION).down_revision == "d83b9c61f204"
     assert scripts.get_revision("d83b9c61f204").down_revision == "c5e83a9d2714"
 

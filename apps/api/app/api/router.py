@@ -1,10 +1,13 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    executed_workouts,
+    plan_execution_comparisons,
     assessments,
     capacities,
     coach,
     health,
+    planning_adoption,
     polar,
     polar_environment_replay,
     polar_hr_acquisition,
@@ -13,6 +16,10 @@ from app.api.routes import (
     polar_response_cohort_records,
     polar_response_dataset,
     polar_tcx,
+    pft,
+    phase_clarification_storage,
+    phase_reconciliations,
+    plan_contracts,
     readiness,
     responses,
     sessions,
@@ -21,6 +28,13 @@ from app.api.routes import (
 )
 
 api_router = APIRouter()
+api_router.include_router(pft.router)
+api_router.include_router(plan_contracts.router)
+api_router.include_router(executed_workouts.router)
+api_router.include_router(plan_execution_comparisons.router)
+api_router.include_router(phase_reconciliations.router)
+api_router.include_router(phase_clarification_storage.router)
+api_router.include_router(planning_adoption.router)
 
 api_router.include_router(health.router)
 api_router.include_router(polar.router)

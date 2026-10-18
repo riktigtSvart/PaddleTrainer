@@ -1,0 +1,1861 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.paddletrainer.example/contracts/0.1/integration-contracts.schema.json",
+  "title": "PaddleTrainer Planning/Data integration draft v0.1",
+  "$defs": {
+    "Intensity": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "HR_BPM",
+            "HR_ZONE",
+            "POWER_W",
+            "SPEED_MPS",
+            "PACE_S_PER_KM",
+            "RPE_0_10",
+            "FREE",
+            "UNKNOWN"
+          ]
+        },
+        "target_mode": {
+          "type": "string",
+          "enum": [
+            "POINT",
+            "RANGE",
+            "FREE",
+            "UNKNOWN"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "lower": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "upper": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "bounds": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "CLOSED",
+            "LEFT_CLOSED",
+            "RIGHT_CLOSED",
+            "OPEN",
+            "UNKNOWN",
+            null
+          ]
+        },
+        "zone_definition_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unknown_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "type",
+        "target_mode",
+        "value",
+        "lower",
+        "upper",
+        "bounds",
+        "zone_definition_ref",
+        "unknown_reason"
+      ],
+      "additionalProperties": false
+    },
+    "RecoverySpec": {
+      "type": "object",
+      "properties": {
+        "placement": {
+          "type": "string",
+          "enum": [
+            "BETWEEN_REPETITIONS",
+            "AFTER_EACH_REPETITION"
+          ]
+        },
+        "block": {
+          "$ref": "#/$defs/WorkoutBlock"
+        }
+      },
+      "required": [
+        "placement",
+        "block"
+      ],
+      "additionalProperties": false
+    },
+    "WorkoutBlock": {
+      "type": "object",
+      "properties": {
+        "block_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "block_type": {
+          "type": "string",
+          "enum": [
+            "STEADY",
+            "INTERVAL",
+            "RECOVERY",
+            "TRANSITION",
+            "START",
+            "SPRINT",
+            "TECHNIQUE",
+            "WARMUP",
+            "COOLDOWN",
+            "MIXED",
+            "UNKNOWN"
+          ]
+        },
+        "structure": {
+          "type": "string",
+          "enum": [
+            "SEGMENT",
+            "SEQUENCE"
+          ]
+        },
+        "duration_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "distance_m": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "completion_condition": {
+          "type": "string",
+          "enum": [
+            "DURATION",
+            "DISTANCE",
+            "FIRST_REACHED",
+            "BOTH_REACHED",
+            "MANUAL",
+            "CHILDREN"
+          ]
+        },
+        "intensity": {
+          "$ref": "#/$defs/Intensity"
+        },
+        "repeat_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "recovery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecoverySpec"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkoutBlock"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "block_id",
+        "block_type",
+        "structure",
+        "duration_s",
+        "distance_m",
+        "completion_condition",
+        "intensity",
+        "repeat_count",
+        "recovery",
+        "execution_role",
+        "children",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "Evidence": {
+      "type": "object",
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "RAW_SOURCE",
+            "PLAN_SNAPSHOT",
+            "PROVIDER_CLOCK",
+            "PHASE_BOUNDARY",
+            "SENSOR_DECLARATION",
+            "ENVIRONMENT",
+            "FEEDBACK",
+            "DERIVED_METHOD",
+            "ZONE_DEFINITION"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "source_ref": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "available_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "VERIFIED_WITH_LIMITATIONS",
+            "UNVERIFIED",
+            "CONFLICTING",
+            "MISSING"
+          ]
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "evidence_id",
+        "kind",
+        "scope",
+        "source_ref",
+        "sha256",
+        "collected_at",
+        "available_at",
+        "verification_status",
+        "limitations"
+      ],
+      "additionalProperties": false
+    },
+    "PlanRef": {
+      "type": "object",
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "plan_revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "plan_id",
+        "plan_revision"
+      ],
+      "additionalProperties": false
+    },
+    "ExecutionRef": {
+      "type": "object",
+      "properties": {
+        "executed_workout_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "execution_revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "executed_workout_id",
+        "execution_revision"
+      ],
+      "additionalProperties": false
+    },
+    "Metric": {
+      "type": "object",
+      "properties": {
+        "metric_name": {
+          "type": "string",
+          "enum": [
+            "MEAN_HEART_RATE",
+            "MEAN_SPEED",
+            "DISTANCE",
+            "DURATION",
+            "CARDIO_LOAD"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "BPM",
+            "M_PER_S",
+            "METRE",
+            "SECOND",
+            "SOURCE_NATIVE"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AVAILABLE",
+            "MISSING",
+            "UNRESOLVED"
+          ]
+        },
+        "aggregation": {
+          "type": "string",
+          "enum": [
+            "WHOLE_SESSION",
+            "BLOCK_MEAN",
+            "BLOCK_TOTAL"
+          ]
+        },
+        "sample_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 1,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "metric_name",
+        "value",
+        "unit",
+        "status",
+        "aggregation",
+        "sample_count",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "Boundary": {
+      "type": "object",
+      "properties": {
+        "start_offset_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "end_offset_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "clock_domain": {
+          "type": "string",
+          "enum": [
+            "GPS_DECLARED_ROUTE",
+            "NATIVE_INDEX_CANDIDATE",
+            "PROVIDER_ACTIVE",
+            "WALL_CLOCK_UTC",
+            "UNKNOWN"
+          ]
+        },
+        "clock_anchor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "CANDIDATE",
+            "UNRESOLVED"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 1,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "start_offset_s",
+        "end_offset_s",
+        "clock_domain",
+        "clock_anchor",
+        "status",
+        "method",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "ExecutedBlock": {
+      "type": "object",
+      "properties": {
+        "executed_block_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "planned_block_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "planned_occurrence_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_block_type": {
+          "type": "string",
+          "enum": [
+            "STEADY",
+            "INTERVAL",
+            "RECOVERY",
+            "TRANSITION",
+            "START",
+            "SPRINT",
+            "TECHNIQUE",
+            "WARMUP",
+            "COOLDOWN",
+            "MIXED",
+            "UNKNOWN"
+          ]
+        },
+        "execution_role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "boundary": {
+          "$ref": "#/$defs/Boundary"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "executed_block_id",
+        "planned_block_id",
+        "planned_occurrence_id",
+        "observed_block_type",
+        "execution_role",
+        "boundary",
+        "metrics"
+      ],
+      "additionalProperties": false
+    },
+    "DecisionSubject": {
+      "type": "object",
+      "properties": {
+        "planned_block_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "planned_occurrence_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "executed_block_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "planned_block_id",
+        "planned_occurrence_id",
+        "executed_block_id"
+      ],
+      "additionalProperties": false
+    },
+    "ApplicabilityChecks": {
+      "type": "object",
+      "properties": {
+        "hr_input": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNKNOWN"
+          ]
+        },
+        "boundaries": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "CANDIDATE",
+            "UNRESOLVED"
+          ]
+        },
+        "native_time_origin": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "UNVERIFIED",
+            "UNKNOWN"
+          ]
+        },
+        "geographical_support": {
+          "type": "string",
+          "enum": [
+            "REPEATED",
+            "NEW",
+            "UNKNOWN"
+          ]
+        },
+        "numeric_range": {
+          "type": "string",
+          "enum": [
+            "WITHIN",
+            "EXTRAPOLATION",
+            "UNKNOWN"
+          ]
+        },
+        "sensor_quality": {
+          "type": "string",
+          "enum": [
+            "ESTABLISHED",
+            "UNESTABLISHED",
+            "INVALID",
+            "UNKNOWN"
+          ]
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "REPRESENTATIVE",
+            "PROXY",
+            "MISSING",
+            "UNKNOWN"
+          ]
+        },
+        "plan_content_at_execution": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "UNVERIFIED",
+            "UNKNOWN",
+            "NOT_NEEDED"
+          ]
+        }
+      },
+      "required": [
+        "hr_input",
+        "boundaries",
+        "native_time_origin",
+        "geographical_support",
+        "numeric_range",
+        "sensor_quality",
+        "environment",
+        "plan_content_at_execution"
+      ],
+      "additionalProperties": false
+    },
+    "Reason": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "BLOCKING",
+            "LIMITATION",
+            "INFO"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "SpeedModelApplicabilityDecision": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "SpeedModelApplicabilityDecision"
+        },
+        "schema_version": {
+          "const": "0.1"
+        },
+        "decision_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "athlete_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "plan_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlanRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "subject": {
+          "$ref": "#/$defs/DecisionSubject"
+        },
+        "model_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "model_variant": {
+          "type": "string",
+          "enum": [
+            "HR_GEOGRAPHY",
+            "PLUS_ENVIRONMENT",
+            "PLUS_HISTORY"
+          ]
+        },
+        "parameter_set_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_artifact_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rules_version": {
+          "const": "speed-applicability-0.1"
+        },
+        "assessment_scope": {
+          "type": "string",
+          "enum": [
+            "BLOCK_TYPE_ROUTING",
+            "EXECUTED_DATA_REPLAY",
+            "PRE_EXERCISE_PREDICTION"
+          ]
+        },
+        "block_type": {
+          "type": "string",
+          "enum": [
+            "STEADY",
+            "INTERVAL",
+            "RECOVERY",
+            "TRANSITION",
+            "START",
+            "SPRINT",
+            "TECHNIQUE",
+            "WARMUP",
+            "COOLDOWN",
+            "MIXED",
+            "UNKNOWN"
+          ]
+        },
+        "block_type_basis": {
+          "type": "string",
+          "enum": [
+            "PLAN_DECLARED",
+            "EXECUTION_RECONSTRUCTED",
+            "USER_DECLARED",
+            "UNKNOWN"
+          ]
+        },
+        "structure": {
+          "type": "string",
+          "enum": [
+            "SEGMENT",
+            "SEQUENCE"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "APPLICABLE",
+            "APPLICABLE_WITH_LIMITATIONS",
+            "NOT_APPLICABLE",
+            "UNKNOWN"
+          ]
+        },
+        "numeric_result_allowed": {
+          "type": "boolean"
+        },
+        "result_use": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "DESCRIPTIVE_DEVELOPMENT_ONLY"
+          ]
+        },
+        "checks": {
+          "$ref": "#/$defs/ApplicabilityChecks"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "minItems": 1,
+          "maxItems": 10000
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "decision_id",
+        "athlete_id",
+        "plan_ref",
+        "execution_ref",
+        "subject",
+        "model_id",
+        "model_version",
+        "model_variant",
+        "parameter_set_id",
+        "model_artifact_sha256",
+        "rules_version",
+        "assessment_scope",
+        "block_type",
+        "block_type_basis",
+        "structure",
+        "status",
+        "numeric_result_allowed",
+        "result_use",
+        "checks",
+        "reasons",
+        "evidence_refs",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "SpeedResult": {
+      "type": "object",
+      "properties": {
+        "result_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "decision_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "executed_block_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "model_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "model_variant": {
+          "type": "string",
+          "enum": [
+            "HR_GEOGRAPHY",
+            "PLUS_ENVIRONMENT",
+            "PLUS_HISTORY"
+          ]
+        },
+        "parameter_set_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "model_artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "evaluation_context": {
+          "type": "string",
+          "enum": [
+            "FORWARD_DEVELOPMENT",
+            "ALL_DATA_REFIT",
+            "UNSCORED_REPLAY"
+          ]
+        },
+        "predicted_mean_speed_mps": {
+          "type": "number",
+          "minimum": 0
+        },
+        "native_value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "native_unit": {
+          "const": "KM_PER_H"
+        },
+        "aggregation": {
+          "const": "SECTION_MEAN"
+        },
+        "result_use": {
+          "const": "DESCRIPTIVE_DEVELOPMENT_ONLY"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 1,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "result_id",
+        "decision_id",
+        "executed_block_id",
+        "model_id",
+        "model_version",
+        "model_variant",
+        "parameter_set_id",
+        "model_artifact_sha256",
+        "evaluation_context",
+        "predicted_mean_speed_mps",
+        "native_value",
+        "native_unit",
+        "aggregation",
+        "result_use",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "WorkoutPlanContract": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "WorkoutPlanContract"
+        },
+        "schema_version": {
+          "const": "0.1"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "plan_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "athlete_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "planned_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "planned_start_time": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "sport": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "session_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 10000
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkoutBlock"
+          },
+          "minItems": 1,
+          "maxItems": 10000
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "plan_id",
+        "plan_revision",
+        "athlete_id",
+        "planned_date",
+        "planned_start_time",
+        "sport",
+        "session_type",
+        "title",
+        "description",
+        "blocks",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "ExecutedWorkout": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "ExecutedWorkout"
+        },
+        "schema_version": {
+          "const": "0.1"
+        },
+        "executed_workout_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "execution_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "athlete_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "sport": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "provider_session_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "start_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end_time": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "plan_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlanRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plan_link_status": {
+          "type": "string",
+          "enum": [
+            "EXACT_PROVIDER_ID",
+            "MANUAL_CONFIRMED",
+            "CANDIDATE",
+            "UNKNOWN"
+          ]
+        },
+        "plan_content_at_execution_status": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "UNVERIFIED",
+            "CONFLICTING",
+            "UNKNOWN"
+          ]
+        },
+        "plan_link_evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "reported_duration_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "active_duration_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "wall_clock_duration_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "native_time_origin_status": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "UNVERIFIED",
+            "CONFLICTING",
+            "UNKNOWN"
+          ]
+        },
+        "hr_acquisition_quality": {
+          "type": "string",
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED",
+            "INVALID",
+            "UNKNOWN"
+          ]
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExecutedBlock"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "speed_results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SpeedResult"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "executed_workout_id",
+        "execution_revision",
+        "athlete_id",
+        "sport",
+        "provider",
+        "provider_session_id",
+        "start_time",
+        "end_time",
+        "plan_ref",
+        "plan_link_status",
+        "plan_content_at_execution_status",
+        "plan_link_evidence_refs",
+        "reported_duration_s",
+        "active_duration_s",
+        "wall_clock_duration_s",
+        "native_time_origin_status",
+        "hr_acquisition_quality",
+        "blocks",
+        "speed_results",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "EffectAnswer": {
+      "type": "object",
+      "properties": {
+        "answer_status": {
+          "type": "string",
+          "enum": [
+            "ANSWERED",
+            "UNKNOWN",
+            "NOT_ASKED",
+            "NOT_APPLICABLE",
+            "DECLINED"
+          ]
+        },
+        "value": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 3
+        }
+      },
+      "required": [
+        "answer_status",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "ThermalAnswer": {
+      "type": "object",
+      "properties": {
+        "answer_status": {
+          "type": "string",
+          "enum": [
+            "ANSWERED",
+            "UNKNOWN",
+            "NOT_ASKED",
+            "NOT_APPLICABLE",
+            "DECLINED"
+          ]
+        },
+        "direction": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "NONE",
+            "HEAT",
+            "COLD",
+            null
+          ]
+        },
+        "severity": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 3
+        }
+      },
+      "required": [
+        "answer_status",
+        "direction",
+        "severity"
+      ],
+      "additionalProperties": false
+    },
+    "ExertionAnswer": {
+      "type": "object",
+      "properties": {
+        "answer_status": {
+          "type": "string",
+          "enum": [
+            "ANSWERED",
+            "UNKNOWN",
+            "NOT_ASKED",
+            "NOT_APPLICABLE",
+            "DECLINED"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 10
+        }
+      },
+      "required": [
+        "answer_status",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "CompletionAnswer": {
+      "type": "object",
+      "properties": {
+        "answer_status": {
+          "type": "string",
+          "enum": [
+            "ANSWERED",
+            "UNKNOWN",
+            "NOT_ASKED",
+            "NOT_APPLICABLE",
+            "DECLINED"
+          ]
+        },
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "YES",
+            "PARTLY",
+            "NO",
+            null
+          ]
+        }
+      },
+      "required": [
+        "answer_status",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "SessionFeedback": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "SessionFeedback"
+        },
+        "schema_version": {
+          "const": "0.1"
+        },
+        "feedback_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "athlete_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "execution_ref": {
+          "$ref": "#/$defs/ExecutionRef"
+        },
+        "executed_block_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "SESSION",
+            "BLOCK"
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timing": {
+          "type": "string",
+          "enum": [
+            "PRE_EXERCISE",
+            "POST_EXERCISE",
+            "NEXT_MORNING",
+            "LATER_RECALL",
+            "UNKNOWN"
+          ]
+        },
+        "questionnaire_version": {
+          "const": "0.1"
+        },
+        "wind_effect": {
+          "$ref": "#/$defs/EffectAnswer"
+        },
+        "waves_effect": {
+          "$ref": "#/$defs/EffectAnswer"
+        },
+        "thermal_effect": {
+          "$ref": "#/$defs/ThermalAnswer"
+        },
+        "overall_exertion": {
+          "$ref": "#/$defs/ExertionAnswer"
+        },
+        "prescription_completion": {
+          "$ref": "#/$defs/CompletionAnswer"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 10000
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "feedback_id",
+        "athlete_id",
+        "execution_ref",
+        "executed_block_id",
+        "scope",
+        "recorded_at",
+        "timing",
+        "questionnaire_version",
+        "wind_effect",
+        "waves_effect",
+        "thermal_effect",
+        "overall_exertion",
+        "prescription_completion",
+        "notes",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "Adherence": {
+      "type": "object",
+      "properties": {
+        "metric_type": {
+          "type": "string",
+          "enum": [
+            "HR_BPM",
+            "HR_ZONE",
+            "POWER_W",
+            "SPEED_MPS",
+            "DURATION",
+            "DISTANCE"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "CANDIDATE",
+            "NOT_EVALUABLE",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "inside_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "below_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "above_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "unknown_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "observed_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "endpoint_policy": {
+          "type": "string",
+          "enum": [
+            "CLOSED",
+            "LEFT_CLOSED",
+            "RIGHT_CLOSED",
+            "OPEN",
+            "UNKNOWN"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "metric_type",
+        "status",
+        "inside_s",
+        "below_s",
+        "above_s",
+        "unknown_s",
+        "observed_s",
+        "endpoint_policy",
+        "reasons",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "ComparisonRow": {
+      "type": "object",
+      "properties": {
+        "planned_occurrence_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "executed_block_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "alignment_status": {
+          "type": "string",
+          "enum": [
+            "MATCHED_VERIFIED",
+            "MATCHED_CANDIDATE",
+            "MISSED",
+            "UNPLANNED",
+            "UNRESOLVED"
+          ]
+        },
+        "target_adherence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Adherence"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "applicability_decision_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "planned_occurrence_id",
+        "executed_block_ids",
+        "alignment_status",
+        "target_adherence",
+        "applicability_decision_ids",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "PlanExecutionComparison": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "PlanExecutionComparison"
+        },
+        "schema_version": {
+          "const": "0.1"
+        },
+        "comparison_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "athlete_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "plan_ref": {
+          "$ref": "#/$defs/PlanRef"
+        },
+        "execution_ref": {
+          "$ref": "#/$defs/ExecutionRef"
+        },
+        "comparison_method_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "coverage": {
+          "type": "string",
+          "enum": [
+            "COMPLETE",
+            "PARTIAL",
+            "UNKNOWN"
+          ]
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ComparisonRow"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "comparison_id",
+        "athlete_id",
+        "plan_ref",
+        "execution_ref",
+        "comparison_method_version",
+        "coverage",
+        "rows",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "IntegrationBundle": {
+      "type": "object",
+      "properties": {
+        "contract_type": {
+          "const": "IntegrationBundle"
+        },
+        "schema_version": {
+          "const": "0.1"
+        },
+        "plan": {
+          "$ref": "#/$defs/WorkoutPlanContract"
+        },
+        "executed": {
+          "$ref": "#/$defs/ExecutedWorkout"
+        },
+        "feedback": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SessionFeedback"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "comparison": {
+          "$ref": "#/$defs/PlanExecutionComparison"
+        },
+        "applicability_decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SpeedModelApplicabilityDecision"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "contract_type",
+        "schema_version",
+        "plan",
+        "executed",
+        "feedback",
+        "comparison",
+        "applicability_decisions"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

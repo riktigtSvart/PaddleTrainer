@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.integrations.polar.client import PolarAPIError, PolarClient
 from app.models.entities import ExternalConnection
+from app.services.api_hr_timebase_audit import build_api_hr_timebase_audit
 from app.services.hr_timebase_persistence import (
     load_current_hr_timebase_snapshots,
     persist_hr_timebase_snapshot,
@@ -23,6 +24,35 @@ from app.services.tcx_heart_rate_timebase import (
 from app.services.users import get_or_create_demo_user
 
 router = APIRouter(prefix="/integrations/polar", tags=["polar"])
+
+
+@router.get("/sessions/{session_external_id}/hr-timebase/api-audit")
+async def inspect_training_session_api_timebase(
+    session_external_id: str,
+    sample_date: Annotated[date, Query()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    exercise_external_id: Annotated[str | None, Query()] = None,
+    include_payload: Annotated[bool, Query()] = False,
+):
+    """Inspect API clocks, including requested pause metadata; never save proof."""
+    features = ["samples", "routes", "pause-times"]
+    user, session, match_count = await _fetch_sample_session(
+        db, session_external_id, sample_date, features=features
+    )
+    audit = build_api_hr_timebase_audit(
+        session, session,
+        expected_session_external_id=session_external_id,
+        sample_session_match_count=match_count,
+        route_session_match_count=match_count,
+        expected_exercise_external_id=exercise_external_id,
+        requested_features=features,
+    )
+    return {"athlete_id": str(user.id), "session_external_id": session_external_id,
+            "sample_date": sample_date.isoformat(), "provider_session_match_count": match_count,
+            "audit": audit, "payload_included": include_payload,
+            "raw_session": session if include_payload else None,
+            "science_storage_writes": 0, "environment_provider_calls": 0,
+            "training_authorized": False, "numeric_prediction_authorized": False}
 
 
 @router.post(
@@ -180,7 +210,7 @@ async def _read_tcx_body(request):
     return bytes(body)
 
 
-async def _fetch_sample_session(db, session_external_id, sample_date):
+async def _fetch_sample_session(db, session_external_id, sample_date, *, features=None):
     if sample_date == date.max:
         raise HTTPException(422, "Sample date cannot be the last representable date.")
     user = await get_or_create_demo_user(db)
@@ -197,7 +227,8 @@ async def _fetch_sample_session(db, session_external_id, sample_date):
     token = await get_valid_access_token(db, connection)
     try:
         payload = await PolarClient().list_training_sessions(
-            token, sample_date, sample_date + timedelta(days=1), features=["samples"]
+            token, sample_date, sample_date + timedelta(days=1),
+            features=["samples"] if features is None else features,
         )
     except PolarAPIError:
         raise HTTPException(502, "Polar training sample request failed.") from None

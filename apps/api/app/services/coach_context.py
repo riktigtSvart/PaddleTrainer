@@ -164,7 +164,7 @@ def build_interpretation_facts(
         )
         if training_load is not None
         else {}
-    )
+    ) or {}
 
     readiness_presence = (
         readiness.get(

@@ -40,6 +40,8 @@ from app.services.response_dataset_split import resolve_dataset_split
 
 MAX_EXECUTION_MEMBERS = 20
 MAX_ASSEMBLY_SECONDS = 120
+MAX_EXTENDED_ASSEMBLY_SECONDS = 360
+SMALL_COHORT_MAX_MEMBERS = 3
 MAX_CURRENT_SESSION_BYTES = 16 * 1024 * 1024
 MAX_INDEX_BYTES = 1024 * 1024
 VERIFIED_REPLAY_SCOPE = "VERIFIED_SAVED_ENVIRONMENT_WITH_CURRENT_POLAR_SOURCE_AND_PINNED_HR_PROOFS"
@@ -85,8 +87,18 @@ def _require(condition, code):
         raise CohortVerificationError(code)
 
 
-def _deadline(start):
-    _require(monotonic() - start < MAX_ASSEMBLY_SECONDS, "COHORT_EXECUTION_TIME_LIMIT")
+def _assembly_seconds(member_count):
+    # Preserve the three-session control's committed execution metadata.
+    return (
+        MAX_ASSEMBLY_SECONDS
+        if member_count <= SMALL_COHORT_MAX_MEMBERS
+        else MAX_EXTENDED_ASSEMBLY_SECONDS
+    )
+
+
+def _deadline(start, assembly_seconds=None):
+    seconds = MAX_ASSEMBLY_SECONDS if assembly_seconds is None else assembly_seconds
+    _require(monotonic() - start < seconds, "COHORT_EXECUTION_TIME_LIMIT")
 
 
 async def _selected_metadata(db, user_id, member):
@@ -154,7 +166,8 @@ async def _current_session(client, token, member, feature):
 
 
 async def _member_index(
-    db, user_id, member, split_manifest, client, token, start, *, verify_chronology=False
+    db, user_id, member, split_manifest, client, token, start, *,
+    verify_chronology=False, assembly_seconds=None
 ):
     saved = await load_environment_replay_snapshot(
         db,
@@ -166,7 +179,7 @@ async def _member_index(
     await _selected_metadata(db, user_id, member)  # Recheck pins after preflight.
     snapshot = saved.snapshot_json
     require_json_size(snapshot, MAX_CAPTURE_BYTES, "COHORT_SNAPSHOT_SIZE_LIMIT")
-    _deadline(start)
+    _deadline(start, assembly_seconds)
     route = await _current_session(client, token, member, "routes")
     sample = await _current_session(client, token, member, "samples")
     kwargs = {
@@ -176,7 +189,7 @@ async def _member_index(
     }
     clocks = await load_current_hr_timebase_snapshots(db, sample, **kwargs)
     declarations = await load_current_hr_acquisition_declarations(db, sample, **kwargs)
-    _deadline(start)
+    _deadline(start, assembly_seconds)
     dataset = replay_environment_dataset(
         snapshot,
         snapshot_id=saved.id,
@@ -219,7 +232,7 @@ async def _member_index(
         dataset["package_hash"] == member.expected_unassigned_replay_package_hash,
         "COHORT_REPLAY_PACKAGE_PIN_MISMATCH",
     )
-    _deadline(start)
+    _deadline(start, assembly_seconds)
     sequences = [s for r in dataset["routes"] for s in r["sequences"]]
     result = {
         "status": "SOURCE_VERIFIED_WITH_LIMITATIONS",
@@ -330,7 +343,7 @@ def _base(manifest):
         },
         "execution_limits": {
             "max_members": MAX_EXECUTION_MEMBERS,
-            "max_assembly_seconds": MAX_ASSEMBLY_SECONDS,
+            "max_assembly_seconds": _assembly_seconds(len(manifest.members)),
             "max_snapshot_bytes": MAX_CAPTURE_BYTES,
             "max_current_session_bytes": MAX_CURRENT_SESSION_BYTES,
             "max_dataset_bytes": MAX_DATASET_BYTES,
@@ -354,6 +367,7 @@ async def assemble_response_cohort(db, manifest, *, user_id, verify_chronology=F
         else manifest
     )
     base = _base(manifest)
+    assembly_seconds = base["execution_limits"]["max_assembly_seconds"]
     if verify_chronology:
         base.update(assembly_version="0.2.0", chronological_split_verified=False)
         base["execution_limits"]["max_temporal_exercises_per_member"] = MAX_TEMPORAL_EXERCISES
@@ -366,7 +380,7 @@ async def assemble_response_cohort(db, manifest, *, user_id, verify_chronology=F
         _require(
             all(m.athlete_id == str(user_id) for m in manifest.members), "COHORT_OWNER_MISMATCH"
         )
-        async with asyncio.timeout(MAX_ASSEMBLY_SECONDS):
+        async with asyncio.timeout(assembly_seconds):
             connection = (
                 await db.execute(
                     select(ExternalConnection).where(
@@ -384,7 +398,7 @@ async def assemble_response_cohort(db, manifest, *, user_id, verify_chronology=F
             for position, member in enumerate(members):
                 failing_member = position
                 await _selected_metadata(db, user_id, member)
-                _deadline(started)
+                _deadline(started, assembly_seconds)
             failing_member = None
             token = await get_valid_access_token(db, connection)
             _require(
@@ -404,9 +418,10 @@ async def assemble_response_cohort(db, manifest, *, user_id, verify_chronology=F
                         token,
                         started,
                         verify_chronology=verify_chronology,
+                        assembly_seconds=assembly_seconds,
                     )
                 )
-                _deadline(started)
+                _deadline(started, assembly_seconds)
             result = {
                 **base,
                 "status": "SOURCE_VERIFIED_COHORT_INDEX_WITH_LIMITATIONS",
@@ -454,7 +469,7 @@ async def assemble_response_cohort(db, manifest, *, user_id, verify_chronology=F
                         ]
                     )
                 )
-            _deadline(started)
+            _deadline(started, assembly_seconds)
             result["cohort_index_hash"] = canonical_hash(result)
             require_json_size(result, MAX_INDEX_BYTES, "COHORT_INDEX_SIZE_LIMIT")
             return result

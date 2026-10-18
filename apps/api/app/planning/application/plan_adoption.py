@@ -307,12 +307,46 @@ def evaluate_current_state_adoption(
     )
 
 
-def _external_plan_contract_json(capture: ExistingWorkoutPlanCapture) -> str:
+def _authoritative_plan_contract_json(
+    capture: ExistingWorkoutPlanCapture,
+    polar_reconciliation: PolarSourceReconciliationArtifact | None,
+) -> str:
     source = json.loads(capture.source_read_json)
     try:
         plan = source["adapter_result"]["plan"]
     except (KeyError, TypeError) as exc:
         raise ValueError("Capture does not contain adapter_result.plan.") from exc
+
+    if capture.source_kind != "STORED_POLAR_TARGET":
+        return canonical_json(plan)
+
+    if (
+        polar_reconciliation is None
+        or "/planned_start_utc" not in polar_reconciliation.compared_fields
+    ):
+        return canonical_json(plan)
+
+    snapshot = source.get("source_snapshot")
+    if not isinstance(snapshot, dict):
+        return canonical_json(plan)
+
+    planned_start = snapshot.get("planned_start_time")
+    if planned_start is None:
+        return canonical_json(plan)
+    if not isinstance(planned_start, str) or not planned_start:
+        raise ValueError("Reconciled current planned_start_time must be a non-empty string.")
+
+    try:
+        parsed = datetime.fromisoformat(planned_start.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("Reconciled current planned_start_time is invalid.") from exc
+
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ValueError("Reconciled current planned_start_time must be offset-aware.")
+
+    plan["planned_start_time"] = (
+        parsed.astimezone(timezone.utc).isoformat(timespec="seconds")
+    )
     return canonical_json(plan)
 
 
@@ -374,7 +408,10 @@ def prepare_current_state_adoption(
         effective_from=established,
         created_at=established,
         contract_schema_version=capture.external_contract_schema_version,
-        contract_json=_external_plan_contract_json(capture),
+        contract_json=_authoritative_plan_contract_json(
+            capture,
+            polar_reconciliation,
+        ),
         occurrences=occurrences,
         adoption_source=source_ref,
         decision_lineage=None,

@@ -1,5 +1,6 @@
 from contextlib import nullcontext
 from datetime import date, datetime, timezone
+import json
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -44,7 +45,7 @@ NOW = datetime(2026, 10, 18, 5, 0, tzinfo=UTC)
 API_ROOT = Path(__file__).resolve().parents[2]
 
 
-def capture():
+def capture(*, contract_start="2026-10-18T05:00:00+00:00", snapshot_start=None):
     plan = {
         "contract_type": "WorkoutPlanContract",
         "schema_version": "0.1",
@@ -52,7 +53,7 @@ def capture():
         "plan_revision": 1,
         "athlete_id": "athlete-1",
         "planned_date": "2026-10-18",
-        "planned_start_time": "2026-10-18T05:00:00+00:00",
+        "planned_start_time": contract_start,
         "sport": "KAYAK",
         "session_type": "UNKNOWN",
         "title": "Polar current state",
@@ -61,6 +62,8 @@ def capture():
         "evidence": [],
     }
     source = {"status": "PLAN_CONTRACT_READ_WITH_LIMITATIONS", "adapter_result": {"plan": plan}}
+    if snapshot_start is not None:
+        source["source_snapshot"] = {"planned_start_time": snapshot_start}
     source_json = canonical_json(source)
     source_hash = compute_content_hash(source, exclude_fields=frozenset())
     return finalize_existing_workout_plan_capture(
@@ -88,7 +91,7 @@ def capture():
     )
 
 
-def reconciliation(cap):
+def reconciliation(cap, *, compared_fields=("/title",)):
     provisional = PolarSourceReconciliationArtifact(
         schema_version="0.2",
         rules_version="polar-source-reconciliation-0.2",
@@ -111,7 +114,7 @@ def reconciliation(cap):
         current_orm_edit_detected=False,
         provider_snapshot_selected_as_future_authority_candidate=True,
         adoption_gate_integrated=False,
-        compared_fields=("/title",),
+        compared_fields=compared_fields,
         differences=(),
         normalization_notes=("TEST",),
         excluded_fields=("/status",),
@@ -132,6 +135,46 @@ def ids():
     values = iter(["revision", "occurrence"])
     return lambda: next(values)
 
+
+def test_reconciled_current_start_is_promoted_into_authoritative_baseline():
+    cap = capture(
+        contract_start=None,
+        snapshot_start="2026-10-18T05:00:00+00:00",
+    )
+    artifact = reconciliation(
+        cap,
+        compared_fields=("/title", "/planned_start_utc"),
+    )
+
+    prepared = prepare_current_state_adoption(
+        capture=cap,
+        authority_established_at=NOW,
+        polar_reconciliation=artifact,
+        polar_reconciliation_audit_persistence_ready=True,
+        id_factory=ids(),
+    )
+
+    contract = json.loads(prepared.revision.canonical_contract_json)
+    assert contract["planned_start_time"] == "2026-10-18T05:00:00+00:00"
+
+
+def test_current_start_is_not_promoted_without_explicit_time_reconciliation():
+    cap = capture(
+        contract_start=None,
+        snapshot_start="2026-10-18T05:00:00+00:00",
+    )
+    artifact = reconciliation(cap)
+
+    prepared = prepare_current_state_adoption(
+        capture=cap,
+        authority_established_at=NOW,
+        polar_reconciliation=artifact,
+        polar_reconciliation_audit_persistence_ready=True,
+        id_factory=ids(),
+    )
+
+    contract = json.loads(prepared.revision.canonical_contract_json)
+    assert contract["planned_start_time"] is None
 
 def test_migration_extends_current_single_head_without_sibling_branch():
     scripts = ScriptDirectory.from_config(Config(str(API_ROOT / "alembic.ini")))

@@ -15,6 +15,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects import postgresql
+from sqlalchemy import Float
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -431,6 +432,230 @@ class PlanningPlanExecutionLinkRow(Base):
         nullable=False,
         default=False,
     )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    content_hash_algorithm: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    content_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+class PlanningOccurrenceExecutionLinkRow(Base):
+    __tablename__ = "planning_occurrence_execution_links"
+    __table_args__ = (
+        UniqueConstraint(
+            "plan_execution_link_id",
+            "authoritative_occurrence_id",
+            name="uq_planning_occ_exec_authoritative_occurrence",
+        ),
+        UniqueConstraint(
+            "plan_execution_link_id",
+            "phase_reconciliation_artifact_id",
+            "stable_source_occurrence_id",
+            name="uq_planning_occ_exec_source_candidate",
+        ),
+        UniqueConstraint(
+            "confirmation_id",
+            name="uq_planning_occ_exec_confirmation",
+        ),
+        CheckConstraint(
+            "link_basis = 'user_confirmed_candidate_segment'",
+            name="ck_planning_occ_exec_basis",
+        ),
+        CheckConstraint(
+            "occurrence_alignment_status = "
+            "'user_confirmed_candidate_segment'",
+            name="ck_planning_occ_exec_alignment_status",
+        ),
+        CheckConstraint(
+            "plan_content_at_execution_status = 'unverified'",
+            name="ck_planning_occ_exec_plan_content_status",
+        ),
+        CheckConstraint(
+            "provider_event_verified = false",
+            name="ck_planning_occ_exec_no_provider_event",
+        ),
+        CheckConstraint(
+            "clock_alignment_verified = false",
+            name="ck_planning_occ_exec_no_clock_alignment",
+        ),
+        CheckConstraint(
+            "actual_boundary_verified = false",
+            name="ck_planning_occ_exec_no_actual_boundary",
+        ),
+        CheckConstraint(
+            "temporal_match_used = false",
+            name="ck_planning_occ_exec_no_temporal_match",
+        ),
+        CheckConstraint(
+            "candidate_start_min_s >= 0 "
+            "AND candidate_start_max_s >= candidate_start_min_s",
+            name="ck_planning_occ_exec_start_window",
+        ),
+        CheckConstraint(
+            "candidate_completion_min_s >= 0 "
+            "AND candidate_completion_max_s "
+            ">= candidate_completion_min_s",
+            name="ck_planning_occ_exec_completion_window",
+        ),
+        CheckConstraint(
+            "length(session_source_content_hash) = 64",
+            name="ck_planning_occ_exec_session_hash_length",
+        ),
+        CheckConstraint(
+            "length(plan_source_content_hash) = 64",
+            name="ck_planning_occ_exec_plan_hash_length",
+        ),
+        CheckConstraint(
+            "length(content_hash) = 64",
+            name="ck_planning_occ_exec_hash_length",
+        ),
+    )
+
+    link_id: Mapped[str] = mapped_column(
+        Text,
+        primary_key=True,
+    )
+    schema_version: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    athlete_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    plan_execution_link_id: Mapped[str] = mapped_column(
+        ForeignKey(
+            "planning_plan_execution_links.link_id",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+        index=True,
+    )
+    logical_plan_id: Mapped[str] = mapped_column(
+        ForeignKey(
+            "planning_logical_plans.logical_plan_id",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+    )
+    observed_revision_id: Mapped[str] = mapped_column(
+        ForeignKey(
+            "planning_plan_revisions.revision_id",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+        index=True,
+    )
+    authoritative_occurrence_id: Mapped[str] = mapped_column(
+        ForeignKey(
+            "planning_plan_occurrence_identities.occurrence_id",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+        index=True,
+    )
+    workout_session_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("workout_sessions.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    link_basis: Mapped[str] = mapped_column(Text, nullable=False)
+
+    phase_reconciliation_artifact_id: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    phase_reconciliation_rules_version: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    session_source_content_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    plan_source_content_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    stable_source_occurrence_id: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    captured_contract_occurrence_id: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    hypothesis_id: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    candidate_start_min_s: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+    )
+    candidate_start_max_s: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+    )
+    candidate_completion_min_s: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+    )
+    candidate_completion_max_s: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+    )
+    clock_domain: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    confirmation_id: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    confirmation_submitted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
+    occurrence_alignment_status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    plan_content_at_execution_status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    provider_event_verified: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+    clock_alignment_verified: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+    actual_boundary_verified: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+    temporal_match_used: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

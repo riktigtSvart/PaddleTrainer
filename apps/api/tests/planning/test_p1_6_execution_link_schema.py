@@ -42,8 +42,8 @@ def test_p1_6_migration_extends_previous_head():
         Config(str(API_ROOT / "alembic.ini"))
     )
 
-    assert scripts.get_heads() == ["a91f6c3d7b20"]
+    assert scripts.get_heads() == ["c84d7e1a6f32"]
 
-    current = scripts.get_revision("a91f6c3d7b20")
+    current = scripts.get_revision("c84d7e1a6f32")
     assert current is not None
-    assert current.down_revision == "e2a7c4b9d310"
+    assert current.down_revision == "a91f6c3d7b20"

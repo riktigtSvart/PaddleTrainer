@@ -16,6 +16,13 @@ class AuthoritativeOccurrenceExecutionLinkRepository(Protocol):
     ) -> AuthoritativeOccurrenceExecutionLink | None:
         ...
 
+    async def list_by_plan_execution_link(
+        self,
+        *,
+        plan_execution_link_id: str,
+    ) -> tuple[AuthoritativeOccurrenceExecutionLink, ...]:
+        ...
+
     async def save(
         self,
         link: AuthoritativeOccurrenceExecutionLink,

@@ -79,6 +79,27 @@ class SqlAlchemyAuthoritativeOccurrenceExecutionLinkRepository:
         row = result.scalar_one_or_none()
         return None if row is None else self._from_row(row)
 
+    async def list_by_plan_execution_link(
+        self,
+        *,
+        plan_execution_link_id: str,
+    ) -> tuple[AuthoritativeOccurrenceExecutionLink, ...]:
+        result = await self._session.execute(
+            select(PlanningOccurrenceExecutionLinkRow)
+            .where(
+                PlanningOccurrenceExecutionLinkRow.plan_execution_link_id
+                == plan_execution_link_id
+            )
+            .order_by(
+                PlanningOccurrenceExecutionLinkRow.authoritative_occurrence_id,
+                PlanningOccurrenceExecutionLinkRow.link_id,
+            )
+        )
+        return tuple(
+            self._from_row(row)
+            for row in result.scalars().all()
+        )
+
     async def save(
         self,
         link: AuthoritativeOccurrenceExecutionLink,

@@ -6,7 +6,7 @@ from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -71,6 +71,28 @@ from app.planning.infrastructure.repositories.postgres_plan_reconciliation_audit
 from app.planning.ports.execution_source import (
     ExecutionSourceNotFound,
 )
+from app.planning.application.link_authoritative_occurrence_execution import (
+    AuthoritativeOccurrenceExecutionPlanLinkNotFound,
+    AuthoritativeOccurrenceExecutionStateError,
+    link_authoritative_occurrence_execution_with_repository,
+)
+from app.planning.domain.occurrence_execution import (
+    OccurrenceExecutionConflictError,
+    OccurrenceExecutionNotEligible,
+)
+from app.planning.infrastructure.adapters.current_phase_occurrence_candidate import (
+    CurrentAppPhaseOccurrenceCandidateProvider,
+    CurrentPhaseOccurrenceCandidateNotFound,
+)
+from app.planning.infrastructure.adapters.phase_occurrence_candidate import (
+    PhaseOccurrenceCandidateAdapterError,
+)
+from app.planning.infrastructure.repositories.postgres_authoritative_occurrence_execution import (
+    build_production_authoritative_occurrence_execution_repository,
+)
+from app.services.phase_reconciliation_read import (
+    PhaseReconciliationReadError,
+)
 from app.services.plan_contract_read import PlanReadError
 
 
@@ -89,6 +111,23 @@ class PlanAdoptionRequest(BaseModel):
 
 class AuthoritativePlanRevisionRequest(BaseModel):
     instruction_id: str = Field(min_length=1)
+
+
+class AuthoritativeOccurrenceExecutionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    hypothesis_id: str = Field(
+        min_length=12,
+        max_length=256,
+        pattern=r"^phase_path_.+$",
+    )
+    stable_source_occurrence_id: str = Field(
+        min_length=25,
+        max_length=256,
+        pattern=r"^phase-source-occurrence_.+$",
+    )
+    acknowledge_candidate_boundaries: Literal[True]
+    acknowledge_not_provider_verified: Literal[True]
 
 
 async def _existing_owner_id(db: AsyncSession):
@@ -715,6 +754,248 @@ async def link_authoritative_execution_api(
             "temporal_match_used": (
                 link.temporal_match_used
             ),
+        },
+        "source_workout_mutated": False,
+        "workout_session_mutated": False,
+        "authoritative_revision_mutated": False,
+    }
+
+
+@router.post(
+    "/workouts/{workout_id}/authoritative-plan/"
+    "executions/{session_id}/occurrences/{authoritative_occurrence_id}",
+    status_code=201,
+)
+async def link_authoritative_occurrence_execution_api(
+    workout_id: UUID,
+    session_id: UUID,
+    authoritative_occurrence_id: str,
+    payload: AuthoritativeOccurrenceExecutionRequest,
+    response: Response,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Confirm one authoritative occurrence against a server candidate.
+
+    The caller selects only identities already exposed by reconciliation
+    plus two explicit acknowledgements. Hashes, candidate windows,
+    captured occurrence provenance, clock domain, and evidence authority
+    are re-derived server-side.
+    """
+    response.headers["Cache-Control"] = "no-store"
+
+    owner_id = await _owner_or_404(db)
+    logical_plan_id = f"planned-workout:{workout_id}"
+
+    revision_repository = (
+        build_production_authoritative_plan_revision_repository(
+            db
+        )
+    )
+    execution_link_repository = (
+        build_production_authoritative_plan_execution_repository(
+            db
+        )
+    )
+    occurrence_execution_repository = (
+        build_production_authoritative_occurrence_execution_repository(
+            db
+        )
+    )
+
+    candidate_provider = (
+        CurrentAppPhaseOccurrenceCandidateProvider(
+            db,
+            athlete_id=str(owner_id),
+            workout_session_id=str(session_id),
+        )
+    )
+
+    try:
+        link = (
+            await link_authoritative_occurrence_execution_with_repository(
+                athlete_id=str(owner_id),
+                logical_plan_id=logical_plan_id,
+                workout_session_id=str(session_id),
+                authoritative_occurrence_id=(
+                    authoritative_occurrence_id
+                ),
+                hypothesis_id=payload.hypothesis_id,
+                stable_source_occurrence_id=(
+                    payload.stable_source_occurrence_id
+                ),
+                acknowledges_candidate_boundaries=(
+                    payload.acknowledge_candidate_boundaries
+                ),
+                acknowledges_not_provider_verified=(
+                    payload.acknowledge_not_provider_verified
+                ),
+                execution_link_repository=(
+                    execution_link_repository
+                ),
+                revision_repository=revision_repository,
+                occurrence_execution_repository=(
+                    occurrence_execution_repository
+                ),
+                candidate_provider=candidate_provider,
+                session=db,
+            )
+        )
+    except AuthoritativeOccurrenceExecutionPlanLinkNotFound:
+        raise HTTPException(
+            404,
+            {
+                "code": (
+                    "AUTHORITATIVE_PLAN_EXECUTION_LINK_NOT_FOUND"
+                )
+            },
+        ) from None
+    except CurrentPhaseOccurrenceCandidateNotFound:
+        raise HTTPException(
+            404,
+            {
+                "code": (
+                    "AUTHORITATIVE_OCCURRENCE_SESSION_NOT_FOUND"
+                )
+            },
+        ) from None
+    except PhaseReconciliationReadError as exc:
+        raise HTTPException(
+            exc.status_code,
+            {
+                "code": (
+                    "AUTHORITATIVE_OCCURRENCE_"
+                    "RECONCILIATION_UNAVAILABLE"
+                ),
+                "blocking_reason": exc.code,
+            },
+        ) from None
+    except PhaseOccurrenceCandidateAdapterError:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_OCCURRENCE_"
+                    "CANDIDATE_NOT_ELIGIBLE"
+                )
+            },
+        ) from None
+    except OccurrenceExecutionNotEligible:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_OCCURRENCE_"
+                    "EXECUTION_NOT_ELIGIBLE"
+                )
+            },
+        ) from None
+    except OccurrenceExecutionConflictError:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_OCCURRENCE_"
+                    "EXECUTION_CONFLICT"
+                )
+            },
+        ) from None
+    except AuthoritativeOccurrenceExecutionStateError:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_OCCURRENCE_"
+                    "EXECUTION_STATE_INVALID"
+                )
+            },
+        ) from None
+    except ValueError:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_OCCURRENCE_"
+                    "EXECUTION_INVALID"
+                )
+            },
+        ) from None
+
+    return {
+        "status": "authoritative_occurrence_execution_link",
+        "link": {
+            "link_id": link.link_id,
+            "schema_version": link.schema_version,
+            "athlete_id": link.athlete_id,
+            "plan_execution_link_id": (
+                link.plan_execution_link_id
+            ),
+            "logical_plan_id": link.logical_plan_id,
+            "observed_revision_id": (
+                link.observed_revision_id
+            ),
+            "authoritative_occurrence_id": (
+                link.authoritative_occurrence_id
+            ),
+            "workout_session_id": link.workout_session_id,
+            "link_basis": link.link_basis.value,
+            "phase_reconciliation_artifact_id": (
+                link.phase_reconciliation_artifact_id
+            ),
+            "phase_reconciliation_rules_version": (
+                link.phase_reconciliation_rules_version
+            ),
+            "hypothesis_id": link.hypothesis_id,
+            "stable_source_occurrence_id": (
+                link.stable_source_occurrence_id
+            ),
+            "captured_contract_occurrence_id": (
+                link.captured_contract_occurrence_id
+            ),
+            "candidate_start_window_s": list(
+                link.candidate_start_window_s
+            ),
+            "candidate_completion_window_s": list(
+                link.candidate_completion_window_s
+            ),
+            "clock_domain": link.clock_domain,
+            "confirmation_id": link.confirmation_id,
+            "confirmation_submitted_at": (
+                link.confirmation_submitted_at.isoformat()
+            ),
+            "occurrence_alignment_status": (
+                link.occurrence_alignment_status
+            ),
+            "plan_content_at_execution_status": (
+                link.plan_content_at_execution_status
+            ),
+            "provider_event_verified": (
+                link.provider_event_verified
+            ),
+            "clock_alignment_verified": (
+                link.clock_alignment_verified
+            ),
+            "actual_boundary_verified": (
+                link.actual_boundary_verified
+            ),
+            "temporal_match_used": link.temporal_match_used,
+            "created_at": link.created_at.isoformat(),
+            "content_hash": link.content_hash,
+        },
+        "claims": {
+            "plan_identity_linked": True,
+            "occurrence_candidate_association_confirmed": True,
+            "occurrence_alignment_verified": False,
+            "occurrence_alignment_status": (
+                link.occurrence_alignment_status
+            ),
+            "plan_content_at_execution_status": (
+                link.plan_content_at_execution_status
+            ),
+            "phase_alignment_verified": False,
+            "provider_event_verified": False,
+            "clock_alignment_verified": False,
+            "actual_boundary_verified": False,
+            "temporal_match_used": False,
         },
         "source_workout_mutated": False,
         "workout_session_mutated": False,

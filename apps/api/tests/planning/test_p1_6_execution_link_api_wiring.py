@@ -49,7 +49,10 @@ def test_execution_link_api_is_identity_only_server_trust_boundary():
         'executions/{session_id}",'
     )
     end = source.index(
-        '@router.get("/workouts/{workout_id}/authoritative-plan")'
+        '@router.post(\n'
+        '    "/workouts/{workout_id}/authoritative-plan/"\n'
+        '    "executions/{session_id}/occurrences/'
+        '{authoritative_occurrence_id}",'
     )
     endpoint = source[start:end]
 

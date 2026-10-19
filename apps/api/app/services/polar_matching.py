@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.entities import (
     PlannedWorkout,
     User,
+    WorkoutLinkSource,
     WorkoutSession,
     WorkoutStatus,
 )
@@ -56,6 +57,9 @@ async def link_sessions_to_planned_workouts(
 
         if session.planned_workout_id is None:
             session.planned_workout_id = planned.id
+            session.planned_workout_link_source = (
+                WorkoutLinkSource.PROVIDER_EXACT
+            )
             linked += 1
             continue
 

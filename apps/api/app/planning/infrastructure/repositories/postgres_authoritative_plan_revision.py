@@ -82,6 +82,26 @@ class SqlAlchemyAuthoritativePlanRevisionRepository:
         row = result.scalar_one_or_none()
         return None if row is None else self._identity_from_row(row)
 
+    async def get_plan_for_update(
+        self,
+        *,
+        logical_plan_id: str,
+    ) -> AuthoritativePlanIdentity | None:
+        result = await self._session.execute(
+            select(PlanningLogicalPlanRow)
+            .where(
+                PlanningLogicalPlanRow.logical_plan_id
+                == logical_plan_id
+            )
+            .with_for_update()
+        )
+        row = result.scalar_one_or_none()
+        return (
+            None
+            if row is None
+            else self._identity_from_row(row)
+        )
+
     async def get_revision(
         self,
         *,

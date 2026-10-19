@@ -23,6 +23,11 @@ from app.planning.application.audited_plan_mutation import (
     AuditedPlanMutationInstructionNotFound,
     load_audited_plan_mutation_instruction,
 )
+from app.planning.application.link_authoritative_execution import (
+    AuthoritativeExecutionPlanNotFound,
+    AuthoritativeExecutionPlanStateError,
+    link_authoritative_execution_with_repository,
+)
 from app.planning.application.polar_source_reconciliation import (
     build_polar_source_reconciliation,
 )
@@ -32,6 +37,10 @@ from app.planning.application.plan_adoption import (
     PlanAlreadyAdoptedError,
     adopt_with_repository,
     preview_with_repository,
+)
+from app.planning.domain.execution_link import (
+    AuthoritativeExecutionLinkConflictError,
+    AuthoritativeExecutionLinkNotEligible,
 )
 from app.planning.domain.integration.polar_reconciliation import (
     PolarSourceReconciliationError,
@@ -43,6 +52,12 @@ from app.planning.infrastructure.adapters.current_app_plan_read import (
     CurrentAppPlanReadAdapterError,
     capture_current_app_plan,
 )
+from app.planning.infrastructure.adapters.locked_execution_source import (
+    CurrentAppLockedExecutionSource,
+)
+from app.planning.infrastructure.repositories.postgres_authoritative_plan_execution import (
+    build_production_authoritative_plan_execution_repository,
+)
 from app.planning.infrastructure.repositories.postgres_authoritative_plan_revision import (
     build_production_authoritative_plan_revision_repository,
 )
@@ -52,6 +67,9 @@ from app.planning.infrastructure.repositories.postgres_planning_audit import (
 from app.planning.infrastructure.repositories.postgres_plan_reconciliation_audit import (
     PlanReconciliationAuditPersistenceError,
     build_production_plan_reconciliation_audit_repository,
+)
+from app.planning.ports.execution_source import (
+    ExecutionSourceNotFound,
 )
 from app.services.plan_contract_read import PlanReadError
 
@@ -547,6 +565,160 @@ async def create_authoritative_plan_revision(
             "content_hash": applied.identity.content_hash,
         },
         "revision": _revision_payload(applied.revision),
+    }
+
+
+@router.post(
+    "/workouts/{workout_id}/authoritative-plan/executions/{session_id}",
+    status_code=201,
+)
+async def link_authoritative_execution_api(
+    workout_id: UUID,
+    session_id: UUID,
+    response: Response,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Establish one immutable authoritative plan/execution link.
+
+    The client supplies only resource identities. Revision identity,
+    provider evidence, source hashes, and eligibility are resolved
+    server-side from locked authoritative/current application state.
+    """
+    response.headers["Cache-Control"] = "no-store"
+
+    owner_id = await _owner_or_404(db)
+    logical_plan_id = f"planned-workout:{workout_id}"
+
+    revision_repository = (
+        build_production_authoritative_plan_revision_repository(
+            db
+        )
+    )
+    execution_link_repository = (
+        build_production_authoritative_plan_execution_repository(
+            db
+        )
+    )
+
+    try:
+        link = (
+            await link_authoritative_execution_with_repository(
+                athlete_id=str(owner_id),
+                logical_plan_id=logical_plan_id,
+                workout_session_id=str(session_id),
+                revision_repository=revision_repository,
+                execution_link_repository=(
+                    execution_link_repository
+                ),
+                execution_source=(
+                    CurrentAppLockedExecutionSource()
+                ),
+                session=db,
+            )
+        )
+    except AuthoritativeExecutionPlanNotFound:
+        raise HTTPException(
+            404,
+            {"code": "AUTHORITATIVE_PLAN_NOT_FOUND"},
+        ) from None
+    except ExecutionSourceNotFound:
+        raise HTTPException(
+            404,
+            {"code": "EXECUTION_SOURCE_NOT_FOUND"},
+        ) from None
+    except PlanReadError as exc:
+        raise HTTPException(
+            exc.status_code,
+            {"code": exc.code},
+        ) from None
+    except AuthoritativeExecutionLinkNotEligible:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_EXECUTION_LINK_NOT_ELIGIBLE"
+                )
+            },
+        ) from None
+    except AuthoritativeExecutionLinkConflictError:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_EXECUTION_LINK_CONFLICT"
+                )
+            },
+        ) from None
+    except AuthoritativeExecutionPlanStateError:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_PLAN_EXECUTION_STATE_INVALID"
+                )
+            },
+        ) from None
+    except ValueError:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "AUTHORITATIVE_EXECUTION_LINK_INVALID"
+                )
+            },
+        ) from None
+
+    return {
+        "status": "authoritative_plan_execution_link",
+        "link": {
+            "link_id": link.link_id,
+            "schema_version": link.schema_version,
+            "athlete_id": link.athlete_id,
+            "logical_plan_id": link.logical_plan_id,
+            "observed_revision_id": (
+                link.observed_revision_id
+            ),
+            "workout_session_id": (
+                link.workout_session_id
+            ),
+            "source_workout_id": link.source_workout_id,
+            "link_basis": link.link_basis.value,
+            "provider_target_id": link.provider_target_id,
+            "source_workout_content_hash": (
+                link.source_workout_content_hash
+            ),
+            "session_source_content_hash": (
+                link.session_source_content_hash
+            ),
+            "observed_revision_content_hash": (
+                link.observed_revision_content_hash
+            ),
+            "plan_content_at_execution_status": (
+                link.plan_content_at_execution_status
+            ),
+            "temporal_match_used": (
+                link.temporal_match_used
+            ),
+            "created_at": link.created_at.isoformat(),
+            "content_hash_algorithm": (
+                link.content_hash_algorithm
+            ),
+            "content_hash": link.content_hash,
+        },
+        "claims": {
+            "plan_identity_linked": True,
+            "plan_content_at_execution_status": (
+                link.plan_content_at_execution_status
+            ),
+            "occurrence_alignment_verified": False,
+            "phase_alignment_verified": False,
+            "temporal_match_used": (
+                link.temporal_match_used
+            ),
+        },
+        "source_workout_mutated": False,
+        "workout_session_mutated": False,
+        "authoritative_revision_mutated": False,
     }
 
 

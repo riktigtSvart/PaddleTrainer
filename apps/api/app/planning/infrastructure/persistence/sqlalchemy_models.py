@@ -4,6 +4,7 @@ from datetime import datetime
 import uuid
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -314,6 +315,131 @@ class PlanningAuditArtifactRow(Base):
         nullable=False,
     )
     contract_json: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+
+class PlanningPlanExecutionLinkRow(Base):
+    __tablename__ = "planning_plan_execution_links"
+    __table_args__ = (
+        UniqueConstraint(
+            "workout_session_id",
+            name="uq_planning_plan_execution_link_session",
+        ),
+        CheckConstraint(
+            "link_basis IN "
+            "('exact_provider_id', 'manual_confirmed')",
+            name="ck_planning_plan_execution_link_basis",
+        ),
+        CheckConstraint(
+            "plan_content_at_execution_status = 'unverified'",
+            name="ck_planning_plan_execution_content_status",
+        ),
+        CheckConstraint(
+            "temporal_match_used = false",
+            name="ck_planning_plan_execution_no_temporal_match",
+        ),
+        CheckConstraint(
+            "(link_basis = 'exact_provider_id' "
+            "AND provider_target_id IS NOT NULL) OR "
+            "(link_basis = 'manual_confirmed' "
+            "AND provider_target_id IS NULL)",
+            name="ck_planning_plan_execution_provider_proof",
+        ),
+        CheckConstraint(
+            "length(source_workout_content_hash) = 64",
+            name="ck_planning_plan_execution_source_hash_length",
+        ),
+        CheckConstraint(
+            "length(session_source_content_hash) = 64",
+            name="ck_planning_plan_execution_session_hash_length",
+        ),
+        CheckConstraint(
+            "length(observed_revision_content_hash) = 64",
+            name="ck_planning_plan_execution_revision_hash_length",
+        ),
+        CheckConstraint(
+            "length(content_hash) = 64",
+            name="ck_planning_plan_execution_hash_length",
+        ),
+    )
+
+    link_id: Mapped[str] = mapped_column(
+        Text,
+        primary_key=True,
+    )
+    schema_version: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    athlete_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    logical_plan_id: Mapped[str] = mapped_column(
+        ForeignKey(
+            "planning_logical_plans.logical_plan_id",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+        index=True,
+    )
+    observed_revision_id: Mapped[str] = mapped_column(
+        ForeignKey(
+            "planning_plan_revisions.revision_id",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+        index=True,
+    )
+    workout_session_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("workout_sessions.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    source_workout_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("planned_workouts.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    link_basis: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    provider_target_id: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    source_workout_content_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    session_source_content_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    observed_revision_content_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    plan_content_at_execution_status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    temporal_match_used: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    content_hash_algorithm: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    content_hash: Mapped[str] = mapped_column(
         Text,
         nullable=False,
     )

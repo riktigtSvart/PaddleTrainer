@@ -21,6 +21,13 @@ class AuthoritativePlanRevisionRepository(Protocol):
     ) -> AuthoritativePlanIdentity | None:
         ...
 
+    async def get_plan_for_update(
+        self,
+        *,
+        logical_plan_id: str,
+    ) -> AuthoritativePlanIdentity | None:
+        ...
+
     async def get_revision(
         self,
         *,

@@ -7,6 +7,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     JSON,
     Text,
@@ -272,3 +273,47 @@ class PlanningPlanRevisionReconciliationAuditRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     audit_content_hash_algorithm: Mapped[str] = mapped_column(Text, nullable=False)
     audit_content_hash: Mapped[str] = mapped_column(Text, nullable=False)
+
+class PlanningAuditArtifactRow(Base):
+    __tablename__ = "planning_audit_artifacts"
+    __table_args__ = (
+        Index(
+            "ix_planning_audit_athlete_kind_created",
+            "athlete_id",
+            "artifact_kind",
+            "created_at",
+        ),
+    )
+
+    artifact_kind: Mapped[str] = mapped_column(
+        Text,
+        primary_key=True,
+    )
+    artifact_id: Mapped[str] = mapped_column(
+        Text,
+        primary_key=True,
+    )
+    athlete_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    schema_version: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    content_hash_algorithm: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    content_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    contract_json: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )

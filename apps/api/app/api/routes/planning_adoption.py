@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from typing import Annotated, Literal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field
@@ -13,6 +13,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.db.session import get_db
 from app.models.entities import User
+from app.planning.application.apply_plan_revision import (
+    AuthoritativePlanRevisionNoChange,
+    AuthoritativePlanRevisionStaleCurrent,
+    apply_authoritative_plan_revision_with_repository,
+)
+from app.planning.application.audited_plan_mutation import (
+    AuditedPlanMutationInstructionError,
+    AuditedPlanMutationInstructionNotFound,
+    load_audited_plan_mutation_instruction,
+)
 from app.planning.application.polar_source_reconciliation import (
     build_polar_source_reconciliation,
 )
@@ -36,6 +46,9 @@ from app.planning.infrastructure.adapters.current_app_plan_read import (
 from app.planning.infrastructure.repositories.postgres_authoritative_plan_revision import (
     build_production_authoritative_plan_revision_repository,
 )
+from app.planning.infrastructure.repositories.postgres_planning_audit import (
+    build_production_planning_audit_repository,
+)
 from app.planning.infrastructure.repositories.postgres_plan_reconciliation_audit import (
     PlanReconciliationAuditPersistenceError,
     build_production_plan_reconciliation_audit_repository,
@@ -53,6 +66,11 @@ class PlanAdoptionRequest(BaseModel):
         pattern=r"^[0-9a-f]{64}$",
     )
     acknowledge_current_state_baseline_only: Literal[True]
+
+
+
+class AuthoritativePlanRevisionRequest(BaseModel):
+    instruction_id: str = Field(min_length=1)
 
 
 async def _existing_owner_id(db: AsyncSession):
@@ -196,6 +214,11 @@ def _revision_payload(revision) -> dict:
             None
             if revision.adoption_source is None
             else asdict(revision.adoption_source)
+        ),
+        "decision_lineage": (
+            None
+            if revision.decision_lineage is None
+            else asdict(revision.decision_lineage)
         ),
     }
 
@@ -403,6 +426,127 @@ async def adopt_plan_current_state(
         "source_workout_mutated": False,
         "external_plan_id_promoted": False,
         "external_occurrence_ids_promoted": False,
+    }
+
+
+@router.post(
+    "/workouts/{workout_id}/authoritative-plan/revisions",
+    status_code=201,
+)
+async def create_authoritative_plan_revision(
+    workout_id: UUID,
+    payload: AuthoritativePlanRevisionRequest,
+    response: Response,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    response.headers["Cache-Control"] = "no-store"
+
+    owner_id = await _owner_or_404(db)
+    logical_plan_id = f"planned-workout:{workout_id}"
+
+    revision_repository = (
+        build_production_authoritative_plan_revision_repository(
+            db
+        )
+    )
+
+    identity = await revision_repository.get_plan(
+        logical_plan_id=logical_plan_id
+    )
+    if (
+        identity is None
+        or identity.current_revision_id is None
+        or identity.athlete_id != str(owner_id)
+    ):
+        raise HTTPException(
+            404,
+            {"code": "AUTHORITATIVE_PLAN_NOT_FOUND"},
+        )
+
+    audit_repository = (
+        build_production_planning_audit_repository(db)
+    )
+
+    try:
+        instruction = (
+            await load_audited_plan_mutation_instruction(
+                instruction_id=payload.instruction_id,
+                expected_athlete_id=str(owner_id),
+                expected_plan_id=logical_plan_id,
+                audit_repository=audit_repository,
+            )
+        )
+
+        applied = (
+            await apply_authoritative_plan_revision_with_repository(
+                instruction=instruction,
+                revision_id=f"pt-plan-rev:{uuid4()}",
+                repository=revision_repository,
+                session=db,
+            )
+        )
+    except AuditedPlanMutationInstructionNotFound:
+        raise HTTPException(
+            404,
+            {
+                "code": (
+                    "PLAN_MUTATION_INSTRUCTION_NOT_FOUND"
+                )
+            },
+        ) from None
+    except AuditedPlanMutationInstructionError:
+        raise HTTPException(
+            409,
+            {
+                "code": (
+                    "PLAN_MUTATION_INSTRUCTION_INVALID"
+                )
+            },
+        ) from None
+    except AuthoritativePlanRevisionNoChange:
+        raise HTTPException(
+            409,
+            {"code": "PLAN_REVISION_NO_CHANGE"},
+        ) from None
+    except (
+        AuthoritativePlanRevisionStaleCurrent,
+        AuthoritativePlanConflictError,
+    ):
+        raise HTTPException(
+            409,
+            {"code": "PLAN_REVISION_STALE_CURRENT"},
+        ) from None
+    except ValueError:
+        raise HTTPException(
+            409,
+            {"code": "PLAN_REVISION_NOT_ELIGIBLE"},
+        ) from None
+
+    return {
+        "status": "authoritative_plan_revision_created",
+        "identity": {
+            "logical_plan_id": (
+                applied.identity.logical_plan_id
+            ),
+            "athlete_id": applied.identity.athlete_id,
+            "source_workout_id": (
+                applied.identity.source_workout_id
+            ),
+            "current_revision_id": (
+                applied.identity.current_revision_id
+            ),
+            "current_revision_number": (
+                applied.identity.current_revision_number
+            ),
+            "authority_established_at": (
+                None
+                if applied.identity.authority_established_at
+                is None
+                else applied.identity.authority_established_at.isoformat()
+            ),
+            "content_hash": applied.identity.content_hash,
+        },
+        "revision": _revision_payload(applied.revision),
     }
 
 

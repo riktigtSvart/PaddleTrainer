@@ -6,6 +6,10 @@ from .postgres_authoritative_plan_revision import (
     SqlAlchemyAuthoritativePlanRevisionRepository,
     build_production_authoritative_plan_revision_repository,
 )
+from .postgres_planning_audit import (
+    SqlAlchemyPlanningAuditRepository,
+    build_production_planning_audit_repository,
+)
 from .sqlite import (
     PLANNING_SQLITE_SCHEMA_VERSION,
     PlanningSqliteDatabase,
@@ -19,6 +23,8 @@ __all__ = [
     "InMemoryPlanningSnapshotRepository",
     "SqlAlchemyAuthoritativePlanRevisionRepository",
     "build_production_authoritative_plan_revision_repository",
+    "SqlAlchemyPlanningAuditRepository",
+    "build_production_planning_audit_repository",
     "PLANNING_SQLITE_SCHEMA_VERSION",
     "PlanningSqliteDatabase",
     "PlanningSqliteSchemaError",

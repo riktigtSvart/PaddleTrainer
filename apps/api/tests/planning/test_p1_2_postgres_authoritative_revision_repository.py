@@ -7,6 +7,15 @@ from sqlalchemy import Column, MetaData, Table, Uuid, create_engine, event, sele
 from sqlalchemy.orm import Session
 
 from app.db.base import Base
+from app.planning.application.apply_plan_revision import (
+    apply_authoritative_plan_revision,
+)
+from app.planning.domain.plan_revision.models import (
+    OccurrenceIdentityPolicy,
+    PlanMutationOperation,
+    create_workout_plan_contract_artifact,
+    finalize_plan_mutation_instruction,
+)
 from app.planning.domain.plan_revision.persistence_contract import (
     AdoptionSourceRef,
     AuthoritativePlanConflictError,
@@ -331,3 +340,185 @@ async def test_revision_membership_is_append_only_and_ordinals_are_stored(db, id
         ("pt-plan-rev:second", 0),
         ("pt-plan-rev:second", 1),
     ]
+
+@pytest.mark.asyncio
+async def test_p1_5_application_append_round_trips_lineage_and_preserves_baseline(
+    db,
+    ids,
+):
+    repo = SqlAlchemyAuthoritativePlanRevisionRepository(
+        db,
+        source_hash_provider=StaticHashProvider("c" * 64),
+    )
+    first = baseline(ids)
+    await repo.adopt_current_state(
+        binding=binding(ids),
+        revision=first,
+    )
+
+    old_json = db.session.scalar(
+        select(PlanningPlanRevisionRow.canonical_contract_json).where(
+            PlanningPlanRevisionRow.revision_id == first.revision_id
+        )
+    )
+
+    artifact = create_workout_plan_contract_artifact(
+        plan_id=first.logical_plan_id,
+        revision_id="artifact-p1-5-r2",
+        contract_schema_version="0.1",
+        contract_json='{"blocks":[],"plan":"p1.5-second"}',
+        stable_occurrence_ids=(
+            "pt-occ:one",
+            "pt-occ:three",
+        ),
+    )
+    instruction = finalize_plan_mutation_instruction(
+        instruction_id="instruction-p1-5-r2",
+        operation=PlanMutationOperation.MODIFY,
+        decision_hash="d" * 64,
+        rationale_hash="e" * 64,
+        context_hash="f" * 64,
+        selected_action_id="action-p1-5",
+        plan_id=first.logical_plan_id,
+        expected_current_revision_id=first.revision_id,
+        new_plan_artifact=artifact,
+        occurrence_identity_policy=(
+            OccurrenceIdentityPolicy.PRESERVE_UNCHANGED
+        ),
+        effective_from=dt(12),
+        created_at=dt(11),
+    )
+
+    applied = await apply_authoritative_plan_revision(
+        current_revision=first,
+        instruction=instruction,
+        revision_id="pt-plan-rev:p1-5-second",
+        repository=repo,
+    )
+
+    assert applied.identity.current_revision_id == applied.revision.revision_id
+    assert applied.identity.current_revision_number == 2
+
+    loaded = await repo.get_current_revision(
+        logical_plan_id=first.logical_plan_id,
+    )
+    assert loaded == applied.revision
+    assert loaded.previous_revision_id == first.revision_id
+
+    assert loaded.decision_lineage is not None
+    assert loaded.decision_lineage.context_hash == instruction.context_hash
+    assert loaded.decision_lineage.decision_hash == instruction.decision_hash
+    assert loaded.decision_lineage.rationale_hash == instruction.rationale_hash
+    assert loaded.decision_lineage.instruction_hash == instruction.content_hash
+
+    assert [
+        (item.occurrence_id, item.lineage_kind)
+        for item in loaded.occurrences
+    ] == [
+        ("pt-occ:one", OccurrenceLineageKind.PRESERVED),
+        ("pt-occ:three", OccurrenceLineageKind.NEW),
+    ]
+
+    assert await repo.get_revision(revision_id=first.revision_id) == first
+    assert db.session.scalar(
+        select(PlanningPlanRevisionRow.canonical_contract_json).where(
+            PlanningPlanRevisionRow.revision_id == first.revision_id
+        )
+    ) == old_json
+
+    assert db.commit_count == 0
+
+
+@pytest.mark.asyncio
+async def test_p1_5_application_append_rejects_real_stale_current_pointer(
+    db,
+    ids,
+):
+    repo = SqlAlchemyAuthoritativePlanRevisionRepository(
+        db,
+        source_hash_provider=StaticHashProvider("c" * 64),
+    )
+    first = baseline(ids)
+    await repo.adopt_current_state(
+        binding=binding(ids),
+        revision=first,
+    )
+
+    first_artifact = create_workout_plan_contract_artifact(
+        plan_id=first.logical_plan_id,
+        revision_id="artifact-p1-5-current",
+        contract_schema_version="0.1",
+        contract_json='{"blocks":[],"plan":"current-second"}',
+        stable_occurrence_ids=(
+            "pt-occ:one",
+            "pt-occ:three",
+        ),
+    )
+    first_instruction = finalize_plan_mutation_instruction(
+        instruction_id="instruction-p1-5-current",
+        operation=PlanMutationOperation.MODIFY,
+        decision_hash="1" * 64,
+        rationale_hash="2" * 64,
+        context_hash="3" * 64,
+        selected_action_id="action-current",
+        plan_id=first.logical_plan_id,
+        expected_current_revision_id=first.revision_id,
+        new_plan_artifact=first_artifact,
+        occurrence_identity_policy=(
+            OccurrenceIdentityPolicy.PRESERVE_UNCHANGED
+        ),
+        effective_from=dt(12),
+        created_at=dt(11),
+    )
+
+    current = await apply_authoritative_plan_revision(
+        current_revision=first,
+        instruction=first_instruction,
+        revision_id="pt-plan-rev:p1-5-current",
+        repository=repo,
+    )
+
+    stale_artifact = create_workout_plan_contract_artifact(
+        plan_id=first.logical_plan_id,
+        revision_id="artifact-p1-5-stale",
+        contract_schema_version="0.1",
+        contract_json='{"blocks":[],"plan":"stale-second"}',
+        stable_occurrence_ids=(
+            "pt-occ:one",
+            "pt-occ:four",
+        ),
+    )
+    stale_instruction = finalize_plan_mutation_instruction(
+        instruction_id="instruction-p1-5-stale",
+        operation=PlanMutationOperation.MODIFY,
+        decision_hash="4" * 64,
+        rationale_hash="5" * 64,
+        context_hash="6" * 64,
+        selected_action_id="action-stale",
+        plan_id=first.logical_plan_id,
+        expected_current_revision_id=first.revision_id,
+        new_plan_artifact=stale_artifact,
+        occurrence_identity_policy=(
+            OccurrenceIdentityPolicy.PRESERVE_UNCHANGED
+        ),
+        effective_from=dt(13),
+        created_at=dt(12),
+    )
+
+    with pytest.raises(
+        AuthoritativePlanConflictError,
+        match="Current revision changed before append",
+    ):
+        await apply_authoritative_plan_revision(
+            current_revision=first,
+            instruction=stale_instruction,
+            revision_id="pt-plan-rev:p1-5-stale",
+            repository=repo,
+        )
+
+    loaded = await repo.get_current_revision(
+        logical_plan_id=first.logical_plan_id,
+    )
+    assert loaded == current.revision
+    assert loaded.revision_number == 2
+    assert db.commit_count == 0

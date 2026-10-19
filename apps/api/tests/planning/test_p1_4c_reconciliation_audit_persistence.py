@@ -178,7 +178,12 @@ def test_current_start_is_not_promoted_without_explicit_time_reconciliation():
 
 def test_migration_extends_current_single_head_without_sibling_branch():
     scripts = ScriptDirectory.from_config(Config(str(API_ROOT / "alembic.ini")))
-    assert scripts.get_heads() == ["f14c7b2e9d01"]
+
+    assert scripts.get_heads() == ["e2a7c4b9d310"]
+
+    current = scripts.get_revision("e2a7c4b9d310")
+    assert current is not None
+    assert current.down_revision == "f14c7b2e9d01"
     assert scripts.get_revision("f14c7b2e9d01").down_revision == "da7e4c92b610"
     assert scripts.get_revision("da7e4c92b610").down_revision == "c91f7a3e2d40"
 

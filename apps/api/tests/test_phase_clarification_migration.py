@@ -31,7 +31,10 @@ def test_complete_received_graph_has_one_head_and_preserves_planning_source():
     root=Path(__file__).resolve().parents[1]
     config=Config(str(root/'alembic.ini'));config.set_main_option('script_location',str(root/'alembic'))
     scripts=ScriptDirectory.from_config(config)
-    assert scripts.get_heads()==['f14c7b2e9d01']
+    assert scripts.get_heads() == ["e2a7c4b9d310"]
+    current = scripts.get_revision("e2a7c4b9d310")
+    assert current is not None
+    assert current.down_revision == "f14c7b2e9d01"
     assert scripts.get_revision('c91f7a3e2d40').down_revision=='b8e4d6a10f32'
     actual=root/'alembic/versions/c91f7a3e2d40_add_planning_authoritative_plan_revisions.py'
     assert hashlib.sha256(actual.read_bytes()).hexdigest()=='9bd697b7982b15a54c19af65ad30c3224f8164e3e52f51210ebb6d9d3509ec98'

@@ -47,7 +47,22 @@ from .response_metrics import (
     build_response_metric_observation,
 )
 
+from .response_reference import (
+    DESCRIPTIVE_RESPONSE_METRIC_REFERENCE_SCHEMA_V01,
+    DescriptiveResponseMetricReference,
+    ResponseMetricReferenceEligibility,
+    ResponseMetricReferenceKey,
+    ResponseMetricReferenceSource,
+    build_descriptive_response_metric_references,
+)
+
 __all__ = [
+    "DESCRIPTIVE_RESPONSE_METRIC_REFERENCE_SCHEMA_V01",
+    "DescriptiveResponseMetricReference",
+    "ResponseMetricReferenceEligibility",
+    "ResponseMetricReferenceKey",
+    "ResponseMetricReferenceSource",
+    "build_descriptive_response_metric_references",
     "RESPONSE_METRIC_OBSERVATION_SCHEMA_V01",
     "ResponseMetricObservation",
     "build_response_metric_observation",

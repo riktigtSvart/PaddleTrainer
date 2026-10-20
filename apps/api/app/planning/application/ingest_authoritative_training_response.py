@@ -11,7 +11,10 @@ from ..domain.common.enums import (
 )
 from ..domain.common.serialization import canonical_json
 from ..domain.common.time import to_utc
-from ..domain.evidence.models import EvidenceQuality
+from ..domain.evidence.models import (
+    EvidenceItem,
+    EvidenceQuality,
+)
 from ..domain.persistence.audit import (
     AuditArtifactKind,
     AuditArtifactRecord,
@@ -26,6 +29,7 @@ from ..domain.response_evidence import (
     TrainingResponseTiming,
 )
 from ..ports.audit import AsyncPlanningAuditRepository
+from ..ports.evidence import AsyncEvidenceRepository
 from ..ports.training_response_source import (
     LockedTrainingResponseSourceProvider,
 )
@@ -36,11 +40,15 @@ from .ingest_authoritative_executed_training import (
     authoritative_executed_training_artifact_id,
     restore_authoritative_executed_training_audit_artifact,
 )
+from .project_authoritative_training_response import (
+    project_authoritative_training_response_evidence,
+)
 
 
 @dataclass(frozen=True)
 class AuthoritativeTrainingResponseIngestionResult:
     artifact: AuthoritativeTrainingResponseEvidence
+    evidence: EvidenceItem
     reused_durable_artifact: bool
 
 
@@ -522,6 +530,7 @@ async def ingest_authoritative_training_response(
     response_source_id: str,
     response_source: LockedTrainingResponseSourceProvider,
     audit_repository: AsyncPlanningAuditRepository,
+    evidence_repository: AsyncEvidenceRepository,
     session,
     created_at: datetime | None = None,
 ) -> AuthoritativeTrainingResponseIngestionResult:
@@ -530,8 +539,9 @@ async def ingest_authoritative_training_response(
     First durable response freeze wins. Retries restore the immutable
     response artifact without recapturing mutable AthleteResponse state.
 
-    P1.8C deliberately persists only the authoritative audit artifact.
-    EvidenceItem projection belongs to the later P1.8D stage.
+    The authoritative audit artifact and its deterministic SESSION_FEEDBACK
+    EvidenceItem projection share one transaction. Retries reuse the durable
+    response freeze and idempotently restore the first persisted projection.
     """
 
     canonical_athlete_id = _uuid_text(
@@ -656,10 +666,27 @@ async def ingest_authoritative_training_response(
 
             reused = False
 
+        projection_created_at = max(
+            materialized_at,
+            artifact.created_at,
+        )
+
+        projected = (
+            project_authoritative_training_response_evidence(
+                artifact,
+                created_at=projection_created_at,
+            )
+        )
+
+        persisted_evidence = await evidence_repository.save(
+            projected
+        )
+
         await session.commit()
 
         return AuthoritativeTrainingResponseIngestionResult(
             artifact=artifact,
+            evidence=persisted_evidence,
             reused_durable_artifact=reused,
         )
 

@@ -188,6 +188,33 @@ class FakeAuditRepository:
         return None
 
 
+class FakeEvidenceRepository:
+    def __init__(self, *, error=None):
+        self.error = error
+        self.items = {}
+        self.save_calls = []
+
+    async def save(self, item):
+        self.save_calls.append(item)
+
+        if self.error is not None:
+            raise self.error
+
+        existing = self.items.get(item.evidence_id)
+
+        if existing is None:
+            self.items[item.evidence_id] = item
+            return item
+
+        assert existing.content_hash == item.content_hash
+        assert existing.source_ref == item.source_ref
+        assert existing.payload == item.payload
+
+        # created_at is deliberately non-semantic. Preserve the first
+        # durable projection exactly like SqlAlchemyEvidenceRepository.
+        return existing
+
+
 class FakeResponseSource:
     def __init__(self, value=None, *, error=None):
         self.value = value
@@ -236,6 +263,7 @@ def test_response_artifact_identity_is_source_stable():
 @pytest.mark.asyncio
 async def test_first_ingestion_saves_response_freeze_then_commits():
     audit = FakeAuditRepository()
+    evidence = FakeEvidenceRepository()
     audit.preload(
         execution_record()
     )
@@ -252,6 +280,7 @@ async def test_first_ingestion_saves_response_freeze_then_commits():
             response_source_id=RESPONSE,
             response_source=source,
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=NOW,
         )
@@ -289,6 +318,7 @@ async def test_first_ingestion_saves_response_freeze_then_commits():
 @pytest.mark.asyncio
 async def test_retry_reuses_durable_freeze_without_response_recapture():
     audit = FakeAuditRepository()
+    evidence = FakeEvidenceRepository()
     audit.preload(
         execution_record()
     )
@@ -303,6 +333,7 @@ async def test_retry_reuses_durable_freeze_without_response_recapture():
                 response_capture()
             ),
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=NOW,
         )
@@ -320,6 +351,7 @@ async def test_retry_reuses_durable_freeze_without_response_recapture():
             response_source_id=RESPONSE,
             response_source=exploding_source,
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=LATER,
         )
@@ -339,6 +371,7 @@ async def test_retry_reuses_durable_freeze_without_response_recapture():
 @pytest.mark.asyncio
 async def test_missing_durable_execution_rolls_back():
     audit = FakeAuditRepository()
+    evidence = FakeEvidenceRepository()
     session = FakeSession()
 
     source = FakeResponseSource(
@@ -353,6 +386,7 @@ async def test_missing_durable_execution_rolls_back():
             response_source_id=RESPONSE,
             response_source=source,
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=NOW,
         )
@@ -373,6 +407,7 @@ async def test_response_audit_save_failure_rolls_back():
     audit = FakeAuditRepository(
         save_error=error
     )
+    evidence = FakeEvidenceRepository()
     audit.preload(
         execution_record()
     )
@@ -390,6 +425,7 @@ async def test_response_audit_save_failure_rolls_back():
                 response_capture()
             ),
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=NOW,
         )
@@ -402,6 +438,7 @@ async def test_response_audit_save_failure_rolls_back():
 @pytest.mark.asyncio
 async def test_commit_failure_rolls_back():
     audit = FakeAuditRepository()
+    evidence = FakeEvidenceRepository()
     audit.preload(
         execution_record()
     )
@@ -421,6 +458,7 @@ async def test_commit_failure_rolls_back():
                 response_capture()
             ),
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=NOW,
         )
@@ -432,6 +470,7 @@ async def test_commit_failure_rolls_back():
 @pytest.mark.asyncio
 async def test_existing_cross_athlete_freeze_is_not_disclosed():
     audit = FakeAuditRepository()
+    evidence = FakeEvidenceRepository()
     audit.preload(
         execution_record()
     )
@@ -446,6 +485,7 @@ async def test_existing_cross_athlete_freeze_is_not_disclosed():
                 response_capture()
             ),
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=NOW,
         )
@@ -487,6 +527,7 @@ async def test_existing_cross_athlete_freeze_is_not_disclosed():
             response_source_id=RESPONSE,
             response_source=source,
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=LATER,
         )
@@ -498,6 +539,7 @@ async def test_existing_cross_athlete_freeze_is_not_disclosed():
 @pytest.mark.asyncio
 async def test_tampered_persisted_response_contract_is_rejected():
     audit = FakeAuditRepository()
+    evidence = FakeEvidenceRepository()
     audit.preload(
         execution_record()
     )
@@ -512,6 +554,7 @@ async def test_tampered_persisted_response_contract_is_rejected():
                 response_capture()
             ),
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=NOW,
         )
@@ -552,8 +595,172 @@ async def test_tampered_persisted_response_contract_is_rejected():
                 )
             ),
             audit_repository=audit,
+            evidence_repository=evidence,
             session=session,
             created_at=LATER,
         )
 
+    assert session.rollback_count == 1
+
+
+@pytest.mark.asyncio
+async def test_d2_first_ingestion_persists_session_feedback_before_commit():
+    audit = FakeAuditRepository()
+    evidence = FakeEvidenceRepository()
+
+    audit.preload(
+        execution_record()
+    )
+
+    session = FakeSession()
+
+    result = await (
+        ingestion.ingest_authoritative_training_response(
+            athlete_id=ATHLETE,
+            response_source_id=RESPONSE,
+            response_source=FakeResponseSource(
+                response_capture()
+            ),
+            audit_repository=audit,
+            evidence_repository=evidence,
+            session=session,
+            created_at=NOW,
+        )
+    )
+
+    assert len(audit.saved) == 1
+    assert len(evidence.save_calls) == 1
+    assert len(evidence.items) == 1
+
+    assert result.evidence.evidence_type == "SESSION_FEEDBACK"
+
+    assert (
+        result.evidence.source_ref.source_record_id
+        == result.artifact.artifact_id
+    )
+
+    assert (
+        result.evidence.source_ref.source_content_hash
+        == result.artifact.content_hash
+    )
+
+    assert (
+        result.evidence.payload[
+            "authoritative_response_evidence_id"
+        ]
+        == result.artifact.artifact_id
+    )
+
+    assert (
+        result.evidence.payload[
+            "causal_attribution_established"
+        ]
+        is False
+    )
+
+    assert session.commit_count == 1
+    assert session.rollback_count == 0
+
+
+@pytest.mark.asyncio
+async def test_d2_retry_reuses_first_durable_projection_created_at():
+    audit = FakeAuditRepository()
+    evidence = FakeEvidenceRepository()
+
+    audit.preload(
+        execution_record()
+    )
+
+    session = FakeSession()
+
+    first = await (
+        ingestion.ingest_authoritative_training_response(
+            athlete_id=ATHLETE,
+            response_source_id=RESPONSE,
+            response_source=FakeResponseSource(
+                response_capture()
+            ),
+            audit_repository=audit,
+            evidence_repository=evidence,
+            session=session,
+            created_at=NOW,
+        )
+    )
+
+    exploding_source = FakeResponseSource(
+        error=AssertionError(
+            "Retry must not recapture mutable AthleteResponse."
+        )
+    )
+
+    second = await (
+        ingestion.ingest_authoritative_training_response(
+            athlete_id=ATHLETE,
+            response_source_id=RESPONSE,
+            response_source=exploding_source,
+            audit_repository=audit,
+            evidence_repository=evidence,
+            session=session,
+            created_at=LATER,
+        )
+    )
+
+    assert exploding_source.calls == []
+
+    assert len(audit.saved) == 1
+    assert len(evidence.items) == 1
+    assert len(evidence.save_calls) == 2
+
+    assert second.reused_durable_artifact is True
+    assert second.artifact == first.artifact
+    assert second.evidence == first.evidence
+
+    # Repository idempotency preserves the first durable created_at even
+    # though the retry generated an equivalent projection at LATER.
+    assert (
+        second.evidence.created_at
+        == first.evidence.created_at
+    )
+
+    assert session.commit_count == 2
+    assert session.rollback_count == 0
+
+
+@pytest.mark.asyncio
+async def test_d2_projection_persistence_failure_rolls_back_audit_transaction():
+    audit = FakeAuditRepository()
+
+    audit.preload(
+        execution_record()
+    )
+
+    evidence = FakeEvidenceRepository(
+        error=RuntimeError(
+            "response projection persistence failed"
+        )
+    )
+
+    session = FakeSession()
+
+    with pytest.raises(
+        RuntimeError,
+        match="response projection persistence failed",
+    ):
+        await ingestion.ingest_authoritative_training_response(
+            athlete_id=ATHLETE,
+            response_source_id=RESPONSE,
+            response_source=FakeResponseSource(
+                response_capture()
+            ),
+            audit_repository=audit,
+            evidence_repository=evidence,
+            session=session,
+            created_at=NOW,
+        )
+
+    # Audit save occurred in the same transaction, but no commit may occur.
+    assert len(audit.saved) == 1
+    assert len(evidence.save_calls) == 1
+
+    assert session.commit_count == 0
     assert session.rollback_count == 1

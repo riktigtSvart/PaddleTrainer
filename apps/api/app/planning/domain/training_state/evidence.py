@@ -138,6 +138,134 @@ def _require_v02_authority_metadata(payload) -> None:
             )
 
 
+def _validate_v02_execution_authority(
+    item: EvidenceItem,
+) -> None:
+    """Validate v0.2 authority metadata without promoting it into state."""
+
+    payload = item.payload
+
+    required_strings = (
+        "authoritative_execution_evidence_id",
+        "authoritative_execution_evidence_hash",
+        "plan_execution_link_id",
+    )
+
+    for field_name in required_strings:
+        value = payload.get(field_name)
+
+        if (
+            not isinstance(value, str)
+            or not value.strip()
+        ):
+            raise ValueError(
+                f"{field_name} must be a non-empty string."
+            )
+
+    artifact_id = payload.get(
+        "authoritative_execution_evidence_id"
+    )
+    artifact_hash = payload.get(
+        "authoritative_execution_evidence_hash"
+    )
+
+    if (
+        len(artifact_hash) != 64
+        or any(
+            char not in "0123456789abcdef"
+            for char in artifact_hash
+        )
+    ):
+        raise ValueError(
+            "authoritative_execution_evidence_hash must be "
+            "a lowercase SHA-256 digest."
+        )
+
+    if item.source_ref.source_record_id != artifact_id:
+        raise ValueError(
+            "v0.2 source record identity does not match "
+            "authoritative execution metadata."
+        )
+
+    if (
+        item.source_ref.source_content_hash
+        != artifact_hash
+    ):
+        raise ValueError(
+            "v0.2 source content hash does not match "
+            "authoritative execution metadata."
+        )
+
+    if payload.get("plan_identity_linked") is not True:
+        raise ValueError(
+            "v0.2 executed training requires plan identity linkage."
+        )
+
+    if (
+        payload.get("plan_content_at_execution_status")
+        != "unverified"
+    ):
+        raise ValueError(
+            "v0.2 executed training cannot claim verified "
+            "historical plan content."
+        )
+
+    for field_name in (
+        "occurrence_alignment_verified",
+        "phase_alignment_verified",
+        "provider_event_verified",
+        "clock_alignment_verified",
+        "actual_boundary_verified",
+        "temporal_match_used",
+    ):
+        if payload.get(field_name) is not False:
+            raise ValueError(
+                f"{field_name} must remain false in v0.2 "
+                "training exposure evidence."
+            )
+
+    count = payload.get(
+        "occurrence_association_count"
+    )
+
+    if (
+        isinstance(count, bool)
+        or not isinstance(count, int)
+        or count < 0
+    ):
+        raise ValueError(
+            "occurrence_association_count must be a "
+            "non-negative integer."
+        )
+
+    status = payload.get(
+        "occurrence_alignment_status"
+    )
+
+    if status not in (
+        "none",
+        "user_confirmed_candidate_segment",
+    ):
+        raise ValueError(
+            "Unsupported occurrence_alignment_status."
+        )
+
+    if count == 0 and status != "none":
+        raise ValueError(
+            "Zero occurrence associations require status=none."
+        )
+
+    if (
+        count > 0
+        and status
+        != "user_confirmed_candidate_segment"
+    ):
+        raise ValueError(
+            "Occurrence associations require explicit "
+            "user-confirmed candidate status."
+        )
+
+
 def training_exposure_from_evidence(
     item: EvidenceItem,
 ) -> TrainingExposureObservation | None:
@@ -154,6 +282,12 @@ def training_exposure_from_evidence(
         raise ValueError(
             "Unsupported executed training session evidence schema."
         )
+
+    if (
+        schema_version
+        == EXECUTED_TRAINING_SESSION_SCHEMA_V02
+    ):
+        _validate_v02_execution_authority(item)
 
     if (
         schema_version

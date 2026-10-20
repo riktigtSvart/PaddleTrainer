@@ -32,7 +32,22 @@ from .history import (
     build_training_dynamics_history,
 )
 
+from .descriptive import (
+    DescriptiveCategoryCount,
+    DescriptiveNumericSummary,
+    DescriptiveSampleSupport,
+    TRAINING_DYNAMICS_DESCRIPTIVE_SUMMARY_SCHEMA_V01,
+    TrainingDynamicsDescriptiveSummary,
+    summarize_training_dynamics_history,
+)
+
 __all__ = [
+    "DescriptiveCategoryCount",
+    "DescriptiveNumericSummary",
+    "DescriptiveSampleSupport",
+    "TRAINING_DYNAMICS_DESCRIPTIVE_SUMMARY_SCHEMA_V01",
+    "TrainingDynamicsDescriptiveSummary",
+    "summarize_training_dynamics_history",
     "TRAINING_DYNAMICS_HISTORY_SCHEMA_V01",
     "TrainingDynamicsHistory",
     "TrainingDynamicsHistoryCoverage",

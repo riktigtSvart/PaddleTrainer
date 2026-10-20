@@ -24,7 +24,20 @@ from .models import (
     build_retention_estimate,
 )
 
+from .history import (
+    TRAINING_DYNAMICS_HISTORY_SCHEMA_V01,
+    TrainingDynamicsHistory,
+    TrainingDynamicsHistoryCoverage,
+    TrainingDynamicsHistoryEntry,
+    build_training_dynamics_history,
+)
+
 __all__ = [
+    "TRAINING_DYNAMICS_HISTORY_SCHEMA_V01",
+    "TrainingDynamicsHistory",
+    "TrainingDynamicsHistoryCoverage",
+    "TrainingDynamicsHistoryEntry",
+    "build_training_dynamics_history",
     "LATENT_TRAINING_EFFECT_ESTIMATE_SCHEMA_V01",
     "LONGITUDINAL_TRAINING_EFFECT_STATE_SCHEMA_V01",
     "OBSERVED_RESPONSE_ASSOCIATION_SCHEMA_V01",

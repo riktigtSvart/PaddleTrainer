@@ -31,7 +31,7 @@ def test_complete_received_graph_has_one_head_and_preserves_planning_source():
     root=Path(__file__).resolve().parents[1]
     config=Config(str(root/'alembic.ini'));config.set_main_option('script_location',str(root/'alembic'))
     scripts=ScriptDirectory.from_config(config)
-    assert scripts.get_heads() == ["c84d7e1a6f32"]
+    assert scripts.get_heads() == ["e17b9c4d2a61"]
     current = scripts.get_revision("a91f6c3d7b20")
     assert current is not None
     assert current.down_revision == "e2a7c4b9d310"

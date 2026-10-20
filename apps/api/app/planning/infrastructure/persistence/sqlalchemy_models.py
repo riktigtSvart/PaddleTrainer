@@ -668,3 +668,123 @@ class PlanningOccurrenceExecutionLinkRow(Base):
         Text,
         nullable=False,
     )
+
+
+class PlanningEvidenceItemRow(Base):
+    __tablename__ = "planning_evidence_items"
+    __table_args__ = (
+        CheckConstraint(
+            "available_at >= observed_at",
+            name="ck_planning_evidence_available_after_observed",
+        ),
+        CheckConstraint(
+            "source_content_hash IS NULL "
+            "OR length(source_content_hash) = 64",
+            name="ck_planning_evidence_source_hash_length",
+        ),
+        CheckConstraint(
+            "length(content_hash) = 64",
+            name="ck_planning_evidence_hash_length",
+        ),
+        CheckConstraint(
+            "provenance IN "
+            "('source', 'derived', 'policy_resolved', 'inferred')",
+            name="ck_planning_evidence_provenance",
+        ),
+        CheckConstraint(
+            "knowledge_status IN "
+            "('known', 'unknown', 'not_applicable', "
+            "'not_measured', 'not_asked')",
+            name="ck_planning_evidence_knowledge_status",
+        ),
+        CheckConstraint(
+            "quality IN ('high', 'moderate', 'low', 'unknown')",
+            name="ck_planning_evidence_quality",
+        ),
+        Index(
+            "ix_planning_evidence_athlete_available",
+            "athlete_id",
+            "available_at",
+            "evidence_id",
+        ),
+    )
+
+    evidence_id: Mapped[str] = mapped_column(
+        Text,
+        primary_key=True,
+    )
+
+    athlete_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
+    evidence_type: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    observed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
+    available_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
+    source_system: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    source_record_id: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    source_version: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    source_content_hash: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    provenance: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    knowledge_status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    quality: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    payload_json: Mapped[dict] = mapped_column(
+        JSON_DOCUMENT,
+        nullable=False,
+    )
+
+    content_hash_algorithm: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    content_hash: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )

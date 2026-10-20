@@ -12,6 +12,7 @@ class AuditArtifactKind(StrEnum):
     PLANNER_RUN_RECORD = "planner_run_record"
     PLAN_MUTATION_INSTRUCTION = "plan_mutation_instruction"
     PLAN_REVISION_LINK = "plan_revision_link"
+    AUTHORITATIVE_EXECUTED_TRAINING = "authoritative_executed_training"
 
 
 class AuditArtifactSaveStatus(StrEnum):

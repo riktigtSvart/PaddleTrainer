@@ -35,3 +35,20 @@ class EvidenceRepository(Protocol):
         information_cutoff_at: datetime,
     ) -> tuple[EvidenceItem, ...]:
         ...
+
+class AsyncEvidenceRepository(Protocol):
+    """Async durable evidence boundary for production persistence."""
+
+    async def save(
+        self,
+        item: EvidenceItem,
+    ) -> EvidenceItem:
+        ...
+
+    async def list_available(
+        self,
+        *,
+        athlete_id: str,
+        information_cutoff_at: datetime,
+    ) -> tuple[EvidenceItem, ...]:
+        ...

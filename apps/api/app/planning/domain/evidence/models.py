@@ -27,6 +27,10 @@ class EvidenceQuality(StrEnum):
     UNKNOWN = "unknown"
 
 
+class EvidenceConflictError(RuntimeError):
+    """Stable evidence identity was reused for different content."""
+
+
 @dataclass(frozen=True)
 class SourceRecordRef:
     source_system: str

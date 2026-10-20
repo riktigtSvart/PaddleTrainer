@@ -41,7 +41,16 @@ from .descriptive import (
     summarize_training_dynamics_history,
 )
 
+from .response_metrics import (
+    RESPONSE_METRIC_OBSERVATION_SCHEMA_V01,
+    ResponseMetricObservation,
+    build_response_metric_observation,
+)
+
 __all__ = [
+    "RESPONSE_METRIC_OBSERVATION_SCHEMA_V01",
+    "ResponseMetricObservation",
+    "build_response_metric_observation",
     "DescriptiveCategoryCount",
     "DescriptiveNumericSummary",
     "DescriptiveSampleSupport",

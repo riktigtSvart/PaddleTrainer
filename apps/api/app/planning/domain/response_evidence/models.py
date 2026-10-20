@@ -20,6 +20,10 @@ TRAINING_RESPONSE_EVIDENCE_SCHEMA_V01 = (
     "authoritative-training-response-evidence-v0.1"
 )
 
+TRAINING_RESPONSE_EVIDENCE_SCHEMA_V02 = (
+    "authoritative-training-response-evidence-v0.2"
+)
+
 TRAINING_RESPONSE_EVIDENCE_ID_PREFIX = (
     "pt-training-response-evidence:"
 )
@@ -40,6 +44,19 @@ class TrainingResponseKind(StrEnum):
 
     SESSION_FEEDBACK = "session_feedback"
     PHYSIOLOGICAL_RESPONSE = "physiological_response"
+
+
+class TrainingResponseTiming(StrEnum):
+    """When the response was observed relative to the executed session.
+
+    This is observation context, not a measurement and not evidence of
+    causal attribution.
+    """
+
+    IMMEDIATE = "immediate"
+    SAME_DAY = "same_day"
+    NEXT_MORNING = "next_morning"
+    FOLLOW_UP = "follow_up"
 
 
 class TrainingResponseLinkBasis(StrEnum):
@@ -211,6 +228,7 @@ class AuthoritativeTrainingResponseEvidence:
     executed_training_evidence_hash: str
 
     response_kind: TrainingResponseKind
+    response_timing: TrainingResponseTiming
     session_link_basis: TrainingResponseLinkBasis
 
     observed_at: datetime
@@ -264,6 +282,7 @@ def build_authoritative_training_response_evidence(
     executed_training_evidence_id: str,
     executed_training_evidence_hash: str,
     response_kind: TrainingResponseKind,
+    response_timing: TrainingResponseTiming,
     session_link_basis: TrainingResponseLinkBasis,
     observed_at: datetime,
     available_at: datetime,
@@ -323,6 +342,9 @@ def build_authoritative_training_response_evidence(
 
     kind = TrainingResponseKind(
         response_kind
+    )
+    timing = TrainingResponseTiming(
+        response_timing
     )
     link_basis = TrainingResponseLinkBasis(
         session_link_basis
@@ -417,7 +439,7 @@ def build_authoritative_training_response_evidence(
     provisional = AuthoritativeTrainingResponseEvidence(
         artifact_id=artifact_id,
         schema_version=(
-            TRAINING_RESPONSE_EVIDENCE_SCHEMA_V01
+            TRAINING_RESPONSE_EVIDENCE_SCHEMA_V02
         ),
         athlete_id=canonical_athlete_id,
         workout_session_id=canonical_session_id,
@@ -428,6 +450,7 @@ def build_authoritative_training_response_evidence(
             executed_training_evidence_hash
         ),
         response_kind=kind,
+        response_timing=timing,
         session_link_basis=link_basis,
         observed_at=observed,
         available_at=available,

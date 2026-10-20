@@ -10,11 +10,12 @@ from app.planning.domain.evidence.models import (
     EvidenceQuality,
 )
 from app.planning.domain.response_evidence import (
-    TRAINING_RESPONSE_EVIDENCE_SCHEMA_V01,
+    TRAINING_RESPONSE_EVIDENCE_SCHEMA_V02,
     TrainingResponseInterpretation,
     TrainingResponseKind,
     TrainingResponseLinkBasis,
     TrainingResponseMeasurement,
+    TrainingResponseTiming,
     build_authoritative_training_response_evidence,
 )
 
@@ -84,6 +85,7 @@ def build(
         executed_training_evidence_id=EXECUTED_ID,
         executed_training_evidence_hash=EXECUTED_HASH,
         response_kind=response_kind,
+        response_timing=TrainingResponseTiming.IMMEDIATE,
         session_link_basis=session_link_basis,
         observed_at=observed_at or dt(8),
         available_at=available_at or dt(9),
@@ -117,7 +119,7 @@ def test_builds_hash_verified_descriptive_response_evidence():
 
     assert (
         artifact.schema_version
-        == TRAINING_RESPONSE_EVIDENCE_SCHEMA_V01
+        == TRAINING_RESPONSE_EVIDENCE_SCHEMA_V02
     )
     assert (
         artifact.response_kind
@@ -469,6 +471,9 @@ def test_source_content_identity_is_part_of_semantic_hash():
             executed_training_evidence_hash=EXECUTED_HASH,
             response_kind=(
                 TrainingResponseKind.SESSION_FEEDBACK
+            ),
+            response_timing=(
+                TrainingResponseTiming.IMMEDIATE
             ),
             session_link_basis=(
                 TrainingResponseLinkBasis

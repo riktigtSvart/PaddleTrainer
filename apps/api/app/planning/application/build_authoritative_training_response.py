@@ -14,6 +14,9 @@ from ..domain.response_evidence import (
     TrainingResponseLinkBasis,
     build_authoritative_training_response_evidence,
 )
+from ..domain.response_evidence.source_capture import (
+    TrainingResponseSourceCapture,
+)
 from ..ports.training_response_source import (
     LockedTrainingResponseSourceProvider,
 )
@@ -31,27 +34,16 @@ class AuthoritativeTrainingResponseTemporalInvalid(ValueError):
     """Response timing is inconsistent with available execution evidence."""
 
 
-async def assemble_authoritative_training_response(
+def assemble_authoritative_training_response_from_capture(
     *,
     athlete_id: str,
-    response_source_id: str,
     executed_training: AuthoritativeExecutedTrainingEvidence,
-    response_source: LockedTrainingResponseSourceProvider,
-    session,
+    capture: TrainingResponseSourceCapture,
     created_at: datetime,
 ) -> AuthoritativeTrainingResponseEvidence:
-    """Assemble one authoritative session-level response artifact.
+    """Pure assembly after one already-locked response-source capture.
 
-    Transaction-neutral by design. The caller owns commit/rollback and must
-    keep the response-source locks alive until any resulting durable writes
-    are complete.
-
-    The explicit AthleteResponse -> WorkoutSession identity is checked against
-    an already-established P1.7 authoritative executed-training artifact.
-
-    This establishes response-to-executed-session identity only. It does not
-    establish causality, fatigue/readiness diagnosis, performance prediction,
-    or prescription authority.
+    No source reads, commits, rollbacks, or persistence occur here.
     """
 
     if not executed_training.verify_content_hash():
@@ -70,7 +62,6 @@ async def assemble_authoritative_training_response(
         )
 
     if executed_training.athlete_id != athlete_id:
-        # Do not reinterpret another athlete's execution evidence.
         raise AuthoritativeTrainingResponseIdentityMismatch(
             "Response athlete does not match authoritative "
             "executed-training athlete."
@@ -105,12 +96,6 @@ async def assemble_authoritative_training_response(
             "stronger execution authority."
         )
 
-    capture = await response_source.lock_and_capture(
-        session,
-        athlete_id=athlete_id,
-        response_source_id=response_source_id,
-    )
-
     if capture.athlete_id != athlete_id:
         raise AuthoritativeTrainingResponseIdentityMismatch(
             "Response source athlete identity mismatch."
@@ -141,9 +126,6 @@ async def assemble_authoritative_training_response(
             "training observation."
         )
 
-    # The authoritative response is not knowable until BOTH:
-    #   1. the response source was available, and
-    #   2. the P1.7 execution authority existed.
     authoritative_available_at = max(
         capture.available_at,
         executed_available_at,
@@ -195,4 +177,29 @@ async def assemble_authoritative_training_response(
         quality=EvidenceQuality.MODERATE,
         measurements=capture.measurements,
         created_at=artifact_created_at,
+    )
+
+
+async def assemble_authoritative_training_response(
+    *,
+    athlete_id: str,
+    response_source_id: str,
+    executed_training: AuthoritativeExecutedTrainingEvidence,
+    response_source: LockedTrainingResponseSourceProvider,
+    session,
+    created_at: datetime,
+) -> AuthoritativeTrainingResponseEvidence:
+    """Capture once, then assemble one authoritative response artifact."""
+
+    capture = await response_source.lock_and_capture(
+        session,
+        athlete_id=athlete_id,
+        response_source_id=response_source_id,
+    )
+
+    return assemble_authoritative_training_response_from_capture(
+        athlete_id=athlete_id,
+        executed_training=executed_training,
+        capture=capture,
+        created_at=created_at,
     )

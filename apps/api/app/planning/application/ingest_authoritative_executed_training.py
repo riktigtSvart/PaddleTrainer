@@ -513,6 +513,14 @@ def _restore_audit_artifact(
     return artifact
 
 
+def restore_authoritative_executed_training_audit_artifact(
+    record: AuditArtifactRecord,
+) -> AuthoritativeExecutedTrainingEvidence:
+    """Restore and fully verify one durable P1.7 audit artifact."""
+
+    return _restore_audit_artifact(record)
+
+
 def _audit_record(
     artifact: AuthoritativeExecutedTrainingEvidence,
 ) -> AuditArtifactRecord:

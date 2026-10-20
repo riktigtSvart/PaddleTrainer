@@ -13,6 +13,7 @@ class AuditArtifactKind(StrEnum):
     PLAN_MUTATION_INSTRUCTION = "plan_mutation_instruction"
     PLAN_REVISION_LINK = "plan_revision_link"
     AUTHORITATIVE_EXECUTED_TRAINING = "authoritative_executed_training"
+    AUTHORITATIVE_TRAINING_RESPONSE = "authoritative_training_response"
 
 
 class AuditArtifactSaveStatus(StrEnum):

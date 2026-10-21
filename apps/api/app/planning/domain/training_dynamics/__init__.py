@@ -129,7 +129,36 @@ from .association_evidence import (
     build_personal_association_evidence,
 )
 
+
+from .prospective_prediction import (
+    PERSONAL_RESPONSE_PREDICTION_MODEL_ID_V01,
+    PERSONAL_RESPONSE_PREDICTION_MODEL_VERSION_V01,
+    PERSONAL_RESPONSE_PREDICTION_RULES_V01,
+    PERSONAL_RESPONSE_PREDICTION_SCHEMA_V01,
+    PREDICTION_TARGET_PREDICTOR_SCHEMA_V01,
+    PersonalResponsePredictionCandidate,
+    PersonalResponsePredictionDirection,
+    PersonalResponsePredictionLimitationCode,
+    PersonalResponsePredictionStatus,
+    PredictionTargetPredictorObservation,
+    build_personal_response_prediction_candidate,
+    create_prediction_target_predictor_observation,
+)
+
 __all__ = [
+    "PERSONAL_RESPONSE_PREDICTION_MODEL_ID_V01",
+    "PERSONAL_RESPONSE_PREDICTION_MODEL_VERSION_V01",
+    "PERSONAL_RESPONSE_PREDICTION_RULES_V01",
+    "PERSONAL_RESPONSE_PREDICTION_SCHEMA_V01",
+    "PREDICTION_TARGET_PREDICTOR_SCHEMA_V01",
+    "PersonalResponsePredictionCandidate",
+    "PersonalResponsePredictionDirection",
+    "PersonalResponsePredictionLimitationCode",
+    "PersonalResponsePredictionStatus",
+    "PredictionTargetPredictorObservation",
+    "build_personal_response_prediction_candidate",
+    "create_prediction_target_predictor_observation",
+
     "PERSONAL_ASSOCIATION_EVIDENCE_RULES_V01",
     "PERSONAL_ASSOCIATION_EVIDENCE_SCHEMA_V01",
     "PersonalAssociationEvidence",

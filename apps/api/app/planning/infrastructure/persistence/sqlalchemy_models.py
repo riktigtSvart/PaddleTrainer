@@ -307,6 +307,10 @@ class PlanningAuditArtifactRow(Base):
         DateTime(timezone=True),
         nullable=False,
     )
+    persisted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
     content_hash_algorithm: Mapped[str] = mapped_column(
         Text,
         nullable=False,

@@ -14,6 +14,7 @@ class AuditArtifactKind(StrEnum):
     PLAN_REVISION_LINK = "plan_revision_link"
     AUTHORITATIVE_EXECUTED_TRAINING = "authoritative_executed_training"
     AUTHORITATIVE_TRAINING_RESPONSE = "authoritative_training_response"
+    PERSONAL_RESPONSE_PREDICTION_ISSUANCE = "personal_response_prediction_issuance"
 
 
 class AuditArtifactSaveStatus(StrEnum):
@@ -35,6 +36,10 @@ class AuditArtifactRecord:
     content_hash_algorithm: str
     content_hash: str
     contract_json: str
+
+    # Persistence metadata assigned by the durable store.
+    # None means no authoritative DB insertion time is proven.
+    persisted_at: datetime | None = None
 
 
 @dataclass(frozen=True)

@@ -111,6 +111,7 @@ class PlanningSqliteDatabase:
                     athlete_id TEXT NOT NULL,
                     schema_version TEXT NOT NULL,
                     created_at TEXT NOT NULL,
+                    persisted_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     content_hash_algorithm TEXT NOT NULL,
                     content_hash TEXT NOT NULL,
                     contract_json TEXT NOT NULL,
@@ -251,6 +252,11 @@ class SqlitePlanningAuditRepository:
             content_hash_algorithm=row["content_hash_algorithm"],
             content_hash=row["content_hash"],
             contract_json=row["contract_json"],
+            persisted_at=(
+                None
+                if row["persisted_at"] is None
+                else _dt_from_storage(row["persisted_at"])
+            ),
         )
 
     def save(

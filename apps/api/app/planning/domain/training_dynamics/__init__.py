@@ -145,7 +145,20 @@ from .prospective_prediction import (
     create_prediction_target_predictor_observation,
 )
 
+
+from .prospective_issuance import (
+    PERSONAL_RESPONSE_PREDICTION_ISSUANCE_RULES_V01,
+    PERSONAL_RESPONSE_PREDICTION_ISSUANCE_SCHEMA_V01,
+    PersonalResponsePredictionIssuanceContract,
+    build_personal_response_prediction_issuance_contract,
+)
+
 __all__ = [
+    "PERSONAL_RESPONSE_PREDICTION_ISSUANCE_RULES_V01",
+    "PERSONAL_RESPONSE_PREDICTION_ISSUANCE_SCHEMA_V01",
+    "PersonalResponsePredictionIssuanceContract",
+    "build_personal_response_prediction_issuance_contract",
+
     "PERSONAL_RESPONSE_PREDICTION_MODEL_ID_V01",
     "PERSONAL_RESPONSE_PREDICTION_MODEL_VERSION_V01",
     "PERSONAL_RESPONSE_PREDICTION_RULES_V01",

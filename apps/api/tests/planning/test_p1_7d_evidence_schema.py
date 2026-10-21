@@ -99,7 +99,7 @@ def test_p1_7d_migration_is_new_head():
     )
 
     assert scripts.get_heads() == [
-        "e17b9c4d2a61"
+        "a2c31f5d9b70"
     ]
 
     current = scripts.get_revision(

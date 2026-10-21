@@ -32,6 +32,10 @@ class AsyncSQLiteBridge:
         self.session = session
         self.commit_count = 0
 
+    def get_bind(self):
+        """Expose the wrapped SQLAlchemy bind expected by repositories."""
+        return self.session.get_bind()
+
     async def execute(self, statement):
         return self.session.execute(statement)
 
@@ -63,7 +67,17 @@ def db(athlete_id):
         )
 
     engine = create_engine("sqlite+pysqlite:///:memory:")
-    metadata.create_all(engine)
+
+    # This repository contract test owns only the athlete FK stub and
+    # planning_audit_artifacts. Creating all Base metadata makes the test
+    # depend on unrelated ORM import order (for example planned_workouts).
+    metadata.create_all(
+        engine,
+        tables=[
+            metadata.tables["users"],
+            metadata.tables["planning_audit_artifacts"],
+        ],
+    )
 
     with engine.begin() as connection:
         users = metadata.tables["users"]
@@ -126,7 +140,24 @@ async def test_save_and_get_round_trip_without_commit(
     )
 
     assert saved.status == AuditArtifactSaveStatus.CREATED
-    assert loaded == item
+
+    assert loaded is not None
+
+    # Semantic audit content round-trips unchanged.
+    assert loaded.artifact_kind == item.artifact_kind
+    assert loaded.artifact_id == item.artifact_id
+    assert loaded.athlete_id == item.athlete_id
+    assert loaded.schema_version == item.schema_version
+    assert loaded.created_at == item.created_at
+    assert loaded.content_hash_algorithm == item.content_hash_algorithm
+    assert loaded.content_hash == item.content_hash
+    assert loaded.contract_json == item.contract_json
+
+    # Persistence metadata is assigned by the durable store rather than
+    # supplied by the caller.
+    assert item.persisted_at is None
+    assert loaded.persisted_at is not None
+    assert loaded.persisted_at.tzinfo is not None
     assert db.commit_count == 0
 
 

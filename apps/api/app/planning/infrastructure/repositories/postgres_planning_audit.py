@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import timezone
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from ...domain.persistence.audit import (
     AuditArtifactConflictError,
@@ -41,13 +41,21 @@ class SqlAlchemyPlanningAuditRepository:
         row: PlanningAuditArtifactRow,
     ) -> AuditArtifactRecord:
         created_at = row.created_at
+        persisted_at = row.persisted_at
 
         # PostgreSQL preserves timezone-aware DateTime values. SQLite, used
-        # only by repository contract tests here, returns the same stored UTC
-        # timestamp as a naive datetime. Restore UTC at the adapter boundary
-        # so the domain contract remains timezone-aware in both cases.
+        # only by repository contract tests here, returns stored UTC values
+        # as naive datetimes. Restore UTC at the adapter boundary.
         if created_at.tzinfo is None:
             created_at = created_at.replace(tzinfo=timezone.utc)
+
+        if (
+            persisted_at is not None
+            and persisted_at.tzinfo is None
+        ):
+            persisted_at = persisted_at.replace(
+                tzinfo=timezone.utc
+            )
 
         return AuditArtifactRecord(
             artifact_kind=AuditArtifactKind(row.artifact_kind),
@@ -58,12 +66,19 @@ class SqlAlchemyPlanningAuditRepository:
             content_hash_algorithm=row.content_hash_algorithm,
             content_hash=row.content_hash,
             contract_json=row.contract_json,
+            persisted_at=persisted_at,
         )
 
     async def save(
         self,
         record: AuditArtifactRecord,
     ) -> AuditArtifactSaveResult:
+        if record.persisted_at is not None:
+            raise ValueError(
+                "persisted_at is database-assigned and "
+                "must not be supplied by callers."
+            )
+
         result = await self.session.execute(
             select(PlanningAuditArtifactRow).where(
                 PlanningAuditArtifactRow.artifact_kind
@@ -100,6 +115,17 @@ class SqlAlchemyPlanningAuditRepository:
                 athlete_id=self._athlete_uuid(record.athlete_id),
                 schema_version=record.schema_version,
                 created_at=record.created_at,
+                # Prospective issuance proof uses database time,
+                # never a caller-provided Python timestamp.
+                # PostgreSQL statement_timestamp() reflects the
+                # start of this persistence statement rather than
+                # the start of a potentially long transaction.
+                persisted_at=(
+                    func.statement_timestamp()
+                    if self.session.get_bind().dialect.name
+                    == "postgresql"
+                    else func.current_timestamp()
+                ),
                 content_hash_algorithm=record.content_hash_algorithm,
                 content_hash=record.content_hash,
                 contract_json=record.contract_json,

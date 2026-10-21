@@ -82,7 +82,30 @@ from .personal_reference import (
     build_personal_response_reference_assessment,
 )
 
+from .association_dataset import (
+    PERSONAL_ASSOCIATION_DATASET_RULES_V01,
+    PERSONAL_ASSOCIATION_DATASET_SCHEMA_V01,
+    PERSONAL_ASSOCIATION_PAIR_SCHEMA_V01,
+    PersonalAssociationDataset,
+    PersonalAssociationExclusionCount,
+    PersonalAssociationPair,
+    PersonalAssociationPairEligibility,
+    PersonalAssociationPairExclusionReason,
+    PersonalAssociationPredictorKey,
+    build_personal_association_dataset,
+)
+
 __all__ = [
+    "PERSONAL_ASSOCIATION_DATASET_RULES_V01",
+    "PERSONAL_ASSOCIATION_DATASET_SCHEMA_V01",
+    "PERSONAL_ASSOCIATION_PAIR_SCHEMA_V01",
+    "PersonalAssociationDataset",
+    "PersonalAssociationExclusionCount",
+    "PersonalAssociationPair",
+    "PersonalAssociationPairEligibility",
+    "PersonalAssociationPairExclusionReason",
+    "PersonalAssociationPredictorKey",
+    "build_personal_association_dataset",
     "PERSONAL_RESPONSE_REFERENCE_ASSESSMENT_SCHEMA_V01",
     "PERSONAL_RESPONSE_REFERENCE_RULES_V01",
     "PersonalResponseReferenceAssessment",

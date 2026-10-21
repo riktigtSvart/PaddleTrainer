@@ -15,6 +15,7 @@ class AuditArtifactKind(StrEnum):
     AUTHORITATIVE_EXECUTED_TRAINING = "authoritative_executed_training"
     AUTHORITATIVE_TRAINING_RESPONSE = "authoritative_training_response"
     PERSONAL_RESPONSE_PREDICTION_ISSUANCE = "personal_response_prediction_issuance"
+    PERSONAL_RESPONSE_PREDICTION_OUTCOME = "personal_response_prediction_outcome"
 
 
 class AuditArtifactSaveStatus(StrEnum):

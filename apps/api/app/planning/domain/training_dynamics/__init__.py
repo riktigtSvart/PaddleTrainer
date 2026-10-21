@@ -153,7 +153,25 @@ from .prospective_issuance import (
     build_personal_response_prediction_issuance_contract,
 )
 
+from .prospective_outcome import (
+    PROSPECTIVE_RESPONSE_CHALLENGE_RULES_V01,
+    PROSPECTIVE_RESPONSE_CHALLENGE_SCHEMA_V01,
+    ProspectiveResponseActualDirection,
+    ProspectiveResponseChallenge,
+    ProspectiveResponseChallengeResult,
+    build_prospective_response_challenge,
+    personal_response_prediction_outcome_binding_id,
+)
+
 __all__ = [
+    "PROSPECTIVE_RESPONSE_CHALLENGE_RULES_V01",
+    "PROSPECTIVE_RESPONSE_CHALLENGE_SCHEMA_V01",
+    "ProspectiveResponseActualDirection",
+    "ProspectiveResponseChallenge",
+    "ProspectiveResponseChallengeResult",
+    "build_prospective_response_challenge",
+    "personal_response_prediction_outcome_binding_id",
+
     "PERSONAL_RESPONSE_PREDICTION_ISSUANCE_RULES_V01",
     "PERSONAL_RESPONSE_PREDICTION_ISSUANCE_SCHEMA_V01",
     "PersonalResponsePredictionIssuanceContract",

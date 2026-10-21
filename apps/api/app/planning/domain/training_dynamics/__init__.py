@@ -163,7 +163,73 @@ from .prospective_outcome import (
     personal_response_prediction_outcome_binding_id,
 )
 
+from .prospective_cohort import (
+    PROSPECTIVE_VALIDATION_COHORT_RULES_V01,
+    PROSPECTIVE_VALIDATION_COHORT_SCHEMA_V01,
+    ProspectiveChallengeCohortEntry,
+    ProspectiveCohortOutcomeStatus,
+    ProspectiveIssuanceCohortSource,
+    ProspectiveOutcomeCohortSource,
+    ProspectiveValidationCohort,
+    ProspectiveValidationFamilyKey,
+    build_prospective_validation_cohort,
+)
+
+from .prospective_multiplicity import (
+    PROSPECTIVE_MULTIPLICITY_GUARD_RULES_V01,
+    PROSPECTIVE_MULTIPLICITY_GUARD_SCHEMA_V01,
+    ProspectiveMultiplicityMethod,
+    ProspectiveValidationFamilyCensusEntry,
+    ProspectiveValidationMultiplicityGuard,
+    build_prospective_validation_multiplicity_guard,
+)
+
+from .prospective_validation import (
+    PROSPECTIVE_VALIDATION_ASSESSMENT_RULES_V01,
+    PROSPECTIVE_VALIDATION_ASSESSMENT_SCHEMA_V01,
+    ProspectiveValidationAssessment,
+    ProspectiveValidationAssessmentStatus,
+    build_prospective_validation_assessment,
+)
+
+from .prospective_validation_evidence import (
+    PROSPECTIVE_VALIDATION_EVIDENCE_RULES_V01,
+    PROSPECTIVE_VALIDATION_EVIDENCE_SCHEMA_V01,
+    ProspectiveValidationEvidence,
+    ProspectiveValidationEvidenceStatus,
+    build_prospective_validation_evidence,
+)
+
 __all__ = [
+    "PROSPECTIVE_VALIDATION_EVIDENCE_RULES_V01",
+    "PROSPECTIVE_VALIDATION_EVIDENCE_SCHEMA_V01",
+    "ProspectiveValidationEvidence",
+    "ProspectiveValidationEvidenceStatus",
+    "build_prospective_validation_evidence",
+
+    "PROSPECTIVE_VALIDATION_ASSESSMENT_RULES_V01",
+    "PROSPECTIVE_VALIDATION_ASSESSMENT_SCHEMA_V01",
+    "ProspectiveValidationAssessment",
+    "ProspectiveValidationAssessmentStatus",
+    "build_prospective_validation_assessment",
+
+    "PROSPECTIVE_MULTIPLICITY_GUARD_RULES_V01",
+    "PROSPECTIVE_MULTIPLICITY_GUARD_SCHEMA_V01",
+    "ProspectiveMultiplicityMethod",
+    "ProspectiveValidationFamilyCensusEntry",
+    "ProspectiveValidationMultiplicityGuard",
+    "build_prospective_validation_multiplicity_guard",
+
+    "PROSPECTIVE_VALIDATION_COHORT_RULES_V01",
+    "PROSPECTIVE_VALIDATION_COHORT_SCHEMA_V01",
+    "ProspectiveChallengeCohortEntry",
+    "ProspectiveCohortOutcomeStatus",
+    "ProspectiveIssuanceCohortSource",
+    "ProspectiveOutcomeCohortSource",
+    "ProspectiveValidationCohort",
+    "ProspectiveValidationFamilyKey",
+    "build_prospective_validation_cohort",
+
     "PROSPECTIVE_RESPONSE_CHALLENGE_RULES_V01",
     "PROSPECTIVE_RESPONSE_CHALLENGE_SCHEMA_V01",
     "ProspectiveResponseActualDirection",

@@ -31,9 +31,13 @@ from ..domain.training_dynamics.prospective_issuance import (
     PersonalResponsePredictionIssuanceContract,
 )
 from ..domain.training_dynamics.prospective_outcome import (
+    PROSPECTIVE_RESPONSE_CHALLENGE_RULES_V01,
     PROSPECTIVE_RESPONSE_CHALLENGE_SCHEMA_V01,
+    ProspectiveResponseActualDirection,
     ProspectiveResponseChallenge,
+    ProspectiveResponseChallengeResult,
     build_prospective_response_challenge,
+    personal_response_prediction_outcome_binding_id,
 )
 from ..domain.training_dynamics.prospective_prediction import (
     PersonalResponsePredictionDirection,
@@ -509,6 +513,401 @@ def restore_personal_response_prediction_issuance_audit_artifact(
         )
 
     return issuance
+
+
+
+def restore_personal_response_prediction_outcome_audit_artifact(
+    record: AuditArtifactRecord,
+) -> ProspectiveResponseChallenge:
+    """Restore and fully verify one durable P2.3B2 outcome binding."""
+
+    if (
+        record.artifact_kind
+        != AuditArtifactKind
+        .PERSONAL_RESPONSE_PREDICTION_OUTCOME
+    ):
+        raise ValueError(
+            "Unexpected prospective-response outcome "
+            "audit artifact kind."
+        )
+
+    try:
+        raw = json.loads(record.contract_json)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            "Prospective-response outcome contract "
+            "is not valid JSON."
+        ) from exc
+
+    raw = _require_mapping(
+        raw,
+        field_name="challenge",
+    )
+
+    raw_response_key = _require_mapping(
+        raw.get("response_key"),
+        field_name="response_key",
+    )
+
+    challenge = ProspectiveResponseChallenge(
+        binding_id=_require_string(
+            raw.get("binding_id"),
+            field_name="binding_id",
+        ),
+        schema_version=_require_string(
+            raw.get("schema_version"),
+            field_name="schema_version",
+        ),
+        rules_version=_require_string(
+            raw.get("rules_version"),
+            field_name="rules_version",
+        ),
+
+        athlete_id=_require_string(
+            raw.get("athlete_id"),
+            field_name="athlete_id",
+        ),
+        workout_session_id=_require_string(
+            raw.get("workout_session_id"),
+            field_name="workout_session_id",
+        ),
+
+        source_issuance_id=_require_string(
+            raw.get("source_issuance_id"),
+            field_name="source_issuance_id",
+        ),
+        source_issuance_content_hash=_require_sha256(
+            raw.get("source_issuance_content_hash"),
+            field_name="source_issuance_content_hash",
+        ),
+
+        source_candidate_id=_require_string(
+            raw.get("source_candidate_id"),
+            field_name="source_candidate_id",
+        ),
+        source_candidate_content_hash=_require_sha256(
+            raw.get("source_candidate_content_hash"),
+            field_name="source_candidate_content_hash",
+        ),
+
+        source_response_artifact_id=_require_string(
+            raw.get("source_response_artifact_id"),
+            field_name="source_response_artifact_id",
+        ),
+        source_response_content_hash=_require_sha256(
+            raw.get("source_response_content_hash"),
+            field_name="source_response_content_hash",
+        ),
+
+        source_executed_training_evidence_id=_require_string(
+            raw.get(
+                "source_executed_training_evidence_id"
+            ),
+            field_name=(
+                "source_executed_training_evidence_id"
+            ),
+        ),
+        source_executed_training_evidence_hash=_require_sha256(
+            raw.get(
+                "source_executed_training_evidence_hash"
+            ),
+            field_name=(
+                "source_executed_training_evidence_hash"
+            ),
+        ),
+
+        response_key=ResponseMetricReferenceKey(
+            metric_key=_require_string(
+                raw_response_key.get("metric_key"),
+                field_name="response_key.metric_key",
+            ),
+            unit=_optional_string(
+                raw_response_key.get("unit"),
+                field_name="response_key.unit",
+            ),
+            response_timing=TrainingResponseTiming(
+                _require_string(
+                    raw_response_key.get(
+                        "response_timing"
+                    ),
+                    field_name=(
+                        "response_key.response_timing"
+                    ),
+                )
+            ),
+            stimulus_modality_key=_require_string(
+                raw_response_key.get(
+                    "stimulus_modality_key"
+                ),
+                field_name=(
+                    "response_key.stimulus_modality_key"
+                ),
+            ),
+        ),
+
+        prediction_direction=(
+            PersonalResponsePredictionDirection(
+                _require_string(
+                    raw.get("prediction_direction"),
+                    field_name="prediction_direction",
+                )
+            )
+        ),
+
+        historical_response_median=float(
+            _require_number(
+                raw.get(
+                    "historical_response_median"
+                ),
+                field_name=(
+                    "historical_response_median"
+                ),
+            )
+        ),
+        actual_response_value=float(
+            _require_number(
+                raw.get("actual_response_value"),
+                field_name="actual_response_value",
+            )
+        ),
+
+        actual_response_direction=(
+            ProspectiveResponseActualDirection(
+                _require_string(
+                    raw.get(
+                        "actual_response_direction"
+                    ),
+                    field_name=(
+                        "actual_response_direction"
+                    ),
+                )
+            )
+        ),
+
+        result=ProspectiveResponseChallengeResult(
+            _require_string(
+                raw.get("result"),
+                field_name="result",
+            )
+        ),
+
+        issuance_persisted_at=_require_datetime(
+            raw.get("issuance_persisted_at"),
+            field_name="issuance_persisted_at",
+        ),
+
+        response_observed_at=_require_datetime(
+            raw.get("response_observed_at"),
+            field_name="response_observed_at",
+        ),
+        response_available_at=_require_datetime(
+            raw.get("response_available_at"),
+            field_name="response_available_at",
+        ),
+        response_persisted_at=_require_datetime(
+            raw.get("response_persisted_at"),
+            field_name="response_persisted_at",
+        ),
+
+        prospective_challenge_established=_require_bool(
+            raw.get(
+                "prospective_challenge_established"
+            ),
+            field_name=(
+                "prospective_challenge_established"
+            ),
+        ),
+        directional_score_available=_require_bool(
+            raw.get("directional_score_available"),
+            field_name="directional_score_available",
+        ),
+
+        evidence_level_ceiling=EffectEvidenceLevel(
+            _require_string(
+                raw.get("evidence_level_ceiling"),
+                field_name="evidence_level_ceiling",
+            )
+        ),
+        association_supported=_require_bool(
+            raw.get("association_supported"),
+            field_name="association_supported",
+        ),
+
+        prospective_validation_established=_require_bool(
+            raw.get(
+                "prospective_validation_established"
+            ),
+            field_name=(
+                "prospective_validation_established"
+            ),
+        ),
+        causal_attribution_established=_require_bool(
+            raw.get(
+                "causal_attribution_established"
+            ),
+            field_name=(
+                "causal_attribution_established"
+            ),
+        ),
+        effect_inference_authorized=_require_bool(
+            raw.get(
+                "effect_inference_authorized"
+            ),
+            field_name=(
+                "effect_inference_authorized"
+            ),
+        ),
+        readiness_inference_authorized=_require_bool(
+            raw.get(
+                "readiness_inference_authorized"
+            ),
+            field_name=(
+                "readiness_inference_authorized"
+            ),
+        ),
+        performance_prediction_authorized=_require_bool(
+            raw.get(
+                "performance_prediction_authorized"
+            ),
+            field_name=(
+                "performance_prediction_authorized"
+            ),
+        ),
+        prescription_change_authorized=_require_bool(
+            raw.get(
+                "prescription_change_authorized"
+            ),
+            field_name=(
+                "prescription_change_authorized"
+            ),
+        ),
+        planning_authorized=_require_bool(
+            raw.get("planning_authorized"),
+            field_name="planning_authorized",
+        ),
+
+        created_at=_require_datetime(
+            raw.get("created_at"),
+            field_name="created_at",
+        ),
+
+        content_hash_algorithm=_require_string(
+            raw.get("content_hash_algorithm"),
+            field_name="content_hash_algorithm",
+        ),
+        content_hash=_require_sha256(
+            raw.get("content_hash"),
+            field_name="content_hash",
+        ),
+    )
+
+    if (
+        challenge.schema_version
+        != PROSPECTIVE_RESPONSE_CHALLENGE_SCHEMA_V01
+        or challenge.rules_version
+        != PROSPECTIVE_RESPONSE_CHALLENGE_RULES_V01
+    ):
+        raise ValueError(
+            "Unsupported persisted prospective-response "
+            "challenge contract."
+        )
+
+    if (
+        challenge.binding_id
+        != personal_response_prediction_outcome_binding_id(
+            challenge.source_issuance_id
+        )
+    ):
+        raise ValueError(
+            "Prospective-response binding identity does not "
+            "match its source issuance."
+        )
+
+    if (
+        challenge.binding_id != record.artifact_id
+        or challenge.athlete_id != record.athlete_id
+        or challenge.schema_version
+        != record.schema_version
+        or challenge.content_hash_algorithm
+        != record.content_hash_algorithm
+        or challenge.content_hash
+        != record.content_hash
+        or challenge.created_at
+        != to_utc(
+            record.created_at,
+            field_name="record.created_at",
+        )
+    ):
+        raise ValueError(
+            "Prospective-response audit metadata does not "
+            "match its canonical contract."
+        )
+
+    if (
+        challenge.content_hash_algorithm
+        != CONTENT_HASH_ALGORITHM
+    ):
+        raise ValueError(
+            "Unsupported prospective-response hash algorithm."
+        )
+
+    if (
+        challenge.prospective_challenge_established
+        is not True
+        or challenge.evidence_level_ceiling
+        != EffectEvidenceLevel.ASSOCIATION_SUPPORTED
+        or challenge.association_supported is not True
+    ):
+        raise ValueError(
+            "Persisted challenge lacks required bounded "
+            "prospective-challenge authority."
+        )
+
+    if any(
+        (
+            challenge.prospective_validation_established,
+            challenge.causal_attribution_established,
+            challenge.effect_inference_authorized,
+            challenge.readiness_inference_authorized,
+            challenge.performance_prediction_authorized,
+            challenge.prescription_change_authorized,
+            challenge.planning_authorized,
+        )
+    ):
+        raise ValueError(
+            "Persisted challenge claims unsupported "
+            "stronger authority."
+        )
+
+    if (
+        challenge.result
+        == ProspectiveResponseChallengeResult
+        .TIED_UNSCORABLE
+    ):
+        if challenge.directional_score_available is not False:
+            raise ValueError(
+                "Tied challenge must remain directionally "
+                "unscorable."
+            )
+    elif challenge.directional_score_available is not True:
+        raise ValueError(
+            "Matched/mismatched challenge must have "
+            "a directional score."
+        )
+
+    if not challenge.verify_content_hash():
+        raise ValueError(
+            "Persisted prospective-response challenge "
+            "content hash does not verify."
+        )
+
+    if canonical_json(challenge) != record.contract_json:
+        raise ValueError(
+            "Persisted prospective-response challenge "
+            "does not round-trip canonically."
+        )
+
+    return challenge
 
 
 def _binding_audit_record(

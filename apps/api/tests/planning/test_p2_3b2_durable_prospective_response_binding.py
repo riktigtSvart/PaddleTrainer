@@ -1054,3 +1054,57 @@ async def test_second_response_for_same_issuance_conflicts(
     assert first.challenge.binding_id
 
     assert session.rollback_count == 1
+
+
+
+@pytest.mark.asyncio
+async def test_persisted_binding_contract_restores_canonically(
+    monkeypatch,
+):
+    (
+        repository,
+        prediction,
+        response_source,
+        execution,
+    ) = repository_with_sources()
+
+    install_restorers(
+        monkeypatch,
+        responses={
+            response_source.artifact_id:
+                response_source,
+        },
+        executions={
+            execution.artifact_id:
+                execution,
+        },
+    )
+
+    result = await (
+        binder.bind_personal_response_prediction_outcome(
+            athlete_id=ATHLETE,
+            issuance_id=prediction.issuance_id,
+            response_artifact_id=(
+                response_source.artifact_id
+            ),
+            audit_repository=repository,
+            session=FakeSession(),
+        )
+    )
+
+    stored = repository.records[
+        (
+            AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_OUTCOME,
+            result.challenge.binding_id,
+        )
+    ]
+
+    restored = (
+        binder.restore_personal_response_prediction_outcome_audit_artifact(
+            stored
+        )
+    )
+
+    assert restored == result.challenge
+    assert restored.verify_content_hash()

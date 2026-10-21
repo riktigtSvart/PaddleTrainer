@@ -106,7 +106,32 @@ from .association_estimate import (
     build_personal_association_estimate,
 )
 
+
+from .association_support import (
+    PERSONAL_ASSOCIATION_EXACT_PERMUTATION_MAX_PAIRS_V01,
+    PERSONAL_ASSOCIATION_MONTE_CARLO_RESAMPLES_V01,
+    PERSONAL_ASSOCIATION_SUPPORT_ALPHA_V01,
+    PERSONAL_ASSOCIATION_SUPPORT_RULES_V01,
+    PERSONAL_ASSOCIATION_SUPPORT_SCHEMA_V01,
+    PersonalAssociationPermutationMethod,
+    PersonalAssociationSupportAssessment,
+    PersonalAssociationSupportLimitationCode,
+    PersonalAssociationSupportStatus,
+    assess_personal_association_support,
+)
+
 __all__ = [
+    "PERSONAL_ASSOCIATION_EXACT_PERMUTATION_MAX_PAIRS_V01",
+    "PERSONAL_ASSOCIATION_MONTE_CARLO_RESAMPLES_V01",
+    "PERSONAL_ASSOCIATION_SUPPORT_ALPHA_V01",
+    "PERSONAL_ASSOCIATION_SUPPORT_RULES_V01",
+    "PERSONAL_ASSOCIATION_SUPPORT_SCHEMA_V01",
+    "PersonalAssociationPermutationMethod",
+    "PersonalAssociationSupportAssessment",
+    "PersonalAssociationSupportLimitationCode",
+    "PersonalAssociationSupportStatus",
+    "assess_personal_association_support",
+
     "PERSONAL_ASSOCIATION_ESTIMATE_RULES_V01",
     "PERSONAL_ASSOCIATION_ESTIMATE_SCHEMA_V01",
     "PersonalAssociationEstimate",

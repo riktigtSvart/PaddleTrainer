@@ -200,7 +200,23 @@ from .prospective_validation_evidence import (
     build_prospective_validation_evidence,
 )
 
+from .prospective_challenge_slot import (
+    PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT_IDENTITY_V01,
+    PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT_RULES_V01,
+    PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT_SCHEMA_V01,
+    PersonalResponsePredictionChallengeSlot,
+    build_personal_response_prediction_challenge_slot,
+    personal_response_prediction_challenge_slot_id,
+)
+
 __all__ = [
+    "PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT_IDENTITY_V01",
+    "PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT_RULES_V01",
+    "PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT_SCHEMA_V01",
+    "PersonalResponsePredictionChallengeSlot",
+    "build_personal_response_prediction_challenge_slot",
+    "personal_response_prediction_challenge_slot_id",
+
     "PROSPECTIVE_VALIDATION_EVIDENCE_RULES_V01",
     "PROSPECTIVE_VALIDATION_EVIDENCE_SCHEMA_V01",
     "ProspectiveValidationEvidence",

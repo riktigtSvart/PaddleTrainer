@@ -29,6 +29,10 @@ from app.planning.domain.training_dynamics import (
     PersonalResponsePredictionStatus,
     ResponseMetricReferenceKey,
 )
+from app.planning.domain.training_dynamics.prospective_challenge_slot import (
+    build_personal_response_prediction_challenge_slot,
+    personal_response_prediction_challenge_slot_id,
+)
 from app.planning.domain.training_dynamics.prospective_issuance import (
     PERSONAL_RESPONSE_PREDICTION_ISSUANCE_SCHEMA_V01,
     build_personal_response_prediction_issuance_contract,
@@ -72,6 +76,7 @@ class FakeAuditRepository:
     def __init__(self, *, database_clock=None):
         self.records = {}
         self.drop_after_save = False
+        self.fail_issuance_save = False
         self.database_clock = (
             database_clock
             or (lambda: dt(12))
@@ -125,6 +130,16 @@ class FakeAuditRepository:
                 artifact_kind=record.artifact_kind,
                 artifact_id=record.artifact_id,
                 content_hash=record.content_hash,
+            )
+
+        if (
+            self.fail_issuance_save
+            and record.artifact_kind
+            == AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_ISSUANCE
+        ):
+            raise RuntimeError(
+                "synthetic issuance save failure"
             )
 
         stored = replace(
@@ -199,6 +214,9 @@ def candidate(
     ),
     prediction_available=True,
     planning_authorized=False,
+    workout_session_id="future-session",
+    response_metric_key="self_reported_fatigue_score",
+    target_predictor_value=4.5,
 ):
     value = PersonalResponsePredictionCandidate(
         candidate_id="PENDING",
@@ -217,7 +235,7 @@ def candidate(
         ),
 
         athlete_id=ATHLETE,
-        workout_session_id="future-session",
+        workout_session_id=workout_session_id,
 
         source_dataset_id="dataset-1",
         source_dataset_content_hash="a" * 64,
@@ -240,7 +258,7 @@ def candidate(
         ),
 
         response_key=ResponseMetricReferenceKey(
-            metric_key="self_reported_fatigue_score",
+            metric_key=response_metric_key,
             unit="score_0_10",
             response_timing=TrainingResponseTiming.SAME_DAY,
             stimulus_modality_key="RUNNING",
@@ -256,7 +274,7 @@ def candidate(
 
         source_spearman_rho=1.0,
 
-        target_predictor_value=4.5,
+        target_predictor_value=target_predictor_value,
 
         predicted_response_direction=direction,
 
@@ -367,7 +385,27 @@ async def test_retry_preserves_first_durable_issuance_time():
 
     assert second.reused_durable_issuance is True
 
-    assert len(repository.records) == 1
+    assert len(repository.records) == 2
+
+    assert sum(
+        1
+        for kind, _ in repository.records
+        if (
+            kind
+            == AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_ISSUANCE
+        )
+    ) == 1
+
+    assert sum(
+        1
+        for kind, _ in repository.records
+        if (
+            kind
+            == AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT
+        )
+    ) == 1
 
 
 @pytest.mark.asyncio
@@ -606,3 +644,550 @@ async def test_missing_read_after_write_fails_closed():
 
     assert session.commit_count == 0
     assert session.rollback_count == 1
+
+
+
+def _durable_issuance_record(
+    source,
+    *,
+    persisted_at=None,
+):
+    issuance = (
+        build_personal_response_prediction_issuance_contract(
+            source
+        )
+    )
+
+    return (
+        issuance,
+        AuditArtifactRecord(
+            artifact_kind=(
+                AuditArtifactKind
+                .PERSONAL_RESPONSE_PREDICTION_ISSUANCE
+            ),
+            artifact_id=issuance.issuance_id,
+            athlete_id=issuance.athlete_id,
+            schema_version=issuance.schema_version,
+            created_at=issuance.prediction_at,
+            content_hash_algorithm=(
+                issuance.content_hash_algorithm
+            ),
+            content_hash=issuance.content_hash,
+            contract_json=canonical_json(
+                issuance
+            ),
+            persisted_at=(
+                persisted_at or dt(12)
+            ),
+        ),
+    )
+
+
+def _slot_record(
+    issuance,
+    *,
+    persisted_at=None,
+):
+    slot = (
+        build_personal_response_prediction_challenge_slot(
+            issuance
+        )
+    )
+
+    return (
+        slot,
+        AuditArtifactRecord(
+            artifact_kind=(
+                AuditArtifactKind
+                .PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT
+            ),
+            artifact_id=slot.slot_id,
+            athlete_id=slot.athlete_id,
+            schema_version=slot.schema_version,
+            created_at=issuance.prediction_at,
+            content_hash_algorithm=(
+                slot.content_hash_algorithm
+            ),
+            content_hash=slot.content_hash,
+            contract_json=canonical_json(
+                slot
+            ),
+            persisted_at=(
+                persisted_at or dt(12)
+            ),
+        ),
+    )
+
+
+def test_p2_3e_candidate_specific_changes_share_same_slot_identity():
+    first = (
+        build_personal_response_prediction_issuance_contract(
+            candidate(
+                target_predictor_value=4.5,
+            )
+        )
+    )
+
+    second = (
+        build_personal_response_prediction_issuance_contract(
+            candidate(
+                target_predictor_value=4.0,
+            )
+        )
+    )
+
+    assert first.issuance_id != second.issuance_id
+
+    first_slot = (
+        build_personal_response_prediction_challenge_slot(
+            first
+        )
+    )
+
+    second_slot = (
+        build_personal_response_prediction_challenge_slot(
+            second
+        )
+    )
+
+    assert first_slot.slot_id == second_slot.slot_id
+
+    # Same stable identity, different binding content:
+    # immutable persistence therefore conflicts rather than
+    # creating a second issuance for the same challenge.
+    assert (
+        first_slot.content_hash
+        != second_slot.content_hash
+    )
+
+
+def test_p2_3e_different_response_context_gets_different_slot():
+    first = (
+        build_personal_response_prediction_issuance_contract(
+            candidate()
+        )
+    )
+
+    second = (
+        build_personal_response_prediction_issuance_contract(
+            candidate(
+                response_metric_key="recovery_score",
+            )
+        )
+    )
+
+    assert (
+        personal_response_prediction_challenge_slot_id(
+            first
+        )
+        != personal_response_prediction_challenge_slot_id(
+            second
+        )
+    )
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_first_issue_persists_slot_and_issuance_together():
+    source = candidate()
+
+    repository = FakeAuditRepository()
+    session = FakeSession()
+
+    result = await issue_personal_response_prediction(
+        candidate=source,
+        audit_repository=repository,
+        session=session,
+    )
+
+    slot = (
+        build_personal_response_prediction_challenge_slot(
+            result.issuance
+        )
+    )
+
+    assert (
+        (
+            AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT,
+            slot.slot_id,
+        )
+        in repository.records
+    )
+
+    assert (
+        (
+            AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_ISSUANCE,
+            result.issuance.issuance_id,
+        )
+        in repository.records
+    )
+
+    assert session.commit_count == 1
+    assert session.rollback_count == 0
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_same_slot_different_issuance_fails_closed():
+    first = candidate(
+        target_predictor_value=4.5,
+    )
+
+    second = candidate(
+        target_predictor_value=4.0,
+    )
+
+    repository = FakeAuditRepository()
+
+    await issue_personal_response_prediction(
+        candidate=first,
+        audit_repository=repository,
+        session=FakeSession(),
+    )
+
+    session = FakeSession()
+
+    with pytest.raises(
+        PersonalResponsePredictionIssuanceError,
+        match="already reserved",
+    ):
+        await issue_personal_response_prediction(
+            candidate=second,
+            audit_repository=repository,
+            session=session,
+        )
+
+    assert session.commit_count == 0
+    assert session.rollback_count == 1
+
+    assert sum(
+        1
+        for kind, _ in repository.records
+        if (
+            kind
+            == AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_ISSUANCE
+        )
+    ) == 1
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_different_response_context_can_use_separate_slot():
+    first = candidate()
+
+    second = candidate(
+        response_metric_key="recovery_score",
+    )
+
+    repository = FakeAuditRepository()
+
+    await issue_personal_response_prediction(
+        candidate=first,
+        audit_repository=repository,
+        session=FakeSession(),
+    )
+
+    await issue_personal_response_prediction(
+        candidate=second,
+        audit_repository=repository,
+        session=FakeSession(),
+    )
+
+    assert sum(
+        1
+        for kind, _ in repository.records
+        if (
+            kind
+            == AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_ISSUANCE
+        )
+    ) == 2
+
+    assert sum(
+        1
+        for kind, _ in repository.records
+        if (
+            kind
+            == AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT
+        )
+    ) == 2
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_legacy_same_issuance_is_lazily_reserved():
+    source = candidate()
+
+    issuance, record = _durable_issuance_record(
+        source
+    )
+
+    repository = FakeAuditRepository()
+
+    repository.records[
+        (
+            record.artifact_kind,
+            record.artifact_id,
+        )
+    ] = record
+
+    result = await issue_personal_response_prediction(
+        candidate=source,
+        audit_repository=repository,
+        session=FakeSession(),
+    )
+
+    assert result.reused_durable_issuance is True
+    assert result.durable_issued_at == dt(12)
+
+    slot = (
+        build_personal_response_prediction_challenge_slot(
+            issuance
+        )
+    )
+
+    assert (
+        (
+            AuditArtifactKind
+            .PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT,
+            slot.slot_id,
+        )
+        in repository.records
+    )
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_legacy_different_issuance_same_slot_blocks_new_issue():
+    legacy_source = candidate(
+        target_predictor_value=4.0,
+    )
+
+    requested = candidate(
+        target_predictor_value=4.5,
+    )
+
+    legacy, record = _durable_issuance_record(
+        legacy_source
+    )
+
+    requested_issuance = (
+        build_personal_response_prediction_issuance_contract(
+            requested
+        )
+    )
+
+    assert (
+        personal_response_prediction_challenge_slot_id(
+            legacy
+        )
+        == personal_response_prediction_challenge_slot_id(
+            requested_issuance
+        )
+    )
+
+    assert (
+        legacy.issuance_id
+        != requested_issuance.issuance_id
+    )
+
+    repository = FakeAuditRepository()
+
+    repository.records[
+        (
+            record.artifact_kind,
+            record.artifact_id,
+        )
+    ] = record
+
+    session = FakeSession()
+
+    with pytest.raises(
+        PersonalResponsePredictionIssuanceError,
+        match="already occupies",
+    ):
+        await issue_personal_response_prediction(
+            candidate=requested,
+            audit_repository=repository,
+            session=session,
+        )
+
+    assert session.commit_count == 0
+    assert session.rollback_count == 1
+
+    assert not any(
+        kind
+        == AuditArtifactKind
+        .PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT
+        for kind, _ in repository.records
+    )
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_multiple_legacy_issuances_same_slot_are_ambiguous():
+    first_source = candidate(
+        target_predictor_value=4.0,
+    )
+
+    second_source = candidate(
+        target_predictor_value=4.5,
+    )
+
+    requested = candidate(
+        target_predictor_value=4.2,
+    )
+
+    _, first_record = _durable_issuance_record(
+        first_source
+    )
+
+    _, second_record = _durable_issuance_record(
+        second_source
+    )
+
+    repository = FakeAuditRepository()
+
+    for record in (
+        first_record,
+        second_record,
+    ):
+        repository.records[
+            (
+                record.artifact_kind,
+                record.artifact_id,
+            )
+        ] = record
+
+    with pytest.raises(
+        PersonalResponsePredictionIssuanceError,
+        match="Multiple legacy",
+    ):
+        await issue_personal_response_prediction(
+            candidate=requested,
+            audit_repository=repository,
+            session=FakeSession(),
+        )
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_repository_scan_limit_fails_closed():
+    repository = FakeAuditRepository()
+
+    for index in range(500):
+        record = AuditArtifactRecord(
+            artifact_kind=(
+                AuditArtifactKind
+                .PERSONAL_RESPONSE_PREDICTION_ISSUANCE
+            ),
+            artifact_id=f"legacy-{index}",
+            athlete_id=ATHLETE,
+            schema_version="legacy",
+            created_at=dt(9),
+            content_hash_algorithm=(
+                CONTENT_HASH_ALGORITHM
+            ),
+            content_hash="f" * 64,
+            contract_json="{}",
+            persisted_at=dt(9),
+        )
+
+        repository.records[
+            (
+                record.artifact_kind,
+                record.artifact_id,
+            )
+        ] = record
+
+    session = FakeSession()
+
+    with pytest.raises(
+        PersonalResponsePredictionIssuanceError,
+        match="scan completeness is unknown",
+    ):
+        await issue_personal_response_prediction(
+            candidate=candidate(),
+            audit_repository=repository,
+            session=session,
+        )
+
+    assert session.commit_count == 0
+    assert session.rollback_count == 1
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_reservation_without_bound_issuance_fails_closed():
+    source = candidate()
+
+    issuance = (
+        build_personal_response_prediction_issuance_contract(
+            source
+        )
+    )
+
+    slot, slot_record = _slot_record(
+        issuance
+    )
+
+    repository = FakeAuditRepository()
+
+    repository.records[
+        (
+            slot_record.artifact_kind,
+            slot_record.artifact_id,
+        )
+    ] = slot_record
+
+    session = FakeSession()
+
+    with pytest.raises(
+        PersonalResponsePredictionIssuanceError,
+        match="bound issuance is missing",
+    ):
+        await issue_personal_response_prediction(
+            candidate=source,
+            audit_repository=repository,
+            session=session,
+        )
+
+    assert session.commit_count == 0
+    assert session.rollback_count == 1
+class TransactionalFakeSession(FakeSession):
+    def __init__(self, repository):
+        super().__init__()
+        self.repository = repository
+        self.snapshot = dict(
+            repository.records
+        )
+
+    async def rollback(self):
+        await super().rollback()
+
+        self.repository.records = dict(
+            self.snapshot
+        )
+
+
+@pytest.mark.asyncio
+async def test_p2_3e_issuance_save_failure_rolls_back_slot_reservation():
+    repository = FakeAuditRepository()
+    repository.fail_issuance_save = True
+
+    session = TransactionalFakeSession(
+        repository
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="synthetic issuance save failure",
+    ):
+        await issue_personal_response_prediction(
+            candidate=candidate(),
+            audit_repository=repository,
+            session=session,
+        )
+
+    assert session.commit_count == 0
+    assert session.rollback_count == 1
+
+    # Reservation was flushed first, but transaction rollback
+    # removes it together with the failed issuance attempt.
+    assert repository.records == {}

@@ -67,7 +67,18 @@ from .sufficiency import (
     assess_training_dynamics_data_sufficiency,
 )
 
+from .reference_sufficiency import (
+    RESPONSE_METRIC_REFERENCE_SUFFICIENCY_SCHEMA_V01,
+    ResponseMetricReferenceContextDimension,
+    ResponseMetricReferenceSufficiencyAssessment,
+    assess_response_metric_reference_sufficiency,
+)
+
 __all__ = [
+    "RESPONSE_METRIC_REFERENCE_SUFFICIENCY_SCHEMA_V01",
+    "ResponseMetricReferenceContextDimension",
+    "ResponseMetricReferenceSufficiencyAssessment",
+    "assess_response_metric_reference_sufficiency",
     "TRAINING_DYNAMICS_DATA_SUFFICIENCY_RULES_V01",
     "TRAINING_DYNAMICS_DATA_SUFFICIENCY_SCHEMA_V01",
     "TrainingDynamicsDataSufficiencyAssessment",

@@ -120,7 +120,22 @@ from .association_support import (
     assess_personal_association_support,
 )
 
+
+from .association_evidence import (
+    PERSONAL_ASSOCIATION_EVIDENCE_RULES_V01,
+    PERSONAL_ASSOCIATION_EVIDENCE_SCHEMA_V01,
+    PersonalAssociationEvidence,
+    PersonalAssociationEvidenceStatus,
+    build_personal_association_evidence,
+)
+
 __all__ = [
+    "PERSONAL_ASSOCIATION_EVIDENCE_RULES_V01",
+    "PERSONAL_ASSOCIATION_EVIDENCE_SCHEMA_V01",
+    "PersonalAssociationEvidence",
+    "PersonalAssociationEvidenceStatus",
+    "build_personal_association_evidence",
+
     "PERSONAL_ASSOCIATION_EXACT_PERMUTATION_MAX_PAIRS_V01",
     "PERSONAL_ASSOCIATION_MONTE_CARLO_RESAMPLES_V01",
     "PERSONAL_ASSOCIATION_SUPPORT_ALPHA_V01",

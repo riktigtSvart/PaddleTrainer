@@ -69,6 +69,11 @@ class SqlAlchemyAuthoritativePlanRevisionRepository:
         self._session = session
         self._source_hash_provider = source_hash_provider
 
+    @property
+    def session(self):
+        """Expose the bound session for transaction-owning read workflows."""
+        return self._session
+
     async def get_plan(
         self,
         *,

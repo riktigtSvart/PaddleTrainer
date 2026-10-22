@@ -20,6 +20,7 @@ class AuditArtifactKind(StrEnum):
     PROSPECTIVE_VALIDATION_EVIDENCE = "prospective_validation_evidence"
     PLANNING_UTILITY_OBSERVATION = "planning_utility_observation"
     PLANNING_UTILITY_DECISION_BINDING = "planning_utility_decision_binding"
+    PLANNING_UTILITY_FOLLOWUP = "planning_utility_followup"
 
 
 class AuditArtifactSaveStatus(StrEnum):

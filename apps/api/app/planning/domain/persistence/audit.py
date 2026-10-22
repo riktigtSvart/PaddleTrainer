@@ -18,6 +18,7 @@ class AuditArtifactKind(StrEnum):
     PERSONAL_RESPONSE_PREDICTION_CHALLENGE_SLOT = "personal_response_prediction_challenge_slot"
     PERSONAL_RESPONSE_PREDICTION_OUTCOME = "personal_response_prediction_outcome"
     PROSPECTIVE_VALIDATION_EVIDENCE = "prospective_validation_evidence"
+    PLANNING_UTILITY_OBSERVATION = "planning_utility_observation"
 
 
 class AuditArtifactSaveStatus(StrEnum):

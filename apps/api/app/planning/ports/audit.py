@@ -55,3 +55,20 @@ class AsyncPlanningAuditRepository(Protocol):
         limit: int = 50,
     ) -> tuple[AuditArtifactRecord, ...]:
         ...
+
+
+class PlanningAuditSession(Protocol):
+    def in_transaction(self) -> bool:
+        ...
+
+    async def commit(self) -> None:
+        ...
+
+    async def rollback(self) -> None:
+        ...
+
+
+class SessionBoundAsyncPlanningAuditRepository(AsyncPlanningAuditRepository, Protocol):
+    @property
+    def session(self) -> PlanningAuditSession:
+        ...

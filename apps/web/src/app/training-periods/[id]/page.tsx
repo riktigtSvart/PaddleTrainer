@@ -710,6 +710,18 @@ export default async function TrainingPeriodPage({
 
                 <div className="space-y-12 py-10">
 
+                    {["MACROCYCLE", "MESOCYCLE"].includes(period.period_type) && (
+                        <section className="rounded-2xl border border-teal-500/40 bg-zinc-900 p-5">
+                            <h2 className="text-xl font-semibold">Képességcélok és mérési protokollok</h2>
+                            <p className="mt-2 text-sm leading-6 text-zinc-300">
+                                A képességek célszerepeit, az előre rögzített mérési feltételeket és az értékeléseket külön munkafolyamat kezeli.
+                            </p>
+                            <Link href={`/planning-goals?period=${period.id}`} className="mt-4 inline-block text-sm text-teal-200 hover:text-teal-100">
+                                Célok és mérések megnyitása →
+                            </Link>
+                        </section>
+                    )}
+
                     <section>
                         <h2 className="mb-5 text-2xl font-semibold">
                             Célok

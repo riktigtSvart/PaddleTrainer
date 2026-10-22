@@ -522,6 +522,9 @@ export default async function Home() {
           <p className="mt-3 text-zinc-400">
             Tervezett és teljesített edzések
           </p>
+          <Link href="/planning-goals" className="mt-4 inline-block rounded-lg border border-teal-500/50 px-4 py-2 text-sm text-teal-200 transition hover:bg-teal-950">
+            Célok és mérések →
+          </Link>
         </header>
 
         <div className="space-y-10">

@@ -24,6 +24,7 @@ class AuditArtifactKind(StrEnum):
     MACROCYCLE_CAPABILITY_PLAN = "macrocycle_capability_plan"
     MESOCYCLE_GOAL_PROTOCOL = "mesocycle_goal_protocol"
     MESOCYCLE_GOAL_ASSESSMENT = "mesocycle_goal_assessment"
+    GOAL_MEASUREMENT_REGISTRATION = "goal_measurement_registration"
 
 
 class AuditArtifactSaveStatus(StrEnum):

@@ -21,6 +21,8 @@ class AuditArtifactKind(StrEnum):
     PLANNING_UTILITY_OBSERVATION = "planning_utility_observation"
     PLANNING_UTILITY_DECISION_BINDING = "planning_utility_decision_binding"
     PLANNING_UTILITY_FOLLOWUP = "planning_utility_followup"
+    MACROCYCLE_CAPABILITY_PLAN = "macrocycle_capability_plan"
+    MESOCYCLE_GOAL_PROTOCOL = "mesocycle_goal_protocol"
 
 
 class AuditArtifactSaveStatus(StrEnum):

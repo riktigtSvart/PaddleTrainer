@@ -10,7 +10,9 @@ DATA_BASE = "https://www.polaraccesslink.com/v4/data"
 
 
 class PolarAPIError(RuntimeError):
-    pass
+    def __init__(self, message, *, status_code=None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class PolarClient:
@@ -79,21 +81,40 @@ class PolarClient:
             params=params,
         )
 
+    async def list_daily_activity(self, access_token: str, from_date: date, to_date: date) -> dict:
+        return await self._get(access_token, "/activity/list", params=[
+            ("from", from_date.isoformat()), ("to", to_date.isoformat()), ("features", "samples"),
+        ])
+
+    async def list_tests(self, access_token: str, from_date: date, to_date: date) -> dict:
+        return await self._get(access_token, "/tests/list", params={
+            "from": from_date.isoformat(), "to": to_date.isoformat(),
+        })
+
     async def list_training_targets(
         self,
         access_token: str,
         from_date: date,
         to_date: date,
-    ) -> dict:
+        *,
+        raw_response: bool = False,
+    ) -> dict | list:
+        # The live endpoint requires from/to despite the fromDate/toDate docs.
         params = {
             "from": from_date.isoformat(),
             "to": to_date.isoformat(),
         }
-        return await self._get(
+        payload = await self._get(
             access_token,
             "/training-target/calendar-targets",
             params=params,
         )
+        if raw_response:
+            return payload
+        items = payload.get("trainingTarget") if isinstance(payload, dict) else payload
+        if not isinstance(items, list):
+            raise PolarAPIError("POLAR_TARGETS_PAYLOAD_INVALID")
+        return items
 
     async def list_sport_profiles(self, access_token: str) -> dict:
         return await self._get(access_token, "/sports/profiles")
@@ -201,5 +222,5 @@ class PolarClient:
             detail = response.text
 
         raise PolarAPIError(
-            f"Polar API {response.status_code}: {detail}"
+            f"Polar API {response.status_code}: {detail}", status_code=response.status_code
         )

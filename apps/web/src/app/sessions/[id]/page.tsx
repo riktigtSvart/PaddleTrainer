@@ -199,7 +199,7 @@ export default async function SessionDetailPage({
           href="/"
           className="text-sm text-zinc-400 transition hover:text-zinc-100"
         >
-          ← Coach
+          ← Napirend
         </Link>
 
         <header className="mt-8 border-b border-zinc-800 pb-8">
@@ -419,7 +419,7 @@ export default async function SessionDetailPage({
     </h2>
 
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-zinc-400">
-      Ez az edzés spontán teljesítés volt, ezért nem tartozik hozzá előzetes edzésterv.
+      Ez az edzés még nincs edzéstervhez párosítva. A hiányzó kapcsolatból nem állapítható meg, hogy volt-e előzetes terv.
     </div>
   </section>
 )}

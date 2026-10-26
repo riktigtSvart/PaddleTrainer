@@ -382,6 +382,11 @@ async def sync_training_targets(
     user: User,
     past_days: int = 35,
     future_days: int = 30,
+    *,
+    first=None,
+    last=None,
+    protect_tracked_plans: bool = False,
+    report: dict | None = None,
 ) -> tuple[int, int]:
     connection = await db.scalar(
         select(ExternalConnection).where(
@@ -400,19 +405,46 @@ async def sync_training_targets(
 
     today = datetime.now(timezone.utc).date()
 
-    from_date = today - timedelta(days=past_days)
-    to_date = today + timedelta(days=future_days)
+    from_date = first or today - timedelta(days=past_days)
+    to_date = last or today + timedelta(days=future_days)
 
-    payload = await PolarClient().list_training_targets(
+    response_payload = await PolarClient().list_training_targets(
         access_token,
         from_date,
         to_date,
+        **({"raw_response": True} if report is not None else {}),
     )
+    payload = response_payload.get("trainingTarget") if isinstance(response_payload, dict) else response_payload
 
     imported = 0
     updated = 0
+    skipped = 0
+    skip_reasons = {}
+
+    def skip(reason):
+        nonlocal skipped
+        skipped += 1
+        skip_reasons[reason] = skip_reasons.get(reason, 0) + 1
+    protected_ids = set()
+    if protect_tracked_plans:
+        from app.planning.infrastructure.persistence.sqlalchemy_models import PlanningLogicalPlanRow
+        protected_ids = set((await db.execute(select(PlanningLogicalPlanRow.source_workout_id).where(
+            PlanningLogicalPlanRow.athlete_id == user.id,
+        ))).scalars().all())
+    if report is not None:
+        from app.services.provider_payload_archive import archive_payload
+        if not isinstance(payload, list):
+            raise ValueError("POLAR_TARGETS_PAYLOAD_INVALID")
+        await archive_payload(db, user, "DATA_SYNC_TARGETS", response_payload if isinstance(response_payload, dict) else {"targets": payload}, first=from_date, last=to_date)
 
     for raw_item in payload:
+        if report is not None:
+            if not isinstance(raw_item, dict) or not isinstance(raw_item.get("session"), dict):
+                skip("invalid_record")
+                continue
+            if not raw_item["session"].get("id"):
+                skip("missing_target_id")
+                continue
         normalized = normalize_training_target(
             raw_item
         )
@@ -422,6 +454,7 @@ async def sync_training_targets(
         )
 
         if not polar_target_id:
+            skip("missing_target_id")
             continue
 
         existing = await db.scalar(
@@ -448,6 +481,7 @@ async def sync_training_targets(
         )
 
         if planned_start is None:
+            skip("missing_start")
             continue
 
         first_exercise = (
@@ -508,6 +542,11 @@ async def sync_training_targets(
         # ---------------------------------
 
         if existing:
+            if protect_tracked_plans and (existing.id in protected_ids or existing.source != "POLAR"):
+                skip("protected_plan")
+                continue
+            if report is not None and existing.raw_data is not None:
+                await archive_payload(db, user, "DATA_SYNC_PREVIOUS_TARGET", {"workout_id": str(existing.id), "raw_data": existing.raw_data})
             workout = existing
 
             workout.date = planned_start.date()
@@ -631,4 +670,6 @@ async def sync_training_targets(
         updated,
     )
 
+    if report is not None:
+        report.update(imported=imported, updated=updated, skipped=skipped, skip_reasons=skip_reasons)
     return imported, updated

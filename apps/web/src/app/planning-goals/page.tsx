@@ -9,9 +9,16 @@ export const metadata: Metadata = {
 export default async function PlanningGoalsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string | string[] }>;
+  searchParams: Promise<{
+    period?: string | string[];
+    cycle?: string | string[];
+  }>;
 }) {
-  const { period } = await searchParams;
+  const { period, cycle } = await searchParams;
+  const initialCycle =
+    typeof cycle === "string" && /^pt-cycle:[0-9a-f]{64}$/.test(cycle)
+      ? cycle
+      : "";
   const initialPeriod =
     typeof period === "string" &&
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
@@ -26,7 +33,7 @@ export default async function PlanningGoalsPage({
     >
       <div className="mx-auto max-w-5xl">
         <Link href="/" className="text-sm text-zinc-300 hover:text-teal-200">
-          ← Coach
+          ← Napirend
         </Link>
         <header className="my-8">
           <p className="text-sm text-teal-200">PaddleTrainer · Cikluscélok</p>
@@ -38,7 +45,10 @@ export default async function PlanningGoalsPage({
             változás.
           </p>
         </header>
-        <GoalWorkspace initialPeriod={initialPeriod} />
+        <GoalWorkspace
+          initialPeriod={initialPeriod}
+          initialCycle={initialCycle}
+        />
       </div>
     </main>
   );

@@ -1,0 +1,196 @@
+{
+  "receipt": {
+    "schema_version": "data-sync-receipt-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "committed": true,
+    "reused": false,
+    "start": {
+      "artifact_id": "pt-data-sync:11111111111141118111111111111111:POLAR:000000000000000000000000000bbfd1",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "content_hash": "dffce058451fadab3f17e51577f17f1ca81f2fcb8c545f8e4479c51253ba5121",
+      "created_at": "2026-10-22T09:00:00.000002+00:00",
+      "deadline_at": "2026-10-22T09:04:00.000002+00:00",
+      "planning_authorized": false,
+      "proposal": {
+        "datasets": ["sessions", "targets"],
+        "future_days": 30,
+        "past_days": 35,
+        "provider": "POLAR",
+        "request_id": "00000000-0000-0000-0000-0000000bbfd1"
+      },
+      "request_hash": "bb7791c52f69249dd250febf8d55227ab5e15bd19630f50271e0baa02d2c837c",
+      "schema_version": "data-sync-run-v0.1",
+      "stage": "started",
+      "window": {
+        "from_date": "2026-09-18",
+        "sessions_to_exclusive": "2026-10-23",
+        "targets_to_exclusive": "2026-11-22",
+        "timezone_name": "Europe/Budapest"
+      }
+    },
+    "result": {
+      "artifact_id": "pt-data-sync:11111111111141118111111111111111:POLAR:000000000000000000000000000bbfd1",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "content_hash": "8973d52de380c50300e26198c5c47b9479a727193dfbb88cf86b098082974a42",
+      "created_at": "2026-10-22T09:00:00.000005+00:00",
+      "datasets": [
+        {
+          "dataset": "sessions",
+          "error_code": null,
+          "imported": 1,
+          "skipped": 0,
+          "state": "succeeded",
+          "updated": 0
+        },
+        {
+          "dataset": "targets",
+          "error_code": null,
+          "imported": 1,
+          "skipped": 0,
+          "state": "succeeded",
+          "updated": 0
+        }
+      ],
+      "error_code": null,
+      "may_have_saved_data": true,
+      "outcome": "succeeded",
+      "planning_authorized": false,
+      "proposal": {
+        "datasets": ["sessions", "targets"],
+        "future_days": 30,
+        "past_days": 35,
+        "provider": "POLAR",
+        "request_id": "00000000-0000-0000-0000-0000000bbfd1"
+      },
+      "request_hash": "bb7791c52f69249dd250febf8d55227ab5e15bd19630f50271e0baa02d2c837c",
+      "schema_version": "data-sync-run-v0.1",
+      "stage": "finished",
+      "start_reference": {
+        "artifact_id": "pt-data-sync:11111111111141118111111111111111:POLAR:000000000000000000000000000bbfd1",
+        "content_hash": "dffce058451fadab3f17e51577f17f1ca81f2fcb8c545f8e4479c51253ba5121"
+      }
+    },
+    "run": {
+      "request_id": "00000000-0000-0000-0000-0000000bbfd1",
+      "provider": "POLAR",
+      "state": "succeeded",
+      "started_at": "2026-10-22T09:00:00.000002+00:00",
+      "deadline_at": "2026-10-22T09:04:00.000002+00:00",
+      "finished_at": "2026-10-22T09:00:00.000005+00:00",
+      "window": {
+        "from_date": "2026-09-18",
+        "sessions_to_exclusive": "2026-10-23",
+        "targets_to_exclusive": "2026-11-22",
+        "timezone_name": "Europe/Budapest"
+      },
+      "datasets": [
+        {
+          "dataset": "sessions",
+          "error_code": null,
+          "imported": 1,
+          "skipped": 0,
+          "state": "succeeded",
+          "updated": 0
+        },
+        {
+          "dataset": "targets",
+          "error_code": null,
+          "imported": 1,
+          "skipped": 0,
+          "state": "succeeded",
+          "updated": 0
+        }
+      ],
+      "requested_datasets": ["sessions", "targets"],
+      "error_code": null,
+      "may_have_saved_data": true
+    },
+    "planning_authorized": false
+  },
+  "status": {
+    "schema_version": "data-connections-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "retrieved_at": "2026-10-22T09:00:00.000008+00:00",
+    "providers": [
+      {
+        "key": "POLAR",
+        "label": "Polar",
+        "implemented": true,
+        "delivery": "pull",
+        "connection_state": "connected",
+        "manual_sync_supported": true,
+        "datasets": ["sessions", "targets"],
+        "allowed_datasets": ["sessions", "targets"],
+        "last_run": {
+          "request_id": "00000000-0000-0000-0000-0000000bbfd1",
+          "provider": "POLAR",
+          "state": "succeeded",
+          "started_at": "2026-10-22T09:00:00.000002+00:00",
+          "deadline_at": "2026-10-22T09:04:00.000002+00:00",
+          "finished_at": "2026-10-22T09:00:00.000005+00:00",
+          "window": {
+            "from_date": "2026-09-18",
+            "sessions_to_exclusive": "2026-10-23",
+            "targets_to_exclusive": "2026-11-22",
+            "timezone_name": "Europe/Budapest"
+          },
+          "datasets": [
+            {
+              "dataset": "sessions",
+              "error_code": null,
+              "imported": 1,
+              "skipped": 0,
+              "state": "succeeded",
+              "updated": 0
+            },
+            {
+              "dataset": "targets",
+              "error_code": null,
+              "imported": 1,
+              "skipped": 0,
+              "state": "succeeded",
+              "updated": 0
+            }
+          ],
+          "requested_datasets": ["sessions", "targets"],
+          "error_code": null,
+          "may_have_saved_data": true
+        },
+        "last_success_at": "2026-10-22T09:00:00.000005+00:00",
+        "last_success_datasets": ["sessions", "targets"],
+        "latest_session_at": "2026-10-23T15:35:00+00:00"
+      },
+      {
+        "key": "GARMIN",
+        "label": "Garmin",
+        "implemented": false,
+        "delivery": "not_configured",
+        "connection_state": "unavailable",
+        "manual_sync_supported": false,
+        "datasets": [],
+        "allowed_datasets": [],
+        "last_run": null,
+        "last_success_at": null,
+        "last_success_datasets": [],
+        "latest_session_at": null
+      },
+      {
+        "key": "SUUNTO",
+        "label": "Suunto",
+        "implemented": false,
+        "delivery": "not_configured",
+        "connection_state": "unavailable",
+        "manual_sync_supported": false,
+        "datasets": [],
+        "allowed_datasets": [],
+        "last_run": null,
+        "last_success_at": null,
+        "last_success_datasets": [],
+        "latest_session_at": null
+      }
+    ],
+    "has_more": false,
+    "planning_authorized": false
+  }
+}

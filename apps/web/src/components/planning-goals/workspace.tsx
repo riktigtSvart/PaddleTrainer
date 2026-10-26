@@ -1,4 +1,8 @@
 "use client";
+import Link from "next/link";
+import { loadDetail as loadCycle } from "@/lib/planning-cycles/client";
+import type { Detail as CycleDetail } from "@/lib/planning-cycles/contracts";
+import { Competitions } from "@/components/planning-cycles/program-details";
 import { useEffect, useRef, useState } from "react";
 import {
   getJSON,
@@ -55,9 +59,13 @@ function savedLabel(receipt: Receipt) {
 }
 export default function GoalWorkspace({
   initialPeriod,
+  initialCycle = "",
 }: {
   initialPeriod: string;
+  initialCycle?: string;
 }) {
+  const [cycleContext, setCycleContext] = useState<CycleDetail | null>(null);
+  const [cycleError, setCycleError] = useState("");
   const [loaded, setLoaded] = useState<Loaded | null>(null),
     [loadError, setLoadError] = useState("");
   const [reload, setReload] = useState(0),
@@ -95,6 +103,26 @@ export default function GoalWorkspace({
     focusStatus();
   }
 
+  useEffect(() => {
+    if (!initialCycle) return;
+    const controller = new AbortController();
+    loadCycle(initialCycle, controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setCycleContext(result);
+          setCycleError("");
+        }
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted)
+          setCycleError(
+            error instanceof Error
+              ? error.message
+              : "A versenyadatok betöltése nem sikerült.",
+          );
+      });
+    return () => controller.abort();
+  }, [initialCycle, reload]);
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
@@ -307,8 +335,48 @@ export default function GoalWorkspace({
     (item) => item.artifact.artifact_id === selected[resource],
   );
 
+  const cyclePeriods =
+    cycleContext?.boundary_revisions.at(-1)?.artifact.periods ??
+    cycleContext?.program.artifact.periods ??
+    [];
+  const cyclePeriod = cyclePeriods.find((p) => p.id === periodId);
+  const relevantEvents = cyclePeriod
+    ? (
+        cycleContext?.competition_revisions.at(-1)?.artifact.proposal
+          .competitions ??
+        cycleContext?.program.artifact.proposal.competitions ??
+        []
+      ).filter(
+        (c) =>
+          c.status === "planned" &&
+          c.start_date <= cyclePeriod.end_date &&
+          c.end_date >= cyclePeriod.start_date,
+      )
+    : [];
+  const suggestedCapabilities = [
+    ...new Set(relevantEvents.flatMap((c) => c.profile?.capability_keys ?? [])),
+  ];
   return (
     <div className="space-y-7">
+      {cycleError && <Message error>{cycleError}</Message>}
+      {cyclePeriod && (
+        <Card title="A felkészülés versenykövetelményei">
+          <Competitions value={relevantEvents} />
+          <p className="mt-4 text-sm text-zinc-400">
+            A verseny követelményprofilja támpont a képességek kiválasztásához.
+            A sportoló kiinduló állapota és személyes adatai alapján minden
+            mezociklus szerepét külön kell megadni; a kimaradó képesség nem
+            engedélyezett leépülés.
+          </p>
+          {!!cycleContext?.boundary_revisions.length && (
+            <p className="mt-3 text-sm text-amber-100">
+              A ciklushatárok módosultak. Ellenőrizd a terhelést, a
+              képességszerepeket és a mérési időablakokat. A korábban rögzített
+              protokollok az eredeti időablakaikkal maradnak meg.
+            </p>
+          )}
+        </Card>
+      )}
       <p className="rounded-xl border border-zinc-700 bg-zinc-900 p-4 text-sm leading-6 text-zinc-300">
         A célok a makrociklusból kapnak szerepet. A mérési protokoll előre
         rögzíti az összehasonlítás feltételeit; az értékelés jelzi a hiányzó
@@ -535,6 +603,7 @@ export default function GoalWorkspace({
                   <MacroForm
                     key={periodId + (base?.artifact.artifact_id ?? "new")}
                     catalog={loaded.catalog}
+                    suggestedCapabilities={suggestedCapabilities}
                     period={period}
                     periods={loaded.periods}
                     base={base as Receipt<MacroArtifact> | undefined}
@@ -694,6 +763,20 @@ export default function GoalWorkspace({
               mezociklushoz lehet rögzíteni.
             </p>
           )}
+          <div className="rounded-xl border border-zinc-700 p-4 text-sm leading-6 text-zinc-300">
+            {!loaded.periods.some((p) => p.period_type === "MACROCYCLE") && (
+              <p className="mb-3">
+                Még nincs választható makrociklus. Először hozd létre a
+                felkészülés ciklusait.
+              </p>
+            )}
+            <Link
+              href="/planning-cycles"
+              className="text-teal-200 underline underline-offset-4"
+            >
+              Új felkészülés és ciklusok létrehozása
+            </Link>
+          </div>
           {period &&
             resource !== "macrocycle-plans" &&
             period.period_type === "MACROCYCLE" && (

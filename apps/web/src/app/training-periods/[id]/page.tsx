@@ -628,7 +628,7 @@ export default async function TrainingPeriodPage({
                     href="/"
                     className="text-sm text-zinc-400 transition hover:text-zinc-100"
                 >
-                    ← Coach
+                    ← Napirend
                 </Link>
 
                 <header className="mt-8 border-b border-zinc-800 pb-8">

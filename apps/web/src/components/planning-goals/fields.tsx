@@ -5,7 +5,7 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 export const buttonClass =
-  "rounded-lg bg-teal-300 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-40";
+  "pt-primary rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40";
 export const secondaryClass =
   "rounded-lg border border-zinc-600 px-4 py-2 text-sm text-zinc-100 hover:bg-zinc-800 disabled:opacity-40";
 const fieldClass =

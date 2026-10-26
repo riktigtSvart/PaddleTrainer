@@ -407,6 +407,11 @@ async def sync_recent_sessions(
     db: AsyncSession,
     user: User,
     days: int = 30,
+    *,
+    first=None,
+    last=None,
+    include_enrichment: bool = True,
+    report: dict | None = None,
 ) -> int:
     connection = await db.scalar(
         select(ExternalConnection).where(
@@ -431,29 +436,38 @@ async def sync_recent_sessions(
 
     # 2) Load recent base sessions without optional feature enrichment.
     today = datetime.now(timezone.utc).date()
-    start_date = today - timedelta(days=min(days, 89))
+    start_date = first or today - timedelta(days=min(days, 89))
+    end_date = last or today
 
     payload = await PolarClient().list_training_sessions(
         access_token,
         start_date,
-        today,
+        end_date,
         features=None,
     )
 
     sessions = payload.get("trainingSessions", [])
+    if report is not None:
+        from app.services.provider_payload_archive import archive_payload
+        if "trainingSessions" not in payload or not isinstance(sessions, list) or not all(isinstance(item, dict) for item in sessions):
+            raise ValueError("POLAR_SESSIONS_PAYLOAD_INVALID")
+        await archive_payload(db, user, "DATA_SYNC_SESSIONS", payload, first=start_date, last=end_date)
     print("TRAINING SESSION COUNT:", len(sessions))
 
     imported = 0
     updated = 0
+    skip_reasons = {}
 
     # 3) Insert new sessions and refresh base fields on existing sessions.
     for item in sessions:
         external_id = (item.get("identifier") or {}).get("id")
         if not external_id:
+            skip_reasons["missing_session_id"] = skip_reasons.get("missing_session_id", 0) + 1
             continue
 
         start = polar_session_time(item, "startTime")
         if not start:
+            skip_reasons["missing_start"] = skip_reasons.get("missing_start", 0) + 1
             continue
 
         stop = polar_session_time(item, "stopTime")
@@ -497,7 +511,7 @@ async def sync_recent_sessions(
                 name=item.get("name"),
                 started_at=start,
                 ended_at=stop,
-                duration_sec=int(duration_ms / 1000) if duration_ms else None,
+                duration_sec=int(duration_ms / 1000) if duration_ms is not None else None,
                 distance_m=item.get("distanceMeters"),
                 calories=item.get("calories"),
                 avg_hr=item.get("hrAvg"),
@@ -520,6 +534,12 @@ async def sync_recent_sessions(
 
     print("IMPORTED SESSIONS:", imported)
     print("UPDATED SESSIONS:", updated)
+
+    if report is not None:
+        report.update(imported=imported, updated=updated, skipped=len(sessions) - imported - updated,
+                      skip_reasons=skip_reasons)
+    if not include_enrichment:
+        return imported
 
     await _enrich_training_load(
         db,

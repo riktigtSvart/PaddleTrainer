@@ -19,23 +19,84 @@ export async function forwardGoals(
   const url = new URL(request.url),
     method = request.method;
   const resource = path[0];
-  const collection = path.length === 1 && resources.has(resource);
+  const cyclePrograms =
+    path.length === 2 && resource === "cycles" && path[1] === "programs";
+  const cycleRevision =
+    path.length === 2 &&
+    resource === "cycles" &&
+    ["competition-revisions", "boundary-revisions"].includes(path[1]);
+  const cyclePreview =
+    path.length === 2 && resource === "cycles" && path[1] === "preview";
+  const cycleCatalog =
+    path.length === 2 && resource === "cycles" && path[1] === "catalog";
+  const cycleDetail =
+    path.length === 3 &&
+    resource === "cycles" &&
+    path[1] === "programs" &&
+    /^pt-cycle:[0-9a-f]{64}$/.test(path[2]);
+  const athleteRead =
+    path.length === 2 &&
+    resource === "athlete" &&
+    ["context", "history"].includes(path[1]);
+  const athleteWrite =
+    path.length === 2 &&
+    resource === "athlete" &&
+    ["profiles", "availability", "polar-imports"].includes(path[1]);
+  const athletePreview =
+    path.length === 3 &&
+    resource === "athlete" &&
+    path[1] === "availability" &&
+    path[2] === "preview";
+  const athleteDetail =
+    path.length === 3 &&
+    resource === "athlete" &&
+    ["profiles", "availability"].includes(path[1]) &&
+    /^pt-athlete:[0-9a-f]{64}$/.test(path[2]);
+  const collection =
+    (path.length === 1 && resources.has(resource)) || cyclePrograms;
   const detail =
     path.length === 2 &&
     resources.has(resource) &&
     /^pt-goal(?:-assessment|-measurement)?:[0-9a-f]{64}$/.test(path[1]);
   const vocabulary = path.length === 1 && resource === "catalog";
   const periods = path.length === 1 && resource === "periods";
-  if (!(collection || detail || vocabulary || periods))
+  if (!(
+    collection ||
+    detail ||
+    vocabulary ||
+    periods ||
+    cycleRevision ||
+    cyclePreview ||
+    cycleCatalog ||
+    cycleDetail ||
+    athleteRead ||
+    athleteWrite ||
+    athletePreview ||
+    athleteDetail
+  ))
     return failure(404, "GOAL_ROUTE_NOT_FOUND");
-  if (method !== "GET" && !(method === "POST" && collection))
+  if (
+    (method === "GET" &&
+      (cycleRevision || cyclePreview || athleteWrite || athletePreview)) ||
+    (method !== "GET" &&
+      !(
+        method === "POST" &&
+        (collection ||
+          cycleRevision ||
+          cyclePreview ||
+          athleteWrite ||
+          athletePreview)
+      ))
+  )
     return failure(405, "GOAL_METHOD_NOT_ALLOWED");
   const allowedQuery =
-    method === "GET" && collection
-      ? ["limit", "offset"]
-      : method === "GET" && detail
-        ? ["available_by"]
-        : [];
+    method === "GET" && athleteRead
+      ? ["start_date", "end_date"]
+      : method === "GET" && collection
+        ? ["limit", "offset"]
+        : method === "GET" && detail
+          ? ["available_by"]
+          : [];
   const seen = new Set<string>();
   for (const [key] of url.searchParams) {
     if (!allowedQuery.includes(key) || seen.has(key))
@@ -98,9 +159,16 @@ export async function forwardGoals(
       root.hash
     )
       return failure(503, "GOAL_API_CONFIGURATION_INVALID");
-    const relative = periods
-      ? "api/v1/training-periods"
-      : "api/v1/planning/goals/" + path.map(encodeURIComponent).join("/");
+    const relative =
+      resource === "athlete"
+        ? "api/v1/planning/athlete/" +
+          path.slice(1).map(encodeURIComponent).join("/")
+        : resource === "cycles"
+          ? "api/v1/planning/cycles/" +
+            path.slice(1).map(encodeURIComponent).join("/")
+          : periods
+            ? "api/v1/training-periods"
+            : "api/v1/planning/goals/" + path.map(encodeURIComponent).join("/");
     const target = new URL(relative, root);
     target.search = url.search;
     const result = await send(target, {

@@ -18,6 +18,7 @@ type Props = {
   locked: boolean;
   submit: (proposal: unknown) => void;
   invalid: (message: string) => void;
+  suggestedCapabilities?: string[];
 };
 export default function MacroForm({
   catalog,
@@ -27,6 +28,7 @@ export default function MacroForm({
   locked,
   submit,
   invalid,
+  suggestedCapabilities = [],
 }: Props) {
   const [selected, setSelected] = useState(
     () =>
@@ -77,6 +79,33 @@ export default function MacroForm({
           }}
         >
           <fieldset disabled={locked} className="space-y-6">
+            {!!suggestedCapabilities.length && (
+              <div className="space-y-3 text-sm">
+                <p>
+                  A kapcsolódó versenyek előzetes képességprofilja:{" "}
+                  {suggestedCapabilities
+                    .map((k) => capabilityLabels[k] ?? k)
+                    .join(", ")}
+                  . A szerepek és indoklások kitöltése továbbra is szükséges.
+                </p>
+                <button
+                  type="button"
+                  className="rounded-lg border border-zinc-600 px-4 py-2 text-teal-200"
+                  onClick={() =>
+                    setSelected(
+                      new Set([
+                        ...selected,
+                        ...suggestedCapabilities.filter((k) =>
+                          catalog.capabilities.includes(k),
+                        ),
+                      ]),
+                    )
+                  }
+                >
+                  Versenyprofil képességeinek kijelölése
+                </button>
+              </div>
+            )}
             {catalog.capabilities.map((key) => {
               const goal = base?.artifact.proposal.goals.find(
                 (g) => g.capability_key === key,

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.entities import (
@@ -10,6 +10,60 @@ from app.models.entities import (
     WorkoutSession,
     WorkoutStatus,
 )
+
+
+async def link_exact_polar_sessions_after_import(db: AsyncSession, user: User) -> dict:
+    """Backfill owned Polar references, without changing plans or existing links.
+
+    Covers previously stored sessions as well as this import's date window.
+    A null link is updated conditionally, so a concurrently assigned link wins.
+    Plan revisions/occurrences and completion states are not inferred here.
+    """
+    report = dict(linked=0, already_linked=0, unmatched=0,
+                  missing_reference=0, conflicts=0, ambiguous=0)
+    # Backfilling history needs only reference columns, not stored sample series.
+    plans = (await db.execute(select(PlannedWorkout.id, PlannedWorkout.polar_target_id).where(
+        PlannedWorkout.user_id == user.id, PlannedWorkout.polar_target_id.is_not(None),
+    ))).all()
+    by_target = {}
+    for plan in plans:
+        by_target.setdefault(plan.polar_target_id, []).append(plan)
+    sessions = (await db.execute(select(
+        WorkoutSession.id, WorkoutSession.planned_workout_id,
+        WorkoutSession.raw_data["trainingTarget"].label("polar_reference"),
+    ).where(
+        WorkoutSession.user_id == user.id, WorkoutSession.external_provider == "POLAR",
+    ))).all()
+    for session in sessions:
+        reference = session.polar_reference
+        target_id = reference.get("id") if isinstance(reference, dict) else None
+        valid = (type(target_id) is int and target_id > 0 or
+                 type(target_id) is str and 0 < len(target_id) <= 128
+                 and target_id == target_id.strip())
+        if not valid:
+            report["missing_reference"] += 1
+            continue
+        candidates = by_target.get(str(target_id), [])
+        if not candidates:
+            report["unmatched"] += 1
+            continue
+        if len(candidates) != 1:
+            report["ambiguous"] += 1
+            continue
+        plan = candidates[0]
+        if session.planned_workout_id == plan.id:
+            report["already_linked"] += 1
+            continue
+        if session.planned_workout_id is not None:
+            report["conflicts"] += 1
+            continue
+        changed = await db.execute(update(WorkoutSession).where(
+            WorkoutSession.id == session.id, WorkoutSession.user_id == user.id,
+            WorkoutSession.external_provider == "POLAR", WorkoutSession.planned_workout_id.is_(None),
+        ).values(planned_workout_id=plan.id, planned_workout_link_source=WorkoutLinkSource.PROVIDER_EXACT))
+        report["linked" if changed.rowcount == 1 else "conflicts"] += 1
+    await db.commit()
+    return report
 
 
 async def link_sessions_to_planned_workouts(

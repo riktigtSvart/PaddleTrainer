@@ -25,6 +25,16 @@ class AuditArtifactKind(StrEnum):
     MESOCYCLE_GOAL_PROTOCOL = "mesocycle_goal_protocol"
     MESOCYCLE_GOAL_ASSESSMENT = "mesocycle_goal_assessment"
     GOAL_MEASUREMENT_REGISTRATION = "goal_measurement_registration"
+    CYCLE_PROGRAM_REGISTRATION = "cycle_program_registration"
+    CYCLE_MESOCYCLE_BOUNDARY_REVISION = "cycle_mesocycle_boundary_revision"
+    CYCLE_COMPETITION_REVISION = "cycle_competition_revision"
+    ATHLETE_PROFILE = "athlete_profile"
+    ATHLETE_AVAILABILITY = "athlete_availability"
+    ATHLETE_POLAR_IMPORT = "athlete_polar_import"
+    WORKOUT_GOAL_TAG = "workout_goal_tag"
+    DATA_SYNC_STARTED = "data_sync_started"
+    DATA_SYNC_SUCCEEDED = "data_sync_succeeded"
+    DATA_SYNC_FAILED = "data_sync_failed"
 
 
 class AuditArtifactSaveStatus(StrEnum):

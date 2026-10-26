@@ -16,6 +16,9 @@ import Icon, { sportIcon } from "@/components/ui/icon";
 import { constraintDescription } from "@/lib/calendar/constraint-forms";
 import type { Opportunity } from "@/lib/calendar/constraints";
 import { estimateLabel, estimateRange } from "@/lib/calendar/duration-estimate";
+import EditableSlot from "./editable-slot";
+import { canTransform } from "@/lib/calendar/slot-transform";
+import type { SlotChange } from "@/lib/calendar/slot-transform";
 export function eventDuration(e: CalendarEvent) { return e.durationEstimate ? estimateLabel(e.durationEstimate) : formatDuration(e.duration); }
 
 export function eventLabel(event: CalendarEvent, zone: string) {
@@ -57,6 +60,8 @@ export default function TimeGrid({
   expandHours,
   addSlot,
   opportunities,
+  onTransform,
+  editDisabled = false,
 }: {
   feed: Feed;
   events: CalendarEvent[];
@@ -67,6 +72,8 @@ export default function TimeGrid({
   expandHours: () => void;
   addSlot?: (day: string) => void;
   opportunities?: Opportunity[];
+  onTransform?: (event: CalendarEvent, change: SlotChange) => void;
+  editDisabled?: boolean;
 }) {
   const from = fullDay ? 0 : 6,
     to = fullDay ? 24 : 22;
@@ -126,16 +133,8 @@ export default function TimeGrid({
       eventLabel(s.event, feed.timezone_name) +
       (s.clockChange ? " · óraátállítás érinti" : "") +
       (enlarged ? " · jelölés az olvashatóság miatt nagyítva" : "");
-    return (
-      <button
-        type="button"
-        key={s.event.key}
-        className={`pt-event pt-goal-${goalFamily(s.event.goal)}${available ? " is-available" : ""}${busy ? " is-commitment" : ""}${s.event.occurrence?.details.firmness === "flexible" ? " is-flexible" : ""}${s.event.conflict ? " has-conflict" : ""}${s.event.kind === "session" ? " is-actual" : ""}${s.point ? " is-point" : ""}${small ? " is-short" : ""}${enlarged ? " is-enlarged" : ""}`}
-        style={style}
-        onClick={() => open(s.event)}
-        aria-label={label}
-        title={label}
-      >
+    const className = `pt-event pt-goal-${goalFamily(s.event.goal)}${available ? " is-available" : ""}${busy ? " is-commitment" : ""}${s.event.occurrence?.details.firmness === "flexible" ? " is-flexible" : ""}${s.event.conflict ? " has-conflict" : ""}${s.event.kind === "session" ? " is-actual" : ""}${s.point ? " is-point" : ""}${small ? " is-short" : ""}${enlarged ? " is-enlarged" : ""}`;
+    const content = <>
         {enlarged && (
           <span className="pt-event-true-end" style={{ top: `calc(var(--pt-hour) * ${(bottom - top) / 60} - 1px)` }} aria-hidden="true" />
         )}
@@ -163,8 +162,13 @@ export default function TimeGrid({
               : eventDuration(s.event)}
           </span>
         )}
-      </button>
-    );
+    </>;
+    const button = <button type="button" key={s.event.key} className={className} style={style}
+      onClick={() => open(s.event)} aria-label={label} title={label}>{content}</button>;
+    return onTransform && background && canTransform(s.event) && !s.point && !s.clockChange
+      ? <EditableSlot key={s.event.key} event={s.event} segment={s} zone={feed.timezone_name} hours={to - from}
+        style={style} className={className} label={label} disabled={editDisabled} onTransform={onTransform} open={() => open(s.event)}>{content}</EditableSlot>
+      : button;
   }
   return (
     <>
@@ -198,6 +202,7 @@ export default function TimeGrid({
                 <div
                   className={`pt-grid-day-head${date === feed.local_today ? " is-today" : ""}`}
                   key={date}
+                  data-date={date}
                 >
                   <button type="button" onClick={() => selectDay(date)}>
                     {formatDay(date, true)}
@@ -265,6 +270,7 @@ export default function TimeGrid({
                 <div
                   key={date}
                   className={`pt-day-column${feed.availability.days.find((d) => d.date === date)?.status === "unavailable" ? " unavailable" : ""}`}
+                  data-date={date}
                 >
                   {available.map(draw)}
                   {busy.map(draw)}

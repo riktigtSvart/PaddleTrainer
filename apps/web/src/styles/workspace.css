@@ -61,6 +61,27 @@
 .pt-quick-dialog :disabled { opacity: .65; }
 .pt-quick-dialog .pt-message { margin-top: 12px; }
 .pt-quick-control:empty { display: none; }
+.pt-slot-shell { position: absolute; }
+.pt-slot-shell:hover, .pt-slot-shell:focus-within, .pt-slot-shell.is-dragging { z-index: 6 !important; }
+.pt-slot-shell > .pt-event { cursor: grab; user-select: none; }
+.pt-slot-shell > .pt-event[aria-disabled="true"] { cursor: pointer; }
+.pt-slot-shell.is-dragging > .pt-event { opacity: .45; cursor: grabbing; }
+.pt-slot-handle { position: absolute; left: 8px; right: 8px; height: 16px; z-index: 8; border: 0; padding: 0; background: transparent; cursor: ns-resize; opacity: 0; }
+.pt-slot-handle.is-start { top: -8px; }
+.pt-slot-handle.is-end { bottom: -8px; }
+.pt-slot-handle span { display: block; height: 3px; width: min(32px, 70%); border-radius: 3px; margin: auto; background: var(--pt-accent); box-shadow: 0 0 0 2px var(--pt-panel); }
+.pt-slot-shell:hover .pt-slot-handle, .pt-slot-shell:focus-within .pt-slot-handle { opacity: 1; }
+.pt-slot-handle:focus-visible { outline: 2px solid var(--pt-accent); border-radius: 5px; }
+.pt-drag-ghost { position: fixed; z-index: 100; border: 2px solid var(--pt-accent); color: var(--pt-text); background: color-mix(in srgb, var(--pt-accent) 15%, var(--pt-panel)); border-radius: 5px; padding: 3px 5px; pointer-events: none; overflow: hidden; box-shadow: 0 5px 20px #0005; }
+.pt-drag-ghost strong, .pt-drag-ghost span { display: block; font-size: 11px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.pt-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
+.pt-drag-feedback { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 100; width: max-content; max-width: min(520px, 90vw); border: 1px solid var(--pt-line); background: var(--pt-panel); color: var(--pt-text); border-radius: 8px; padding: 10px 14px; font-size: 13px; box-shadow: 0 5px 25px #0005; }
+.pt-editor-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.pt-editor-tools small { font-size: 12px; color: var(--pt-muted); }
+.pt-calendar-edit-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.pt-calendar-undo { display: inline-flex; border-radius: 8px; }
+.pt-calendar-undo > button:disabled { pointer-events: none; }
+.pt-calendar-undo:focus-visible { outline: 2px solid var(--pt-accent); outline-offset: 3px; }
 .pt-conflicts { background: var(--pt-warning-bg); color: var(--pt-warning); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; }
 .pt-conflicts summary { cursor: pointer; }
 .pt-conflicts summary svg { display: inline; margin-right: 8px; width: 16px; height: 16px; vertical-align: middle; }

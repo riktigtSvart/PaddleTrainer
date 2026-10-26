@@ -3,7 +3,7 @@ import { dates, ref, resizeCalendar, validateCalendar } from "@/lib/athlete-setu
 import type { Calendar, Window } from "@/lib/athlete-setup/contracts";
 import { addDays, requireValue } from "./contracts";
 import type { CalendarEvent } from "./contracts";
-import { categoryLabels, changeSchedule, currentCalendar, defaultDetails, readDetails, readProposal } from "./constraints";
+import { categoryLabels, changeSchedule, currentCalendar, defaultDetails, readDetails, readProposal, readSchedule } from "./constraints";
 import type { Details, EditorPending, Occurrence, Rule, ScheduleContext } from "./constraints";
 
 export type Draft = {
@@ -29,11 +29,24 @@ export function ruleFor(draft: Draft, context: ScheduleContext, source: Occurren
 }
 export function legacyChange(calendar: Calendar, event: CalendarEvent, draft: Draft, remove: boolean): Calendar {
   requireValue(event.kind === "availability" && !!event.window && !event.occurrence);
-  const result = structuredClone(calendar), d = result.days.find((d) => d.date === event.date);
+  const result = extendCalendar(structuredClone(calendar), draft.date, calendar.timezone_name), d = result.days.find((d) => d.date === event.date);
   const original = d?.windows.find((w) => w.key === event.window!.key);
   requireValue(d && original && Object.entries(original).filter(([key]) => !["start_fold", "end_fold"].includes(key)).every(([key, value]) => canonical(value) === canonical(event.window![key as keyof typeof event.window])), "Az edzésablak közben megváltozott.");
   const fields = Object.fromEntries(Object.entries(draft.details).filter(([key]) => key in original));
   const w: Window = { ...original, ...fields, key: event.window.key, max_minutes: draft.details.max_minutes! };
+  if (!remove && draft.date !== event.date) {
+    const target = result.days.find((day) => day.date === draft.date)!;
+    requireValue(target.status !== "unavailable", "A célnapot elérhetetlennek jelölted. Előbb vizsgáld felül a napi lehetőséget.");
+    requireValue(!target.windows.some((old) => old.key === w.key), "A célnapon már létezik ilyen azonosítójú ablak.");
+    d.windows = d.windows.filter((old) => old.key !== w.key);
+    d.status = d.windows.length ? "available" : "unknown";
+    d.max_total_minutes = d.windows.length && d.max_total_minutes !== null
+      ? Math.min(d.max_total_minutes, d.windows.reduce((sum, item) => sum + item.max_minutes, 0)) : null;
+    target.windows.push(w); target.status = "available";
+    // The target's explicit daily cap is retained; moving a window never raises it.
+    validateCalendar(result);
+    return result;
+  }
   d.windows = remove ? d.windows.filter((w) => w.key !== event.window!.key) : d.windows.map((old) => old.key === w.key ? w : old);
   d.status = d.windows.length ? "available" : "unknown";
   d.max_total_minutes = d.windows.length && draft.daily !== "" ? Number(draft.daily) : null;
@@ -62,11 +75,18 @@ export function prepareEdit(context: ScheduleContext, draft: Draft, event: Calen
     operation = "availability"; body = JSON.stringify(availability);
   } else {
     const rule = ruleFor(draft, context, event?.occurrence ?? null);
-    base.data = changeSchedule(context.data, rule, event?.occurrence ?? null, draft.scope, remove);
+    if (event?.occurrence?.repeat === "weekly" && draft.date !== event.occurrence.source_date && !remove) {
+      requireValue(draft.scope === "occurrence", "Másik napra csak a kiválasztott alkalom helyezhető át.");
+      base.data = changeSchedule(context.data, rule, event.occurrence, "occurrence", true);
+      base.data.rules.push({ ...rule, id: crypto.randomUUID(), start_date: draft.date,
+        end_date: draft.date, repeat: "once", weekdays: [] });
+      base.data = readSchedule(base.data);
+    } else base.data = changeSchedule(context.data, rule, event?.occurrence ?? null, draft.scope, remove);
     body = JSON.stringify(readProposal(base));
   }
-  const first = draft.date < context.start_date ? draft.date : context.start_date;
-  const end = draft.details.ends_next_day ? addDays(draft.date, 1) : draft.date;
+  const first = [draft.date, context.start_date, event?.date ?? draft.date].sort()[0];
+  const end = [draft.details.ends_next_day ? addDays(draft.date, 1) : draft.date,
+    event?.occurrence?.details.ends_next_day || event?.window?.ends_next_day ? addDays(event.date, 1) : event?.date ?? draft.date].sort().at(-1)!;
   const last = end > context.end_date ? end : context.end_date;
   dates(first, last);
   return { pending: { version: "calendar-editor-pending-v0.1", owner: context.athlete_id, operation, body },

@@ -9,11 +9,11 @@ export async function forwardCalendar(
   const fail = (status: number, code: string) =>
     Response.json({ detail: { code } }, { status, headers });
   const url = new URL(request.url),
-    route = path[0],
+    route = path.join("/"),
     method = request.method;
-  if (path.length !== 1 || !["feed", "goals"].includes(route))
+  if (!["feed", "goals", "constraints", "constraints/preview"].includes(route))
     return fail(404, "CALENDAR_ROUTE_NOT_FOUND");
-  if (method !== (route === "feed" ? "GET" : "POST"))
+  if (!(route === "constraints" ? ["GET", "POST"].includes(method) : method === (route === "feed" ? "GET" : "POST")))
     return fail(405, "CALENDAR_METHOD_NOT_ALLOWED");
   const seen = new Set<string>();
   for (const [key] of url.searchParams) {
@@ -51,7 +51,7 @@ export async function forwardCalendar(
           const part = await reader.read();
           if (part.done) break;
           total += part.value.byteLength;
-          if (total > 16384) {
+          if (total > (route.startsWith("constraints") ? 1048576 : 16384)) {
             await reader.cancel();
             return fail(413, "CALENDAR_BODY_TOO_LARGE");
           }

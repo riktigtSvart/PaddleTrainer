@@ -15,6 +15,7 @@ export default function PeriodGrid({
   overview,
   open,
   selectDay,
+  addSlot,
 }: {
   feed: Feed;
   events: CalendarEvent[];
@@ -23,6 +24,7 @@ export default function PeriodGrid({
   overview: boolean;
   open: (event: CalendarEvent) => void;
   selectDay: (day: string) => void;
+  addSlot?: (day: string) => void;
 }) {
   const all = segments(
     events,
@@ -43,14 +45,14 @@ export default function PeriodGrid({
       <div className="pt-overview-grid">
         {days.map((d) => {
           const activities = (byDay.get(d) ?? []).filter(
-            (e) => e.kind !== "availability",
+            (e) => e.kind === "planned" || e.kind === "session",
           );
           return (
             <button
               type="button"
               className={`pt-overview-day${d === selected ? " is-selected" : ""}`}
               key={d}
-              title={`${formatDay(d, true)} · ${activities.length} edzés/terv`}
+              title={`${formatDay(d, true)} · ${activities.length} edzés/terv · ${(byDay.get(d) ?? []).filter((e) => e.kind === "constraint").length} elfoglaltság`}
               aria-label={`${formatDay(d, true)} napi nézet · ${activities.length} edzés/terv`}
               onClick={() => selectDay(d)}
             >
@@ -76,7 +78,7 @@ export default function PeriodGrid({
       ))}
       {days.map((d) => {
         const activities = (byDay.get(d) ?? []).filter(
-            (e) => e.kind !== "availability",
+            (e) => e.kind === "planned" || e.kind === "session",
           ),
           a = feed.availability.days.find((a) => a.date === d);
         return (
@@ -93,6 +95,7 @@ export default function PeriodGrid({
               {d.slice(8)}
               <small>{d.endsWith("-01") ? d.slice(5, 7) + "." : ""}</small>
             </button>
+            {addSlot && <button type="button" className="pt-add-slot" aria-label={`${formatDay(d)} · új idősáv`} onClick={() => addSlot(d)}>+</button>}
             {activities.slice(0, 3).map((e) => (
               <button
                 type="button"
@@ -103,6 +106,7 @@ export default function PeriodGrid({
                 onClick={() => open(e)}
               >
                 <Icon name={sportIcon(e.sport)} />
+                {e.conflict && <Icon name="alert" />}
                 <span>
                   {e.start
                     ? localParts(e.start, feed.timezone_name).clock + " "
@@ -126,6 +130,9 @@ export default function PeriodGrid({
                 +{activities.length - 3} további
               </button>
             )}
+            {(byDay.get(d) ?? []).filter((e) => e.kind === "constraint").slice(0, 1).map((e) => <button type="button" key={e.key} className="pt-month-commitment" onClick={() => open(e)} title={eventLabel(e, feed.timezone_name)}><Icon name="calendar" />{e.title}</button>)}
+            {(byDay.get(d) ?? []).filter((e) => e.kind === "constraint").length > 1 && <button type="button" className="pt-more" onClick={() => selectDay(d)}>+{(byDay.get(d) ?? []).filter((e) => e.kind === "constraint").length - 1} elfoglaltság</button>}
+            {(byDay.get(d) ?? []).filter((e) => e.kind === "availability" && e.occurrence).slice(0, 1).map((e) => <button key={e.key} type="button" className="pt-more" onClick={() => open(e)}>Edzéslehetőség</button>)}
             {a?.status === "available" && (
               <small className="pt-notice">{a.windows.length} idősáv</small>
             )}

@@ -32,6 +32,15 @@ import type {
 import TimeGrid, { eventLabel } from "./time-grid";
 import PeriodGrid from "./period-grid";
 import StateSummary from "./state-summary";
+import ConflictSummary from "./conflict-summary";
+import DurationDetails from "./duration-details";
+import { estimateLabel } from "@/lib/calendar/duration-estimate";
+import QuickEditor from "./quick-editor";
+import type { EditRequest } from "./quick-editor";
+import { loadConstraints } from "@/lib/calendar/constraint-client";
+import { constraintEvents } from "@/lib/calendar/constraint-forms";
+import { conflictKind } from "@/lib/calendar/constraints";
+import type { ScheduleContext } from "@/lib/calendar/constraints";
 
 type Pending = { owner: string; body: string };
 type Selection = { key: string; base: GoalTag | null };
@@ -40,6 +49,10 @@ const spans: Span[] = [1, 7, 28, 144],
 const message = (e: unknown) =>
   e instanceof Error ? e.message : "A művelet nem sikerült.";
 export default function CalendarWorkspace() {
+  const [constraints, setConstraints] = useState<ScheduleContext | null>(null),
+    [constraintError, setConstraintError] = useState(""),
+    [constraintLoading, setConstraintLoading] = useState(true),
+    [editRequest, setEditRequest] = useState<EditRequest | null>(null);
   const [data, setData] = useState<Feed | null>(null),
     [view, setView] = useState<{ date: string | null; span: Span }>({
       date: null,
@@ -53,6 +66,7 @@ export default function CalendarWorkspace() {
     [draftGoal, setDraftGoal] = useState("");
   const [layers, setLayers] = useState({
       availability: true,
+      commitments: true,
       training: true,
       preparation: true,
       state: false,
@@ -89,8 +103,18 @@ export default function CalendarWorkspace() {
     return () => abort.abort();
   }, [range, reload]);
   useEffect(() => {
+    const abort = new AbortController();
+    loadConstraints(range, abort.signal).then((value) => {
+      if (!abort.signal.aborted) { setConstraints(value); setConstraintError(""); setConstraintLoading(false); }
+    }).catch((e) => {
+      if (!abort.signal.aborted) { setConstraintError(message(e)); setConstraintLoading(false); }
+    });
+    return () => abort.abort();
+  }, [range, reload]);
+  useEffect(() => {
     function updated() {
       setLoading(true);
+      setConstraintLoading(true);
       setReload((n) => n + 1);
     }
     window.addEventListener(UPDATED_EVENT, updated);
@@ -124,10 +148,24 @@ export default function CalendarWorkspace() {
       active = false;
     };
   }, []);
-  const allEvents = useMemo(() => (data ? eventsFrom(data) : []), [data]);
+  const constraintsMatch = !!data && !!constraints && !constraintError && data.athlete_id === constraints.athlete_id &&
+    data.timezone_name === constraints.timezone_name && data.start_date === constraints.start_date && data.end_date === constraints.end_date &&
+    (data.availability.reference?.artifact_id ?? null) === (constraints.availability?.artifact.artifact_id ?? null) &&
+    (data.availability.reference?.content_hash ?? null) === (constraints.availability?.artifact.content_hash ?? null);
+  const allEvents = useMemo(() => {
+    if (!data) return [];
+    const source = eventsFrom(data);
+    if (!constraints || !constraintsMatch) return source;
+    return [...source.map((event) => {
+      if (event.kind !== "planned") return event;
+      const impacts = constraints.conflicts.filter((c) => c.plan_id === event.entityId && conflictKind(c) !== "unknown");
+      const conflict: CalendarEvent["conflict"] = impacts.some((c) => c.severity === "fixed") ? "fixed" : impacts.some((c) => c.severity === "flexible") ? "flexible" : impacts.length ? "review" : undefined;
+      return { ...event, conflict };
+    }), ...constraintEvents(constraints)];
+  }, [data, constraints, constraintsMatch]);
   const entries = useMemo(() => calendarEntries(allEvents), [allEvents]);
   const visibleEvents = entries.filter((e) =>
-    e.kind === "availability" ? layers.availability : layers.training,
+    e.kind === "availability" ? layers.availability : e.kind === "constraint" ? layers.commitments : layers.training,
   );
   const selected = allEvents.find((e) => e.key === selection?.key) ?? null;
   const staleGoal =
@@ -139,6 +177,7 @@ export default function CalendarWorkspace() {
   const locked = loading || sending || !!pending || !ready || storageBlocked;
   function refresh() {
     setLoading(true);
+    setConstraintLoading(true);
     setReload((n) => n + 1);
   }
   function changeView(date: string, span: Span) {
@@ -147,6 +186,7 @@ export default function CalendarWorkspace() {
       setView({ date, span });
       setSelection(null);
       setLoading(true);
+      setConstraintLoading(true);
       setError("");
     } catch (e) {
       setError(message(e));
@@ -160,6 +200,7 @@ export default function CalendarWorkspace() {
     }
   }
   function open(event: CalendarEvent) {
+    if (event.kind === "availability" || event.kind === "constraint") { editSlot(event.date, event); return; }
     setSelection({ key: event.key, base: event.goalTag });
     setDraftGoal(event.goal ?? "");
     requestAnimationFrame(() =>
@@ -168,6 +209,10 @@ export default function CalendarWorkspace() {
         behavior: "instant",
       }),
     );
+  }
+  function editSlot(date: string, event: CalendarEvent | null = null) {
+    if (!constraintsMatch || constraintLoading || loading) return;
+    setEditRequest((old) => ({ serial: (old?.serial ?? 0) + 1, date, event }));
   }
   async function transmit(value: Pending) {
     if (!data || sendingRef.current || value.owner !== data.athlete_id) return;
@@ -211,7 +256,7 @@ export default function CalendarWorkspace() {
     if (
       !data ||
       !selected ||
-      selected.kind === "availability" ||
+      (selected.kind !== "planned" && selected.kind !== "session") ||
       locked ||
       sendingRef.current ||
       staleGoal
@@ -293,7 +338,7 @@ export default function CalendarWorkspace() {
         <div>
           <h1>Napirend</h1>
           <div className="pt-calendar-subtitle">
-            Edzések és megadott edzéslehetőségek
+            Edzések, lehetőségek és elfoglaltságok
           </div>
         </div>
         <div className="pt-calendar-actions">
@@ -389,15 +434,16 @@ export default function CalendarWorkspace() {
             ))}
           </div>
         </div>
-        <Link className="pt-button" href="/athlete-setup?tab=calendar">
+        <button className="pt-button" type="button" disabled={!constraintsMatch || constraintLoading || loading || !!constraints?.timezone_review_required} onClick={() => editSlot(activeDate)}>
           <Icon name="clock" />
-          Idősávok megadása
-        </Link>
+          Új idősáv / elfoglaltság
+        </button>
       </div>
       <div className="pt-layers">
         {(
           [
             ["availability", "Edzéslehetőségek"],
+            ["commitments", "Elfoglaltságok"],
             ["training", "Edzések"],
             ["preparation", "Felkészülés"],
             ["state", "Állapotadatok"],
@@ -435,6 +481,11 @@ export default function CalendarWorkspace() {
           {success}
         </div>
       )}
+      {constraintError && <div className="pt-message is-error" role="alert">A napirendi korlátok nem tölthetők be: {constraintError} A Frissítés gombbal újrapróbálható.</div>}
+      {data && constraints && !constraintsMatch && !constraintError && !loading && !constraintLoading && <div className="pt-message is-error" role="alert">A naptár és az idősávok közben megváltoztak. A Frissítés gombbal olvasd újra az időszakot.</div>}
+      {constraints?.timezone_review_required && <div className="pt-message is-error" role="alert">A tárolt idősávok időzónája eltér a profilétól. Az időpontok felülvizsgálandók.</div>}
+      <QuickEditor context={constraintsMatch ? constraints : null} request={editRequest} disabled={loading || constraintLoading || !constraintsMatch} onSaved={refresh} />
+      {constraintsMatch && constraints && <ConflictSummary conflicts={constraints.conflicts} estimates={constraints.duration_estimates} openPlan={(id) => { const event = allEvents.find((e) => e.kind === "planned" && e.entityId === id); if (event) open(event); }} />}
       {pending && (
         <div className="pt-message" role="status">
           Függő célmentés. Az eredmény azonos kéréssel ellenőrizhető.
@@ -501,6 +552,8 @@ export default function CalendarWorkspace() {
                   open={open}
                   selectDay={(d) => changeView(d, 1)}
                   expandHours={() => setFullDay(true)}
+                  opportunities={constraintsMatch ? constraints?.opportunities : undefined}
+                  addSlot={constraintsMatch && !constraintLoading && !loading ? (date) => editSlot(date) : undefined}
                 />
               ) : (
                 <PeriodGrid
@@ -511,6 +564,7 @@ export default function CalendarWorkspace() {
                   overview={view.span === 144}
                   open={open}
                   selectDay={(d) => changeView(d, 1)}
+                  addSlot={constraintsMatch && !constraintLoading && !loading ? (date) => editSlot(date) : undefined}
                 />
               )}
               <div
@@ -542,6 +596,8 @@ export default function CalendarWorkspace() {
                   <Icon name="clock" />
                   Megadott edzéslehetőség
                 </span>
+                <span><Icon name="calendar" />Elfoglaltság · folytonos: rögzített, szaggatott: rugalmas</span>
+                <Link href="/athlete-setup?tab=calendar">Teljes edzésablak-naptár →</Link>
               </div>
               <div className="pt-future-lane">
                 <Icon name="cart" />
@@ -569,6 +625,11 @@ export default function CalendarWorkspace() {
                   ))}
                 </ul>
               </details>
+              {constraintsMatch && constraints && constraints.data.exceptions.some((e) => e.replacement === null && e.date >= data.start_date && e.date <= data.end_date) && <details className="pt-event-list"><summary>Kihagyott ismétlődő alkalmak</summary><ul>{constraints.data.exceptions.filter((e) => e.replacement === null && e.date >= data.start_date && e.date <= data.end_date).map((e) => {
+                const rule = constraints.data.rules.find((r) => r.id === e.rule_id)!;
+                const occurrence = { key: `${e.rule_id}:${e.date}`, rule_id: e.rule_id, source_date: e.date, repeat: rule.repeat, overridden: true, details: rule.details, start_at: null, end_at: null, elapsed_minutes: null, issue: null };
+                return <li key={occurrence.key}>{formatDay(e.date)} · {rule.details.title} <button type="button" className="pt-more" disabled={loading || constraintLoading} onClick={() => editSlot(e.date, { key: "constraint:" + occurrence.key, entityId: e.rule_id, kind: rule.details.kind === "available" ? "availability" : "constraint", date: e.date, title: rule.details.title, sport: "UNKNOWN", start: null, end: null, duration: null, goal: null, goalTag: null, occurrence })}>Alkalom visszaállítása / szerkesztése</button></li>;
+              })}</ul></details>}
             </div>
             {selected && (
               <aside
@@ -603,12 +664,12 @@ export default function CalendarWorkspace() {
                   <p>
                     {localParts(selected.start, data.timezone_name).clock}
                     {selected.end
-                      ? " – " +
+                      ? (selected.durationEstimate ? " – ~" : " – ") +
                         localParts(selected.end, data.timezone_name).clock
                       : " · végidő nincs megadva"}
                   </p>
                 )}
-                {selected.endEstimated && (
+                {selected.endEstimated && !selected.durationEstimate && (
                   <p className="pt-notice">
                     A végidő a rögzített időtartamból becsült.
                   </p>
@@ -785,8 +846,8 @@ export default function CalendarWorkspace() {
                         )}
                         <dl className="pt-detail-metrics">
                           <div>
-                            <dt>Tervezett idő</dt>
-                            <dd>{formatDuration(planned?.duration_sec)}</dd>
+                            <dt>{selected.durationEstimate ? "Naptári időbecslés" : "Tervezett idő"}</dt>
+                            <dd>{selected.durationEstimate ? estimateLabel(selected.durationEstimate) : formatDuration(planned?.duration_sec)}</dd>
                           </div>
                           <div>
                             <dt>Tervezett táv</dt>
@@ -802,6 +863,7 @@ export default function CalendarWorkspace() {
                             </dd>
                           </div>
                         </dl>
+                        {selected.durationEstimate && <DurationDetails estimate={selected.durationEstimate} zone={data.timezone_name} />}
                         {!selected.start && (
                           <p className="pt-notice">
                             Ehhez a tervhez nincs kezdési idő megadva.

@@ -1,7 +1,7 @@
 """Owned calendar projection and append-only explicit workout goal tags.
 
-The projection uses stored planned workouts and measured sessions; it never
-fabricates a planned start, a missing duration, or a capability from an intensity.
+Source prescriptions remain intact. A separate labeled timetable estimate may
+accompany a distance-only plan; it never authorizes a training dose.
 """
 
 import json
@@ -14,6 +14,7 @@ from sqlalchemy.orm import selectinload
 
 from app.models.entities import PlannedWorkout, TrainingPeriod, User, WorkoutSession
 from app.planning.application import register_athlete_setup as setup
+from app.planning.application import calendar_duration
 from app.planning.domain import athlete_setup
 from app.planning.domain.common.serialization import CONTENT_HASH_ALGORITHM, canonical_json, compute_content_hash
 from app.planning.domain.persistence.audit import AuditArtifactKind, AuditArtifactRecord, AuditArtifactSaveStatus
@@ -201,7 +202,8 @@ async def feed(*, owner, start, end, repository, session):
     try:
         user = (await session.execute(select(User).where(User.id == UUID(owner)))).scalar_one()
         tz = ZoneInfo(user.timezone)
-        today = _now().astimezone(tz).date()
+        now = _now()
+        today = now.astimezone(tz).date()
         if start is None:
             first = today - timedelta(days=today.weekday())
             last = first + timedelta(days=6)
@@ -210,11 +212,15 @@ async def feed(*, owner, start, end, repository, session):
         require(date(1900, 1, 1) <= first <= last <= date(2100, 12, 31) and (last - first).days < 366, "CALENDAR_DATE_RANGE_INVALID")
         low = datetime.combine(first, time.min, tz).astimezone(UTC)
         high = datetime.combine(last + timedelta(days=1), time.min, tz).astimezone(UTC)
+        planned_end = extract("epoch", PlannedWorkout.planned_start_time) + func.coalesce(PlannedWorkout.duration_sec, 0)
         plans = list((await session.execute(
             select(PlannedWorkout).options(selectinload(PlannedWorkout.blocks))
             .where(PlannedWorkout.user_id == UUID(owner), or_(
                 and_(PlannedWorkout.date >= first, PlannedWorkout.date <= last),
                 and_(PlannedWorkout.planned_start_time >= low, PlannedWorkout.planned_start_time < high),
+                and_(PlannedWorkout.planned_start_time < high, planned_end > low.timestamp()),
+                and_(PlannedWorkout.duration_sec.is_(None), PlannedWorkout.planned_start_time >= low - timedelta(days=1),
+                    PlannedWorkout.planned_start_time < low),
             )).order_by(PlannedWorkout.date, PlannedWorkout.id).limit(ROW_LIMIT + 1)
         )).scalars().unique())
         # SQLAlchemy compiles epoch extraction for both PostgreSQL and contract-test SQLite.
@@ -230,6 +236,8 @@ async def feed(*, owner, start, end, repository, session):
             .order_by(TrainingPeriod.start_date, TrainingPeriod.id).limit(ROW_LIMIT + 1)
         )).scalars())
         require(max(len(plans), len(sessions), len(periods)) <= ROW_LIMIT, "CALENDAR_RANGE_TOO_DENSE")
+        estimates = await calendar_duration.project(owner=owner, plans=plans, session=session, now=now, zone=user.timezone)
+        plans = [p for p in plans if calendar_duration.reaches_view(p, first, last, low, high, estimates.get(str(p.id)))]
         linked_ids = {s.planned_workout_id for s in sessions if s.planned_workout_id}
         owned_links = set((await session.execute(select(PlannedWorkout.id).where(PlannedWorkout.user_id == UUID(owner), PlannedWorkout.id.in_(linked_ids)))).scalars()) if linked_ids else set()
         entities = {("planned", str(p.id)) for p in plans} | {("session", str(s.id)) for s in sessions} | {("planned", str(p)) for p in owned_links}
@@ -241,7 +249,7 @@ async def feed(*, owner, start, end, repository, session):
 
         planned = [{**WorkoutOut.model_validate(p).model_dump(mode="json"),
             "planned_start_time": aware(p.planned_start_time).isoformat() if p.planned_start_time else None,
-            "goal_tag": tag("planned", p.id)} for p in plans]
+            "goal_tag": tag("planned", p.id), "duration_estimate": estimates.get(str(p.id))} for p in plans]
         actual = []
         for s in sessions:
             item = {"id": str(s.id), "sport": s.sport.value, "name": s.name,

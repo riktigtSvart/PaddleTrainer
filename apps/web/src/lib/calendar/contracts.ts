@@ -1,5 +1,7 @@
 import { addDays, day, object, sha } from "@/lib/planning-cycles/contracts";
 import { capabilityLabels } from "@/lib/planning-goals/labels";
+import { readDurationEstimate } from "./duration-estimate";
+import type { DurationEstimate } from "./duration-estimate";
 export { addDays };
 
 export const goalLabels: Record<string, string> = {
@@ -55,6 +57,7 @@ export function goalFamily(goal: string | null | undefined): Family {
 export type Reference = { artifact_id: string; content_hash: string };
 export type GoalTag = Reference & { primary_goal: string | null };
 export type Planned = {
+  duration_estimate?: DurationEstimate | null;
   id: string;
   date: string;
   planned_start_time: string | null;
@@ -231,6 +234,10 @@ export function readFeed(value: unknown): Feed {
       );
       tag(r.goal_tag);
       if (kind === "planned") {
+        if (r.duration_estimate !== undefined && r.duration_estimate !== null) {
+          const estimate = readDurationEstimate(r.duration_estimate, r.id as string, x.athlete_id as string);
+          requireValue(r.duration_sec === null && estimate.sport === r.sport && estimate.distance_m === r.distance_m);
+        }
         requireDay(r.date);
         requireValue(
           r.planned_start_time === null || validInstant(r.planned_start_time),
@@ -372,8 +379,9 @@ export function localParts(instant: string, zone: string) {
   };
 }
 export type CalendarEvent = {
+  durationEstimate?: DurationEstimate;
   key: string;
-  kind: "planned" | "session" | "availability";
+  kind: "planned" | "session" | "availability" | "constraint";
   entityId: string;
   title: string;
   sport: string;
@@ -388,6 +396,8 @@ export type CalendarEvent = {
   endEstimated?: boolean;
   linkedPlanId?: string | null;
   pairedPlan?: CalendarEvent;
+  occurrence?: import("./constraints").Occurrence;
+  conflict?: "fixed" | "flexible" | "review";
 };
 export function eventsFrom(feed: Feed): CalendarEvent[] {
   const events: CalendarEvent[] = feed.planned.map((p) => ({
@@ -402,12 +412,14 @@ export function eventsFrom(feed: Feed): CalendarEvent[] {
     sourceDate: p.date,
     start: p.planned_start_time,
     end:
-      p.planned_start_time && p.duration_sec !== null
+      p.planned_start_time && (p.duration_sec !== null || p.duration_estimate)
         ? new Date(
-            Date.parse(p.planned_start_time) + p.duration_sec * 1000,
+            Date.parse(p.planned_start_time) + (p.duration_sec ?? p.duration_estimate!.duration_sec) * 1000,
           ).toISOString()
         : null,
-    duration: p.duration_sec,
+    duration: p.duration_sec ?? p.duration_estimate?.duration_sec ?? null,
+    durationEstimate: p.duration_sec === null ? p.duration_estimate ?? undefined : undefined,
+    endEstimated: p.duration_sec === null && !!p.duration_estimate,
     goal: p.goal_tag?.primary_goal ?? null,
     goalTag: p.goal_tag,
   }));

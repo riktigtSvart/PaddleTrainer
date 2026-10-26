@@ -1,0 +1,1034 @@
+{
+  "empty": {
+    "schema_version": "calendar-constraints-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-22",
+    "start_date": "2026-10-19",
+    "end_date": "2026-11-01",
+    "retrieved_at": "2026-10-22T09:00:00.000004+00:00",
+    "reference": null,
+    "saved": null,
+    "data": {
+      "timezone_name": "Europe/Budapest",
+      "rules": [],
+      "exceptions": []
+    },
+    "availability": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "calendar": {
+          "all_opportunities_are_required": false,
+          "availability_status": "UNKNOWN",
+          "coverage": {
+            "available": 1,
+            "unavailable": 0,
+            "unknown": 1
+          },
+          "days": [
+            {
+              "date": "2026-10-23",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "easy",
+                  "elapsed_minutes": 60,
+                  "end_at": "2026-10-23T05:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "07:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 45,
+                  "notes": "",
+                  "resources": [
+                    "Futópad"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Futás"
+                  ],
+                  "start_at": "2026-10-23T04:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "06:00"
+                },
+                {
+                  "effort_cap": "easy",
+                  "elapsed_minutes": 90,
+                  "end_at": "2026-10-23T17:30:00+00:00",
+                  "end_fold": null,
+                  "end_time": "19:30",
+                  "ends_next_day": false,
+                  "key": "evening",
+                  "location": "Otthon",
+                  "max_minutes": 60,
+                  "notes": "",
+                  "resources": [
+                    "Futópad"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Futás"
+                  ],
+                  "start_at": "2026-10-23T16:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "18:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-24",
+              "max_total_minutes": null,
+              "notes": "",
+              "status": "unknown",
+              "windows": []
+            }
+          ],
+          "workouts_created": false
+        },
+        "content_hash": "7372db4e09c211c294229338717a91da4984986a2b9af9fc227dedae0eccfcb9",
+        "created_at": "2026-10-22T09:00:00.000001+00:00",
+        "kind": "availability",
+        "planning_authorized": false,
+        "proposal": {
+          "data": {
+            "days": [
+              {
+                "date": "2026-10-23",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "easy",
+                    "end_fold": null,
+                    "end_time": "07:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 45,
+                    "notes": "",
+                    "resources": [
+                      "Futópad"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Futás"
+                    ],
+                    "start_fold": null,
+                    "start_time": "06:00"
+                  },
+                  {
+                    "effort_cap": "easy",
+                    "end_fold": null,
+                    "end_time": "19:30",
+                    "ends_next_day": false,
+                    "key": "evening",
+                    "location": "Otthon",
+                    "max_minutes": 60,
+                    "notes": "",
+                    "resources": [
+                      "Futópad"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Futás"
+                    ],
+                    "start_fold": null,
+                    "start_time": "18:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-24",
+                "max_total_minutes": null,
+                "notes": "",
+                "status": "unknown",
+                "windows": []
+              }
+            ],
+            "end_date": "2026-10-24",
+            "mesocycle_id": null,
+            "start_date": "2026-10-23",
+            "timezone_name": "Europe/Budapest"
+          },
+          "previous_reference": null,
+          "request_id": "00000000-0000-0000-0000-00000000f231"
+        },
+        "revision": 1,
+        "schema_version": "athlete-setup-v0.1",
+        "timezone_name": "Europe/Budapest",
+        "workouts_created": false
+      },
+      "durable_available_at": "2026-10-22T09:00:00.000002+00:00",
+      "committed": true,
+      "reused": true,
+      "planning_authorized": false,
+      "workouts_created": false
+    },
+    "occurrences": [],
+    "conflicts": [
+      {
+        "plan_id": "00000000-0000-0000-0000-000000013c6a",
+        "plan_title": "Separate plan",
+        "occurrence_key": "availability:2026-10-23",
+        "constraint_title": "Megadott edzéslehetőség",
+        "date": "2026-10-23",
+        "severity": "fixed",
+        "code": "OUTSIDE_OPPORTUNITY"
+      },
+      {
+        "plan_id": "00000000-0000-0000-0000-0000000ab24a",
+        "plan_title": "Untimed",
+        "occurrence_key": "availability:2026-10-23",
+        "constraint_title": "Megadott edzéslehetőség",
+        "date": "2026-10-23",
+        "severity": "review",
+        "code": "PLAN_TIME_UNKNOWN"
+      }
+    ],
+    "opportunities": [
+      {
+        "key": "legacy:2026-10-23:morning",
+        "source_date": "2026-10-23",
+        "start_at": "2026-10-23T04:00:00+00:00",
+        "end_at": "2026-10-23T05:00:00+00:00",
+        "max_minutes": 45,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "known": true,
+        "usable_minutes": 45,
+        "intervals": [
+          {
+            "start_at": "2026-10-23T04:00:00+00:00",
+            "end_at": "2026-10-23T05:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "key": "legacy:2026-10-23:evening",
+        "source_date": "2026-10-23",
+        "start_at": "2026-10-23T16:00:00+00:00",
+        "end_at": "2026-10-23T17:30:00+00:00",
+        "max_minutes": 60,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "known": true,
+        "usable_minutes": 60,
+        "intervals": [
+          {
+            "start_at": "2026-10-23T16:00:00+00:00",
+            "end_at": "2026-10-23T17:30:00+00:00"
+          }
+        ]
+      }
+    ],
+    "timezone_review_required": false,
+    "proposal_hash": null,
+    "availability_proposal_hash": null,
+    "has_more": false,
+    "absence_means_free": false,
+    "opportunities_are_required": false,
+    "planning_authorized": false,
+    "workouts_changed": false
+  },
+  "receipt": {
+    "identity_scope": "APPLICATION_DEMO_USER",
+    "artifact": {
+      "artifact_id": "pt-calendar-constraints:11111111111141118111111111111111:00000000000000000000000000013ccd",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "content_hash": "27d3299d8d39643672988ef07fcc299f275cb233ff06727ddcedd889697afa26",
+      "created_at": "2026-10-22T09:00:00.000005+00:00",
+      "planning_authorized": false,
+      "proposal": {
+        "data": {
+          "exceptions": [],
+          "rules": [
+            {
+              "details": {
+                "category": "work",
+                "effort_cap": "unknown",
+                "end_fold": null,
+                "end_time": "18:00",
+                "ends_next_day": false,
+                "firmness": "fixed",
+                "kind": "busy",
+                "location": "",
+                "max_minutes": null,
+                "notes": "",
+                "resources": [],
+                "sport_scope": "unknown",
+                "sports": [],
+                "start_fold": null,
+                "start_time": "17:00",
+                "title": "Munka"
+              },
+              "end_date": null,
+              "id": "00000000-0000-0000-0000-000000013c69",
+              "repeat": "weekly",
+              "start_date": "2026-10-19",
+              "weekdays": [
+                0,
+                2,
+                4
+              ]
+            }
+          ],
+          "timezone_name": "Europe/Budapest"
+        },
+        "previous_reference": null,
+        "request_id": "00000000-0000-0000-0000-000000013ccd"
+      },
+      "revision": 1,
+      "schema_version": "calendar-constraints-v0.1",
+      "workouts_changed": false
+    },
+    "committed": true,
+    "reused": false,
+    "durable_available_at": "2026-10-22T09:00:00.000006+00:00",
+    "planning_authorized": false,
+    "workouts_changed": false
+  },
+  "context": {
+    "schema_version": "calendar-constraints-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-22",
+    "start_date": "2026-10-19",
+    "end_date": "2026-11-01",
+    "retrieved_at": "2026-10-22T09:00:00.000008+00:00",
+    "reference": {
+      "artifact_id": "pt-calendar-constraints:11111111111141118111111111111111:00000000000000000000000000013ccd",
+      "content_hash": "27d3299d8d39643672988ef07fcc299f275cb233ff06727ddcedd889697afa26"
+    },
+    "saved": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-calendar-constraints:11111111111141118111111111111111:00000000000000000000000000013ccd",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "content_hash": "27d3299d8d39643672988ef07fcc299f275cb233ff06727ddcedd889697afa26",
+        "created_at": "2026-10-22T09:00:00.000005+00:00",
+        "planning_authorized": false,
+        "proposal": {
+          "data": {
+            "exceptions": [],
+            "rules": [
+              {
+                "details": {
+                  "category": "work",
+                  "effort_cap": "unknown",
+                  "end_fold": null,
+                  "end_time": "18:00",
+                  "ends_next_day": false,
+                  "firmness": "fixed",
+                  "kind": "busy",
+                  "location": "",
+                  "max_minutes": null,
+                  "notes": "",
+                  "resources": [],
+                  "sport_scope": "unknown",
+                  "sports": [],
+                  "start_fold": null,
+                  "start_time": "17:00",
+                  "title": "Munka"
+                },
+                "end_date": null,
+                "id": "00000000-0000-0000-0000-000000013c69",
+                "repeat": "weekly",
+                "start_date": "2026-10-19",
+                "weekdays": [
+                  0,
+                  2,
+                  4
+                ]
+              }
+            ],
+            "timezone_name": "Europe/Budapest"
+          },
+          "previous_reference": null,
+          "request_id": "00000000-0000-0000-0000-000000013ccd"
+        },
+        "revision": 1,
+        "schema_version": "calendar-constraints-v0.1",
+        "workouts_changed": false
+      },
+      "committed": true,
+      "reused": true,
+      "durable_available_at": "2026-10-22T09:00:00.000006+00:00",
+      "planning_authorized": false,
+      "workouts_changed": false
+    },
+    "data": {
+      "exceptions": [],
+      "rules": [
+        {
+          "details": {
+            "category": "work",
+            "effort_cap": "unknown",
+            "end_fold": null,
+            "end_time": "18:00",
+            "ends_next_day": false,
+            "firmness": "fixed",
+            "kind": "busy",
+            "location": "",
+            "max_minutes": null,
+            "notes": "",
+            "resources": [],
+            "sport_scope": "unknown",
+            "sports": [],
+            "start_fold": null,
+            "start_time": "17:00",
+            "title": "Munka"
+          },
+          "end_date": null,
+          "id": "00000000-0000-0000-0000-000000013c69",
+          "repeat": "weekly",
+          "start_date": "2026-10-19",
+          "weekdays": [
+            0,
+            2,
+            4
+          ]
+        }
+      ],
+      "timezone_name": "Europe/Budapest"
+    },
+    "availability": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "calendar": {
+          "all_opportunities_are_required": false,
+          "availability_status": "UNKNOWN",
+          "coverage": {
+            "available": 1,
+            "unavailable": 0,
+            "unknown": 1
+          },
+          "days": [
+            {
+              "date": "2026-10-23",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "easy",
+                  "elapsed_minutes": 60,
+                  "end_at": "2026-10-23T05:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "07:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 45,
+                  "notes": "",
+                  "resources": [
+                    "Futópad"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Futás"
+                  ],
+                  "start_at": "2026-10-23T04:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "06:00"
+                },
+                {
+                  "effort_cap": "easy",
+                  "elapsed_minutes": 90,
+                  "end_at": "2026-10-23T17:30:00+00:00",
+                  "end_fold": null,
+                  "end_time": "19:30",
+                  "ends_next_day": false,
+                  "key": "evening",
+                  "location": "Otthon",
+                  "max_minutes": 60,
+                  "notes": "",
+                  "resources": [
+                    "Futópad"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Futás"
+                  ],
+                  "start_at": "2026-10-23T16:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "18:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-24",
+              "max_total_minutes": null,
+              "notes": "",
+              "status": "unknown",
+              "windows": []
+            }
+          ],
+          "workouts_created": false
+        },
+        "content_hash": "7372db4e09c211c294229338717a91da4984986a2b9af9fc227dedae0eccfcb9",
+        "created_at": "2026-10-22T09:00:00.000001+00:00",
+        "kind": "availability",
+        "planning_authorized": false,
+        "proposal": {
+          "data": {
+            "days": [
+              {
+                "date": "2026-10-23",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "easy",
+                    "end_fold": null,
+                    "end_time": "07:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 45,
+                    "notes": "",
+                    "resources": [
+                      "Futópad"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Futás"
+                    ],
+                    "start_fold": null,
+                    "start_time": "06:00"
+                  },
+                  {
+                    "effort_cap": "easy",
+                    "end_fold": null,
+                    "end_time": "19:30",
+                    "ends_next_day": false,
+                    "key": "evening",
+                    "location": "Otthon",
+                    "max_minutes": 60,
+                    "notes": "",
+                    "resources": [
+                      "Futópad"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Futás"
+                    ],
+                    "start_fold": null,
+                    "start_time": "18:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-24",
+                "max_total_minutes": null,
+                "notes": "",
+                "status": "unknown",
+                "windows": []
+              }
+            ],
+            "end_date": "2026-10-24",
+            "mesocycle_id": null,
+            "start_date": "2026-10-23",
+            "timezone_name": "Europe/Budapest"
+          },
+          "previous_reference": null,
+          "request_id": "00000000-0000-0000-0000-00000000f231"
+        },
+        "revision": 1,
+        "schema_version": "athlete-setup-v0.1",
+        "timezone_name": "Europe/Budapest",
+        "workouts_created": false
+      },
+      "durable_available_at": "2026-10-22T09:00:00.000002+00:00",
+      "committed": true,
+      "reused": true,
+      "planning_authorized": false,
+      "workouts_created": false
+    },
+    "occurrences": [
+      {
+        "key": "00000000-0000-0000-0000-000000013c69:2026-10-19",
+        "rule_id": "00000000-0000-0000-0000-000000013c69",
+        "source_date": "2026-10-19",
+        "repeat": "weekly",
+        "overridden": false,
+        "details": {
+          "category": "work",
+          "effort_cap": "unknown",
+          "end_fold": null,
+          "end_time": "18:00",
+          "ends_next_day": false,
+          "firmness": "fixed",
+          "kind": "busy",
+          "location": "",
+          "max_minutes": null,
+          "notes": "",
+          "resources": [],
+          "sport_scope": "unknown",
+          "sports": [],
+          "start_fold": null,
+          "start_time": "17:00",
+          "title": "Munka"
+        },
+        "start_at": "2026-10-19T15:00:00+00:00",
+        "end_at": "2026-10-19T16:00:00+00:00",
+        "elapsed_minutes": 60.0,
+        "issue": null
+      },
+      {
+        "key": "00000000-0000-0000-0000-000000013c69:2026-10-21",
+        "rule_id": "00000000-0000-0000-0000-000000013c69",
+        "source_date": "2026-10-21",
+        "repeat": "weekly",
+        "overridden": false,
+        "details": {
+          "category": "work",
+          "effort_cap": "unknown",
+          "end_fold": null,
+          "end_time": "18:00",
+          "ends_next_day": false,
+          "firmness": "fixed",
+          "kind": "busy",
+          "location": "",
+          "max_minutes": null,
+          "notes": "",
+          "resources": [],
+          "sport_scope": "unknown",
+          "sports": [],
+          "start_fold": null,
+          "start_time": "17:00",
+          "title": "Munka"
+        },
+        "start_at": "2026-10-21T15:00:00+00:00",
+        "end_at": "2026-10-21T16:00:00+00:00",
+        "elapsed_minutes": 60.0,
+        "issue": null
+      },
+      {
+        "key": "00000000-0000-0000-0000-000000013c69:2026-10-23",
+        "rule_id": "00000000-0000-0000-0000-000000013c69",
+        "source_date": "2026-10-23",
+        "repeat": "weekly",
+        "overridden": false,
+        "details": {
+          "category": "work",
+          "effort_cap": "unknown",
+          "end_fold": null,
+          "end_time": "18:00",
+          "ends_next_day": false,
+          "firmness": "fixed",
+          "kind": "busy",
+          "location": "",
+          "max_minutes": null,
+          "notes": "",
+          "resources": [],
+          "sport_scope": "unknown",
+          "sports": [],
+          "start_fold": null,
+          "start_time": "17:00",
+          "title": "Munka"
+        },
+        "start_at": "2026-10-23T15:00:00+00:00",
+        "end_at": "2026-10-23T16:00:00+00:00",
+        "elapsed_minutes": 60.0,
+        "issue": null
+      },
+      {
+        "key": "00000000-0000-0000-0000-000000013c69:2026-10-26",
+        "rule_id": "00000000-0000-0000-0000-000000013c69",
+        "source_date": "2026-10-26",
+        "repeat": "weekly",
+        "overridden": false,
+        "details": {
+          "category": "work",
+          "effort_cap": "unknown",
+          "end_fold": null,
+          "end_time": "18:00",
+          "ends_next_day": false,
+          "firmness": "fixed",
+          "kind": "busy",
+          "location": "",
+          "max_minutes": null,
+          "notes": "",
+          "resources": [],
+          "sport_scope": "unknown",
+          "sports": [],
+          "start_fold": null,
+          "start_time": "17:00",
+          "title": "Munka"
+        },
+        "start_at": "2026-10-26T16:00:00+00:00",
+        "end_at": "2026-10-26T17:00:00+00:00",
+        "elapsed_minutes": 60.0,
+        "issue": null
+      },
+      {
+        "key": "00000000-0000-0000-0000-000000013c69:2026-10-28",
+        "rule_id": "00000000-0000-0000-0000-000000013c69",
+        "source_date": "2026-10-28",
+        "repeat": "weekly",
+        "overridden": false,
+        "details": {
+          "category": "work",
+          "effort_cap": "unknown",
+          "end_fold": null,
+          "end_time": "18:00",
+          "ends_next_day": false,
+          "firmness": "fixed",
+          "kind": "busy",
+          "location": "",
+          "max_minutes": null,
+          "notes": "",
+          "resources": [],
+          "sport_scope": "unknown",
+          "sports": [],
+          "start_fold": null,
+          "start_time": "17:00",
+          "title": "Munka"
+        },
+        "start_at": "2026-10-28T16:00:00+00:00",
+        "end_at": "2026-10-28T17:00:00+00:00",
+        "elapsed_minutes": 60.0,
+        "issue": null
+      },
+      {
+        "key": "00000000-0000-0000-0000-000000013c69:2026-10-30",
+        "rule_id": "00000000-0000-0000-0000-000000013c69",
+        "source_date": "2026-10-30",
+        "repeat": "weekly",
+        "overridden": false,
+        "details": {
+          "category": "work",
+          "effort_cap": "unknown",
+          "end_fold": null,
+          "end_time": "18:00",
+          "ends_next_day": false,
+          "firmness": "fixed",
+          "kind": "busy",
+          "location": "",
+          "max_minutes": null,
+          "notes": "",
+          "resources": [],
+          "sport_scope": "unknown",
+          "sports": [],
+          "start_fold": null,
+          "start_time": "17:00",
+          "title": "Munka"
+        },
+        "start_at": "2026-10-30T16:00:00+00:00",
+        "end_at": "2026-10-30T17:00:00+00:00",
+        "elapsed_minutes": 60.0,
+        "issue": null
+      }
+    ],
+    "conflicts": [
+      {
+        "plan_id": "00000000-0000-0000-0000-000000013c6a",
+        "plan_title": "Separate plan",
+        "occurrence_key": "00000000-0000-0000-0000-000000013c69:2026-10-23",
+        "constraint_title": "Munka",
+        "date": "2026-10-23",
+        "severity": "fixed",
+        "code": "WORKOUT_OVERLAP"
+      },
+      {
+        "plan_id": "00000000-0000-0000-0000-0000000ab24a",
+        "plan_title": "Untimed",
+        "occurrence_key": "00000000-0000-0000-0000-000000013c69:2026-10-23",
+        "constraint_title": "Munka",
+        "date": "2026-10-23",
+        "severity": "review",
+        "code": "PLAN_TIME_UNKNOWN"
+      },
+      {
+        "plan_id": "00000000-0000-0000-0000-0000000ab24a",
+        "plan_title": "Untimed",
+        "occurrence_key": "availability:2026-10-23",
+        "constraint_title": "Megadott edzéslehetőség",
+        "date": "2026-10-23",
+        "severity": "review",
+        "code": "PLAN_TIME_UNKNOWN"
+      }
+    ],
+    "opportunities": [
+      {
+        "key": "legacy:2026-10-23:morning",
+        "source_date": "2026-10-23",
+        "start_at": "2026-10-23T04:00:00+00:00",
+        "end_at": "2026-10-23T05:00:00+00:00",
+        "max_minutes": 45,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "known": true,
+        "usable_minutes": 45,
+        "intervals": [
+          {
+            "start_at": "2026-10-23T04:00:00+00:00",
+            "end_at": "2026-10-23T05:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "key": "legacy:2026-10-23:evening",
+        "source_date": "2026-10-23",
+        "start_at": "2026-10-23T16:00:00+00:00",
+        "end_at": "2026-10-23T17:30:00+00:00",
+        "max_minutes": 60,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "known": true,
+        "usable_minutes": 60,
+        "intervals": [
+          {
+            "start_at": "2026-10-23T16:00:00+00:00",
+            "end_at": "2026-10-23T17:30:00+00:00"
+          }
+        ]
+      }
+    ],
+    "timezone_review_required": false,
+    "proposal_hash": null,
+    "availability_proposal_hash": null,
+    "has_more": false,
+    "absence_means_free": false,
+    "opportunities_are_required": false,
+    "planning_authorized": false,
+    "workouts_changed": false
+  },
+  "feed": {
+    "schema_version": "calendar-workspace-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-22",
+    "start_date": "2026-10-19",
+    "end_date": "2026-11-01",
+    "retrieved_at": "2026-10-22T09:00:00.000010+00:00",
+    "planned": [
+      {
+        "id": "00000000-0000-0000-0000-000000013c6a",
+        "date": "2026-10-23",
+        "planned_start_time": "2026-10-23T15:40:00+00:00",
+        "sport": "KAYAK",
+        "title": "Separate plan",
+        "description": null,
+        "duration_sec": 1200,
+        "distance_m": null,
+        "intensity_type": null,
+        "status": "PLANNED",
+        "source": "MANUAL",
+        "polar_target_id": null,
+        "training_period_id": null,
+        "blocks": [],
+        "goal_tag": null
+      },
+      {
+        "id": "00000000-0000-0000-0000-0000000ab249",
+        "date": "2026-10-23",
+        "planned_start_time": "2026-10-23T15:30:00+00:00",
+        "sport": "KAYAK",
+        "title": "VO2 in name is not a goal declaration",
+        "description": null,
+        "duration_sec": 2700,
+        "distance_m": null,
+        "intensity_type": null,
+        "status": "PLANNED",
+        "source": "MANUAL",
+        "polar_target_id": null,
+        "training_period_id": null,
+        "blocks": [],
+        "goal_tag": null
+      },
+      {
+        "id": "00000000-0000-0000-0000-0000000ab24a",
+        "date": "2026-10-23",
+        "planned_start_time": null,
+        "sport": "RUNNING",
+        "title": "Untimed",
+        "description": null,
+        "duration_sec": null,
+        "distance_m": null,
+        "intensity_type": null,
+        "status": "PLANNED",
+        "source": "MANUAL",
+        "polar_target_id": null,
+        "training_period_id": null,
+        "blocks": [],
+        "goal_tag": null
+      }
+    ],
+    "sessions": [
+      {
+        "id": "00000000-0000-0000-0000-0000000ab631",
+        "sport": "KAYAK",
+        "name": null,
+        "external_provider": "POLAR",
+        "external_id": "calendar-session",
+        "duration_sec": 2700,
+        "distance_m": 8000.0,
+        "calories": 0.0,
+        "avg_hr": null,
+        "max_hr": null,
+        "avg_speed": null,
+        "max_speed": null,
+        "avg_power": null,
+        "max_power": null,
+        "avg_cadence": null,
+        "max_cadence": null,
+        "cardio_load": null,
+        "perceived_load": null,
+        "started_at": "2026-10-23T15:35:00+00:00",
+        "ended_at": "2026-10-23T16:25:00+00:00",
+        "rpe": null,
+        "planned_workout_id": "00000000-0000-0000-0000-0000000ab249",
+        "goal_tag": null,
+        "linked_goal_tag": null
+      }
+    ],
+    "availability": {
+      "reference": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "content_hash": "7372db4e09c211c294229338717a91da4984986a2b9af9fc227dedae0eccfcb9"
+      },
+      "days": [
+        {
+          "date": "2026-10-23",
+          "max_total_minutes": 90,
+          "notes": "",
+          "status": "available",
+          "windows": [
+            {
+              "effort_cap": "easy",
+              "end_fold": null,
+              "end_time": "07:00",
+              "ends_next_day": false,
+              "key": "morning",
+              "location": "Otthon",
+              "max_minutes": 45,
+              "notes": "",
+              "resources": [
+                "Futópad"
+              ],
+              "sport_scope": "specified",
+              "sports": [
+                "Futás"
+              ],
+              "start_fold": null,
+              "start_time": "06:00",
+              "start_at": "2026-10-23T04:00:00+00:00",
+              "end_at": "2026-10-23T05:00:00+00:00",
+              "elapsed_minutes": 60
+            },
+            {
+              "effort_cap": "easy",
+              "end_fold": null,
+              "end_time": "19:30",
+              "ends_next_day": false,
+              "key": "evening",
+              "location": "Otthon",
+              "max_minutes": 60,
+              "notes": "",
+              "resources": [
+                "Futópad"
+              ],
+              "sport_scope": "specified",
+              "sports": [
+                "Futás"
+              ],
+              "start_fold": null,
+              "start_time": "18:00",
+              "start_at": "2026-10-23T16:00:00+00:00",
+              "end_at": "2026-10-23T17:30:00+00:00",
+              "elapsed_minutes": 90
+            }
+          ]
+        },
+        {
+          "date": "2026-10-24",
+          "max_total_minutes": null,
+          "notes": "",
+          "status": "unknown",
+          "windows": []
+        }
+      ],
+      "carry_windows": [],
+      "absence_means_unavailable": false
+    },
+    "periods": [],
+    "has_more": false,
+    "planning_authorized": false,
+    "workouts_changed": false
+  },
+  "availability_body": {
+    "request_id": "00000000-0000-0000-0000-00000000f231",
+    "previous_reference": null,
+    "data": {
+      "timezone_name": "Europe/Budapest",
+      "start_date": "2026-10-23",
+      "end_date": "2026-10-24",
+      "mesocycle_id": null,
+      "days": [
+        {
+          "date": "2026-10-23",
+          "status": "available",
+          "max_total_minutes": 90,
+          "windows": [
+            {
+              "key": "morning",
+              "start_time": "06:00",
+              "end_time": "07:00",
+              "ends_next_day": false,
+              "start_fold": null,
+              "end_fold": null,
+              "max_minutes": 45,
+              "sport_scope": "specified",
+              "sports": [
+                "Futás"
+              ],
+              "effort_cap": "easy",
+              "resources": [
+                "Futópad"
+              ],
+              "location": "Otthon",
+              "notes": ""
+            },
+            {
+              "key": "evening",
+              "start_time": "18:00",
+              "end_time": "19:30",
+              "ends_next_day": false,
+              "start_fold": null,
+              "end_fold": null,
+              "max_minutes": 60,
+              "sport_scope": "specified",
+              "sports": [
+                "Futás"
+              ],
+              "effort_cap": "easy",
+              "resources": [
+                "Futópad"
+              ],
+              "location": "Otthon",
+              "notes": ""
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "date": "2026-10-24",
+          "status": "unknown",
+          "max_total_minutes": null,
+          "windows": [],
+          "notes": ""
+        }
+      ]
+    }
+  }
+}

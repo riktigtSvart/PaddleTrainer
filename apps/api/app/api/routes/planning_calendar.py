@@ -100,6 +100,13 @@ async def constraint_save(payload: ScheduleInput, response: Response, db: DB, ow
 from uuid import UUID
 from app.planning.application import calendar_moves as moves
 from app.schemas.calendar_moves import MoveProposal, MoveSave
+from app.services import session_analysis
+
+
+@router.get("/sessions/{session_id}")
+async def session_detail(session_id: UUID, db: DB, owner: Owner):
+    _fresh(db)
+    return await call(session_analysis.detail(owner=owner, session_id=str(session_id), session=db))
 
 @router.get("/moves/{plan_id}")
 async def move_context(plan_id: UUID, db: DB, owner: Owner):

@@ -9,17 +9,18 @@ import {
   loadStatus,
   resultCounts,
   resultDetails,
+  runMessages,
   sendSync,
 } from "@/lib/data-connections/client";
 import {
   attention,
   connectionAttention,
+  continuationOnly,
   datasetLabels,
   displayTime,
   hasSuccessfulTransfer,
   lastRunTime,
   PENDING_KEY,
-  preservedPlansOnly,
   providerState,
   readBody,
   readPending,
@@ -86,11 +87,7 @@ export default function DataConnectionsControl() {
       setPending(null);
       setRetryAllowed(false);
       setRejected(false);
-      setNotice(
-        receipt.run.state === "succeeded" || preservedPlansOnly(receipt.run)
-          ? "A frissítés befejeződött. Az átvett adatok elérhetők."
-          : errorText(receipt.run.error_code ?? "DATA_SYNC_IMPORT_FAILED"),
-      );
+      setNotice(receipt.run.state === "succeeded" ? "A frissítés befejeződött. Az átvett adatok elérhetők." : "");
       setError("");
       setRevision((n) => n + 1);
     } catch {
@@ -295,7 +292,7 @@ export default function DataConnectionsControl() {
     : warning
       ? visible.some(connectionAttention)
         ? "Kapcsolat ellenőrzendő" : "Frissítés ellenőrzendő"
-      : "";
+      : visible.some(p => continuationOnly(p.last_run)) ? "Átvétel folytatható" : "";
   const title = !data
     ? "Adatkapcsolatok · állapot betöltése"
     : visible
@@ -327,7 +324,7 @@ export default function DataConnectionsControl() {
             name={
               warning
                 ? "alert"
-                : busy
+                : busy || visible.some(p => continuationOnly(p.last_run))
                   ? "clock"
                   : visible.some(hasSuccessfulTransfer)
                     ? "check"
@@ -387,7 +384,7 @@ export default function DataConnectionsControl() {
                   >
                     <Icon
                       name={
-                        provider.last_run?.state === "running"
+                        provider.last_run?.state === "running" || continuationOnly(provider.last_run)
                           ? "clock"
                           : attention(provider)
                             ? "alert"
@@ -416,11 +413,9 @@ export default function DataConnectionsControl() {
                     </dd>
                   </div>
                 </dl>
-                {preservedPlansOnly(provider.last_run) && (
-                  <p className="pt-notice">
-                    A védett vagy kézzel módosított terveket megőriztük.
-                  </p>
-                )}
+                {provider.last_run && provider.last_run.state !== "running" && runMessages(provider.last_run).map(line => (
+                  <p key={line} className="pt-notice" role={attention(provider) ? "status" : undefined}>{line}</p>
+                ))}
                 {provider.connection_state === "connected" && (
                   <>
                     <button
@@ -445,7 +440,9 @@ export default function DataConnectionsControl() {
                         {provider.allowed_datasets
                           .map((d) => datasetLabels[d])
                           .join(", ") || "Nincs engedélyezett adatfajta."}{" "}
-                        · alapadatok
+                        {provider.allowed_datasets.includes("session_details")
+                          ? "· A hiányzó részleteket a legutóbbi napoktól, több lépésben vesszük át. A hátralévő mennyiséget az eredmény mutatja."
+                          : "· alapadatok"}
                       </p>
                       <label>
                         Visszamenőleges időszak
@@ -465,8 +462,8 @@ export default function DataConnectionsControl() {
                         a következő 30 nap is bekerül.
                       </p>
                       <p>
-                        A gyors frissítés az edzések alapadatait és a terveket
-                        veszi át. Az alvás, aktivitás és további állapotadatok a
+                        A frissítés az edzéseket, az engedélyezett részletes
+                        adatokat és a terveket veszi át. Az alvás, aktivitás és további állapotadatok a
                         profil Előzmények lapján kezelhetők.
                       </p>
                     </details>
@@ -478,13 +475,7 @@ export default function DataConnectionsControl() {
                   </p>
                 )}
                 {provider.connection_state !== "configuration_required" &&
-                  (provider.connection_state !== "connected" ||
-                    provider.allowed_datasets.length <
-                      provider.datasets.length ||
-                    provider.last_run?.error_code ===
-                      "DATA_SYNC_RECONNECT_REQUIRED" ||
-                    provider.last_run?.error_code ===
-                      "DATA_SYNC_PERMISSION_MISSING") && (
+                  connectionAttention(provider) && (
                     <form
                       action="/api/data-connections/polar/connect"
                       method="get"

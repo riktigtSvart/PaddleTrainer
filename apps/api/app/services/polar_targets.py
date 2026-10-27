@@ -18,6 +18,7 @@ from app.models.entities import (
     WorkoutStatus,
 )
 from app.services.polar_tokens import get_valid_access_token
+from app.services.polar_target_structure import TargetStructureError, native_id, phase_structure, same_blocks
 
 POLAR_TARGET_SPORT_MAP = {
     "95": Sport.KAYAK,
@@ -86,29 +87,9 @@ async def _replace_workout_blocks(
     workout: PlannedWorkout,
     raw_target: dict,
 ) -> None:
-    # Régi blokkok explicit async lekérése.
-    # Így új workoutnál sem indul lazy loading.
-    old_result = await db.scalars(
-        select(WorkoutBlock).where(
-            WorkoutBlock.workout_id
-            == workout.id
-        )
-    )
-
-    old_blocks = list(old_result)
-
-    # Először bontjuk a parent-child
-    # kapcsolatokat a self-FK miatt.
-    for old_block in old_blocks:
-        old_block.parent_block_id = None
-
-    await db.flush()
-
-    # Ezután törölhetők a régi blokkok.
-    for old_block in old_blocks:
-        await db.delete(old_block)
-
-    await db.flush()
+    state = phase_structure(raw_target)
+    if state != "complete":
+        return
 
     exercises = (
         raw_target.get("exercise") or []
@@ -145,6 +126,17 @@ async def _replace_workout_blocks(
             normalized_blocks.append(
                 copied
             )
+
+    old_result = await db.scalars(select(WorkoutBlock).where(WorkoutBlock.workout_id == workout.id))
+    old_blocks = list(old_result)
+    if same_blocks(old_blocks, normalized_blocks):
+        return
+    for old_block in old_blocks:
+        old_block.parent_block_id = None
+    await db.flush()
+    for old_block in old_blocks:
+        await db.delete(old_block)
+    await db.flush()
 
     block_ids: dict[str, object] = {}
 
@@ -377,6 +369,11 @@ def normalize_training_target(
         "blocks": blocks,
     }
 
+def _has_native_phases(raw):
+    exercises = raw.get("exercise") if isinstance(raw, dict) else None
+    return isinstance(exercises, list) and any(isinstance(e, dict) and bool(e.get("phaseOrRepeat")) for e in exercises)
+
+
 async def sync_training_targets(
     db: AsyncSession,
     user: User,
@@ -435,20 +432,34 @@ async def sync_training_targets(
         protected_ids = set((await db.execute(select(PlanningLogicalPlanRow.source_workout_id).where(
             PlanningLogicalPlanRow.athlete_id == user.id,
         ))).scalars().all())
-    if report is not None:
-        from app.services.provider_payload_archive import archive_payload
-        if not isinstance(payload, list):
-            raise ValueError("POLAR_TARGETS_PAYLOAD_INVALID")
-        await archive_payload(db, user, "DATA_SYNC_TARGETS", response_payload if isinstance(response_payload, dict) else {"targets": payload}, first=from_date, last=to_date)
+    from app.services.provider_payload_archive import archive_payload
+    if not isinstance(payload, list):
+        raise ValueError("POLAR_TARGETS_PAYLOAD_INVALID")
+    await archive_payload(db, user, "DATA_SYNC_TARGETS", response_payload if isinstance(response_payload, dict) else {"targets": payload}, first=from_date, last=to_date)
 
     for raw_item in payload:
-        if report is not None:
-            if not isinstance(raw_item, dict) or not isinstance(raw_item.get("session"), dict):
-                skip("invalid_record")
-                continue
-            if not raw_item["session"].get("id"):
-                skip("missing_target_id")
-                continue
+        if not isinstance(raw_item, dict) or not isinstance(raw_item.get("session"), dict):
+            skip("invalid_record")
+            continue
+        if native_id(raw_item["session"].get("id")) is None:
+            skip("missing_target_id")
+            continue
+        try:
+            structure = phase_structure(raw_item)
+        except TargetStructureError:
+            skip("invalid_phase_structure")
+            continue
+        if structure == "incomplete":
+            skip("incomplete_phase_structure")
+            continue
+        try:
+            planned_start = _aware_planned_start(raw_item["session"].get("startTime"), user.timezone)
+        except (ValueError, TypeError, KeyError):
+            skip("invalid_start")
+            continue
+        if planned_start is None:
+            skip("missing_start")
+            continue
         normalized = normalize_training_target(
             raw_item
         )
@@ -479,24 +490,16 @@ async def sync_training_targets(
         session = raw_item.get("session") or {}
         exercises = raw_item.get("exercise") or []
 
-        planned_start = _aware_planned_start(
-            session.get("startTime"),
-            user.timezone,
-        )
-
-        if planned_start is None:
-            skip("missing_start")
-            continue
-
         first_exercise = (
             exercises[0]
             if exercises
             else {}
         )
 
-        sport_id = str(
-            first_exercise.get("sportId")
-        )
+        native_sport_id = first_exercise.get("sportId")
+        if native_sport_id is None:
+            native_sport_id = session.get("sportId")
+        sport_id = str(native_sport_id)
 
         sport = POLAR_TARGET_SPORT_MAP.get(
             sport_id,
@@ -549,7 +552,12 @@ async def sync_training_targets(
             if protect_tracked_plans and (existing.id in protected_ids or existing.source != "POLAR"):
                 skip("protected_plan")
                 continue
-            if report is not None and existing.raw_data is not None:
+            # A sparse completed target cannot erase an earlier prescription.
+            # The incoming response is already archived, including rejected records.
+            if structure == "absent" and (existing.blocks or _has_native_phases(existing.raw_data)):
+                skip("incomplete_phase_structure")
+                continue
+            if existing.raw_data is not None:
                 await archive_payload(db, user, "DATA_SYNC_PREVIOUS_TARGET", {"workout_id": str(existing.id), "raw_data": existing.raw_data})
             workout = existing
 
@@ -559,34 +567,19 @@ async def sync_training_targets(
             if moved is None:
                 workout.date = planned_start.date()
                 workout.planned_start_time = planned_start
-            workout.sport = sport
+            if native_sport_id is not None:
+                workout.sport = sport
+            if normalized.get("title") is not None:
+                workout.title = normalized["title"]
+            if normalized.get("description") is not None:
+                workout.description = normalized["description"]
 
-            workout.title = (
-                normalized.get("title")
-                or "Polar workout"
-            )
-
-            workout.description = (
-                normalized.get(
-                    "description"
-                )
-            )
-
-            workout.duration_sec = (
-                normalized.get(
-                    "duration_sec"
-                )
-            )
-
-            workout.distance_m = (
-                normalized.get(
-                    "distance_m"
-                )
-            )
-
-            workout.intensity_type = (
-                intensity_type
-            )
+            if normalized.get("duration_sec") is not None:
+                workout.duration_sec = normalized["duration_sec"]
+            if normalized.get("distance_m") is not None:
+                workout.distance_m = normalized["distance_m"]
+            if intensity_type is not None:
+                workout.intensity_type = intensity_type
 
             if (
                 workout.status

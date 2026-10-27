@@ -1,8 +1,11 @@
 import { object } from "@/lib/planning-cycles/contracts";
-import { preservedPlanResult, readReceipt, readStatus } from "./contracts";
-import type { DatasetResult, Pending } from "./contracts";
+import { continuationOnly, datasetLabels, preservedPlanResult, preservedPlansOnly, readReceipt, readStatus } from "./contracts";
+import type { DatasetResult, Pending, Run } from "./contracts";
 
 const messages: Record<string, string> = {
+  DATA_SYNC_DETAILS_PENDING: "A részletes edzésadatok egy része megérkezett. Újabb szinkronizálással folytatható az átvétel; először a legutóbbi edzések kerülnek sorra.",
+  DATA_SYNC_DETAILS_SOURCE_CONFLICT: "Néhány részletes forrásadat eltér a megőrzött edzésadattól. A korábbi adat megmaradt; ellenőrzés szükséges.",
+  DATA_SYNC_DETAILS_NOT_RETURNED: "A Polar néhány tárolt edzés részleteit még nem adta vissza. A többi edzés átvétele megmaradt.",
   DATA_SYNC_ALREADY_RUNNING:
     "Ennél a szolgáltatónál már folyamatban van egy frissítés.",
   DATA_SYNC_RECONNECT_REQUIRED:
@@ -40,6 +43,10 @@ export function resultDetails(result: DatasetResult): string[] {
     missing_target_id: "Tervazonosító nélkül",
     missing_session_id: "Teljesítésazonosító nélkül",
     missing_start: "Kezdési idő nélkül",
+    details_batch_pending: "Következő részletes átvételre vár",
+    details_not_returned: "A Polar nem küldte vissza a részleteit",
+    details_source_changed: "Közben megváltozott edzésforrás",
+    details_source_conflict: "Eltérő megőrzött részletes forrás",
   };
   const lines = Object.entries(result.skip_reasons ?? {}).map(([reason, count]) =>
     `${Object.hasOwn(labels, reason) ? labels[reason] : `Ismeretlen kihagyási ok (${reason})`}: ${count}`);
@@ -51,11 +58,19 @@ export function resultDetails(result: DatasetResult): string[] {
     if (p.conflicts) lines.push(`Eltérő meglévő tervkapcsolat: ${p.conflicts}`);
     if (p.ambiguous) lines.push(`Nem egyértelmű tervazonosító: ${p.ambiguous}`);
   }
+  if (result.details) {
+    const d = result.details;
+    lines.push(`Korábban ellenőrzött részletek: ${d.already_complete}`);
+    lines.push(`Most lekért edzésrészletek: ${d.fetched_sessions} · mintasorral: ${d.with_samples} · mintasor nélkül: ${d.without_samples}`);
+    if (d.pending_sessions) lines.push(`További átvételre vár: ${d.pending_sessions} edzés, ${d.pending_days} napon`);
+  }
   return lines;
 }
 export function resultCounts(result: DatasetResult) {
   if (result.state !== "succeeded")
     return result.state === "not_attempted" ? "Nem került sorra" : "Nem fejeződött be";
+  if (result.dataset === "session_details" && result.details)
+    return `Lekért részletek: ${result.details.fetched_sessions} · korábban ellenőrzött: ${result.details.already_complete} · hátralévő: ${result.details.pending_sessions}`;
   const disposition = preservedPlanResult(result) ? "megőrzött" : "kihagyott";
   return `Új: ${result.imported ?? "ismeretlen"} · frissített: ${result.updated ?? "ismeretlen"} · ${disposition}: ${result.skipped ?? "ismeretlen"}`;
 }
@@ -72,6 +87,18 @@ export function errorText(code: string) {
     return `A szolgáltató elutasította az adatlekérést (HTTP ${status}).`;
   }
   return messages[code] ?? `Az adatkapcsolati művelet nem sikerült (${code}).`;
+}
+export function runMessages(run: Run): string[] {
+  if (continuationOnly(run)) {
+    const pending = run.datasets.find(d => d.dataset === "session_details")!.details!;
+    return [`A részletes átvétel folytatható: még ${pending.pending_sessions} edzés, ${pending.pending_days} napon. Újabb szinkronizálással a következő adag kerül sorra.`,
+      ...(run.datasets.some(preservedPlanResult) ? [messages.DATA_SYNC_PROTECTED_PLANS_SKIPPED] : [])];
+  }
+  if (preservedPlansOnly(run)) return [messages.DATA_SYNC_PROTECTED_PLANS_SKIPPED];
+  const actual = run.datasets.filter(d => d.error_code && !preservedPlanResult(d));
+  const lines = actual.map(d => `${datasetLabels[d.dataset]}: ${errorText(d.error_code!)} (${d.error_code})`);
+  if (run.error_code && !actual.some(d => d.error_code === run.error_code)) lines.push(`${errorText(run.error_code)} (${run.error_code})`);
+  return lines.length ? lines : run.state === "failed" || run.state === "interrupted" ? [errorText("DATA_SYNC_IMPORT_FAILED")] : [];
 }
 export class ConnectionError extends Error {
   constructor(

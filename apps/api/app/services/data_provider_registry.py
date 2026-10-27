@@ -13,7 +13,7 @@ class Provider:
 
 
 PROVIDERS = (
-    Provider("POLAR", "Polar", True, "pull", ("sessions", "targets")),
+    Provider("POLAR", "Polar", True, "pull", ("sessions", "targets", "session_details")),
     Provider("GARMIN", "Garmin", False, "not_configured", ()),
     Provider("SUUNTO", "Suunto", False, "not_configured", ()),
 )
@@ -21,4 +21,5 @@ REGISTRY = {item.key: item for item in PROVIDERS}
 DATASET_SCOPES = {
     "sessions": ("training_sessions:read", "sports:read"),
     "targets": ("training_targets:read",),
+    "session_details": ("training_sessions:read",),
 }

@@ -1,6 +1,6 @@
 import { canonical, object, sha } from "@/lib/planning-cycles/contracts";
 
-export type Dataset = "sessions" | "targets";
+export type Dataset = "sessions" | "targets" | "session_details";
 export type Body = {
   request_id: string;
   provider: string;
@@ -25,6 +25,8 @@ export type DatasetResult = {
   error_code: string | null;
   pairing?: PairingResult;
   skip_reasons?: Record<string, number>;
+  details?: { requested_sessions: number; already_complete: number; fetched_sessions: number;
+    with_samples: number; without_samples: number; pending_sessions: number; processed_days: number; pending_days: number };
 };
 export type Run = {
   request_id: string;
@@ -92,6 +94,7 @@ export const UPDATED_EVENT = "paddletrainer:data-synced";
 export const datasetLabels: Record<Dataset, string> = {
   sessions: "Teljesített edzések",
   targets: "Polar-edzéstervek",
+  session_details: "Részletes edzésadatok és grafikonok",
 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export function requireValue(condition: unknown): asserts condition {
@@ -109,9 +112,9 @@ function timestamp(value: unknown, nullable = false) {
 function datasets(value: unknown): asserts value is Dataset[] {
   requireValue(
     Array.isArray(value) &&
-      value.length <= 2 &&
+      value.length <= 3 &&
       new Set(value).size === value.length &&
-      value.every((x) => x === "sessions" || x === "targets"),
+      value.every((x) => x === "sessions" || x === "targets" || x === "session_details"),
   );
 }
 export function readBody(value: unknown): Body {
@@ -190,6 +193,15 @@ function readRun(value: unknown): Run {
       requireValue(Object.entries(reasons).every(([key, n]) =>
         key.length > 0 && Number.isInteger(n) && Number(n) >= 0));
       requireValue(Object.values(reasons).reduce<number>((sum, n) => sum + Number(n), 0) === d.skipped);
+    }
+    if ("details" in d) {
+      const detail = object(d.details);
+      requireValue(d.dataset === "session_details" && Object.keys(detail).sort().join() ===
+        "already_complete,fetched_sessions,pending_days,pending_sessions,processed_days,requested_sessions,with_samples,without_samples");
+      requireValue(Object.values(detail).every(n => Number.isInteger(n) && Number(n) >= 0));
+      requireValue(Number(detail.already_complete) + Number(detail.fetched_sessions) + Number(detail.pending_sessions) === detail.requested_sessions &&
+        Number(detail.with_samples) + Number(detail.without_samples) === detail.fetched_sessions &&
+        detail.fetched_sessions === d.updated && detail.pending_sessions === d.skipped);
     }
   }
   const w = object(r.window);
@@ -365,6 +377,27 @@ export function hasSuccessfulTransfer(p: Provider) {
   return !!p.last_success_at || p.last_run?.state === "succeeded" ||
     preservedPlansOnly(p.last_run);
 }
+export function continuationOnly(run: Run | null) {
+  if (!run || run.state !== "partial" || run.finished_at === null ||
+      !["DATA_SYNC_DETAILS_PENDING", "DATA_SYNC_PROTECTED_PLANS_SKIPPED"].includes(run.error_code ?? "") ||
+      !run.requested_datasets.length || new Set(run.requested_datasets).size !== run.requested_datasets.length ||
+      run.datasets.length !== run.requested_datasets.length) return false;
+  let pending = false;
+  return run.datasets.every((d, i) => {
+    if (d.dataset !== run.requested_datasets[i] || d.state !== "succeeded" ||
+        ![d.imported, d.updated, d.skipped].every(n => Number.isSafeInteger(n) && Number(n) >= 0) ||
+        d.pairing && (d.pairing.conflicts !== 0 || d.pairing.ambiguous !== 0)) return false;
+    if (d.dataset === "session_details" && d.error_code === "DATA_SYNC_DETAILS_PENDING") {
+      const detail = d.details;
+      pending = !!detail && Number(d.skipped) > 0 && detail.pending_sessions === d.skipped && detail.pending_days > 0 &&
+        d.skip_reasons !== undefined && Object.keys(d.skip_reasons).length === 1 && d.skip_reasons.details_batch_pending === d.skipped &&
+        detail.fetched_sessions === d.updated && detail.with_samples + detail.without_samples === detail.fetched_sessions &&
+        detail.already_complete + detail.fetched_sessions + detail.pending_sessions === detail.requested_sessions;
+      return pending;
+    }
+    return preservedPlanResult(d) || d.skipped === 0 && d.error_code === null;
+  }) && pending;
+}
 export function lastRunTime(p: Provider, timezone: string) {
   if (!p.last_run) return displayTime(null, timezone);
   if (p.last_run.state === "running") return "Folyamatban";
@@ -377,7 +410,8 @@ export function connectionAttention(p: Provider) {
     p.allowed_datasets.length < p.datasets.length ||
     ["DATA_SYNC_RECONNECT_REQUIRED", "DATA_SYNC_PERMISSION_MISSING",
       "DATA_SYNC_CONFIGURATION_REQUIRED", "DATA_SYNC_NOT_CONNECTED"].includes(
-      p.last_run?.error_code ?? "")
+      p.last_run?.error_code ?? "") || p.last_run?.datasets.some(d =>
+        ["DATA_SYNC_RECONNECT_REQUIRED", "DATA_SYNC_PERMISSION_MISSING", "DATA_SYNC_CONFIGURATION_REQUIRED", "DATA_SYNC_NOT_CONNECTED"].includes(d.error_code ?? ""))
   );
 }
 export function providerState(p: Provider) {
@@ -390,7 +424,11 @@ export function providerState(p: Provider) {
     }[p.connection_state];
   if (p.allowed_datasets.length < p.datasets.length)
     return "Hiányzó adathozzáférés";
+  const codes = [p.last_run?.error_code, ...(p.last_run?.datasets.map(d => d.error_code) ?? [])];
+  if (codes.includes("DATA_SYNC_RECONNECT_REQUIRED")) return "Újracsatlakozás szükséges";
+  if (codes.includes("DATA_SYNC_PERMISSION_MISSING")) return "Hiányzó adathozzáférés";
   if (preservedPlansOnly(p.last_run)) return "Frissítés befejezve";
+  if (continuationOnly(p.last_run)) return "Átvétel folytatható";
   return p.last_run
     ? {
         running: "Frissítés folyamatban",
@@ -407,6 +445,6 @@ export function attention(p: Provider) {
     (connectionAttention(p) ||
       (!!p.last_run &&
         ["partial", "failed", "interrupted"].includes(p.last_run.state) &&
-        !preservedPlansOnly(p.last_run)))
+        !preservedPlansOnly(p.last_run) && !continuationOnly(p.last_run)))
   );
 }

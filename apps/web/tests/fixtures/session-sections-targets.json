@@ -1,0 +1,431 @@
+{
+  "schema_version": "session-analysis-v0.1",
+  "athlete_id": "11111111-1111-4111-8111-111111111111",
+  "timezone_name": "Europe/Budapest",
+  "retrieved_at": "2026-10-27T09:31:32.053394+00:00",
+  "session": {
+    "id": "00000000-0000-0000-0000-0000000ab631",
+    "name": null,
+    "sport": "KAYAK",
+    "external_provider": "POLAR",
+    "external_id": "calendar-session",
+    "started_at": "2026-10-23T15:35:00+00:00",
+    "ended_at": "2026-10-23T16:25:00+00:00",
+    "planned_workout_id": "00000000-0000-0000-0000-0000000ab249",
+    "planned_workout_link_source": null,
+    "duration_sec": 2700,
+    "distance_m": 8000.0,
+    "calories": 0.0,
+    "avg_hr": null,
+    "max_hr": null,
+    "avg_speed": null,
+    "max_speed": null,
+    "avg_cadence": null,
+    "max_cadence": null,
+    "avg_power": null,
+    "max_power": null,
+    "cardio_load": null,
+    "perceived_load": null,
+    "rpe": null
+  },
+  "plan": {
+    "id": "00000000-0000-0000-0000-0000000ab249",
+    "date": "2026-10-23",
+    "title": "VO2 in name is not a goal declaration",
+    "description": null,
+    "sport": "KAYAK",
+    "status": "PLANNED",
+    "planned_start_time": "2026-10-23T15:30:00+00:00",
+    "duration_sec": 2700,
+    "distance_m": null,
+    "blocks": [
+      {
+        "id": "00000000-0000-0000-0000-000000016f31",
+        "position": 0,
+        "block_type": "WORK",
+        "name": "Sebesség <script>x</script>",
+        "duration_sec": null,
+        "distance_m": null,
+        "intensity_type": "SPEED_ZONES",
+        "intensity_min": 2.0,
+        "intensity_max": 3.0,
+        "repeat_count": null,
+        "parent_block_id": null
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000016f32",
+        "position": 1,
+        "block_type": "WORK",
+        "name": "Wattos cél",
+        "duration_sec": null,
+        "distance_m": null,
+        "intensity_type": "POWER_W",
+        "intensity_min": 180.0,
+        "intensity_max": 220.0,
+        "repeat_count": null,
+        "parent_block_id": null
+      }
+    ]
+  },
+  "link_state": "linked",
+  "samples": {
+    "provider": "POLAR",
+    "time_basis": "exercise_sample_index_times_interval",
+    "exercises": [
+      {
+        "index": 0,
+        "source_path": "exerciseSamples[0]",
+        "source_start": "2026-10-23T17:35:00",
+        "heart_rate_zones": {
+          "unit": "bpm",
+          "source_path": "exerciseSamples[0].zones[0]",
+          "zones": [
+            {
+              "index": 1,
+              "low": 90,
+              "high": 110
+            },
+            {
+              "index": 2,
+              "low": 110,
+              "high": 130
+            },
+            {
+              "index": 3,
+              "low": 130,
+              "high": 150
+            },
+            {
+              "index": 4,
+              "low": 150,
+              "high": 170
+            },
+            {
+              "index": 5,
+              "low": 170,
+              "high": 190
+            }
+          ]
+        },
+        "speed_zones": {
+          "unit": "km/h",
+          "source_path": "exerciseSamples[0].zones[1]",
+          "zones": [
+            {
+              "index": 1,
+              "low": 0,
+              "high": 2
+            },
+            {
+              "index": 2,
+              "low": 2,
+              "high": 4
+            },
+            {
+              "index": 3,
+              "low": 4,
+              "high": 6
+            },
+            {
+              "index": 4,
+              "low": 6,
+              "high": 8
+            },
+            {
+              "index": 5,
+              "low": 8,
+              "high": 10
+            }
+          ]
+        },
+        "power_zones": {
+          "unit": "W",
+          "source_path": "exerciseSamples[0].zones[2]",
+          "zones": [
+            {
+              "index": 1,
+              "low": 0,
+              "high": 100
+            },
+            {
+              "index": 2,
+              "low": 100,
+              "high": 200
+            },
+            {
+              "index": 3,
+              "low": 200,
+              "high": 300
+            },
+            {
+              "index": 4,
+              "low": 300,
+              "high": 400
+            },
+            {
+              "index": 5,
+              "low": 400,
+              "high": 500
+            }
+          ]
+        }
+      }
+    ],
+    "series": [
+      {
+        "id": "e0-s0",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[0]",
+        "source_type": "HEART_RATE",
+        "metric_key": "heart_rate_bpm",
+        "unit": "bpm",
+        "interval_ms": 1000,
+        "slot_count": 5,
+        "valid_sample_count": 4,
+        "missing_sample_count": 1,
+        "values": [
+          100,
+          101,
+          null,
+          103,
+          0
+        ],
+        "issues": [
+          "MISSING_OR_INVALID_VALUES"
+        ]
+      },
+      {
+        "id": "e0-s1",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[1]",
+        "source_type": "SPEED",
+        "metric_key": "speed_kmh",
+        "unit": "km/h",
+        "interval_ms": 2000,
+        "slot_count": 4,
+        "valid_sample_count": 3,
+        "missing_sample_count": 1,
+        "values": [
+          12,
+          0,
+          10,
+          null
+        ],
+        "issues": [
+          "MISSING_OR_INVALID_VALUES"
+        ]
+      },
+      {
+        "id": "e0-s2",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[2]",
+        "source_type": "DISTANCE",
+        "metric_key": "distance_m",
+        "unit": "m",
+        "interval_ms": 1000,
+        "slot_count": 4,
+        "valid_sample_count": 4,
+        "missing_sample_count": 0,
+        "values": [
+          0,
+          3,
+          6,
+          9
+        ],
+        "issues": []
+      },
+      {
+        "id": "e0-s3",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[3]",
+        "source_type": "CADENCE",
+        "metric_key": "cadence_per_min",
+        "unit": "1/perc",
+        "interval_ms": 1000,
+        "slot_count": 3,
+        "valid_sample_count": 3,
+        "missing_sample_count": 0,
+        "values": [
+          30,
+          31,
+          32
+        ],
+        "issues": []
+      },
+      {
+        "id": "e0-s4",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[4]",
+        "source_type": "LEFT_CRANK_CURRENT_POWER",
+        "metric_key": "left_power_w",
+        "unit": "W",
+        "interval_ms": 1000,
+        "slot_count": 2,
+        "valid_sample_count": 2,
+        "missing_sample_count": 0,
+        "values": [
+          90,
+          100
+        ],
+        "issues": []
+      },
+      {
+        "id": "e0-s5",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[5]",
+        "source_type": "RIGHT_CRANK_CURRENT_POWER",
+        "metric_key": "right_power_w",
+        "unit": "W",
+        "interval_ms": 1000,
+        "slot_count": 2,
+        "valid_sample_count": 2,
+        "missing_sample_count": 0,
+        "values": [
+          95,
+          105
+        ],
+        "issues": []
+      },
+      {
+        "id": "e0-s6",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[6]",
+        "source_type": "ALTITUDE",
+        "metric_key": "altitude_m",
+        "unit": "m",
+        "interval_ms": 1000,
+        "slot_count": 3,
+        "valid_sample_count": 3,
+        "missing_sample_count": 0,
+        "values": [
+          -2,
+          0,
+          2
+        ],
+        "issues": []
+      },
+      {
+        "id": "e0-s7",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[7]",
+        "source_type": "TEMPERATURE",
+        "metric_key": "temperature_c",
+        "unit": "°C",
+        "interval_ms": null,
+        "slot_count": 2,
+        "valid_sample_count": 2,
+        "missing_sample_count": 0,
+        "values": [
+          -4,
+          2
+        ],
+        "issues": [
+          "SAMPLE_INTERVAL_UNKNOWN"
+        ]
+      }
+    ],
+    "unsupported": [
+      {
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].samples.samples[8]",
+        "source_type": "UNKNOWN_INTERVAL",
+        "slot_count": 2
+      }
+    ],
+    "issues": [],
+    "slot_count": 25,
+    "valid_sample_count": 23
+  },
+  "sections": {
+    "groups": [
+      {
+        "id": "exercises",
+        "kind": "exercises",
+        "exercise_index": null,
+        "source_path": "exerciseSamples",
+        "rows": [
+          {
+            "id": "exerciseSamples[0]",
+            "position": 0,
+            "exercise_index": 0,
+            "duration_sec": 600.0,
+            "distance_m": 1800,
+            "avg_hr": 124,
+            "avg_speed": 10.8,
+            "avg_power": null,
+            "split_time_sec": null,
+            "issues": []
+          }
+        ]
+      },
+      {
+        "id": "exerciseSamples[0].laps.laps",
+        "kind": "manual_laps",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].laps.laps",
+        "rows": [
+          {
+            "id": "exerciseSamples[0].laps.laps[0]",
+            "position": 0,
+            "exercise_index": 0,
+            "duration_sec": 120.0,
+            "distance_m": 300,
+            "avg_hr": 110,
+            "avg_speed": 9,
+            "avg_power": null,
+            "split_time_sec": 120.0,
+            "issues": []
+          },
+          {
+            "id": "exerciseSamples[0].laps.laps[1]",
+            "position": 1,
+            "exercise_index": 0,
+            "duration_sec": 180.0,
+            "distance_m": 600,
+            "avg_hr": 125,
+            "avg_speed": 12,
+            "avg_power": null,
+            "split_time_sec": 300.0,
+            "issues": []
+          },
+          {
+            "id": "exerciseSamples[0].laps.laps[2]",
+            "position": 2,
+            "exercise_index": 0,
+            "duration_sec": 300.0,
+            "distance_m": 900,
+            "avg_hr": 135,
+            "avg_speed": 10.8,
+            "avg_power": null,
+            "split_time_sec": 600.0,
+            "issues": []
+          }
+        ]
+      },
+      {
+        "id": "exerciseSamples[0].laps.autoLaps",
+        "kind": "automatic_laps",
+        "exercise_index": 0,
+        "source_path": "exerciseSamples[0].laps.autoLaps",
+        "rows": [
+          {
+            "id": "exerciseSamples[0].laps.autoLaps[0]",
+            "position": 0,
+            "exercise_index": 0,
+            "duration_sec": 200.0,
+            "distance_m": 1000,
+            "avg_hr": 140,
+            "avg_speed": null,
+            "avg_power": null,
+            "split_time_sec": null,
+            "issues": []
+          }
+        ]
+      }
+    ],
+    "row_count": 5,
+    "issues": []
+  },
+  "planning_authorized": false,
+  "workouts_changed": false
+}

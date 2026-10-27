@@ -11,7 +11,7 @@ class DataSyncInput(BaseModel):
 
     request_id: UUID
     provider: Literal["POLAR", "GARMIN", "SUUNTO"]
-    datasets: list[Literal["sessions", "targets"]] = Field(min_length=1, max_length=2)
+    datasets: list[Literal["sessions", "targets", "session_details"]] = Field(min_length=1, max_length=3)
     past_days: int = Field(default=35, ge=1, le=89, strict=True)
     future_days: int = Field(default=30, ge=0, le=30, strict=True)
 

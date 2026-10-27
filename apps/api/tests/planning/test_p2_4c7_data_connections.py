@@ -110,7 +110,7 @@ def test_opening_status_is_local_read_only_and_retains_unknown_freshness(connect
     polar = data["providers"][0]
     assert polar["connection_state"] == "connected" and polar["last_success_at"] is None
     assert polar["latest_session_at"] is not None
-    assert polar["last_run"] is None and len(polar["allowed_datasets"]) == 2
+    assert polar["last_run"] is None and polar["allowed_datasets"] == ["sessions", "targets", "session_details"]
     assert all(not p["implemented"] and not p["manual_sync_supported"] for p in data["providers"][1:])
     assert connections.provider_calls == [] and count(connections, PlanningAuditArtifactRow) == 0
     assert "token" not in str(data).lower() and "scopes" not in str(data)
@@ -216,7 +216,7 @@ def test_scope_and_connection_requirements_are_checked_before_reservation(connec
         session.commit()
     post(connections, status=409)
     polar = get(connections)["providers"][0]
-    assert polar["allowed_datasets"] == ["sessions"]
+    assert polar["allowed_datasets"] == ["sessions", "session_details"]
     post(connections, proposal(datasets=["sessions"]))
 
 

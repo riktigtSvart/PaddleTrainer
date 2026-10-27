@@ -101,6 +101,15 @@ def decode(record, owner):
 
 
 def validate_details(item, code):
+    if "details" in item:
+        data = item["details"]
+        require(item["dataset"] == "session_details" and isinstance(data, dict) and set(data) == {
+            "requested_sessions", "already_complete", "fetched_sessions", "with_samples", "without_samples",
+            "pending_sessions", "processed_days", "pending_days"}, code)
+        require(all(type(n) is int and n >= 0 for n in data.values()), code)
+        require(data["already_complete"] + data["fetched_sessions"] + data["pending_sessions"] == data["requested_sessions"]
+            and data["with_samples"] + data["without_samples"] == data["fetched_sessions"]
+            and data["fetched_sessions"] == item["updated"] and data["pending_sessions"] == item["skipped"], code)
     if "pairing" in item:
         require(isinstance(item["pairing"], dict) and set(item["pairing"]) == set(PAIRING_COUNTS), code)
         require(all(type(n) is int and n >= 0 for n in item["pairing"].values()), code)
@@ -315,11 +324,15 @@ async def import_dataset(session, user, dataset, window, report):
         await sync_recent_sessions(session, user, first=first,
             last=date.fromisoformat(window["sessions_to_exclusive"]),
             include_enrichment=False, report=report)
+    elif dataset == "session_details":
+        from app.services.polar_session_details import synchronize_details
+        await synchronize_details(session, user, first=first,
+            last=date.fromisoformat(window["sessions_to_exclusive"]), report=report)
     else:
         await sync_training_targets(session, user, first=first,
             last=date.fromisoformat(window["targets_to_exclusive"]),
             protect_tracked_plans=True, report=report)
-    if report["skipped"]:
+    if report["skipped"] and not report.get("error_code"):
         report["error_code"] = (
             "DATA_SYNC_PROTECTED_PLANS_SKIPPED"
             if set(report.get("skip_reasons", {})) == {"protected_plan"}

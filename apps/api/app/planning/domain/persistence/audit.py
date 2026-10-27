@@ -32,6 +32,7 @@ class AuditArtifactKind(StrEnum):
     ATHLETE_AVAILABILITY = "athlete_availability"
     ATHLETE_POLAR_IMPORT = "athlete_polar_import"
     WORKOUT_GOAL_TAG = "workout_goal_tag"
+    CALENDAR_WORKOUT_MOVE = "calendar_workout_move"
     CALENDAR_CONSTRAINT_REVISION = "calendar_constraint_revision"
     DATA_SYNC_STARTED = "data_sync_started"
     DATA_SYNC_SUCCEEDED = "data_sync_succeeded"

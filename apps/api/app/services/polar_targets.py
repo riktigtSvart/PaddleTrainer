@@ -416,6 +416,10 @@ async def sync_training_targets(
     )
     payload = response_payload.get("trainingTarget") if isinstance(response_payload, dict) else response_payload
 
+    # Serialize app timetable edits and target writes in owner -> plan order.
+    # Provider I/O has already completed, so no owner lock spans that request.
+    await db.execute(select(User.id).where(User.id == user.id).with_for_update())
+
     imported = 0
     updated = 0
     skipped = 0
@@ -458,7 +462,7 @@ async def sync_training_targets(
             continue
 
         existing = await db.scalar(
-            select(PlannedWorkout)
+            select(PlannedWorkout).with_for_update()
             .options(
                 selectinload(
                     PlannedWorkout.blocks
@@ -549,10 +553,12 @@ async def sync_training_targets(
                 await archive_payload(db, user, "DATA_SYNC_PREVIOUS_TARGET", {"workout_id": str(existing.id), "raw_data": existing.raw_data})
             workout = existing
 
-            workout.date = planned_start.date()
-            workout.planned_start_time = (
-                planned_start
-            )
+            from app.planning.application.calendar_moves import latest as latest_move
+            from app.planning.infrastructure.repositories.postgres_planning_audit import SqlAlchemyPlanningAuditRepository
+            moved = await latest_move(SqlAlchemyPlanningAuditRepository(db), db, str(user.id), str(workout.id))
+            if moved is None:
+                workout.date = planned_start.date()
+                workout.planned_start_time = planned_start
             workout.sport = sport
 
             workout.title = (

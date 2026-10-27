@@ -247,9 +247,18 @@ async def feed(*, owner, start, end, repository, session):
             artifact = goals.get((kind, str(entity_id)))
             return None if artifact is None else {**reference(artifact), "primary_goal": artifact["proposal"]["primary_goal"]}
 
+        from app.models.entities import WorkoutStatus
+        from app.planning.infrastructure.persistence.sqlalchemy_models import PlanningLogicalPlanRow
+        plan_ids = [p.id for p in plans]
+        executed = set((await session.execute(select(WorkoutSession.planned_workout_id).where(WorkoutSession.planned_workout_id.in_(plan_ids)))).scalars()) if plan_ids else set()
+        approved = set((await session.execute(select(PlanningLogicalPlanRow.source_workout_id).where(PlanningLogicalPlanRow.source_workout_id.in_(plan_ids)))).scalars()) if plan_ids else set()
+        from app.planning.application import calendar_moves
+        def movement(p):
+            reason = "CALENDAR_MOVE_ALREADY_EXECUTED" if p.id in executed else "CALENDAR_MOVE_APPROVED_PLAN_REVIEW_REQUIRED" if p.id in approved else "CALENDAR_MOVE_STATUS_BLOCKED" if p.status not in (WorkoutStatus.DRAFT, WorkoutStatus.PLANNED, WorkoutStatus.SCHEDULED) else None
+            return {"allowed": reason is None, "blocked_reason": reason, "source_hash": digest(calendar_moves.source(p))}
         planned = [{**WorkoutOut.model_validate(p).model_dump(mode="json"),
             "planned_start_time": aware(p.planned_start_time).isoformat() if p.planned_start_time else None,
-            "goal_tag": tag("planned", p.id), "duration_estimate": estimates.get(str(p.id))} for p in plans]
+            "reschedule": movement(p), "goal_tag": tag("planned", p.id), "duration_estimate": estimates.get(str(p.id))} for p in plans]
         actual = []
         for s in sessions:
             item = {"id": str(s.id), "sport": s.sport.value, "name": s.name,

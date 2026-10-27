@@ -36,10 +36,11 @@ export function UndoControl({ disabled = true, explanation = "Korábbi napirendi
     <span id={hintId} className="pt-sr-only">{explanation}</span>
   </span>;
 }
-export default function QuickEditor({ context, request, disabled, onSaved, onLockedChange, toolbarTarget }: {
+export default function QuickEditor({ context, request, disabled, onSaved, onLockedChange, toolbarTarget, workoutUndo }: {
   context: ScheduleContext | null; request: EditRequest | null; disabled: boolean; onSaved: () => void;
   onLockedChange?: (locked: boolean) => void;
   toolbarTarget?: HTMLElement | null;
+  workoutUndo?: { createdAt: string; disabled: boolean; explanation: string; run: () => void } | null;
 }) {
   const dialog = useRef<HTMLDialogElement>(null), transmitting = useRef(false);
   const [draft, setDraft] = useState<Draft | null>(null), [base, setBase] = useState<ScheduleContext | null>(null);
@@ -186,7 +187,10 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
     : ["A legutóbbi mentett napirendi módosítás visszavonása.",
       ...changes.slice(0, 2).map((change) => `${change.title}\nMost: ${short(change.current)}\nVisszaállítás: ${short(change.restored)}`),
       ...(changes.length > 2 ? [`További ${changes.length - 2} változás az előnézetben.`] : [])].join("\n");
-  const undoControl = <UndoControl disabled={undoDisabled} explanation={undoExplanation} onClick={previewUndo} />;
+  const slotTime = Math.max(...[undo?.after.artifact.created_at, context?.saved?.artifact.created_at, context?.availability?.artifact.created_at].map(value => value ? Date.parse(value) : 0));
+  const external = !!workoutUndo && Date.parse(workoutUndo.createdAt) > slotTime;
+  const undoControl = external ? <UndoControl disabled={disabled || busy || !!draft || !!pending || blocked || !ready || workoutUndo.disabled} explanation={workoutUndo.explanation} onClick={workoutUndo.run} />
+    : <UndoControl disabled={undoDisabled} explanation={undoExplanation} onClick={previewUndo} />;
   return <section className="pt-quick-control" aria-label="Napirend szerkesztése">
     {toolbarTarget ? createPortal(undoControl, toolbarTarget) : toolbarTarget === undefined ? <div className="pt-editor-tools">{undoControl}</div> : null}
     {!ready && <span className="pt-notice">Korábbi napirendi mentések ellenőrzése…</span>}

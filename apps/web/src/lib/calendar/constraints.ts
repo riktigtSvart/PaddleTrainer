@@ -92,6 +92,9 @@ export const issueLabels: Record<string, string> = {
   CALENDAR_CONSTRAINT_DURATION_INVALID: "A kezdés és a befejezés nem ad érvényes időablakot.",
 };
 export const conflictLabels: Record<string, string> = {
+  OTHER_TRAINING_TIME_UNKNOWN: "A másik edzés végideje hiányzik; az átfedés nem dönthető el.",
+  TRAINING_OVERLAP: "Másik tervezett vagy teljesített edzéssel átfedi egymást.",
+  ESTIMATED_TRAINING_OVERLAP: "Becslés alapján másik edzéssel átfedés lehetséges.",
   WORKOUT_OVERLAP: "Az edzés és az elfoglaltság átfedi egymást.",
   START_IN_COMMITMENT: "Az edzés az elfoglaltság idején kezdődik.",
   PLAN_END_UNKNOWN: "Az edzés végideje hiányzik; az átfedés nem dönthető el.",

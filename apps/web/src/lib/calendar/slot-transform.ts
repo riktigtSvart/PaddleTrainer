@@ -1,8 +1,8 @@
-import { addDays, requireValue } from "./contracts";
+import { addDays, localParts, requireValue } from "./contracts";
 import type { CalendarEvent } from "./contracts";
 
 export type DragMode = "move" | "start" | "end";
-export type SlotChange = { date: string; start_time: string; end_time: string; ends_next_day: boolean };
+export type SlotChange = { date: string; start_time: string; end_time: string; ends_next_day: boolean; start_seconds?: number };
 const minutes = (clock: string) => Number(clock.slice(0, 2)) * 60 + Number(clock.slice(3));
 const clock = (n: number) => `${Math.floor(n / 60).toString().padStart(2, "0")}:${(n % 60).toString().padStart(2, "0")}`;
 export function canTransform(event: CalendarEvent) {
@@ -28,4 +28,18 @@ export function transformSlot(event: CalendarEvent, delta: number, days: number,
   const date = addDays(event.occurrence?.source_date ?? event.date, shift + (mode === "move" ? days : 0));
   requireValue(date >= "1900-01-01" && date <= "2100-12-31", "Az időpont a támogatott naptáron kívülre esik.");
   return { date, start_time: clock(first), end_time: clock(last % 1440), ends_next_day: last >= 1440 };
+}
+
+export function canMoveTraining(event: CalendarEvent) {
+  return event.kind === "planned" && event.reschedule?.allowed === true && !!event.start && !!event.end &&
+    Date.parse(event.start) % 1000 === 0 && Date.parse(event.end) > Date.parse(event.start) && Date.parse(event.end) - Date.parse(event.start) <= 86400000;
+}
+export function moveTraining(event: CalendarEvent, delta: number, days: number, zone: string): SlotChange {
+  requireValue(canMoveTraining(event) && Number.isInteger(delta) && delta % 5 === 0 && Number.isInteger(days), "Ez az edzés kattintással helyezhető át.");
+  const start = localParts(event.start!, zone), seconds = new Date(event.start!).getUTCSeconds();
+  const first = Math.floor(start.minute) + delta, shift = Math.floor(first / 1440), normalized = first - shift * 1440;
+  const length = (Date.parse(event.end!) - Date.parse(event.start!)) / 60000;
+  const last = normalized + Math.ceil(length), date = addDays(start.date, days + shift);
+  requireValue(date >= "1900-01-01" && date <= "2100-12-31");
+  return {date, start_time: clock(normalized), end_time: clock(last % 1440), ends_next_day: last >= 1440, start_seconds: seconds};
 }

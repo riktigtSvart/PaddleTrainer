@@ -17,7 +17,7 @@ import { constraintDescription } from "@/lib/calendar/constraint-forms";
 import type { Opportunity } from "@/lib/calendar/constraints";
 import { estimateLabel, estimateRange } from "@/lib/calendar/duration-estimate";
 import EditableSlot from "./editable-slot";
-import { canTransform } from "@/lib/calendar/slot-transform";
+import { canTransform, canMoveTraining } from "@/lib/calendar/slot-transform";
 import type { SlotChange } from "@/lib/calendar/slot-transform";
 export function eventDuration(e: CalendarEvent) { return e.durationEstimate ? estimateLabel(e.durationEstimate) : formatDuration(e.duration); }
 
@@ -165,7 +165,7 @@ export default function TimeGrid({
     </>;
     const button = <button type="button" key={s.event.key} className={className} style={style}
       onClick={() => open(s.event)} aria-label={label} title={label}>{content}</button>;
-    return onTransform && background && canTransform(s.event) && !s.point && !s.clockChange
+    return onTransform && (background && canTransform(s.event) || canMoveTraining(s.event)) && !s.point && !s.clockChange
       ? <EditableSlot key={s.event.key} event={s.event} segment={s} zone={feed.timezone_name} hours={to - from}
         style={style} className={className} label={label} disabled={editDisabled} onTransform={onTransform} open={() => open(s.event)}>{content}</EditableSlot>
       : button;

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent, ReactNode } from "react";
 import { dateDistance, formatDay, localParts } from "@/lib/calendar/contracts";
 import type { CalendarEvent, Segment } from "@/lib/calendar/contracts";
-import { minuteDelta, transformSlot } from "@/lib/calendar/slot-transform";
+import { minuteDelta, transformSlot, moveTraining } from "@/lib/calendar/slot-transform";
 import type { DragMode, SlotChange } from "@/lib/calendar/slot-transform";
 
 type Gesture = { id: number; x: number; y: number; mode: DragMode; active: boolean; height: number; snapshot: string };
@@ -15,7 +15,7 @@ export default function EditableSlot({ event, segment, zone, hours, style, disab
 }) {
   const shell = useRef<HTMLDivElement>(null), gesture = useRef<Gesture | null>(null), skipClickUntil = useRef(0);
   const [ghost, setGhost] = useState<Ghost | null>(null), [message, setMessage] = useState("");
-  const snapshot = JSON.stringify([event.key, event.start, event.end, event.occurrence, event.window]);
+  const snapshot = JSON.stringify([event.key, event.start, event.end, event.occurrence, event.window, event.reschedule, event.duration]);
   const cancel = useCallback((text = "Húzás elvetve.") => { gesture.current = null; setGhost(null); setMessage(text); }, []);
   useEffect(() => {
     if (!message || ghost) return;
@@ -47,7 +47,8 @@ export default function EditableSlot({ event, segment, zone, hours, style, disab
     if (!column) throw new Error("Engedd el egy látható napon belül, vagy az Escape-pel vesd el.");
     const rect = column.getBoundingClientRect();
     if (e.clientY < rect.top || e.clientY > rect.bottom) throw new Error("A húzás a látható óratartományon kívülre került. Válaszd a teljes napot, vagy szerkeszd az időpontot kattintással.");
-    const change = transformSlot(event, minuteDelta(e.clientY, g.y, g.height, hours), dateDistance(segment.day, column.dataset.date!), g.mode);
+    const delta = minuteDelta(e.clientY, g.y, g.height, hours), days = dateDistance(segment.day, column.dataset.date!);
+    const change = event.kind === "planned" ? moveTraining(event, delta, days, zone) : transformSlot(event, delta, days, g.mode);
     const start = Number(change.start_time.slice(0, 2)) * 60 + Number(change.start_time.slice(3));
     const end = Number(change.end_time.slice(0, 2)) * 60 + Number(change.end_time.slice(3)) + (change.ends_next_day ? 1440 : 0);
     const from = hours === 24 ? 0 : 360;
@@ -73,7 +74,9 @@ export default function EditableSlot({ event, segment, zone, hours, style, disab
     skipClickUntil.current = Date.now() + 400;
     if (disabled || g.snapshot !== snapshot) { setMessage("A naptár megváltozott; kezdd újra a friss idősávon."); return; }
     try {
-      const { change } = locate(e, g), original = event.occurrence?.details ?? event.window!;
+      const { change } = locate(e, g);
+      if (event.kind === "planned") { const old = localParts(event.start!, zone); if (change.date !== old.date || change.start_time !== old.clock) onTransform(event, change); return; }
+      const original = event.occurrence?.details ?? event.window!;
       setMessage("");
       if (change.date !== (event.occurrence?.source_date ?? event.date) || change.start_time !== original.start_time ||
         change.end_time !== original.end_time || change.ends_next_day !== original.ends_next_day) onTransform(event, change);
@@ -85,13 +88,13 @@ export default function EditableSlot({ event, segment, zone, hours, style, disab
   const firstEdge = segment.day === start.date && segment.top === start.minute && start.minute >= (hours === 24 ? 0 : 360);
   const lastEdge = (segment.day === end.date && segment.bottom === end.minute || segment.bottom === 1440 && end.minute === 0)
     && segment.bottom <= (hours === 24 ? 1440 : 1320);
-  return <div ref={shell} className={`pt-slot-shell${ghost ? " is-dragging" : ""}`} style={{ ...style, left: 3, right: 3 }}>
+  return <div ref={shell} className={`pt-slot-shell${ghost ? " is-dragging" : ""}`} style={event.kind === "planned" ? style : { ...style, left: 3, right: 3 }}>
     <button type="button" className={className} aria-label={label} title={label} aria-disabled={disabled}
       onPointerDown={(e) => down(e, "move")} onPointerMove={move} onPointerUp={up} onPointerCancel={() => cancel()} onLostPointerCapture={lostCapture} onClick={click}
       style={{ ...style, top: 0, height: "100%", left: 0, right: 0, marginLeft: 0, width: "100%" }}>{children}</button>
-    {!disabled && firstEdge && <button type="button" className="pt-slot-handle is-start" aria-label={`Kezdés szerkesztése: ${event.title}`} title="Kezdés húzása · kattintással pontos szerkesztés"
+    {event.kind !== "planned" && !disabled && firstEdge && <button type="button" className="pt-slot-handle is-start" aria-label={`Kezdés szerkesztése: ${event.title}`} title="Kezdés húzása · kattintással pontos szerkesztés"
       onPointerDown={(e) => down(e, "start")} onPointerMove={move} onPointerUp={up} onPointerCancel={() => cancel()} onLostPointerCapture={lostCapture} onClick={click}><span /></button>}
-    {!disabled && lastEdge && <button type="button" className="pt-slot-handle is-end" aria-label={`Befejezés szerkesztése: ${event.title}`} title="Befejezés húzása · kattintással pontos szerkesztés"
+    {event.kind !== "planned" && !disabled && lastEdge && <button type="button" className="pt-slot-handle is-end" aria-label={`Befejezés szerkesztése: ${event.title}`} title="Befejezés húzása · kattintással pontos szerkesztés"
       onPointerDown={(e) => down(e, "end")} onPointerMove={move} onPointerUp={up} onPointerCancel={() => cancel()} onLostPointerCapture={lostCapture} onClick={click}><span /></button>}
     {ghost && <div className="pt-drag-ghost" style={{ left: ghost.left, top: ghost.top, width: ghost.width, height: Math.max(20, ghost.height) }} aria-hidden="true"><strong>{event.title}</strong><span>{ghost.change.start_time}–{ghost.change.end_time}{ghost.change.ends_next_day ? " +1 nap" : ""}</span></div>}
     {message && <span className={ghost ? "pt-sr-only" : "pt-drag-feedback"} role="status">{message}</span>}

@@ -95,3 +95,25 @@ async def constraint_save(payload: ScheduleInput, response: Response, db: DB, ow
         repository=SqlAlchemyPlanningAuditRepository(db), session=db))
     response.status_code = 200 if result["reused"] else 201
     return result
+
+
+from uuid import UUID
+from app.planning.application import calendar_moves as moves
+from app.schemas.calendar_moves import MoveProposal, MoveSave
+
+@router.get("/moves/{plan_id}")
+async def move_context(plan_id: UUID, db: DB, owner: Owner):
+    _fresh(db)
+    return await call(moves.context(owner=owner, plan_id=str(plan_id), repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+
+@router.post("/moves/preview")
+async def move_preview(payload: MoveProposal, db: DB, owner: Owner):
+    _fresh(db)
+    return await call(moves.preview(owner=owner, proposal=payload.model_dump(mode="json"), repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+
+@router.post("/moves", status_code=201)
+async def move_save(payload: MoveSave, response: Response, db: DB, owner: Owner):
+    _fresh(db)
+    result = await call(moves.save(owner=owner, proposal=payload.proposal.model_dump(mode="json"), review_hash=payload.review_hash, repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+    response.status_code = 200 if result["reused"] else 201
+    return result

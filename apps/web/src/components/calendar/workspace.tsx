@@ -35,6 +35,9 @@ import StateSummary from "./state-summary";
 import ConflictSummary from "./conflict-summary";
 import DurationDetails from "./duration-details";
 import { estimateLabel } from "@/lib/calendar/duration-estimate";
+import MoveEditor from "./move-editor";
+import type { MoveRequest } from "./move-editor";
+import type { MoveUndoState } from "@/lib/calendar/moves";
 import QuickEditor, { UndoControl } from "./quick-editor";
 import type { EditRequest } from "./quick-editor";
 import { loadConstraints } from "@/lib/calendar/constraint-client";
@@ -55,6 +58,9 @@ export default function CalendarWorkspace() {
     [constraintLoading, setConstraintLoading] = useState(true),
     [editRequest, setEditRequest] = useState<EditRequest | null>(null),
     [editorLocked, setEditorLocked] = useState(true),
+    [moveRequest, setMoveRequest] = useState<MoveRequest | null>(null),
+    [moveLocked, setMoveLocked] = useState(true),
+    [moveUndo, setMoveUndo] = useState<MoveUndoState | null>(null),
     [editorTools, setEditorTools] = useState<HTMLDivElement | null>(null);
   const [data, setData] = useState<Feed | null>(null),
     [view, setView] = useState<{ date: string | null; span: Span }>({
@@ -214,8 +220,12 @@ export default function CalendarWorkspace() {
     );
   }
   function editSlot(date: string, event: CalendarEvent | null = null, change?: SlotChange) {
-    if (!constraintsMatch || constraintLoading || loading || editorLocked) return;
+    if (!constraintsMatch || constraintLoading || loading || editorLocked || moveLocked) return;
     setEditRequest((old) => ({ serial: (old?.serial ?? 0) + 1, date, event, change }));
+  }
+  function movePlan(event: CalendarEvent, change?: SlotChange) {
+    if (loading || constraintLoading || !constraintsMatch || editorLocked || moveLocked || event.kind !== "planned") return;
+    setMoveRequest(old => ({ serial: (old?.serial ?? 0) + 1, planId: event.entityId, change, expectedSourceHash: change ? event.reschedule?.source_hash : undefined }));
   }
   async function transmit(value: Pending) {
     if (!data || sendingRef.current || value.owner !== data.athlete_id) return;
@@ -439,7 +449,7 @@ export default function CalendarWorkspace() {
         </div>
         <div className="pt-calendar-edit-actions">
           <div ref={setEditorTools}>{!editorTools && <UndoControl />}</div>
-          <button className="pt-button" type="button" disabled={editorLocked || !constraintsMatch || constraintLoading || loading || !!constraints?.timezone_review_required} onClick={() => editSlot(activeDate)}>
+          <button className="pt-button" type="button" disabled={editorLocked || moveLocked || !constraintsMatch || constraintLoading || loading || !!constraints?.timezone_review_required} onClick={() => editSlot(activeDate)}>
             <Icon name="clock" />
             Új idősáv / elfoglaltság
           </button>
@@ -490,7 +500,11 @@ export default function CalendarWorkspace() {
       {constraintError && <div className="pt-message is-error" role="alert">A napirendi korlátok nem tölthetők be: {constraintError} A Frissítés gombbal újrapróbálható.</div>}
       {data && constraints && !constraintsMatch && !constraintError && !loading && !constraintLoading && <div className="pt-message is-error" role="alert">A naptár és az idősávok közben megváltoztak. A Frissítés gombbal olvasd újra az időszakot.</div>}
       {constraints?.timezone_review_required && <div className="pt-message is-error" role="alert">A tárolt idősávok időzónája eltér a profilétól. Az időpontok felülvizsgálandók.</div>}
-      <QuickEditor context={constraintsMatch ? constraints : null} request={editRequest} disabled={loading || constraintLoading || !constraintsMatch} onSaved={refresh} onLockedChange={setEditorLocked} toolbarTarget={editorTools} />
+      <QuickEditor context={constraintsMatch ? constraints : null} request={editRequest} disabled={moveLocked || loading || constraintLoading || !constraintsMatch} onSaved={refresh} onLockedChange={setEditorLocked} toolbarTarget={editorTools}
+        workoutUndo={moveUndo && moveUndo.owner === data?.athlete_id ? { ...moveUndo, disabled: moveUndo.disabled,
+          run: () => setMoveRequest(old => ({ serial: (old?.serial ?? 0) + 1, planId: moveUndo.planId, undo: true })) } : null} />
+      <MoveEditor owner={data?.athlete_id ?? null} request={moveRequest} disabled={editorLocked || loading || constraintLoading || !constraintsMatch}
+        onSaved={refresh} onLockedChange={setMoveLocked} onUndoChange={setMoveUndo} />
       {constraintsMatch && constraints && <ConflictSummary conflicts={constraints.conflicts} estimates={constraints.duration_estimates} openPlan={(id) => { const event = allEvents.find((e) => e.kind === "planned" && e.entityId === id); if (event) open(event); }} />}
       {pending && (
         <div className="pt-message" role="status">
@@ -559,9 +573,9 @@ export default function CalendarWorkspace() {
                   selectDay={(d) => changeView(d, 1)}
                   expandHours={() => setFullDay(true)}
                   opportunities={constraintsMatch ? constraints?.opportunities : undefined}
-                  onTransform={(event, change) => editSlot(event.date, event, change)}
-                  editDisabled={editorLocked || loading || constraintLoading || !constraintsMatch || !!constraints?.timezone_review_required}
-                  addSlot={constraintsMatch && !constraintLoading && !loading && !editorLocked ? (date) => editSlot(date) : undefined}
+                  onTransform={(event, change) => event.kind === "planned" ? movePlan(event, change) : editSlot(event.date, event, change)}
+                  editDisabled={editorLocked || moveLocked || loading || constraintLoading || !constraintsMatch || !!constraints?.timezone_review_required}
+                  addSlot={constraintsMatch && !constraintLoading && !loading && !editorLocked && !moveLocked ? (date) => editSlot(date) : undefined}
                 />
               ) : (
                 <PeriodGrid
@@ -572,7 +586,7 @@ export default function CalendarWorkspace() {
                   overview={view.span === 144}
                   open={open}
                   selectDay={(d) => changeView(d, 1)}
-                  addSlot={constraintsMatch && !constraintLoading && !loading && !editorLocked ? (date) => editSlot(date) : undefined}
+                  addSlot={constraintsMatch && !constraintLoading && !loading && !editorLocked && !moveLocked ? (date) => editSlot(date) : undefined}
                 />
               )}
               <div
@@ -668,6 +682,7 @@ export default function CalendarWorkspace() {
                     <Icon name="close" />
                   </button>
                 </div>
+                {selected.kind === "planned" && <button type="button" className="pt-button" disabled={loading || editorLocked || moveLocked || !constraintsMatch || constraintLoading} onClick={() => movePlan(selected)}>Edzés áthelyezése…</button>}
                 {selected.start && (
                   <p>
                     {localParts(selected.start, data.timezone_name).clock}

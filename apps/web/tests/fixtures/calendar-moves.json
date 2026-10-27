@@ -1,0 +1,306 @@
+{
+  "context": {
+    "schema_version": "calendar-workout-move-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "plan_id": "00000000-0000-0000-0000-000000013c6a",
+    "title": "Separate plan",
+    "timezone_name": "Europe/Budapest",
+    "current": {
+      "date": "2026-10-23",
+      "planned_start_time": "2026-10-23T15:40:00+00:00"
+    },
+    "source_hash": "110ec86f8d451dc4bafd73cc3869fc8073e88fe83f4afbbb5526cba679b1d959",
+    "previous_reference": null,
+    "restore": null,
+    "allowed": true,
+    "blocked_reason": null,
+    "planning_authorized": false,
+    "training_dose_changed": false,
+    "provider_writeback": false
+  },
+  "proposal": {
+    "request_id": "00000000-0000-0000-0000-0000000182b9",
+    "plan_id": "00000000-0000-0000-0000-000000013c6a",
+    "expected_source_hash": "110ec86f8d451dc4bafd73cc3869fc8073e88fe83f4afbbb5526cba679b1d959",
+    "previous_reference": null,
+    "timezone_name": "Europe/Budapest",
+    "date": "2026-10-24",
+    "start_time": "06:00",
+    "start_fold": null
+  },
+  "preview": {
+    "schema_version": "calendar-workout-move-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "plan_id": "00000000-0000-0000-0000-000000013c6a",
+    "title": "Separate plan",
+    "proposal": {
+      "request_id": "00000000-0000-0000-0000-0000000182b9",
+      "plan_id": "00000000-0000-0000-0000-000000013c6a",
+      "expected_source_hash": "110ec86f8d451dc4bafd73cc3869fc8073e88fe83f4afbbb5526cba679b1d959",
+      "previous_reference": null,
+      "timezone_name": "Europe/Budapest",
+      "date": "2026-10-24",
+      "start_time": "06:00",
+      "start_fold": null
+    },
+    "proposal_hash": "0b16b86fcb03835c6e05a3df516a36826615c6429b362112cae312c6e485c719",
+    "before": {
+      "date": "2026-10-23",
+      "planned_start_time": "2026-10-23T15:40:00+00:00"
+    },
+    "after": {
+      "date": "2026-10-24",
+      "planned_start_time": "2026-10-24T04:00:00+00:00"
+    },
+    "constraints_reference": null,
+    "availability_reference": null,
+    "conflicts": [],
+    "duration_estimate": null,
+    "period_context": null,
+    "period_warning": null,
+    "timezone_review_required": false,
+    "planning_authorized": false,
+    "training_dose_changed": false,
+    "provider_writeback": false,
+    "review_hash": "344dba23e592510e119d705f9f0976d36ffa1c9e76c6215e949392d440c2b21e"
+  },
+  "receipt": {
+    "identity_scope": "APPLICATION_DEMO_USER",
+    "artifact": {
+      "schema_version": "calendar-workout-move-v0.1",
+      "artifact_id": "pt-workout-move:32f05eea9ba1874c8f2d76b39933ce5eeb111e6b502c8690300fb2872940357e:000000000000000000000000000182b9",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "proposal": {
+        "request_id": "00000000-0000-0000-0000-0000000182b9",
+        "plan_id": "00000000-0000-0000-0000-000000013c6a",
+        "expected_source_hash": "110ec86f8d451dc4bafd73cc3869fc8073e88fe83f4afbbb5526cba679b1d959",
+        "previous_reference": null,
+        "timezone_name": "Europe/Budapest",
+        "date": "2026-10-24",
+        "start_time": "06:00",
+        "start_fold": null
+      },
+      "revision": 1,
+      "created_at": "2026-10-22T09:00:00.000005+00:00",
+      "before": {
+        "date": "2026-10-23",
+        "planned_start_time": "2026-10-23T15:40:00+00:00"
+      },
+      "after": {
+        "date": "2026-10-24",
+        "planned_start_time": "2026-10-24T04:00:00+00:00"
+      },
+      "source_before": {
+        "workout": {
+          "id": "00000000-0000-0000-0000-000000013c6a",
+          "date": "2026-10-23",
+          "planned_start_time": "2026-10-23T15:40:00+00:00",
+          "sport": "KAYAK",
+          "title": "Separate plan",
+          "description": null,
+          "duration_sec": 1200,
+          "distance_m": null,
+          "intensity_type": null,
+          "status": "PLANNED",
+          "source": "MANUAL",
+          "polar_target_id": null,
+          "training_period_id": null,
+          "blocks": []
+        },
+        "updated_at": "2026-10-26T21:00:23.190499+00:00",
+        "raw_data_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+      },
+      "review_hash": "344dba23e592510e119d705f9f0976d36ffa1c9e76c6215e949392d440c2b21e",
+      "review": {
+        "schema_version": "calendar-workout-move-v0.1",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "plan_id": "00000000-0000-0000-0000-000000013c6a",
+        "title": "Separate plan",
+        "proposal": {
+          "request_id": "00000000-0000-0000-0000-0000000182b9",
+          "plan_id": "00000000-0000-0000-0000-000000013c6a",
+          "expected_source_hash": "110ec86f8d451dc4bafd73cc3869fc8073e88fe83f4afbbb5526cba679b1d959",
+          "previous_reference": null,
+          "timezone_name": "Europe/Budapest",
+          "date": "2026-10-24",
+          "start_time": "06:00",
+          "start_fold": null
+        },
+        "proposal_hash": "0b16b86fcb03835c6e05a3df516a36826615c6429b362112cae312c6e485c719",
+        "before": {
+          "date": "2026-10-23",
+          "planned_start_time": "2026-10-23T15:40:00+00:00"
+        },
+        "after": {
+          "date": "2026-10-24",
+          "planned_start_time": "2026-10-24T04:00:00+00:00"
+        },
+        "constraints_reference": null,
+        "availability_reference": null,
+        "conflicts": [],
+        "duration_estimate": null,
+        "period_context": null,
+        "period_warning": null,
+        "timezone_review_required": false,
+        "planning_authorized": false,
+        "training_dose_changed": false,
+        "provider_writeback": false,
+        "review_hash": "344dba23e592510e119d705f9f0976d36ffa1c9e76c6215e949392d440c2b21e"
+      },
+      "planning_authorized": false,
+      "training_dose_changed": false,
+      "calendar_timing_changed": true,
+      "provider_writeback": false,
+      "content_hash": "dd74508fb22a2a3822a8b3dac936ae32ebe0e0fd50d8612e5c9049dd658b22fb"
+    },
+    "committed": true,
+    "reused": false,
+    "durable_available_at": "2026-10-22T09:00:00.000006+00:00",
+    "planning_authorized": false,
+    "training_dose_changed": false,
+    "provider_writeback": false
+  },
+  "after": {
+    "schema_version": "calendar-workout-move-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "plan_id": "00000000-0000-0000-0000-000000013c6a",
+    "title": "Separate plan",
+    "timezone_name": "Europe/Budapest",
+    "current": {
+      "date": "2026-10-24",
+      "planned_start_time": "2026-10-24T04:00:00+00:00"
+    },
+    "source_hash": "3f861b67e9143ec240612ee3d39712a52b737973b232c12ccf39bba829626cdf",
+    "previous_reference": {
+      "artifact_id": "pt-workout-move:32f05eea9ba1874c8f2d76b39933ce5eeb111e6b502c8690300fb2872940357e:000000000000000000000000000182b9",
+      "content_hash": "dd74508fb22a2a3822a8b3dac936ae32ebe0e0fd50d8612e5c9049dd658b22fb"
+    },
+    "restore": {
+      "date": "2026-10-23",
+      "planned_start_time": "2026-10-23T15:40:00+00:00"
+    },
+    "allowed": true,
+    "blocked_reason": null,
+    "planning_authorized": false,
+    "training_dose_changed": false,
+    "provider_writeback": false
+  },
+  "feed": {
+    "schema_version": "calendar-workspace-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-22",
+    "start_date": "2026-10-19",
+    "end_date": "2026-11-01",
+    "retrieved_at": "2026-10-22T09:00:00.000008+00:00",
+    "planned": [
+      {
+        "id": "00000000-0000-0000-0000-0000000ab249",
+        "date": "2026-10-23",
+        "planned_start_time": "2026-10-23T15:30:00+00:00",
+        "sport": "KAYAK",
+        "title": "VO2 in name is not a goal declaration",
+        "description": null,
+        "duration_sec": 2700,
+        "distance_m": null,
+        "intensity_type": null,
+        "status": "PLANNED",
+        "source": "MANUAL",
+        "polar_target_id": null,
+        "training_period_id": null,
+        "blocks": [],
+        "reschedule": {
+          "allowed": false,
+          "blocked_reason": "CALENDAR_MOVE_ALREADY_EXECUTED",
+          "source_hash": "98024b1ea891de9d5ac0c53d08793c4a79865365dd20ee01471261d6106ae88f"
+        },
+        "goal_tag": null,
+        "duration_estimate": null
+      },
+      {
+        "id": "00000000-0000-0000-0000-0000000ab24a",
+        "date": "2026-10-23",
+        "planned_start_time": null,
+        "sport": "RUNNING",
+        "title": "Untimed",
+        "description": null,
+        "duration_sec": null,
+        "distance_m": null,
+        "intensity_type": null,
+        "status": "PLANNED",
+        "source": "MANUAL",
+        "polar_target_id": null,
+        "training_period_id": null,
+        "blocks": [],
+        "reschedule": {
+          "allowed": true,
+          "blocked_reason": null,
+          "source_hash": "8b72b9d9bcdc0d2093c854adbd40c3b8e7398d4f3857a424f3cefce397980734"
+        },
+        "goal_tag": null,
+        "duration_estimate": null
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000013c6a",
+        "date": "2026-10-24",
+        "planned_start_time": "2026-10-24T04:00:00+00:00",
+        "sport": "KAYAK",
+        "title": "Separate plan",
+        "description": null,
+        "duration_sec": 1200,
+        "distance_m": null,
+        "intensity_type": null,
+        "status": "PLANNED",
+        "source": "MANUAL",
+        "polar_target_id": null,
+        "training_period_id": null,
+        "blocks": [],
+        "reschedule": {
+          "allowed": true,
+          "blocked_reason": null,
+          "source_hash": "3f861b67e9143ec240612ee3d39712a52b737973b232c12ccf39bba829626cdf"
+        },
+        "goal_tag": null,
+        "duration_estimate": null
+      }
+    ],
+    "sessions": [
+      {
+        "id": "00000000-0000-0000-0000-0000000ab631",
+        "sport": "KAYAK",
+        "name": null,
+        "external_provider": "POLAR",
+        "external_id": "calendar-session",
+        "duration_sec": 2700,
+        "distance_m": 8000.0,
+        "calories": 0.0,
+        "avg_hr": null,
+        "max_hr": null,
+        "avg_speed": null,
+        "max_speed": null,
+        "avg_power": null,
+        "max_power": null,
+        "avg_cadence": null,
+        "max_cadence": null,
+        "cardio_load": null,
+        "perceived_load": null,
+        "started_at": "2026-10-23T15:35:00+00:00",
+        "ended_at": "2026-10-23T16:25:00+00:00",
+        "rpe": null,
+        "planned_workout_id": "00000000-0000-0000-0000-0000000ab249",
+        "goal_tag": null,
+        "linked_goal_tag": null
+      }
+    ],
+    "availability": {
+      "reference": null,
+      "days": [],
+      "carry_windows": [],
+      "absence_means_unavailable": false
+    },
+    "periods": [],
+    "has_more": false,
+    "planning_authorized": false,
+    "workouts_changed": false
+  }
+}

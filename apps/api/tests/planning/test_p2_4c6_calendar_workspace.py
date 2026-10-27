@@ -11,7 +11,7 @@ from app.api.routes import planning_calendar as api
 from app.db.base import Base
 from app.models.entities import PlannedWorkout, Sport, WorkoutBlock, WorkoutSession, WorkoutStatus
 from app.planning.application import calendar_workspace as service
-from app.planning.infrastructure.persistence.sqlalchemy_models import PlanningAuditArtifactRow
+from app.planning.infrastructure.persistence.sqlalchemy_models import PlanningAuditArtifactRow, PlanningLogicalPlanRow, PlanningPlanRevisionRow
 from tests.planning.test_p2_4c3_goal_workflow_api import ATHLETE, OTHER, count
 from tests.planning.test_p2_4c5r2_athlete_setup import calendar, intake as intake_fixture
 
@@ -26,7 +26,7 @@ OTHER_PLAN = str(UUID(int=701099))
 def agenda(tmp_path, monkeypatch):
     wrapper = intake_fixture.__wrapped__(tmp_path, monkeypatch)
     env = next(wrapper)
-    Base.metadata.create_all(env.engine, tables=[WorkoutBlock.__table__])
+    Base.metadata.create_all(env.engine, tables=[WorkoutBlock.__table__, PlanningLogicalPlanRow.__table__, PlanningPlanRevisionRow.__table__])
     env.app.include_router(api.router, prefix="/api/v1")
     monkeypatch.setattr(service, "_now", env.clock.tick)
     with Session(env.engine) as session:

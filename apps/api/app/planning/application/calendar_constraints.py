@@ -136,8 +136,11 @@ async def save(*, owner, proposal, repository, session):
         raise
 
 
-async def projected(*, owner, repository, session, first, last, proposal=None, availability_proposal=None):
-    setup._require_session(repository, session)
+async def projected(*, owner, repository, session, first, last, proposal=None, availability_proposal=None, plan_override=None, close_transaction=True, include_timings=False):
+    if close_transaction:
+        setup._require_session(repository, session)
+    elif getattr(repository, "session", None) is not session:
+        raise RuntimeError("Nested projection requires the same transaction session.")
     try:
         user = (await session.execute(select(User).where(User.id == UUID(owner)))).scalar_one()
         now = _now()
@@ -176,6 +179,8 @@ async def projected(*, owner, repository, session, first, last, proposal=None, a
                     PlannedWorkout.planned_start_time < low)),
         ).order_by(PlannedWorkout.date, PlannedWorkout.id).limit(ROW_LIMIT + 1))).scalars())
         domain.require(len(rows) <= ROW_LIMIT, "CALENDAR_CONSTRAINT_RANGE_TOO_DENSE")
+        if plan_override is not None:
+            rows = [p for p in rows if p.id != plan_override.id] + [plan_override]
         estimates = await calendar_duration.project(owner=owner, plans=rows, session=session, now=now, zone=user.timezone)
         rows = [p for p in rows if calendar_duration.reaches_view(p, a, b, low, high, estimates.get(str(p.id)))]
         estimates = {str(p.id): estimates[str(p.id)] for p in rows if str(p.id) in estimates}
@@ -192,7 +197,7 @@ async def projected(*, owner, repository, session, first, last, proposal=None, a
         impacts = domain.conflicts(plans, occurrences)
         impacts += domain.opportunity_conflicts(plans, groups, calendar, {c["plan_id"] for c in impacts if c["severity"] == "fixed"})
         domain.require(len(impacts) <= domain.MAX_OCCURRENCES, "CALENDAR_CONSTRAINT_RANGE_TOO_DENSE")
-        return {"schema_version": SCHEMA, "athlete_id": owner, "timezone_name": user.timezone,
+        return {**({"_plan_timings": plans} if include_timings else {}), "schema_version": SCHEMA, "athlete_id": owner, "timezone_name": user.timezone,
             "local_today": today.isoformat(), "start_date": first, "end_date": last,
             "retrieved_at": _now().isoformat(), "reference": reference(saved[0]) if saved else None,
             "saved": receipt(*saved, True) if saved else None, "data": state,
@@ -205,4 +210,5 @@ async def projected(*, owner, repository, session, first, last, proposal=None, a
             "has_more": False, "absence_means_free": False, "opportunities_are_required": False,
             "planning_authorized": False, "workouts_changed": False}
     finally:
-        await setup.rollback(session)
+        if close_transaction:
+            await setup.rollback(session)

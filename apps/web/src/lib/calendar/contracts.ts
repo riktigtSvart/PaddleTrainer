@@ -57,6 +57,7 @@ export function goalFamily(goal: string | null | undefined): Family {
 export type Reference = { artifact_id: string; content_hash: string };
 export type GoalTag = Reference & { primary_goal: string | null };
 export type Planned = {
+  reschedule?: { allowed: boolean; blocked_reason: string | null; source_hash: string };
   duration_estimate?: DurationEstimate | null;
   id: string;
   date: string;
@@ -154,7 +155,7 @@ export function requireValue(
 ): asserts condition {
   if (!condition) throw new Error(text);
 }
-function requireDay(value: unknown) {
+export function requireDay(value: unknown) {
   requireValue(typeof value === "string");
   return day(value);
 }
@@ -234,6 +235,7 @@ export function readFeed(value: unknown): Feed {
       );
       tag(r.goal_tag);
       if (kind === "planned") {
+        if (r.reschedule !== undefined) { const m = object(r.reschedule); requireValue(typeof m.allowed === "boolean" && (m.allowed ? m.blocked_reason === null : typeof m.blocked_reason === "string") && typeof m.source_hash === "string" && /^[a-f0-9]{64}$/.test(m.source_hash)); }
         if (r.duration_estimate !== undefined && r.duration_estimate !== null) {
           const estimate = readDurationEstimate(r.duration_estimate, r.id as string, x.athlete_id as string);
           requireValue(r.duration_sec === null && estimate.sport === r.sport && estimate.distance_m === r.distance_m);
@@ -379,6 +381,7 @@ export function localParts(instant: string, zone: string) {
   };
 }
 export type CalendarEvent = {
+  reschedule?: Planned["reschedule"];
   durationEstimate?: DurationEstimate;
   key: string;
   kind: "planned" | "session" | "availability" | "constraint";
@@ -401,6 +404,7 @@ export type CalendarEvent = {
 };
 export function eventsFrom(feed: Feed): CalendarEvent[] {
   const events: CalendarEvent[] = feed.planned.map((p) => ({
+    reschedule: p.reschedule,
     key: "planned:" + p.id,
     kind: "planned",
     entityId: p.id,

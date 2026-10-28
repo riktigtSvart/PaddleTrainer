@@ -82,7 +82,7 @@ class CurrentAppLockedExecutionSource:
                 PlannedWorkout.id == source_uuid,
                 PlannedWorkout.user_id == athlete_uuid,
             )
-            .with_for_update()
+            .with_for_update().execution_options(populate_existing=True)
         )
         source_row = source_result.scalar_one_or_none()
         if source_row is None:
@@ -96,7 +96,7 @@ class CurrentAppLockedExecutionSource:
                 WorkoutSession.id == session_uuid,
                 WorkoutSession.user_id == athlete_uuid,
             )
-            .with_for_update()
+            .with_for_update().execution_options(populate_existing=True)
         )
         session_row = session_result.scalar_one_or_none()
         if session_row is None:

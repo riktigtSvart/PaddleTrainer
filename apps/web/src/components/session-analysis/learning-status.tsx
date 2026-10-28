@@ -1,4 +1,5 @@
 "use client";
+import {ExecutionConnection} from "./execution-connection";
 import {useEffect,useState} from "react";
 import {loadLearning,learningLabels} from "@/lib/session-analysis/learning";
 import type {LearningContext} from "@/lib/session-analysis/learning";
@@ -14,6 +15,7 @@ export function LearningStatus({owner,session,revisionKey}:{owner:string;session
    <p>{learningLabels[a.state]}</p><p className="pt-notice">Megfigyelés: {new Date(a.observed_at).toLocaleString("hu-HU")}. Adatként elérhető: {new Date(a.available_at).toLocaleString("hu-HU")}.</p>
    {a.reporting_delay_seconds>=3600 && <p className="pt-notice">Utólagos kitöltés: kb. {Math.floor(a.reporting_delay_seconds/3600)} órával később. Korábbi elemzésekben nem szerepelhetett.</p>}</div>)}
   {error && <p role="alert">{error}</p>}
+  <ExecutionConnection owner={owner} session={session} needed={!!data?.items.some(x=>x.state==="waiting_for_execution")} onConnected={refresh} />
   <button type="button" className="pt-button" disabled={busy} onClick={()=>void refresh()}>{busy?"Ellenőrzés…":"Tanulási kapcsolat frissítése"}</button>
   <p className="pt-notice">Csak a kiválasztott változat számít. Az önbevallás önmagában nem bizonyít edzéshatást, és nem módosítja automatikusan a tervedet.</p>
  </details>;

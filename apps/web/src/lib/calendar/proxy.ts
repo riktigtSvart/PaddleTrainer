@@ -11,7 +11,7 @@ export async function forwardCalendar(
   const url = new URL(request.url),
     route = path.join("/"),
     method = request.method;
-  const feedback = /^sessions\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\/(?:feedback|learning)$/.test(route);
+  const feedback = /^sessions\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\/(?:feedback|learning|execution-connection)$/.test(route);
   const moveContext = /^(?:moves|sessions)\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(route);
   if (!feedback && !moveContext && !["moves", "moves/preview", "feed", "learning-inputs", "goals", "constraints", "constraints/preview"].includes(route))
     return fail(404, "CALENDAR_ROUTE_NOT_FOUND");

@@ -197,3 +197,25 @@ async def personal_feedback_inputs(db: DB, owner: Owner, start_date: Day | None 
             "information_cutoff_at":now.isoformat(),"window_start_at":start.isoformat(),"as_of":end.isoformat(),"assembly":to_contract_primitive(result),"planning_authorized":False,"model_updated":False}
     finally:
         await db.rollback()
+
+
+from app.services import execution_connection
+from app.schemas.execution_connection import ExecutionConnectionInput
+
+@router.get("/sessions/{session_id}/execution-connection")
+async def execution_connection_preview(session_id: UUID, db: DB, owner: Owner):
+    _fresh(db)
+    return await call(execution_connection.preview(owner=owner,session_id=str(session_id),session=db))
+
+@router.post("/sessions/{session_id}/execution-connection", status_code=201)
+async def execution_connection_save(session_id: UUID, payload: ExecutionConnectionInput, response: Response, db: DB, owner: Owner):
+    _fresh(db)
+    result = await call(execution_connection.connect(owner=owner,session_id=str(session_id),
+        proposal=payload.model_dump(mode="json"),session=db))
+    response.status_code = 200 if result["reused"] else 201
+    try:
+        result["learning"] = await feedback_learning.refresh(owner=owner,session_id=str(session_id),session=db)
+    except (SQLAlchemyError, ValueError, KeyError, TypeError, RuntimeError, LookupError):
+        await db.rollback()
+        result["learning"] = {"state":"retry_required"}
+    return result

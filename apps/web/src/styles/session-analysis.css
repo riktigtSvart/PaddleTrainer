@@ -140,3 +140,8 @@
 
 .pt-feedback-learning {font-size:13px;overflow-wrap:anywhere}
 .pt-feedback-learning > div {margin:14px 0;padding-top:10px;border-top:1px solid var(--pt-line)}
+
+.pt-execution-connection {overflow-wrap:anywhere;padding:14px 0;margin:14px 0;border-top:1px solid var(--pt-line)}
+.pt-execution-connection h3 {font-size:14px;font-weight:600;margin-bottom:10px}
+.pt-execution-connection label {display:flex;flex-direction:row;align-items:flex-start;gap:8px;font-size:12px;line-height:1.6;margin:12px 0}
+.pt-execution-connection input[type="checkbox"] {width:auto;flex:none;margin-top:4px;accent-color:var(--pt-accent)}

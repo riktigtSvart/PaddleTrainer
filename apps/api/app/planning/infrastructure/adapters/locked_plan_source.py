@@ -54,7 +54,7 @@ class CurrentAppLockedPlanSourceHashProvider:
                 PlannedWorkout.id == workout_uuid,
                 PlannedWorkout.user_id == athlete_uuid,
             )
-            .with_for_update()
+            .with_for_update().execution_options(populate_existing=True)
         )
         workout = result.scalar_one_or_none()
         if workout is None:
@@ -64,7 +64,7 @@ class CurrentAppLockedPlanSourceHashProvider:
             select(WorkoutBlock)
             .where(WorkoutBlock.workout_id == workout_uuid)
             .order_by(WorkoutBlock.position, WorkoutBlock.id)
-            .with_for_update()
+            .with_for_update().execution_options(populate_existing=True)
         )
         blocks = list(blocks_result.scalars())
 

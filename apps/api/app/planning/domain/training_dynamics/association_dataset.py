@@ -20,6 +20,7 @@ from .history import (
 from .models import (
     EffectEvidenceLevel,
     RealizedTrainingStimulus,
+    StimulusFeature,
     ResponseIsolationStatus,
 )
 from .personal_reference import (
@@ -538,6 +539,7 @@ def _validate_observation(
     materialized: datetime,
 ) -> tuple[
     RealizedTrainingStimulus,
+    StimulusFeature,
     ResponseMetricReferenceEligibility,
 ]:
     if not observation.verify_content_hash():
@@ -773,6 +775,12 @@ def _predictor_context(
         ),
         None,
     )
+
+    if feature is None and predictor_key.metric_key == "duration_s":
+        # A measured duration is an exposure descriptor, not a physiological
+        # load estimate. Reuse the explicit source status; never fill a gap.
+        feature = StimulusFeature(metric_key="duration_s", knowledge_status=stimulus.duration_status,
+            value=stimulus.duration_s, unit="s")
 
     if feature is None:
         return (

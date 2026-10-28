@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
@@ -60,22 +60,26 @@ async def get_daily_response_observations(
         tzinfo=local_timezone,
     )
 
-    result = await db.scalars(
+    cutoff = min(datetime.now(UTC), day_end.astimezone(UTC))
+
+    result = (await db.execute(
         select(AthleteResponse)
         .where(
             AthleteResponse.user_id == user.id,
             AthleteResponse.recorded_at >= day_start,
             AthleteResponse.recorded_at < day_end,
+            AthleteResponse.created_at <= cutoff,
         )
         .order_by(
             AthleteResponse.recorded_at.asc()
         )
-    )
+    )).scalars()
 
-    return [
-        serialize_response_observation(item)
-        for item in result
-    ]
+    legacy = [serialize_response_observation(item) for item in result]
+    from app.services.feedback_learning import daily_selection
+    current, replaced = await daily_selection(db, str(user.id), day_start, day_end, cutoff)
+    legacy = [item for item in legacy if (item["workout_session_id"], item["response_timing"]) not in replaced]
+    return sorted(legacy + current, key=lambda item:(item["recorded_at"].replace(tzinfo=UTC) if item["recorded_at"].tzinfo is None else item["recorded_at"], item["id"]))
 
 def build_response_trajectories(
     observations: list[dict],

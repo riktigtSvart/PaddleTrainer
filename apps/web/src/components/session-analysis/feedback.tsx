@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { LearningStatus } from "./learning-status";
 import { FeedbackError, loadFeedback, readPending, sendFeedback, score, scoreKeys, storageKey, timings } from "@/lib/session-analysis/feedback";
 import type { Artifact, Context, Pending, Timing } from "@/lib/session-analysis/feedback";
 const titles = {IMMEDIATE:"Edzés utáni", NEXT_MORNING:"Másnap reggeli"};
@@ -88,6 +89,7 @@ export function FeedbackPanel({owner, session}: {owner:string; session:string}) 
     {pending && <div role="status"><p>A mentés eredménye még nem igazolt. A kérés megmaradt ebben a böngészőben.</p><button className="pt-button" disabled={busy} onClick={()=>void submit()}>Azonos mentés újrapróbálása</button></div>}
     {error && <p className="pt-message is-error" role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
     {(!ready || conflict) && <button className="pt-button" disabled={busy} onClick={()=>{if(!ready)window.location.reload();else void refresh();}}>Előzmények újraolvasása</button>}
+    <LearningStatus owner={owner} session={session} revisionKey={timings.map(t=>context?.current[t]?.content_hash ?? "none").join(":")} />
     {context && <details><summary>Mentett előzmények · {context.history.length}</summary>{[...context.history].reverse().map(a=><div className="pt-feedback-history" key={a.artifact_id}>
       <strong>{titles[a.proposal.timing]} · {a.revision}. változat</strong>
       <p>Megfigyelés: {new Date(a.proposal.observed_at).toLocaleString("hu-HU")} · Mentve: {new Date(a.submitted_at).toLocaleString("hu-HU")}</p>

@@ -1,0 +1,60 @@
+{
+  "schema_version": "feedback-learning-v0.1",
+  "athlete_id": "11111111-1111-4111-8111-111111111111",
+  "session_id": "00000000-0000-0000-0000-0000000ab631",
+  "information_cutoff_at": "2026-10-28T12:00:00+00:00",
+  "selection_policy": "latest_known_revision_per_session_and_timing",
+  "items": [
+    {
+      "timing": "IMMEDIATE",
+      "revision": 1,
+      "state": "waiting_for_execution",
+      "feedback_reference": {
+        "artifact_id": "pt-session-feedback:9d018e43fd7f32103b24bf282457984bdf92a60a2f39c078c05cc7f56456f150",
+        "content_hash": "c7ceeefdef0ae03d120205a4814317136326b2ab58d608e440066413030c164f"
+      },
+      "response_source_id": "f04d73c0-bc8b-574e-b94d-a9b5ab9a4944",
+      "observed_at": "2026-10-23T17:00:00+00:00",
+      "submitted_at": "2026-10-24T07:00:00+00:00",
+      "available_at": "2026-10-24T07:00:00+00:00",
+      "reporting_delay_seconds": 50400,
+      "measurements": [
+        {
+          "metric_key": "self_reported_rpe_score",
+          "knowledge_status": "known",
+          "value": 5,
+          "unit": null
+        },
+        {
+          "metric_key": "self_reported_fatigue_score",
+          "knowledge_status": "known",
+          "value": 0,
+          "unit": null
+        },
+        {
+          "metric_key": "self_reported_soreness_score",
+          "knowledge_status": "unknown",
+          "value": null,
+          "unit": null
+        },
+        {
+          "metric_key": "self_reported_recovery_score",
+          "knowledge_status": "unknown",
+          "value": null,
+          "unit": null
+        },
+        {
+          "metric_key": "self_reported_energy_score",
+          "knowledge_status": "known",
+          "value": 7,
+          "unit": null
+        }
+      ],
+      "response_reference": null
+    }
+  ],
+  "planning_authorized": false,
+  "model_updated": false,
+  "provider_writeback": false,
+  "content_hash": "95c9a4c5e7e23f7744e50bd0c3dff5bbb912147821a635da44a1143a82f138fc"
+}

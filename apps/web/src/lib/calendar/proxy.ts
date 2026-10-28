@@ -11,11 +11,11 @@ export async function forwardCalendar(
   const url = new URL(request.url),
     route = path.join("/"),
     method = request.method;
-  const feedback = /^sessions\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\/feedback$/.test(route);
+  const feedback = /^sessions\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\/(?:feedback|learning)$/.test(route);
   const moveContext = /^(?:moves|sessions)\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(route);
-  if (!feedback && !moveContext && !["moves", "moves/preview", "feed", "goals", "constraints", "constraints/preview"].includes(route))
+  if (!feedback && !moveContext && !["moves", "moves/preview", "feed", "learning-inputs", "goals", "constraints", "constraints/preview"].includes(route))
     return fail(404, "CALENDAR_ROUTE_NOT_FOUND");
-  if (!((route === "constraints" || feedback) ? ["GET", "POST"].includes(method) : method === (route === "feed" || moveContext ? "GET" : "POST")))
+  if (!((route === "constraints" || feedback) ? ["GET", "POST"].includes(method) : method === (route === "feed" || route === "learning-inputs" || moveContext ? "GET" : "POST")))
     return fail(405, "CALENDAR_METHOD_NOT_ALLOWED");
   const seen = new Set<string>();
   for (const [key] of url.searchParams) {

@@ -141,4 +141,59 @@ async def feedback_save(session_id: UUID, payload: FeedbackInput, response: Resp
     result = await call(session_feedback.save(owner=owner, session_id=str(session_id),
         proposal=payload.model_dump(mode="json"), repository=SqlAlchemyPlanningAuditRepository(db), session=db))
     response.status_code = 200 if result["reused"] else 201
+    # The feedback has already committed. Learning refresh failure must never
+    # masquerade as a failed user save or discard its idempotent receipt.
+    try:
+        result["learning"] = await feedback_learning.refresh(owner=owner, session_id=str(session_id), session=db)
+    except (SQLAlchemyError, ValueError, KeyError, TypeError, RuntimeError, LookupError):
+        await db.rollback()
+        result["learning"] = {"state":"retry_required"}
     return result
+
+
+from datetime import datetime
+from app.services import feedback_learning
+from app.schemas.feedback_learning import FeedbackLearningRefresh
+
+@router.get("/sessions/{session_id}/learning")
+async def feedback_learning_context(session_id: UUID, db: DB, owner: Owner, information_cutoff_at: datetime | None = None):
+    _fresh(db)
+    return await call(feedback_learning.context(owner=owner, session_id=str(session_id), session=db, cutoff=information_cutoff_at))
+
+@router.post("/sessions/{session_id}/learning")
+async def feedback_learning_refresh(session_id: UUID, payload: FeedbackLearningRefresh, db: DB, owner: Owner):
+    _fresh(db)
+    return await call(feedback_learning.refresh(owner=owner, session_id=str(session_id), session=db))
+
+
+@router.get("/learning-inputs")
+async def personal_feedback_inputs(db: DB, owner: Owner, start_date: Day | None = None, end_date: Day | None = None):
+    from datetime import UTC, time, timedelta
+    from app.planning.application.feedback_personal_inputs import assemble_feedback_personal_inputs
+    from app.planning.domain.common.serialization import to_contract_primitive
+    from app.planning.domain.training_dynamics import PersonalAssociationPredictorKey
+    from app.api.routes.athlete_setup import valid_range
+    _fresh(db)
+    now = feedback_learning._now()
+    if (start_date is None) != (end_date is None):
+        raise error(422,"CALENDAR_DATE_RANGE_INVALID")
+    if start_date:
+        valid_range(start_date,end_date)
+        from zoneinfo import ZoneInfo
+        from sqlalchemy import select
+        from app.models.entities import User
+        user = (await db.execute(select(User).where(User.id == UUID(owner)))).scalar_one()
+        zone = ZoneInfo(user.timezone)
+        start = datetime.combine(datetime.fromisoformat(start_date).date(),time.min,tzinfo=zone).astimezone(UTC)
+        end = min(now, datetime.combine(datetime.fromisoformat(end_date).date() + timedelta(days=1),time.min,tzinfo=zone).astimezone(UTC))
+    else:
+        start, end = now - timedelta(days=90), now
+    try:
+        result = await call(assemble_feedback_personal_inputs(session=db,athlete_id=owner,
+            history_id="pt-training-dynamics-history:c12:" + service.digest({"owner":owner,"start":start.isoformat(),"end":end.isoformat(),"cutoff":now.isoformat()}),
+            window_start_at=start,as_of=end,information_cutoff_at=now,
+            predictor_keys=(PersonalAssociationPredictorKey(metric_key="duration_s",unit="s"),),created_at=now))
+        return {"schema_version":"feedback-personal-inputs-v0.1","athlete_id":owner,
+            "information_cutoff_at":now.isoformat(),"window_start_at":start.isoformat(),"as_of":end.isoformat(),"assembly":to_contract_primitive(result),"planning_authorized":False,"model_updated":False}
+    finally:
+        await db.rollback()

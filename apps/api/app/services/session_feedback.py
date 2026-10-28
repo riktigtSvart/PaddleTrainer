@@ -1,8 +1,8 @@
 """Append-only owned self reports, serialized by the existing owner row lock.
 
 These records are deliberately separate from provider summaries and legacy
-AthleteResponse sources. A future evidence adapter must select a revision
-explicitly; revisions must never count as independent training responses.
+AthleteResponse sources. The C12 adapter selects an explicit immutable revision;
+revisions must never count as independent training responses.
 """
 import json
 from datetime import UTC, datetime, timedelta

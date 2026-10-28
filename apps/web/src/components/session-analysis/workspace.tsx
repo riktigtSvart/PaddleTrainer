@@ -34,8 +34,9 @@ export function SessionDetails({ data }: { data: Analysis }) {
       {data.samples.exercises.length > 1 && <label className="pt-analysis-exercise">Edzésrész<select value={exercise} onChange={e => setExercise(Number(e.target.value))}>
         {data.samples.exercises.map(e => <option value={e.index} key={e.index}>{e.index + 1}. rész{e.source_start ? ` · ${e.source_start}` : " · kezdete nincs megadva"}</option>)}
       </select></label>}
-      {series.length ? <Charts key={`${s.id}-${exercise}`} source={series} speedUnit={speedUnit} onSpeedUnitChange={setSpeedUnit} plan={p} timeline={data.plan_timeline}
-        singleExercise={data.samples.exercises.length === 1} referenceKey={data.plan_timeline ? `paddletrainer:plan-reference:v1:${data.athlete_id}:${s.id}:${exercise}:${data.plan_timeline.content_hash}` : undefined}
+      {series.length ? <Charts key={`${s.id}-${exercise}-${data.plan_timeline?.content_hash ?? "no-plan"}-${data.samples.content_hash ?? data.retrieved_at}`} source={series} speedUnit={speedUnit} onSpeedUnitChange={setSpeedUnit} plan={p} timeline={data.plan_timeline}
+        singleExercise={data.samples.exercises.length === 1} referenceKey={data.plan_timeline ? `paddletrainer:plan-reference:v2:${data.athlete_id}:${s.id}:${exercise}:${data.plan_timeline.content_hash}:${data.samples.content_hash ?? "legacy"}` : undefined}
+        clockIssues={data.samples.exercises.find(e => e.index === exercise)?.clock_issues ?? []}
         zones={data.samples.exercises.find(e => e.index === exercise)?.heart_rate_zones ?? null}
         speedZones={data.samples.exercises.find(e => e.index === exercise)?.speed_zones ?? null}
         powerZones={data.samples.exercises.find(e => e.index === exercise)?.power_zones ?? null} /> : <section className="pt-analysis-card"><h2>Grafikonok</h2>

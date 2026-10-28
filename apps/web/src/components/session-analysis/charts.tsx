@@ -11,12 +11,20 @@ import { SpeedUnitControl } from "./speed-unit-control";
 import { BoundaryLines } from "./boundary-lines";
 import { PlanBoundaryControls, useBoundaryView } from "./plan-boundaries";
 import type { Boundary } from "@/lib/session-analysis/plan-boundaries";
+import type { PhaseGap } from "@/lib/session-analysis/plan-boundaries";
+import { phaseTarget } from "@/lib/session-analysis/phase-statistics";
+import { PhaseAssessment } from "./phase-assessment";
+import { PhaseWindows } from "./phase-windows";
+import { pickedCandidateTime } from "@/lib/session-analysis/phase-candidates";
+import type { PhaseCandidate } from "@/lib/session-analysis/phase-candidates";
 
 const zoneColors = ["var(--pt-muted)", "var(--pt-goal-aerobic)", "var(--pt-goal-technique)", "var(--pt-warning)", "var(--pt-goal-speed)"];
+const noClockIssues: string[] = [];
 
-export function SampleChart({ series, from, to, cursor, setCursor, speedUnit = "km/h", zones = null, target = null, referenceOnly = false, boundaries = [], manualBoundaries = false, distanceBoundaries = false }: {
+export function SampleChart({ series, from, to, cursor, setCursor, speedUnit = "km/h", zones = null, target = null, referenceOnly = false, boundaries = [], manualBoundaries = false, distanceBoundaries = false, phaseGaps = [], selectedWindow = null, onPickTime }: {
   series: Series; from: number; to: number; cursor: number; setCursor: (value: number) => void;
   speedUnit?: SpeedUnit; zones?: MetricZones | null; target?: PulseTarget | null; referenceOnly?: boolean; boundaries?: Boundary[]; manualBoundaries?: boolean; distanceBoundaries?: boolean;
+  phaseGaps?: PhaseGap[]; selectedWindow?: { from: number; to: number; proposal?: boolean } | null; onPickTime?: (ms: number) => void;
 }) {
   const { geometry, axis, pointCount } = useMemo(() => {
     const geometry = segments(series, from, to);
@@ -47,11 +55,16 @@ export function SampleChart({ series, from, to, cursor, setCursor, speedUnit = "
     {series.interval_ms === null ? <p className="pt-notice">A mintavételi időköz nincs megadva. Az értékek a forrásadatok táblázatában elérhetők.</p> :
       tooMany ? <p className="pt-notice">Ebben a tartományban túl sok különálló mintaszakasz van. Szűkítsd az időtartományt a részletes rajzhoz.</p> :
       <svg viewBox="0 0 960 218" role="img" aria-label={title + ". A pontos minták alatta billentyűzettel is vizsgálhatók."}
+        onPointerDown={event => {
+          const box = event.currentTarget.getBoundingClientRect();
+          if (box.width > 0 && onPickTime) onPickTime(from + Math.max(0, Math.min(1, ((event.clientX - box.left) / box.width * 960 - 76) / 794)) * (to - from));
+        }}
         onPointerMove={event => {
           const box = event.currentTarget.getBoundingClientRect();
           if (box.width > 0) setCursor(from + Math.max(0, Math.min(1, ((event.clientX - box.left) / box.width * 960 - 76) / 794)) * (to - from));
         }}>
         <title>{title}</title>
+        <PhaseWindows gaps={phaseGaps} selected={selectedWindow} from={from} to={to} />
         {visibleZones.map(z => <g key={z.index} className="pt-chart-zone" style={{ color: zoneColors[z.index - 1] }}>
           <rect x="76" width="794" y={y(Math.min(high, z.high))} height={Math.max(0, y(Math.max(low, z.low)) - y(Math.min(high, z.high)))} />
           <title>{`Z${z.index}: ${format(z.low)}–${format(z.high)} ${unit} · Polar`}</title>
@@ -87,11 +100,12 @@ export function SampleChart({ series, from, to, cursor, setCursor, speedUnit = "
   </figure>;
 }
 
-export function Charts({ source, speedUnit = "km/h", zones = null, speedZones = null, powerZones = null, plan = null, onSpeedUnitChange, timeline, referenceKey, singleExercise = true }: {
+export function Charts({ source, speedUnit = "km/h", zones = null, speedZones = null, powerZones = null, plan = null, onSpeedUnitChange, timeline, referenceKey, singleExercise = true, clockIssues = noClockIssues }: {
   source: Series[]; speedUnit?: SpeedUnit; zones?: HeartRateZones | null; speedZones?: SpeedZones | null; powerZones?: PowerZones | null; plan?: Plan | null; onSpeedUnitChange?: (unit: SpeedUnit) => void; timeline?: PlanTimeline; referenceKey?: string; singleExercise?: boolean;
+  clockIssues?: string[];
 }) {
   const series = useMemo(() => withPace(source), [source]), end = extent(series);
-  const boundaryView = useBoundaryView(timeline, referenceKey, singleExercise, source);
+  const boundaryView = useBoundaryView(timeline, referenceKey, singleExercise, source, clockIssues);
   const boundaries = boundaryView.show ? boundaryView.boundaries : [];
   const rangeEnd = Math.max(end, boundaryView.boundaries.at(-1)?.ms ?? 0);
   const [enabled, setEnabled] = useState<string[]>(() => {
@@ -102,11 +116,23 @@ export function Charts({ source, speedUnit = "km/h", zones = null, speedZones = 
   const targets = useMemo(() => graphTargets(plan, { heart_rate: zones, speed: speedZones, power: powerZones }), [plan, zones, speedZones, powerZones]);
   const firstTarget = (family: TargetFamily) => targets.find(t => t.family === family && plan?.blocks.find(b => b.id === t.id)?.block_type === "WORK")?.id ?? targets.find(t => t.family === family)?.id ?? "";
   const [targetIds, setTargetIds] = useState(() => ({ heart_rate: firstTarget("heart_rate"), speed: firstTarget("speed"), power: firstTarget("power") }));
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const [selectedWindow, setSelectedWindow] = useState<{ from: number; to: number; proposal?: boolean } | null>(null);
+  const [previewCandidate, setPreviewCandidate] = useState<PhaseCandidate | null>(null), [pickedMs, setPickedMs] = useState<number | null>(null);
+  const phaseZones = useMemo(() => ({ heart_rate: zones, speed: speedZones, power: powerZones }), [zones, speedZones, powerZones]);
+  const focused = boundaryView.part?.phases.find(p => p.id === focusId);
+  const focusedTarget = focused ? phaseTarget(focused, plan, phaseZones) : null;
   const families = ["heart_rate", "speed", "power"] as const;
-  const selected = (family: TargetFamily) => targets.find(t => t.family === family && t.id === targetIds[family]) ?? null;
+  const selected = (family: TargetFamily) => focusId !== null ? focusedTarget?.family === family ? focusedTarget : null : targets.find(t => t.family === family && t.id === targetIds[family]) ?? null;
   const definition = (family: TargetFamily) => family === "heart_rate" ? zones : family === "speed" ? speedZones : powerZones;
   const familyFor = (metric: Series["metric_key"]): TargetFamily | null => metric === "heart_rate_bpm" ? "heart_rate" : ["speed_kmh", "pace_sec_km"].includes(metric) ? "speed" : metric === "power_w" ? "power" : null;
   const [rangeError, setRangeError] = useState("");
+  function resetSelection() { setFocusId(null); setSelectedWindow(null); setPreviewCandidate(null); setPickedMs(null); setRangeError(""); setFrom(0); setTo(end); setCursor(0); }
+  const controls: typeof boundaryView = { ...boundaryView,
+    setPartIndex: value => { boundaryView.setPartIndex(value); resetSelection(); },
+    setTransition: (id, text) => { boundaryView.setTransition(id, text); resetSelection(); },
+    acceptCandidate: (id, text) => { boundaryView.acceptCandidate(id, text); resetSelection(); },
+    apply: () => { boundaryView.apply(); resetSelection(); }, clear: () => { boundaryView.clear(); resetSelection(); } };
   const shown = series.filter(s => enabled.includes(s.id));
   const clampedCursor = Math.max(from, Math.min(to, cursor));
   const step = Math.min(...series.filter(s => s.interval_ms !== null).map(s => s.interval_ms!), 1000);
@@ -122,7 +148,7 @@ export function Charts({ source, speedUnit = "km/h", zones = null, speedZones = 
       const choices = targets.filter(t => t.family === family), current = selected(family), sourceZones = definition(family);
       const label = family === "heart_rate" ? "Pulzuscél a grafikonon" : family === "speed" ? "Sebesség/iram célja" : "Teljesítménycél a grafikonon";
       return <div className="pt-chart-references" key={family}>
-        {choices.length > 0 && <label className="pt-pulse-target">{label}<select value={targetIds[family]} onChange={e => setTargetIds(ids => ({ ...ids, [family]: e.target.value }))}>
+        {choices.length > 0 && <label className="pt-pulse-target">{label}<select value={focusId !== null ? focusedTarget?.family === family && choices.some(t => t.id === focusedTarget.id) ? focusedTarget.id : "" : targetIds[family]} onChange={e => { setFocusId(null); setTargetIds(ids => ({ ...ids, [family]: e.target.value })); }}>
           <option value="">Csak zónák</option>{choices.map(t => <option value={t.id} key={t.id}>{t.label}{t.zoneLabel ? ` · ${t.zoneLabel}` : ""}</option>)}
         </select></label>}
         {sourceZones && <><ul className="pt-zone-legend" aria-label={family === "heart_rate" ? "Az edzéshez tárolt Polar-pulzuszónák" : `${label} · Polar-zónák`}>{sourceZones.zones.map(z => <li key={z.index} style={{ borderColor: zoneColors[z.index - 1] }}>
@@ -133,16 +159,26 @@ export function Charts({ source, speedUnit = "km/h", zones = null, speedZones = 
       </div>;
     })}
     {targets.length > 0 && <p className="pt-notice">A kiemelés a kiválasztott tervezett blokk célját mutatja. A blokk időbeli helyét a mért görbén nem állapítja meg.</p>}
-    <PlanBoundaryControls view={boundaryView} end={end} onZoom={(first, last) => { setRangeError(""); setFrom(first); setTo(last); setCursor(first); }} />
+    <PlanBoundaryControls view={controls} end={end} onZoom={(first, last, id) => { setPreviewCandidate(null); setPickedMs(null); setFocusId(id ?? null); setSelectedWindow(id ? { from: first, to: last } : null); setRangeError(""); setFrom(first); setTo(last); setCursor(first); }} />
+    <PhaseAssessment view={controls} series={series} plan={plan} zones={phaseZones} speedUnit={speedUnit} pickedMs={pickedMs} onCancelPreview={resetSelection} onPreview={option => {
+      setFocusId(null); setPreviewCandidate(option); setPickedMs(option.start_ms);
+      setSelectedWindow({ from: option.from_ms, to: option.to_ms, proposal: true });
+      setFrom(option.goal_ms); setTo(option.preview_to_ms); setCursor(option.start_ms); setRangeError("");
+    }} onSelect={row => {
+      if (row.from_ms === null || row.to_ms === null) return;
+      setPreviewCandidate(null); setPickedMs(null);
+      setFocusId(row.id); setSelectedWindow({ from: row.from_ms, to: row.to_ms });
+      setFrom(row.from_ms); setTo(row.to_ms); setCursor(row.from_ms); setRangeError("");
+    }} />
     <form className="pt-chart-range" onSubmit={event => { event.preventDefault(); const values = new FormData(event.currentTarget);
       const first = Number(values.get("from")) * 1000, last = Number(values.get("to")) * 1000;
-      if (Number.isFinite(first + last) && first >= 0 && first <= last && last <= rangeEnd) { setRangeError(""); setFrom(first); setTo(last); setCursor(first); }
+      if (Number.isFinite(first + last) && first >= 0 && first <= last && last <= rangeEnd) { setPreviewCandidate(null); setPickedMs(null); setSelectedWindow(null); setFocusId(null); setRangeError(""); setFrom(first); setTo(last); setCursor(first); }
       else setRangeError("A kezdet ne legyen később a végnél; a tartomány maradjon a mintasor vagy a megadott terv időhatárain belül.");
     }}>
       <label>Kezdet · mp<input key={`from-${from}`} name="from" type="number" min="0" max={rangeEnd / 1000} step="0.001" defaultValue={from / 1000} required /></label>
       <label>Vég · mp<input key={`to-${to}`} name="to" type="number" min={from / 1000} max={rangeEnd / 1000} step="0.001" defaultValue={to / 1000} required /></label>
       <button type="submit" className="pt-button">Tartomány nagyítása</button>
-      <button type="button" className="pt-button" onClick={() => { setRangeError(""); setFrom(0); setTo(end); setCursor(0); }}>Teljes mintasor</button>
+      <button type="button" className="pt-button" onClick={resetSelection}>Teljes mintasor</button>
     </form>
     {rangeError && <p role="alert" className="pt-notice">{rangeError}</p>}
     <p className="pt-notice">Az időtengely az adott edzésrész mintáinak sorszámából és mintavételi időközéből készül. A szünetekkel és a teljes edzés falióraidejével nem feltétlenül egyezik meg. A hiányokat nem kötjük össze.</p>
@@ -151,7 +187,8 @@ export function Charts({ source, speedUnit = "km/h", zones = null, speedZones = 
       const family = familyFor(s.metric_key);
       return <SampleChart key={s.id} series={s} from={from} to={to} cursor={clampedCursor} setCursor={setCursor} speedUnit={speedUnit}
         zones={family ? zonesOnChart(definition(family), s.metric_key, speedUnit) : null}
-        target={family ? targetOnChart(selected(family), s.metric_key, speedUnit) : null} boundaries={boundaries} manualBoundaries={boundaryView.manual !== null} distanceBoundaries={!boundaryView.manual && boundaryView.alignment.distanceUsed} />;
+        target={family ? targetOnChart(selected(family), s.metric_key, speedUnit) : null} boundaries={boundaries} manualBoundaries={boundaryView.manual !== null || boundaryView.hasReferences} distanceBoundaries={!boundaryView.manual && boundaryView.alignment.distanceUsed}
+        phaseGaps={boundaryView.show ? boundaryView.alignment.gaps : []} selectedWindow={selectedWindow} onPickTime={previewCandidate ? ms => { const picked = pickedCandidateTime(previewCandidate, ms); setPickedMs(picked); setCursor(picked); } : undefined} />;
     })}
     {families.map(family => {
       const metric = family === "heart_rate" ? "heart_rate_bpm" : family === "speed" ? "speed_kmh" : "power_w";
@@ -160,7 +197,8 @@ export function Charts({ source, speedUnit = "km/h", zones = null, speedZones = 
       const reference: Series = { id: "reference-" + family, exercise_index: 0, source_path: "plan", source_type: "PLAN_REFERENCE", metric_key: metric,
         unit: metricInfo[metric].unit, interval_ms: 1000, slot_count: 0, valid_sample_count: 0, missing_sample_count: 0, values: [], issues: [] };
       return <SampleChart key={family} series={reference} from={from} to={to} cursor={clampedCursor} setCursor={setCursor} speedUnit={speedUnit}
-        zones={zonesOnChart(definition(family), metric, speedUnit)} target={target} referenceOnly boundaries={boundaries} manualBoundaries={boundaryView.manual !== null} distanceBoundaries={!boundaryView.manual && boundaryView.alignment.distanceUsed} />;
+        zones={zonesOnChart(definition(family), metric, speedUnit)} target={target} referenceOnly boundaries={boundaries} manualBoundaries={boundaryView.manual !== null || boundaryView.hasReferences} distanceBoundaries={!boundaryView.manual && boundaryView.alignment.distanceUsed}
+        phaseGaps={boundaryView.show ? boundaryView.alignment.gaps : []} selectedWindow={selectedWindow} onPickTime={previewCandidate ? ms => { const picked = pickedCandidateTime(previewCandidate, ms); setPickedMs(picked); setCursor(picked); } : undefined} />;
     })}
     <label className="pt-chart-slider">Minták vizsgálata · {clock(clampedCursor)}
       <input aria-label="Vizsgált mintavételi idő" type="range" min={from} max={to} step={step} value={clampedCursor} disabled={from === to} onChange={e => setCursor(Number(e.target.value))} />

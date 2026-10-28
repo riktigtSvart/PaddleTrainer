@@ -4,6 +4,8 @@ Charts use each exercise's sample index multiplied by its declared interval.
 Exercise clocks are never concatenated or aligned to a guessed session offset.
 """
 from datetime import UTC, datetime
+import hashlib
+import json
 import math
 from uuid import UUID
 from zoneinfo import ZoneInfo
@@ -17,6 +19,7 @@ from app.planning.infrastructure.adapters.athlete_history import aware
 from app.services.session_chart_zones import heart_rate_zones, zone_limits
 from app.services.session_sections import section_groups
 from app.services.session_plan_timeline import plan_timeline
+from app.services.session_sample_clock import sample_clock_issues
 
 SCHEMA = "session-analysis-v0.1"
 MAX_EXERCISES = 64
@@ -81,6 +84,7 @@ def samples(raw, provider):
         start = exercise.get("startTime")
         result["exercises"].append({"index": index, "source_path": f"{key}[{index}]",
                                     "source_start": start[:100] if isinstance(start, str) else None,
+                                    "clock_issues": sample_clock_issues(exercise, raw, index, key),
                                     "heart_rate_zones": heart_rate_zones(exercise, f"{key}[{index}]"),
                                     "speed_zones": zone_limits(exercise, f"{key}[{index}]", "ZONE_TYPE_SPEED", "km/h"),
                                     "power_zones": zone_limits(exercise, f"{key}[{index}]", "ZONE_TYPE_POWER", "W")})
@@ -171,10 +175,12 @@ async def detail(*, owner, session_id, session):
                         "intensity_type": b.intensity_type, "intensity_min": numeric(b.intensity_min),
                         "intensity_max": numeric(b.intensity_max), "repeat_count": b.repeat_count,
                         "parent_block_id": str(b.parent_block_id) if b.parent_block_id else None} for b in found.blocks]}
+        projection = samples(row.raw_data, row.external_provider)
+        projection["content_hash"] = hashlib.sha256(json.dumps(projection, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
         return {"schema_version": SCHEMA, "athlete_id": owner, "timezone_name": user.timezone,
                 "retrieved_at": datetime.now(UTC).isoformat(), "session": summary, "plan": plan,
                 "link_state": "linked" if plan else "linked_plan_unavailable" if row.planned_workout_id else "unlinked",
-                "samples": samples(row.raw_data, row.external_provider),
+                "samples": projection,
                 "sections": section_groups(row.raw_data, row.external_provider),
                 "plan_timeline": plan_timeline(found),
                 "planning_authorized": False, "workouts_changed": False}

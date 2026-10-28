@@ -2,6 +2,10 @@
 import hashlib
 import json
 import math
+import re
+
+from app.services.polar_target_structure import same_blocks
+from app.services.polar_targets import normalize_phase_tree
 
 from app.planning.application.calendar_workspace import CalendarRuleError
 
@@ -56,7 +60,8 @@ def expand(nodes, part_index, state):
                 name = node["label"] + (" · " + " / ".join(cycle) if cycle else "")
                 phases.append({"id": node["id"] + "#" + str(len(phases)), "label": name,
                     "source_block_id": node["source_block_id"], "from_ms": cursor, "to_ms": end,
-                    "duration_ms": length,
+                    "duration_ms": length, "advance": node.get("advance", "UNKNOWN"),
+                    "target": node.get("target"), "source_pointer": node.get("source_pointer"),
                     **({"distance_m": node["distance_m"]} if node.get("distance_m") is not None else {})})
                 if length is None and "PLAN_DURATION_UNKNOWN" not in issues:
                     issues.append("PLAN_DURATION_UNKNOWN")
@@ -95,12 +100,20 @@ def stored_nodes(blocks):
             result.append({"id": key, "label": label(b.name, b.block_type.value), "source_block_id": key,
                 "duration_ms": duration(b.duration_sec, 1000),
                 "distance_m": duration(getattr(b, "distance_m", None)) if b.duration_sec is None else None,
+                "advance": "UNKNOWN", "target": target(getattr(b, "intensity_type", None), getattr(b, "intensity_min", None), getattr(b, "intensity_max", None)),
                 "repeat": repeat(b.repeat_count, container=bool(nested)), "children": nested})
         return result
     result = children(None, 0)
     if len(visited) != len(blocks):
         raise InvalidPlan("PLAN_STRUCTURE_INVALID")
     return result
+
+
+def target(kind, low, high):
+    if not isinstance(kind, str) or len(kind) > 32:
+        return None
+    a, b = duration(low), duration(high)
+    return {"type": kind, "low": a, "high": b} if a is not None and b is not None and a <= b else None
 
 
 def polar_nodes(phases, path, state, depth=0):
@@ -118,16 +131,69 @@ def polar_nodes(phases, path, state, depth=0):
         key = f"{path}[{index}]"
         nested_source = phase.get("phaseOrRepeat")
         nested = polar_nodes([] if nested_source is None else nested_source, key + ".phaseOrRepeat", state, depth + 1)
+        if nested and phase.get("changeType") == "MANUAL" and (phase.get("goal") is not None or phase.get("intensity") is not None or type(phase.get("repeatCount")) is not int or phase["repeatCount"] < 2):
+            raise InvalidPlan("PLAN_REPEAT_TRANSITION_UNRESOLVED")
         if not nested and phase.get("repeatCount") not in (None, 1):
             raise InvalidPlan("PLAN_REPEAT_EMPTY")
         goal = phase.get("goal")
         goal = goal if isinstance(goal, dict) else {}
         length = duration(goal.get("duration")) if goal.get("type") == "DURATION" else None
+        intensity = phase.get("intensity")
+        intensity = intensity if isinstance(intensity, dict) else {}
         result.append({"id": key, "label": label(phase.get("name"), f"{index + 1}. szakasz"),
             "source_block_id": None, "duration_ms": length,
+            "advance": phase.get("changeType") if phase.get("changeType") in ("AUTOMATIC", "MANUAL") else "UNKNOWN",
+            "target": target(intensity.get("type"), intensity.get("lowerZone"), intensity.get("upperZone")),
+            "source_pointer": key,
             "distance_m": duration(goal.get("distance")) if goal.get("type") == "DISTANCE" else None,
             "repeat": repeat(phase.get("repeatCount"), container=bool(nested)), "children": nested})
     return result
+
+
+def matching_native_parts(plan):
+    """Recover leaf advance metadata only from a fully matching owned native tree.
+
+    REPEAT wrappers are structural; their changeType never becomes a leaf wait.
+    Persistent block IDs remain authoritative when blocks already exist.
+    """
+    raw = plan.raw_data
+    session = raw.get("session") if isinstance(raw, dict) else None
+    identity = session.get("id") if isinstance(session, dict) else None
+    if plan.source != "POLAR" or type(identity) not in (str, int) or str(identity) != plan.polar_target_id:
+        return None
+    exercises = raw.get("exercise")
+    if not isinstance(exercises, list):
+        return None
+    if len(exercises) > 64:
+        raise CalendarRuleError("CALENDAR_SESSION_SOURCE_TOO_LARGE")
+    state = {"nodes": 0, "phases": 0}
+    nodes, flattened = [], []
+    for index, exercise in enumerate(exercises):
+        if not isinstance(exercise, dict):
+            raise InvalidPlan("POLAR_PLAN_EXERCISE_INVALID")
+        phases = exercise.get("phaseOrRepeat")
+        phases = [] if phases is None else phases
+        nodes.append(polar_nodes(phases, f"exercise[{index}].phaseOrRepeat", state))
+        for item in normalize_phase_tree(phases):
+            copied = dict(item)
+            copied["key"] = f"e{index}:" + copied["key"]
+            if copied["parent_key"] is not None:
+                copied["parent_key"] = f"e{index}:" + copied["parent_key"]
+            flattened.append(copied)
+    if plan.blocks:
+        if any(not all(hasattr(block, field) for field in ("name", "duration_sec", "distance_m", "intensity_type", "intensity_min", "intensity_max", "repeat_count")) for block in plan.blocks):
+            return None
+        if not same_blocks(plan.blocks, flattened):
+            return None
+        mapping = {item["key"]: str(block.id) for item, block in zip(flattened, sorted(plan.blocks, key=lambda b: b.position))}
+        def bind(items):
+            for node in items:
+                indexes = re.findall(r"\[(\d+)\]", node["id"])
+                node["source_block_id"] = mapping[f"e{indexes[0]}:" + ".".join(indexes[1:])]
+                bind(node["children"])
+        for items in nodes:
+            bind(items)
+    return nodes
 
 
 def plan_timeline(plan):
@@ -139,7 +205,12 @@ def plan_timeline(plan):
             if len(plan.blocks) > NODE_LIMIT:
                 raise CalendarRuleError("CALENDAR_SESSION_SOURCE_TOO_LARGE")
             result["source"] = "stored_blocks"
-            result["parts"] = [expand(stored_nodes(plan.blocks), 0, state)]
+            try:
+                native = matching_native_parts(plan)
+            except (InvalidPlan, TypeError, ValueError):
+                native = None
+            result["parts"] = ([expand(nodes, index, state) for index, nodes in enumerate(native)]
+                               if native is not None else [expand(stored_nodes(plan.blocks), 0, state)])
         elif plan:
             raw = plan.raw_data
             session = raw.get("session") if isinstance(raw, dict) else None

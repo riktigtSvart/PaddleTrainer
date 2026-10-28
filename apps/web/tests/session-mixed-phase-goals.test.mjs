@@ -81,12 +81,17 @@ for(const [name,change,reason] of [
  ['unknown interval',s=>{s[0].interval_ms=null;},'DISTANCE_CLOCK_INVALID'],
  ['distance reset',s=>{s[0].values[50]=0;},'DISTANCE_CLOCK_INVALID'],
  ['unknown initial distance',s=>{s[0].values[0]=null;},'DISTANCE_START_UNKNOWN'],
- ['nonzero initial distance',s=>{s[0].values=s[0].values.map(v=>v+10);},'DISTANCE_START_UNKNOWN'],
  ['goal beyond stored distance',s=>{s[0].values=s[0].values.slice(0,200);},'DISTANCE_GOAL_NOT_REACHED'],
 ])test('uncertain source refuses automatic placement: '+name,()=>{
  const s=clone(source);change(s);const r=alignDistancePhases(part,s);
  assert.equal(r.distanceUsed,false);assert.equal(r.part.total_ms,null);
  assert.deepEqual(planBoundaries(r.part).map(b=>b.ms),[0]);assert.deepEqual(r.reasons,[reason]);
+});
+test('a known nonzero initial counter is an explicit observed-clock reference with unchanged native samples',()=>{
+ const s=clone(source);s[0].values=s[0].values.map(v=>v===null?null:v+10);const before=clone(s);
+ const r=alignDistancePhases(part,s);assert.deepEqual(planBoundaries(r.part).map(b=>b.ms),clock);
+ assert.equal(r.distanceUsed,true);assert.deepEqual(r.reasons,['DISTANCE_INITIAL_OFFSET']);
+ assert.equal(r.source.values[0],10);assert.deepEqual(s,before);
 });
 test('zero distance is explicit zero even without a distance source',()=>{
  const p=clone(part);p.phases[0].distance_m=0;

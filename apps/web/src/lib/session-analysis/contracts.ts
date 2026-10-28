@@ -37,14 +37,15 @@ export type SectionRow = { id: string; position: number; exercise_index: number;
   avg_hr: number | null; avg_speed: number | null; avg_power: number | null; split_time_sec: number | null; issues: string[] };
 export type SectionGroup = { id: string; kind: "exercises" | "manual_laps" | "automatic_laps"; exercise_index: number | null; source_path: string; rows: SectionRow[] };
 export type Sections = { groups: SectionGroup[]; row_count: number; issues: string[] };
-export type PlannedPhase = { id: string; label: string; source_block_id: string | null; from_ms: number | null; to_ms: number | null; duration_ms: number | null; distance_m?: number };
+export type PlannedPhase = { id: string; label: string; source_block_id: string | null; from_ms: number | null; to_ms: number | null; duration_ms: number | null; distance_m?: number;
+  advance?: "AUTOMATIC" | "MANUAL" | "UNKNOWN"; target?: { type: string; low: number; high: number } | null; source_pointer?: string | null };
 export type PlannedPart = { index: number; phases: PlannedPhase[]; total_ms: number | null; issues: string[] };
 export type PlanTimeline = { schema_version: "session-plan-timeline-v0.1"; plan_id: string | null;
   source: "stored_blocks" | "stored_polar_target" | "unavailable"; parts: PlannedPart[]; issues: string[]; content_hash: string };
 export type Analysis = { schema_version: "session-analysis-v0.1"; athlete_id: string; timezone_name: string; retrieved_at: string;
   session: Session; plan: Plan | null; link_state: "linked" | "unlinked" | "linked_plan_unavailable";
   samples: { provider: string; time_basis: "exercise_sample_index_times_interval";
-    exercises: { index: number; source_path: string; source_start: string | null; heart_rate_zones?: HeartRateZones | null; speed_zones?: SpeedZones | null; power_zones?: PowerZones | null }[]; series: Series[];
+    content_hash?: string; exercises: { index: number; source_path: string; source_start: string | null; clock_issues?: string[]; heart_rate_zones?: HeartRateZones | null; speed_zones?: SpeedZones | null; power_zones?: PowerZones | null }[]; series: Series[];
     unsupported: { exercise_index: number; source_path: string; source_type: string; slot_count: number }[];
     issues: string[]; slot_count: number; valid_sample_count: number };
   plan_timeline?: PlanTimeline; sections?: Sections; planning_authorized: false; workouts_changed: false };
@@ -85,8 +86,10 @@ export function readAnalysis(value: unknown, sessionId: string): Analysis {
     Array.isArray(c.exercises) && c.exercises.length <= 64 && Array.isArray(c.series) && c.series.length <= 128 &&
     Array.isArray(c.unsupported) && c.unsupported.length <= 128 && strings(c.issues));
   const exercises = new Set();
+  if (c.content_hash !== undefined) check(text(c.content_hash) && /^[0-9a-f]{64}$/.test(c.content_hash));
   for (const item of c.exercises) {
     const e = object(item); check(integer(e.index) && !exercises.has(e.index) && text(e.source_path) && nullableText(e.source_start)); exercises.add(e.index);
+    if (e.clock_issues !== undefined) check(strings(e.clock_issues));
     for (const [field, unit] of [["heart_rate_zones", "bpm"], ["speed_zones", "km/h"], ["power_zones", "W"]] as const) {
       if (e[field] === undefined || e[field] === null) continue;
       const definition = object(e[field]);
@@ -158,6 +161,11 @@ export function readAnalysis(value: unknown, sessionId: string): Analysis {
         const phase = object(item); count++;
         check(text(phase.id) && !phaseIds.has(phase.id) && text(phase.label) && time(phase.duration_ms) && phase.from_ms === cursor && time(phase.to_ms));
         if (phase.distance_m !== undefined) check(phase.distance_m !== null && time(phase.distance_m) && phase.duration_ms === null);
+        if (phase.advance !== undefined) check(["AUTOMATIC", "MANUAL", "UNKNOWN"].includes(String(phase.advance)));
+        if (phase.source_pointer !== undefined) check(phase.source_pointer === null || text(phase.source_pointer) && phase.source_pointer.length <= 1000 && /^exercise\[\d+\]\.phaseOrRepeat\[\d+\](\.phaseOrRepeat\[\d+\])*$/.test(phase.source_pointer));
+        if (phase.target !== undefined && phase.target !== null) {
+          const target = object(phase.target); check(text(target.type) && target.type.length <= 32 && target.low !== null && target.high !== null && time(target.low) && time(target.high) && Number(target.low) <= Number(target.high));
+        }
         const end: number | null = cursor !== null && phase.duration_ms !== null && Number(cursor) + Number(phase.duration_ms) <= 1e12 ? cursor + Number(phase.duration_ms) : null;
         check(phase.to_ms === end);
         if (timeline.source === "stored_blocks") check(a.plan !== null && object(a.plan).blocks instanceof Array && (object(a.plan).blocks as Block[]).some(b => b.id === phase.source_block_id && (phase.distance_m === undefined || b.distance_m === phase.distance_m)));

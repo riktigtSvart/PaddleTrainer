@@ -34,6 +34,7 @@ class AuditArtifactKind(StrEnum):
     WORKOUT_GOAL_TAG = "workout_goal_tag"
     CALENDAR_WORKOUT_MOVE = "calendar_workout_move"
     CALENDAR_CONSTRAINT_REVISION = "calendar_constraint_revision"
+    SESSION_FEEDBACK = "session_feedback"
     DATA_SYNC_STARTED = "data_sync_started"
     DATA_SYNC_SUCCEEDED = "data_sync_succeeded"
     DATA_SYNC_FAILED = "data_sync_failed"

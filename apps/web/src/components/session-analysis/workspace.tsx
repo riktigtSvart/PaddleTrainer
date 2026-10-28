@@ -8,6 +8,7 @@ import { clock } from "@/lib/session-analysis/chart-data";
 import { Charts } from "./charts";
 import { SpeedUnitControl, useSpeedUnit } from "./speed-unit-control";
 import { speedValue } from "@/lib/session-analysis/presentation";
+import { FeedbackPanel } from "./feedback";
 import { SessionSections } from "./sections";
 
 const number = (value: number | null | undefined, unit = "") => value === null || value === undefined ? "Nincs adat" :
@@ -51,6 +52,7 @@ export function SessionDetails({ data }: { data: Analysis }) {
           </ul><p className="pt-notice">A nyers szolgáltatói adatok változatlanul megmaradnak.</p>
         </details>}
     </div><aside className="pt-analysis-context">
+      <FeedbackPanel key={data.athlete_id + s.id} owner={data.athlete_id} session={s.id} />
       <section className="pt-analysis-card"><h2>Terv és teljesítés</h2>
         {!p && <p className="pt-notice">{data.link_state === "unlinked" ? "Nincs igazolt tervkapcsolat. Ebből nem állapítható meg, hogy volt-e előzetes terv." : "A tárolt tervhivatkozás nem oldható fel ebben a fiókban."}</p>}
         {p && <p><Link href={`/workouts/${p.id}`}>{p.title} →</Link></p>}
@@ -66,7 +68,7 @@ export function SessionDetails({ data }: { data: Analysis }) {
         ["Maximális pulzus", number(s.max_hr, "bpm")], ["Maximális sebesség", number(s.max_speed === null ? null : speedValue(s.max_speed, speedUnit), speedUnit)],
         ["Átlagos frekvencia", number(s.avg_cadence, "1/perc")], ["Maximális frekvencia", number(s.max_cadence, "1/perc")],
         ["Maximális teljesítmény", number(s.max_power, "W")], ["Kardioterhelés · forrásérték", number(s.cardio_load)],
-        ["Észlelt terhelés · forrásérték", number(s.perceived_load)], ["RPE", number(s.rpe)],
+        ["Észlelt terhelés · forrásérték", number(s.perceived_load)], ["RPE · forrásérték", number(s.rpe)],
       ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
       <p className="pt-notice">A hiányzó VO₂max- vagy izomterhelési adatot nem becsüljük meg ebből a nézetből.</p></section>
       <details className="pt-analysis-card"><summary>Edzés forrása</summary><dl className="pt-analysis-facts"><div><dt>Szolgáltató</dt><dd>{s.external_provider}</dd></div>

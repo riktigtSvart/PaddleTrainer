@@ -1,0 +1,175 @@
+{
+  "owner": "11111111-1111-4111-8111-111111111111",
+  "session": "00000000-0000-0000-0000-0000000ab631",
+  "receipt": {
+    "committed": true,
+    "reused": false,
+    "artifact": {
+      "schema_version": "session-feedback-v0.1",
+      "artifact_id": "pt-session-feedback:0be2d516bb119616c16d1cf4fa08193ea547a0cd95d86d847691ab5ddbcf3733",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "session_id": "00000000-0000-0000-0000-0000000ab631",
+      "proposal": {
+        "request_id": "00000000-0000-0000-0000-00000001adb1",
+        "timing": "IMMEDIATE",
+        "expected_revision": 0,
+        "observed_at": "2026-10-23T17:00:00Z",
+        "rpe": 5.5,
+        "fatigue": 0,
+        "soreness": null,
+        "recovery": null,
+        "energy": 7,
+        "comment": "Őszinte <script>szöveg</script>"
+      },
+      "revision": 1,
+      "previous_hash": null,
+      "submitted_at": "2026-10-28T12:00:00+00:00",
+      "timezone_name": "Europe/Budapest",
+      "planning_authorized": false,
+      "provider_writeback": false,
+      "content_hash": "e148967972e045e4170ec5e2759d0306d67bacb49be242d64941469b199a0277"
+    },
+    "durable_available_at": "2026-10-22T09:00:00.000001+00:00"
+  },
+  "next_receipt": {
+    "committed": true,
+    "reused": false,
+    "artifact": {
+      "schema_version": "session-feedback-v0.1",
+      "artifact_id": "pt-session-feedback:5f9f54a48d569a5bd46d3cb882cac2b241dbf914075fe5aec0ec091ccd33d497",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "session_id": "00000000-0000-0000-0000-0000000ab631",
+      "proposal": {
+        "request_id": "00000000-0000-0000-0000-00000001adb2",
+        "timing": "NEXT_MORNING",
+        "expected_revision": 0,
+        "observed_at": "2026-10-24T06:00:00Z",
+        "rpe": 5,
+        "fatigue": 0,
+        "soreness": null,
+        "recovery": null,
+        "energy": null,
+        "comment": ""
+      },
+      "revision": 1,
+      "previous_hash": null,
+      "submitted_at": "2026-10-28T12:00:00+00:00",
+      "timezone_name": "Europe/Budapest",
+      "planning_authorized": false,
+      "provider_writeback": false,
+      "content_hash": "9952743e60e4e8191516cbc8b1d3b97d043f9b27f5386ab76f8e58dea24ebc35"
+    },
+    "durable_available_at": "2026-10-22T09:00:00.000002+00:00"
+  },
+  "context": {
+    "schema_version": "session-feedback-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "session_id": "00000000-0000-0000-0000-0000000ab631",
+    "history": [
+      {
+        "artifact_id": "pt-session-feedback:0be2d516bb119616c16d1cf4fa08193ea547a0cd95d86d847691ab5ddbcf3733",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "content_hash": "e148967972e045e4170ec5e2759d0306d67bacb49be242d64941469b199a0277",
+        "planning_authorized": false,
+        "previous_hash": null,
+        "proposal": {
+          "comment": "Őszinte <script>szöveg</script>",
+          "energy": 7,
+          "expected_revision": 0,
+          "fatigue": 0,
+          "observed_at": "2026-10-23T17:00:00Z",
+          "recovery": null,
+          "request_id": "00000000-0000-0000-0000-00000001adb1",
+          "rpe": 5.5,
+          "soreness": null,
+          "timing": "IMMEDIATE"
+        },
+        "provider_writeback": false,
+        "revision": 1,
+        "schema_version": "session-feedback-v0.1",
+        "session_id": "00000000-0000-0000-0000-0000000ab631",
+        "submitted_at": "2026-10-28T12:00:00+00:00",
+        "timezone_name": "Europe/Budapest"
+      },
+      {
+        "artifact_id": "pt-session-feedback:5f9f54a48d569a5bd46d3cb882cac2b241dbf914075fe5aec0ec091ccd33d497",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "content_hash": "9952743e60e4e8191516cbc8b1d3b97d043f9b27f5386ab76f8e58dea24ebc35",
+        "planning_authorized": false,
+        "previous_hash": null,
+        "proposal": {
+          "comment": "",
+          "energy": null,
+          "expected_revision": 0,
+          "fatigue": 0,
+          "observed_at": "2026-10-24T06:00:00Z",
+          "recovery": null,
+          "request_id": "00000000-0000-0000-0000-00000001adb2",
+          "rpe": 5,
+          "soreness": null,
+          "timing": "NEXT_MORNING"
+        },
+        "provider_writeback": false,
+        "revision": 1,
+        "schema_version": "session-feedback-v0.1",
+        "session_id": "00000000-0000-0000-0000-0000000ab631",
+        "submitted_at": "2026-10-28T12:00:00+00:00",
+        "timezone_name": "Europe/Budapest"
+      }
+    ],
+    "current": {
+      "IMMEDIATE": {
+        "artifact_id": "pt-session-feedback:0be2d516bb119616c16d1cf4fa08193ea547a0cd95d86d847691ab5ddbcf3733",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "content_hash": "e148967972e045e4170ec5e2759d0306d67bacb49be242d64941469b199a0277",
+        "planning_authorized": false,
+        "previous_hash": null,
+        "proposal": {
+          "comment": "Őszinte <script>szöveg</script>",
+          "energy": 7,
+          "expected_revision": 0,
+          "fatigue": 0,
+          "observed_at": "2026-10-23T17:00:00Z",
+          "recovery": null,
+          "request_id": "00000000-0000-0000-0000-00000001adb1",
+          "rpe": 5.5,
+          "soreness": null,
+          "timing": "IMMEDIATE"
+        },
+        "provider_writeback": false,
+        "revision": 1,
+        "schema_version": "session-feedback-v0.1",
+        "session_id": "00000000-0000-0000-0000-0000000ab631",
+        "submitted_at": "2026-10-28T12:00:00+00:00",
+        "timezone_name": "Europe/Budapest"
+      },
+      "NEXT_MORNING": {
+        "artifact_id": "pt-session-feedback:5f9f54a48d569a5bd46d3cb882cac2b241dbf914075fe5aec0ec091ccd33d497",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "content_hash": "9952743e60e4e8191516cbc8b1d3b97d043f9b27f5386ab76f8e58dea24ebc35",
+        "planning_authorized": false,
+        "previous_hash": null,
+        "proposal": {
+          "comment": "",
+          "energy": null,
+          "expected_revision": 0,
+          "fatigue": 0,
+          "observed_at": "2026-10-24T06:00:00Z",
+          "recovery": null,
+          "request_id": "00000000-0000-0000-0000-00000001adb2",
+          "rpe": 5,
+          "soreness": null,
+          "timing": "NEXT_MORNING"
+        },
+        "provider_writeback": false,
+        "revision": 1,
+        "schema_version": "session-feedback-v0.1",
+        "session_id": "00000000-0000-0000-0000-0000000ab631",
+        "submitted_at": "2026-10-28T12:00:00+00:00",
+        "timezone_name": "Europe/Budapest"
+      }
+    },
+    "planning_authorized": false,
+    "provider_writeback": false
+  }
+}

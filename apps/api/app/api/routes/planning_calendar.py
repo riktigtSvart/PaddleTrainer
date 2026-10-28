@@ -124,3 +124,21 @@ async def move_save(payload: MoveSave, response: Response, db: DB, owner: Owner)
     result = await call(moves.save(owner=owner, proposal=payload.proposal.model_dump(mode="json"), review_hash=payload.review_hash, repository=SqlAlchemyPlanningAuditRepository(db), session=db))
     response.status_code = 200 if result["reused"] else 201
     return result
+
+
+from app.schemas.session_feedback import FeedbackInput
+from app.services import session_feedback
+
+@router.get("/sessions/{session_id}/feedback")
+async def feedback_context(session_id: UUID, db: DB, owner: Owner):
+    _fresh(db)
+    return await call(session_feedback.context(owner=owner, session_id=str(session_id),
+        repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+
+@router.post("/sessions/{session_id}/feedback", status_code=201)
+async def feedback_save(session_id: UUID, payload: FeedbackInput, response: Response, db: DB, owner: Owner):
+    _fresh(db)
+    result = await call(session_feedback.save(owner=owner, session_id=str(session_id),
+        proposal=payload.model_dump(mode="json"), repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+    response.status_code = 200 if result["reused"] else 201
+    return result

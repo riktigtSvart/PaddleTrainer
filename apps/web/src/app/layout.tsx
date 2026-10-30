@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import AppShell from "@/components/ui/app-shell";
 import { themeBootstrap } from "@/lib/ui/theme";
 import "./globals.css";
+import "@/styles/compact-workspace.css";
 
 export const metadata: Metadata = {
   title: { default: "PaddleTrainer", template: "%s · PaddleTrainer" },

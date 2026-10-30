@@ -48,11 +48,20 @@ class RevisionAwareFeedbackEvidenceRepository:
         return tuple(item for item in items if keep(item))
 
 async def assemble_feedback_personal_inputs(*, session, athlete_id, history_id, window_start_at, as_of,
-        information_cutoff_at, predictor_keys, created_at):
+        information_cutoff_at, predictor_keys, created_at, observation_end_at=None):
     require(window_start_at <= as_of <= created_at and information_cutoff_at <= created_at,
         "CALENDAR_FEEDBACK_LEARNING_CUTOFF_INVALID")
     items = await RevisionAwareFeedbackEvidenceRepository(session).list_available(
         athlete_id=athlete_id,information_cutoff_at=information_cutoff_at)
+    # Calendar filtering and information availability are different clocks.
+    # Select revisions at the current cutoff first; then bound response dates.
+    # Retain executed-training evidence for valid response linkage/isolation.
+    if observation_end_at is not None:
+        require(window_start_at <= observation_end_at <= as_of,
+            "CALENDAR_FEEDBACK_LEARNING_CUTOFF_INVALID")
+        if observation_end_at < as_of:
+            items = tuple(item for item in items if item.evidence_type != SESSION_FEEDBACK
+                or item.observed_at < observation_end_at)
     history = build_training_dynamics_history_from_evidence(items=items,history_id=history_id,athlete_id=athlete_id,
         window_start_at=window_start_at,as_of=as_of,information_cutoff_at=information_cutoff_at,
         stimulus_coverage=TrainingDynamicsHistoryCoverage.UNKNOWN,response_coverage=TrainingDynamicsHistoryCoverage.PARTIAL,

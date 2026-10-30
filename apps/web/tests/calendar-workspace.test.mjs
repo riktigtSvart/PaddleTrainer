@@ -258,7 +258,7 @@ test("server rendering preserves exact event geometry, icon and actual status", 
   assert.match(html, /is-actual/);
   assert.match(html, /pt-goal-vo2/);
   assert.match(html, /teljesített/);
-  assert.match(html, /Keret nincs megadva/);
+  assert.match(html, /Nincs megadott idősáv/);
 });
 
 function renderedEvents(rows, fullDay = false) {

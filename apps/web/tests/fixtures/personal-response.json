@@ -1,0 +1,1927 @@
+{
+  "empty": {
+    "schema_version": "feedback-personal-inputs-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "response_window_end_at": "2026-10-28T12:00:00+00:00",
+    "selection_scope": "response_observed_at",
+    "information_cutoff_at": "2026-10-28T12:00:00+00:00",
+    "window_start_at": "2026-07-30T12:00:00+00:00",
+    "as_of": "2026-10-28T12:00:00+00:00",
+    "assembly": {
+      "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+      "source_history_content_hash": "59d31a2c17b7e507d7a0a2e0d61f89258d53eb1862e6dfce0221e0b2a1d34b40",
+      "response_observations": [],
+      "descriptive_summary": {
+        "summary_id": "pt-training-dynamics-descriptive-summary:59d31a2c17b7e507d7a0a2e0d61f89258d53eb1862e6dfce0221e0b2a1d34b40",
+        "schema_version": "training-dynamics-descriptive-summary-v0.1",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+        "source_history_content_hash": "59d31a2c17b7e507d7a0a2e0d61f89258d53eb1862e6dfce0221e0b2a1d34b40",
+        "window_start_at": "2026-07-30T12:00:00.000000Z",
+        "as_of": "2026-10-28T12:00:00.000000Z",
+        "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+        "stimulus_coverage": "unknown",
+        "response_coverage": "partial",
+        "observed_stimulus_count": 0,
+        "known_duration_stimulus_count": 0,
+        "observed_response_count": 0,
+        "stimuli_with_observed_response_count": 0,
+        "modality_stimulus_counts": [],
+        "response_timing_counts": [
+          {
+            "category_key": "follow_up",
+            "observed_count": 0
+          },
+          {
+            "category_key": "immediate",
+            "observed_count": 0
+          },
+          {
+            "category_key": "next_morning",
+            "observed_count": 0
+          },
+          {
+            "category_key": "same_day",
+            "observed_count": 0
+          }
+        ],
+        "response_isolation_counts": [
+          {
+            "category_key": "intervening_stimulus_observed",
+            "observed_count": 0
+          },
+          {
+            "category_key": "no_intervening_stimulus_observed",
+            "observed_count": 0
+          },
+          {
+            "category_key": "unknown",
+            "observed_count": 0
+          }
+        ],
+        "observed_stimulus_spacing_s": {
+          "sample_count": 0,
+          "sample_support": "no_samples",
+          "minimum": null,
+          "median": null,
+          "maximum": null,
+          "median_absolute_deviation": null
+        },
+        "response_lag_from_reference_end_s": {
+          "sample_count": 0,
+          "sample_support": "no_samples",
+          "minimum": null,
+          "median": null,
+          "maximum": null,
+          "median_absolute_deviation": null
+        },
+        "causal_attribution_established": false,
+        "effect_inference_authorized": false,
+        "readiness_inference_authorized": false,
+        "performance_prediction_authorized": false,
+        "prescription_change_authorized": false,
+        "created_at": "2026-10-28T12:00:00.000000Z",
+        "content_hash_algorithm": "sha256-canonical-json-v0.1",
+        "content_hash": "b752c229e04def5f6a45a9c21d872e542cf8b9d07071d336106f0b0a8713d1d0"
+      },
+      "response_references": [],
+      "data_sufficiency": {
+        "assessment_id": "pt-training-dynamics-data-sufficiency:c668e8a693fd871b2d6b17743da354307a04ad2646ecf4b7988d5cd0873ce38c",
+        "schema_version": "training-dynamics-data-sufficiency-v0.1",
+        "rules_version": "training-dynamics-data-sufficiency-rules-v0.1",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+        "source_history_content_hash": "59d31a2c17b7e507d7a0a2e0d61f89258d53eb1862e6dfce0221e0b2a1d34b40",
+        "source_summary_id": "pt-training-dynamics-descriptive-summary:59d31a2c17b7e507d7a0a2e0d61f89258d53eb1862e6dfce0221e0b2a1d34b40",
+        "source_summary_content_hash": "b752c229e04def5f6a45a9c21d872e542cf8b9d07071d336106f0b0a8713d1d0",
+        "source_reference_ids": [],
+        "source_reference_content_hashes": [],
+        "window_start_at": "2026-07-30T12:00:00.000000Z",
+        "as_of": "2026-10-28T12:00:00.000000Z",
+        "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+        "stimulus_coverage": "unknown",
+        "response_coverage": "partial",
+        "status": "unknown",
+        "components": [
+          {
+            "kind": "structural_history",
+            "status": "unknown",
+            "source_coverage": "unknown",
+            "observed_count": 0,
+            "usable_count": 0,
+            "limitation_codes": [
+              "no_observed_stimuli",
+              "stimulus_source_coverage_unknown"
+            ]
+          },
+          {
+            "kind": "response_observation",
+            "status": "insufficient",
+            "source_coverage": "partial",
+            "observed_count": 0,
+            "usable_count": 0,
+            "limitation_codes": [
+              "no_observed_responses",
+              "response_source_coverage_partial"
+            ]
+          },
+          {
+            "kind": "response_lag",
+            "status": "insufficient",
+            "source_coverage": "partial",
+            "observed_count": 0,
+            "usable_count": 0,
+            "limitation_codes": [
+              "no_known_response_lags",
+              "response_source_coverage_partial"
+            ]
+          },
+          {
+            "kind": "personal_metric_reference",
+            "status": "insufficient",
+            "source_coverage": "partial",
+            "observed_count": 0,
+            "usable_count": 0,
+            "limitation_codes": [
+              "no_eligible_numeric_response_samples",
+              "no_response_metric_references",
+              "response_source_coverage_partial"
+            ]
+          }
+        ],
+        "reference_context_count": 0,
+        "eligible_numeric_reference_context_count": 0,
+        "observed_reference_observation_count": 0,
+        "eligible_numeric_response_sample_count": 0,
+        "excluded_non_known_response_sample_count": 0,
+        "excluded_known_non_numeric_response_sample_count": 0,
+        "fragmented_metric_keys": [],
+        "limitation_codes": [
+          "no_eligible_numeric_response_samples",
+          "no_known_response_lags",
+          "no_observed_responses",
+          "no_observed_stimuli",
+          "no_response_metric_references",
+          "response_source_coverage_partial",
+          "stimulus_source_coverage_unknown"
+        ],
+        "evidence_level_ceiling": "descriptive",
+        "association_inference_authorized": false,
+        "effect_inference_authorized": false,
+        "causal_attribution_established": false,
+        "readiness_inference_authorized": false,
+        "performance_prediction_authorized": false,
+        "prescription_change_authorized": false,
+        "planning_authorized": false,
+        "created_at": "2026-10-28T12:00:00.000000Z",
+        "content_hash_algorithm": "sha256-canonical-json-v0.1",
+        "content_hash": "c668e8a693fd871b2d6b17743da354307a04ad2646ecf4b7988d5cd0873ce38c"
+      },
+      "reference_sufficiency": [],
+      "personal_references": [],
+      "predictor_keys": [
+        {
+          "metric_key": "duration_s",
+          "unit": "s"
+        }
+      ],
+      "datasets": [],
+      "evidence_level_ceiling": "descriptive",
+      "association_supported": false,
+      "prospective_validation_established": false,
+      "causal_attribution_established": false,
+      "effect_inference_authorized": false,
+      "readiness_inference_authorized": false,
+      "performance_prediction_authorized": false,
+      "prescription_change_authorized": false,
+      "planning_authorized": false,
+      "created_at": "2026-10-28T12:00:00.000000Z"
+    },
+    "planning_authorized": false,
+    "model_updated": false
+  },
+  "connected": {
+    "schema_version": "feedback-personal-inputs-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "response_window_end_at": "2026-10-28T12:00:00+00:00",
+    "selection_scope": "response_observed_at",
+    "information_cutoff_at": "2026-10-28T12:00:00+00:00",
+    "window_start_at": "2026-07-30T12:00:00+00:00",
+    "as_of": "2026-10-28T12:00:00+00:00",
+    "assembly": {
+      "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+      "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+      "response_observations": [
+        {
+          "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_energy_score",
+          "schema_version": "response-metric-observation-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+          "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+          "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+          "stimulus_modality_key": "KAYAK",
+          "association_id": "pt-response-association:session-feedback:c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "association_content_hash": "ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b",
+          "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+          "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "response_timing": "immediate",
+          "session_link_basis": "source_explicit_session_id",
+          "response_observed_at": "2026-10-23T17:00:00.000000Z",
+          "response_available_at": "2026-10-28T12:00:00.000000Z",
+          "lag_from_reference_end_status": "known",
+          "lag_from_reference_end_s": 2700.0,
+          "reference_end_basis": "observed_at_plus_known_duration",
+          "isolation_status": "unknown",
+          "intervening_stimulus_ids": [],
+          "metric_key": "self_reported_energy_score",
+          "knowledge_status": "known",
+          "value": 7,
+          "unit": null,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "dbea1aa2fc9ce9f930baaea6aad6c4d331d3109aba20ae2606571536254cba9d"
+        },
+        {
+          "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_fatigue_score",
+          "schema_version": "response-metric-observation-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+          "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+          "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+          "stimulus_modality_key": "KAYAK",
+          "association_id": "pt-response-association:session-feedback:c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "association_content_hash": "ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b",
+          "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+          "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "response_timing": "immediate",
+          "session_link_basis": "source_explicit_session_id",
+          "response_observed_at": "2026-10-23T17:00:00.000000Z",
+          "response_available_at": "2026-10-28T12:00:00.000000Z",
+          "lag_from_reference_end_status": "known",
+          "lag_from_reference_end_s": 2700.0,
+          "reference_end_basis": "observed_at_plus_known_duration",
+          "isolation_status": "unknown",
+          "intervening_stimulus_ids": [],
+          "metric_key": "self_reported_fatigue_score",
+          "knowledge_status": "known",
+          "value": 0,
+          "unit": null,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "f0ad315dc6de818bb5d1450aa9b5b80d99efe8464006e79b013e5795c973c915"
+        },
+        {
+          "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_recovery_score",
+          "schema_version": "response-metric-observation-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+          "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+          "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+          "stimulus_modality_key": "KAYAK",
+          "association_id": "pt-response-association:session-feedback:c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "association_content_hash": "ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b",
+          "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+          "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "response_timing": "immediate",
+          "session_link_basis": "source_explicit_session_id",
+          "response_observed_at": "2026-10-23T17:00:00.000000Z",
+          "response_available_at": "2026-10-28T12:00:00.000000Z",
+          "lag_from_reference_end_status": "known",
+          "lag_from_reference_end_s": 2700.0,
+          "reference_end_basis": "observed_at_plus_known_duration",
+          "isolation_status": "unknown",
+          "intervening_stimulus_ids": [],
+          "metric_key": "self_reported_recovery_score",
+          "knowledge_status": "unknown",
+          "value": null,
+          "unit": null,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "5042662052429c011d08dd08e4e18aa98883323fbbfad6c6f0e131beb034a919"
+        },
+        {
+          "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_rpe_score",
+          "schema_version": "response-metric-observation-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+          "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+          "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+          "stimulus_modality_key": "KAYAK",
+          "association_id": "pt-response-association:session-feedback:c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "association_content_hash": "ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b",
+          "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+          "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "response_timing": "immediate",
+          "session_link_basis": "source_explicit_session_id",
+          "response_observed_at": "2026-10-23T17:00:00.000000Z",
+          "response_available_at": "2026-10-28T12:00:00.000000Z",
+          "lag_from_reference_end_status": "known",
+          "lag_from_reference_end_s": 2700.0,
+          "reference_end_basis": "observed_at_plus_known_duration",
+          "isolation_status": "unknown",
+          "intervening_stimulus_ids": [],
+          "metric_key": "self_reported_rpe_score",
+          "knowledge_status": "known",
+          "value": 5,
+          "unit": null,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "82d95be63749f650d9654f710743f5e56f046061e650c02b1cf783de2934a0d3"
+        },
+        {
+          "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_soreness_score",
+          "schema_version": "response-metric-observation-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+          "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+          "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+          "stimulus_modality_key": "KAYAK",
+          "association_id": "pt-response-association:session-feedback:c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "association_content_hash": "ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b",
+          "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+          "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+          "response_timing": "immediate",
+          "session_link_basis": "source_explicit_session_id",
+          "response_observed_at": "2026-10-23T17:00:00.000000Z",
+          "response_available_at": "2026-10-28T12:00:00.000000Z",
+          "lag_from_reference_end_status": "known",
+          "lag_from_reference_end_s": 2700.0,
+          "reference_end_basis": "observed_at_plus_known_duration",
+          "isolation_status": "unknown",
+          "intervening_stimulus_ids": [],
+          "metric_key": "self_reported_soreness_score",
+          "knowledge_status": "unknown",
+          "value": null,
+          "unit": null,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "276ca69da3c9fba04f82b95d9329aaef5f911a473ab0d95933675efe3d69112f"
+        }
+      ],
+      "descriptive_summary": {
+        "summary_id": "pt-training-dynamics-descriptive-summary:1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+        "schema_version": "training-dynamics-descriptive-summary-v0.1",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+        "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+        "window_start_at": "2026-07-30T12:00:00.000000Z",
+        "as_of": "2026-10-28T12:00:00.000000Z",
+        "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+        "stimulus_coverage": "unknown",
+        "response_coverage": "partial",
+        "observed_stimulus_count": 1,
+        "known_duration_stimulus_count": 1,
+        "observed_response_count": 1,
+        "stimuli_with_observed_response_count": 1,
+        "modality_stimulus_counts": [
+          {
+            "category_key": "KAYAK",
+            "observed_count": 1
+          }
+        ],
+        "response_timing_counts": [
+          {
+            "category_key": "follow_up",
+            "observed_count": 0
+          },
+          {
+            "category_key": "immediate",
+            "observed_count": 1
+          },
+          {
+            "category_key": "next_morning",
+            "observed_count": 0
+          },
+          {
+            "category_key": "same_day",
+            "observed_count": 0
+          }
+        ],
+        "response_isolation_counts": [
+          {
+            "category_key": "intervening_stimulus_observed",
+            "observed_count": 0
+          },
+          {
+            "category_key": "no_intervening_stimulus_observed",
+            "observed_count": 0
+          },
+          {
+            "category_key": "unknown",
+            "observed_count": 1
+          }
+        ],
+        "observed_stimulus_spacing_s": {
+          "sample_count": 0,
+          "sample_support": "no_samples",
+          "minimum": null,
+          "median": null,
+          "maximum": null,
+          "median_absolute_deviation": null
+        },
+        "response_lag_from_reference_end_s": {
+          "sample_count": 1,
+          "sample_support": "single_sample",
+          "minimum": 2700.0,
+          "median": 2700.0,
+          "maximum": 2700.0,
+          "median_absolute_deviation": null
+        },
+        "causal_attribution_established": false,
+        "effect_inference_authorized": false,
+        "readiness_inference_authorized": false,
+        "performance_prediction_authorized": false,
+        "prescription_change_authorized": false,
+        "created_at": "2026-10-28T12:00:00.000000Z",
+        "content_hash_algorithm": "sha256-canonical-json-v0.1",
+        "content_hash": "1e4a128cc99183f2ba1a54ddb7a9504e9e111f4bf67aa1cbdc90f0baf367f9f9"
+      },
+      "response_references": [
+        {
+          "reference_id": "pt-descriptive-response-metric-reference:3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "schema_version": "descriptive-response-metric-reference-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "window_start_at": "2026-07-30T12:00:00.000000Z",
+          "as_of": "2026-10-28T12:00:00.000000Z",
+          "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "key": {
+            "metric_key": "self_reported_energy_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "sample_support": "single_sample",
+          "minimum": 7.0,
+          "median": 7.0,
+          "maximum": 7.0,
+          "median_absolute_deviation": null,
+          "response_isolation_counts": [
+            {
+              "category_key": "intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "no_intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "unknown",
+              "observed_count": 1
+            }
+          ],
+          "source_observations": [
+            {
+              "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_energy_score",
+              "observation_content_hash": "dbea1aa2fc9ce9f930baaea6aad6c4d331d3109aba20ae2606571536254cba9d",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "eligibility": "eligible_numeric"
+            }
+          ],
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9"
+        },
+        {
+          "reference_id": "pt-descriptive-response-metric-reference:ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "schema_version": "descriptive-response-metric-reference-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "window_start_at": "2026-07-30T12:00:00.000000Z",
+          "as_of": "2026-10-28T12:00:00.000000Z",
+          "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "key": {
+            "metric_key": "self_reported_fatigue_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "sample_support": "single_sample",
+          "minimum": 0.0,
+          "median": 0.0,
+          "maximum": 0.0,
+          "median_absolute_deviation": null,
+          "response_isolation_counts": [
+            {
+              "category_key": "intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "no_intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "unknown",
+              "observed_count": 1
+            }
+          ],
+          "source_observations": [
+            {
+              "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_fatigue_score",
+              "observation_content_hash": "f0ad315dc6de818bb5d1450aa9b5b80d99efe8464006e79b013e5795c973c915",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "eligibility": "eligible_numeric"
+            }
+          ],
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549"
+        },
+        {
+          "reference_id": "pt-descriptive-response-metric-reference:309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "schema_version": "descriptive-response-metric-reference-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "window_start_at": "2026-07-30T12:00:00.000000Z",
+          "as_of": "2026-10-28T12:00:00.000000Z",
+          "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "key": {
+            "metric_key": "self_reported_recovery_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 0,
+          "excluded_non_known_count": 1,
+          "excluded_known_non_numeric_count": 0,
+          "sample_support": "no_samples",
+          "minimum": null,
+          "median": null,
+          "maximum": null,
+          "median_absolute_deviation": null,
+          "response_isolation_counts": [
+            {
+              "category_key": "intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "no_intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "unknown",
+              "observed_count": 1
+            }
+          ],
+          "source_observations": [
+            {
+              "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_recovery_score",
+              "observation_content_hash": "5042662052429c011d08dd08e4e18aa98883323fbbfad6c6f0e131beb034a919",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "eligibility": "non_known"
+            }
+          ],
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30"
+        },
+        {
+          "reference_id": "pt-descriptive-response-metric-reference:386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "schema_version": "descriptive-response-metric-reference-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "window_start_at": "2026-07-30T12:00:00.000000Z",
+          "as_of": "2026-10-28T12:00:00.000000Z",
+          "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "key": {
+            "metric_key": "self_reported_rpe_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "sample_support": "single_sample",
+          "minimum": 5.0,
+          "median": 5.0,
+          "maximum": 5.0,
+          "median_absolute_deviation": null,
+          "response_isolation_counts": [
+            {
+              "category_key": "intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "no_intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "unknown",
+              "observed_count": 1
+            }
+          ],
+          "source_observations": [
+            {
+              "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_rpe_score",
+              "observation_content_hash": "82d95be63749f650d9654f710743f5e56f046061e650c02b1cf783de2934a0d3",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "eligibility": "eligible_numeric"
+            }
+          ],
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794"
+        },
+        {
+          "reference_id": "pt-descriptive-response-metric-reference:383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a",
+          "schema_version": "descriptive-response-metric-reference-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "window_start_at": "2026-07-30T12:00:00.000000Z",
+          "as_of": "2026-10-28T12:00:00.000000Z",
+          "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "key": {
+            "metric_key": "self_reported_soreness_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 0,
+          "excluded_non_known_count": 1,
+          "excluded_known_non_numeric_count": 0,
+          "sample_support": "no_samples",
+          "minimum": null,
+          "median": null,
+          "maximum": null,
+          "median_absolute_deviation": null,
+          "response_isolation_counts": [
+            {
+              "category_key": "intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "no_intervening_stimulus_observed",
+              "observed_count": 0
+            },
+            {
+              "category_key": "unknown",
+              "observed_count": 1
+            }
+          ],
+          "source_observations": [
+            {
+              "observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_soreness_score",
+              "observation_content_hash": "276ca69da3c9fba04f82b95d9329aaef5f911a473ab0d95933675efe3d69112f",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "eligibility": "non_known"
+            }
+          ],
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a"
+        }
+      ],
+      "data_sufficiency": {
+        "assessment_id": "pt-training-dynamics-data-sufficiency:48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+        "schema_version": "training-dynamics-data-sufficiency-v0.1",
+        "rules_version": "training-dynamics-data-sufficiency-rules-v0.1",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+        "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+        "source_summary_id": "pt-training-dynamics-descriptive-summary:1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+        "source_summary_content_hash": "1e4a128cc99183f2ba1a54ddb7a9504e9e111f4bf67aa1cbdc90f0baf367f9f9",
+        "source_reference_ids": [
+          "pt-descriptive-response-metric-reference:3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "pt-descriptive-response-metric-reference:ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "pt-descriptive-response-metric-reference:309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "pt-descriptive-response-metric-reference:386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "pt-descriptive-response-metric-reference:383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a"
+        ],
+        "source_reference_content_hashes": [
+          "3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a"
+        ],
+        "window_start_at": "2026-07-30T12:00:00.000000Z",
+        "as_of": "2026-10-28T12:00:00.000000Z",
+        "information_cutoff_at": "2026-10-28T12:00:00.000000Z",
+        "stimulus_coverage": "unknown",
+        "response_coverage": "partial",
+        "status": "descriptive_supported",
+        "components": [
+          {
+            "kind": "structural_history",
+            "status": "descriptive_supported",
+            "source_coverage": "unknown",
+            "observed_count": 1,
+            "usable_count": 1,
+            "limitation_codes": [
+              "stimulus_source_coverage_unknown"
+            ]
+          },
+          {
+            "kind": "response_observation",
+            "status": "descriptive_supported",
+            "source_coverage": "partial",
+            "observed_count": 1,
+            "usable_count": 1,
+            "limitation_codes": [
+              "response_source_coverage_partial"
+            ]
+          },
+          {
+            "kind": "response_lag",
+            "status": "descriptive_supported",
+            "source_coverage": "partial",
+            "observed_count": 1,
+            "usable_count": 1,
+            "limitation_codes": [
+              "response_source_coverage_partial"
+            ]
+          },
+          {
+            "kind": "personal_metric_reference",
+            "status": "descriptive_supported",
+            "source_coverage": "partial",
+            "observed_count": 5,
+            "usable_count": 3,
+            "limitation_codes": [
+              "non_known_response_samples_present",
+              "response_source_coverage_partial"
+            ]
+          }
+        ],
+        "reference_context_count": 5,
+        "eligible_numeric_reference_context_count": 3,
+        "observed_reference_observation_count": 5,
+        "eligible_numeric_response_sample_count": 3,
+        "excluded_non_known_response_sample_count": 2,
+        "excluded_known_non_numeric_response_sample_count": 0,
+        "fragmented_metric_keys": [],
+        "limitation_codes": [
+          "non_known_response_samples_present",
+          "response_source_coverage_partial",
+          "stimulus_source_coverage_unknown"
+        ],
+        "evidence_level_ceiling": "descriptive",
+        "association_inference_authorized": false,
+        "effect_inference_authorized": false,
+        "causal_attribution_established": false,
+        "readiness_inference_authorized": false,
+        "performance_prediction_authorized": false,
+        "prescription_change_authorized": false,
+        "planning_authorized": false,
+        "created_at": "2026-10-28T12:00:00.000000Z",
+        "content_hash_algorithm": "sha256-canonical-json-v0.1",
+        "content_hash": "48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8"
+      },
+      "reference_sufficiency": [
+        {
+          "assessment_id": "pt-response-metric-reference-sufficiency:c6e8b4dcb55047d5b021f6592f30c1f98aa857c19bdc38df25fc834bd5cabcb9",
+          "schema_version": "response-metric-reference-sufficiency-v0.1",
+          "rules_version": "training-dynamics-data-sufficiency-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_data_sufficiency_assessment_id": "pt-training-dynamics-data-sufficiency:48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_data_sufficiency_content_hash": "48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_reference_id": "pt-descriptive-response-metric-reference:3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "source_reference_content_hash": "3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "key": {
+            "metric_key": "self_reported_energy_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "response_coverage": "partial",
+          "status": "descriptive_supported",
+          "sample_support": "single_sample",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "metric_context_count": 1,
+          "sibling_reference_ids": [],
+          "sibling_reference_content_hashes": [],
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "c6e8b4dcb55047d5b021f6592f30c1f98aa857c19bdc38df25fc834bd5cabcb9"
+        },
+        {
+          "assessment_id": "pt-response-metric-reference-sufficiency:3d0a8a6b42b849340a86fa052efb8c538de5795b9e9664708d16338f396b09e3",
+          "schema_version": "response-metric-reference-sufficiency-v0.1",
+          "rules_version": "training-dynamics-data-sufficiency-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_data_sufficiency_assessment_id": "pt-training-dynamics-data-sufficiency:48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_data_sufficiency_content_hash": "48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_reference_id": "pt-descriptive-response-metric-reference:ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "source_reference_content_hash": "ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "key": {
+            "metric_key": "self_reported_fatigue_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "response_coverage": "partial",
+          "status": "descriptive_supported",
+          "sample_support": "single_sample",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "metric_context_count": 1,
+          "sibling_reference_ids": [],
+          "sibling_reference_content_hashes": [],
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "3d0a8a6b42b849340a86fa052efb8c538de5795b9e9664708d16338f396b09e3"
+        },
+        {
+          "assessment_id": "pt-response-metric-reference-sufficiency:ebaf6c5bfb1ca0e8581a28a4b6ca83549f01def1b733df90eaa0391a41447c05",
+          "schema_version": "response-metric-reference-sufficiency-v0.1",
+          "rules_version": "training-dynamics-data-sufficiency-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_data_sufficiency_assessment_id": "pt-training-dynamics-data-sufficiency:48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_data_sufficiency_content_hash": "48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_reference_id": "pt-descriptive-response-metric-reference:309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "source_reference_content_hash": "309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "key": {
+            "metric_key": "self_reported_recovery_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "response_coverage": "partial",
+          "status": "insufficient",
+          "sample_support": "no_samples",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 0,
+          "excluded_non_known_count": 1,
+          "excluded_known_non_numeric_count": 0,
+          "metric_context_count": 1,
+          "sibling_reference_ids": [],
+          "sibling_reference_content_hashes": [],
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "no_eligible_numeric_response_samples",
+            "non_known_response_samples_present",
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "ebaf6c5bfb1ca0e8581a28a4b6ca83549f01def1b733df90eaa0391a41447c05"
+        },
+        {
+          "assessment_id": "pt-response-metric-reference-sufficiency:722ef599cf7709ad2c3d55e2e37b7ce7169d41a7742f482432a9a51c7c0f417c",
+          "schema_version": "response-metric-reference-sufficiency-v0.1",
+          "rules_version": "training-dynamics-data-sufficiency-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_data_sufficiency_assessment_id": "pt-training-dynamics-data-sufficiency:48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_data_sufficiency_content_hash": "48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_reference_id": "pt-descriptive-response-metric-reference:386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "source_reference_content_hash": "386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "key": {
+            "metric_key": "self_reported_rpe_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "response_coverage": "partial",
+          "status": "descriptive_supported",
+          "sample_support": "single_sample",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "metric_context_count": 1,
+          "sibling_reference_ids": [],
+          "sibling_reference_content_hashes": [],
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "722ef599cf7709ad2c3d55e2e37b7ce7169d41a7742f482432a9a51c7c0f417c"
+        },
+        {
+          "assessment_id": "pt-response-metric-reference-sufficiency:b4bd847dfa60a24b669600f7ea89c6fc10063b61c51836c170c2063699f91600",
+          "schema_version": "response-metric-reference-sufficiency-v0.1",
+          "rules_version": "training-dynamics-data-sufficiency-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_data_sufficiency_assessment_id": "pt-training-dynamics-data-sufficiency:48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_data_sufficiency_content_hash": "48dc801090f54d5c2bfdd6bafd40d071bb8ed82350460f4c9811fcabf7cf81b8",
+          "source_reference_id": "pt-descriptive-response-metric-reference:383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a",
+          "source_reference_content_hash": "383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a",
+          "key": {
+            "metric_key": "self_reported_soreness_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "response_coverage": "partial",
+          "status": "insufficient",
+          "sample_support": "no_samples",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 0,
+          "excluded_non_known_count": 1,
+          "excluded_known_non_numeric_count": 0,
+          "metric_context_count": 1,
+          "sibling_reference_ids": [],
+          "sibling_reference_content_hashes": [],
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "no_eligible_numeric_response_samples",
+            "non_known_response_samples_present",
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "b4bd847dfa60a24b669600f7ea89c6fc10063b61c51836c170c2063699f91600"
+        }
+      ],
+      "personal_references": [
+        {
+          "assessment_id": "pt-personal-response-reference-assessment:26d1a52cd7ed876ac3c9188f5c9f8abec609e740cd968133b0029cd1004f5cea",
+          "schema_version": "personal-response-reference-assessment-v0.1",
+          "rules_version": "personal-response-reference-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_reference_id": "pt-descriptive-response-metric-reference:3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "source_reference_content_hash": "3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "source_sufficiency_assessment_id": "pt-response-metric-reference-sufficiency:c6e8b4dcb55047d5b021f6592f30c1f98aa857c19bdc38df25fc834bd5cabcb9",
+          "source_sufficiency_content_hash": "c6e8b4dcb55047d5b021f6592f30c1f98aa857c19bdc38df25fc834bd5cabcb9",
+          "key": {
+            "metric_key": "self_reported_energy_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "status": "descriptive_reference_available",
+          "response_coverage": "partial",
+          "sample_support": "single_sample",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "reference_minimum": 7.0,
+          "reference_median": 7.0,
+          "reference_maximum": 7.0,
+          "reference_median_absolute_deviation": null,
+          "first_eligible_observed_at": "2026-10-23T17:00:00.000000Z",
+          "last_eligible_observed_at": "2026-10-23T17:00:00.000000Z",
+          "eligible_observation_span_s": 0.0,
+          "metric_context_count": 1,
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "stability_established": false,
+          "representativeness_established": false,
+          "validated_baseline_established": false,
+          "comparison_interpretation_authorized": false,
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "26d1a52cd7ed876ac3c9188f5c9f8abec609e740cd968133b0029cd1004f5cea"
+        },
+        {
+          "assessment_id": "pt-personal-response-reference-assessment:ca283e0e9afa2d347570f07ea87e6d4575213017dddd849defc4c8c044e1c7a3",
+          "schema_version": "personal-response-reference-assessment-v0.1",
+          "rules_version": "personal-response-reference-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_reference_id": "pt-descriptive-response-metric-reference:ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "source_reference_content_hash": "ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "source_sufficiency_assessment_id": "pt-response-metric-reference-sufficiency:3d0a8a6b42b849340a86fa052efb8c538de5795b9e9664708d16338f396b09e3",
+          "source_sufficiency_content_hash": "3d0a8a6b42b849340a86fa052efb8c538de5795b9e9664708d16338f396b09e3",
+          "key": {
+            "metric_key": "self_reported_fatigue_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "status": "descriptive_reference_available",
+          "response_coverage": "partial",
+          "sample_support": "single_sample",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "reference_minimum": 0.0,
+          "reference_median": 0.0,
+          "reference_maximum": 0.0,
+          "reference_median_absolute_deviation": null,
+          "first_eligible_observed_at": "2026-10-23T17:00:00.000000Z",
+          "last_eligible_observed_at": "2026-10-23T17:00:00.000000Z",
+          "eligible_observation_span_s": 0.0,
+          "metric_context_count": 1,
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "stability_established": false,
+          "representativeness_established": false,
+          "validated_baseline_established": false,
+          "comparison_interpretation_authorized": false,
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "ca283e0e9afa2d347570f07ea87e6d4575213017dddd849defc4c8c044e1c7a3"
+        },
+        {
+          "assessment_id": "pt-personal-response-reference-assessment:545683b5232805325cdb49e33fa171432b8fb4b90eaf8919361d3d30fe6be3fa",
+          "schema_version": "personal-response-reference-assessment-v0.1",
+          "rules_version": "personal-response-reference-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_reference_id": "pt-descriptive-response-metric-reference:309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "source_reference_content_hash": "309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "source_sufficiency_assessment_id": "pt-response-metric-reference-sufficiency:ebaf6c5bfb1ca0e8581a28a4b6ca83549f01def1b733df90eaa0391a41447c05",
+          "source_sufficiency_content_hash": "ebaf6c5bfb1ca0e8581a28a4b6ca83549f01def1b733df90eaa0391a41447c05",
+          "key": {
+            "metric_key": "self_reported_recovery_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "status": "unestablished",
+          "response_coverage": "partial",
+          "sample_support": "no_samples",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 0,
+          "excluded_non_known_count": 1,
+          "excluded_known_non_numeric_count": 0,
+          "reference_minimum": null,
+          "reference_median": null,
+          "reference_maximum": null,
+          "reference_median_absolute_deviation": null,
+          "first_eligible_observed_at": null,
+          "last_eligible_observed_at": null,
+          "eligible_observation_span_s": null,
+          "metric_context_count": 1,
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "no_eligible_numeric_response_samples",
+            "non_known_response_samples_present",
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "stability_established": false,
+          "representativeness_established": false,
+          "validated_baseline_established": false,
+          "comparison_interpretation_authorized": false,
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "545683b5232805325cdb49e33fa171432b8fb4b90eaf8919361d3d30fe6be3fa"
+        },
+        {
+          "assessment_id": "pt-personal-response-reference-assessment:80ae21969626ab5bfc83d54588f009b354aad4f9624e24b3de9dbb1b0ee40f0f",
+          "schema_version": "personal-response-reference-assessment-v0.1",
+          "rules_version": "personal-response-reference-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_reference_id": "pt-descriptive-response-metric-reference:386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "source_reference_content_hash": "386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "source_sufficiency_assessment_id": "pt-response-metric-reference-sufficiency:722ef599cf7709ad2c3d55e2e37b7ce7169d41a7742f482432a9a51c7c0f417c",
+          "source_sufficiency_content_hash": "722ef599cf7709ad2c3d55e2e37b7ce7169d41a7742f482432a9a51c7c0f417c",
+          "key": {
+            "metric_key": "self_reported_rpe_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "status": "descriptive_reference_available",
+          "response_coverage": "partial",
+          "sample_support": "single_sample",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 1,
+          "excluded_non_known_count": 0,
+          "excluded_known_non_numeric_count": 0,
+          "reference_minimum": 5.0,
+          "reference_median": 5.0,
+          "reference_maximum": 5.0,
+          "reference_median_absolute_deviation": null,
+          "first_eligible_observed_at": "2026-10-23T17:00:00.000000Z",
+          "last_eligible_observed_at": "2026-10-23T17:00:00.000000Z",
+          "eligible_observation_span_s": 0.0,
+          "metric_context_count": 1,
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "stability_established": false,
+          "representativeness_established": false,
+          "validated_baseline_established": false,
+          "comparison_interpretation_authorized": false,
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "80ae21969626ab5bfc83d54588f009b354aad4f9624e24b3de9dbb1b0ee40f0f"
+        },
+        {
+          "assessment_id": "pt-personal-response-reference-assessment:d06be91f59f0053957f29694f0e2d0c3e7474ca055a4a07fd1870f2b1e27813c",
+          "schema_version": "personal-response-reference-assessment-v0.1",
+          "rules_version": "personal-response-reference-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_reference_id": "pt-descriptive-response-metric-reference:383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a",
+          "source_reference_content_hash": "383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a",
+          "source_sufficiency_assessment_id": "pt-response-metric-reference-sufficiency:b4bd847dfa60a24b669600f7ea89c6fc10063b61c51836c170c2063699f91600",
+          "source_sufficiency_content_hash": "b4bd847dfa60a24b669600f7ea89c6fc10063b61c51836c170c2063699f91600",
+          "key": {
+            "metric_key": "self_reported_soreness_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "status": "unestablished",
+          "response_coverage": "partial",
+          "sample_support": "no_samples",
+          "observed_observation_count": 1,
+          "eligible_numeric_sample_count": 0,
+          "excluded_non_known_count": 1,
+          "excluded_known_non_numeric_count": 0,
+          "reference_minimum": null,
+          "reference_median": null,
+          "reference_maximum": null,
+          "reference_median_absolute_deviation": null,
+          "first_eligible_observed_at": null,
+          "last_eligible_observed_at": null,
+          "eligible_observation_span_s": null,
+          "metric_context_count": 1,
+          "fragmented_dimensions": [],
+          "limitation_codes": [
+            "no_eligible_numeric_response_samples",
+            "non_known_response_samples_present",
+            "response_source_coverage_partial"
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "stability_established": false,
+          "representativeness_established": false,
+          "validated_baseline_established": false,
+          "comparison_interpretation_authorized": false,
+          "association_inference_authorized": false,
+          "effect_inference_authorized": false,
+          "causal_attribution_established": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "d06be91f59f0053957f29694f0e2d0c3e7474ca055a4a07fd1870f2b1e27813c"
+        }
+      ],
+      "predictor_keys": [
+        {
+          "metric_key": "duration_s",
+          "unit": "s"
+        }
+      ],
+      "datasets": [
+        {
+          "dataset_id": "pt-personal-association-dataset:48cffbf02c2a47551fad536f40af61106224a945d1c9a2f8919f6d2222d8bc05",
+          "schema_version": "personal-association-dataset-v0.1",
+          "rules_version": "personal-association-dataset-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_response_reference_id": "pt-descriptive-response-metric-reference:3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "source_response_reference_content_hash": "3c76c3d8c800a90f8e6b20bd64f4ba9ad24880b9bb0574b71a00c9d7908d82d9",
+          "source_personal_reference_assessment_id": "pt-personal-response-reference-assessment:26d1a52cd7ed876ac3c9188f5c9f8abec609e740cd968133b0029cd1004f5cea",
+          "source_personal_reference_assessment_content_hash": "26d1a52cd7ed876ac3c9188f5c9f8abec609e740cd968133b0029cd1004f5cea",
+          "predictor_key": {
+            "metric_key": "duration_s",
+            "unit": "s"
+          },
+          "response_key": {
+            "metric_key": "self_reported_energy_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "observed_pair_count": 1,
+          "eligible_numeric_pair_count": 1,
+          "ineligible_pair_count": 0,
+          "exclusion_counts": [
+            {
+              "reason": "predictor_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_missing",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_non_known",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_unit_mismatch",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_non_known",
+              "observed_count": 0
+            }
+          ],
+          "pairs": [
+            {
+              "pair_id": "pt-personal-association-pair:ae761ec16fe38dae88e7aea323f0012781c8e893a252f153bcce6b15ba67f752",
+              "schema_version": "personal-association-pair-v0.1",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+              "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+              "response_observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_energy_score",
+              "response_observation_content_hash": "dbea1aa2fc9ce9f930baaea6aad6c4d331d3109aba20ae2606571536254cba9d",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "predictor_key": {
+                "metric_key": "duration_s",
+                "unit": "s"
+              },
+              "predictor_knowledge_status": "known",
+              "predictor_observed_unit": "s",
+              "predictor_value": 2700,
+              "predictor_numeric_value": 2700.0,
+              "response_key": {
+                "metric_key": "self_reported_energy_score",
+                "unit": null,
+                "response_timing": "immediate",
+                "stimulus_modality_key": "KAYAK"
+              },
+              "response_knowledge_status": "known",
+              "response_value": 7,
+              "response_numeric_value": 7.0,
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "response_available_at": "2026-10-28T12:00:00.000000Z",
+              "lag_from_reference_end_status": "known",
+              "lag_from_reference_end_s": 2700.0,
+              "isolation_status": "unknown",
+              "intervening_stimulus_ids": [],
+              "eligibility": "eligible_numeric_pair",
+              "exclusion_reasons": [],
+              "association_supported": false,
+              "causal_attribution_established": false,
+              "effect_inference_authorized": false,
+              "prediction_authorized": false,
+              "planning_authorized": false,
+              "created_at": "2026-10-28T12:00:00.000000Z",
+              "content_hash_algorithm": "sha256-canonical-json-v0.1",
+              "content_hash": "ae761ec16fe38dae88e7aea323f0012781c8e893a252f153bcce6b15ba67f752"
+            }
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_supported": false,
+          "prospective_validation_established": false,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "48cffbf02c2a47551fad536f40af61106224a945d1c9a2f8919f6d2222d8bc05"
+        },
+        {
+          "dataset_id": "pt-personal-association-dataset:9a3c24b21dd872491dc4e7582d67658e733be0de625b7e8f7f1b2a45e1df8d26",
+          "schema_version": "personal-association-dataset-v0.1",
+          "rules_version": "personal-association-dataset-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_response_reference_id": "pt-descriptive-response-metric-reference:ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "source_response_reference_content_hash": "ec2566607ee1c4f939c5e3bf698be33abc21d76debf5167c6da89143cb45a549",
+          "source_personal_reference_assessment_id": "pt-personal-response-reference-assessment:ca283e0e9afa2d347570f07ea87e6d4575213017dddd849defc4c8c044e1c7a3",
+          "source_personal_reference_assessment_content_hash": "ca283e0e9afa2d347570f07ea87e6d4575213017dddd849defc4c8c044e1c7a3",
+          "predictor_key": {
+            "metric_key": "duration_s",
+            "unit": "s"
+          },
+          "response_key": {
+            "metric_key": "self_reported_fatigue_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "observed_pair_count": 1,
+          "eligible_numeric_pair_count": 1,
+          "ineligible_pair_count": 0,
+          "exclusion_counts": [
+            {
+              "reason": "predictor_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_missing",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_non_known",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_unit_mismatch",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_non_known",
+              "observed_count": 0
+            }
+          ],
+          "pairs": [
+            {
+              "pair_id": "pt-personal-association-pair:d30f765d1e61abd2d5ad46c73dd912e5fbbbf11d9814a10b01616eedc85b181f",
+              "schema_version": "personal-association-pair-v0.1",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+              "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+              "response_observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_fatigue_score",
+              "response_observation_content_hash": "f0ad315dc6de818bb5d1450aa9b5b80d99efe8464006e79b013e5795c973c915",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "predictor_key": {
+                "metric_key": "duration_s",
+                "unit": "s"
+              },
+              "predictor_knowledge_status": "known",
+              "predictor_observed_unit": "s",
+              "predictor_value": 2700,
+              "predictor_numeric_value": 2700.0,
+              "response_key": {
+                "metric_key": "self_reported_fatigue_score",
+                "unit": null,
+                "response_timing": "immediate",
+                "stimulus_modality_key": "KAYAK"
+              },
+              "response_knowledge_status": "known",
+              "response_value": 0,
+              "response_numeric_value": 0.0,
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "response_available_at": "2026-10-28T12:00:00.000000Z",
+              "lag_from_reference_end_status": "known",
+              "lag_from_reference_end_s": 2700.0,
+              "isolation_status": "unknown",
+              "intervening_stimulus_ids": [],
+              "eligibility": "eligible_numeric_pair",
+              "exclusion_reasons": [],
+              "association_supported": false,
+              "causal_attribution_established": false,
+              "effect_inference_authorized": false,
+              "prediction_authorized": false,
+              "planning_authorized": false,
+              "created_at": "2026-10-28T12:00:00.000000Z",
+              "content_hash_algorithm": "sha256-canonical-json-v0.1",
+              "content_hash": "d30f765d1e61abd2d5ad46c73dd912e5fbbbf11d9814a10b01616eedc85b181f"
+            }
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_supported": false,
+          "prospective_validation_established": false,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "9a3c24b21dd872491dc4e7582d67658e733be0de625b7e8f7f1b2a45e1df8d26"
+        },
+        {
+          "dataset_id": "pt-personal-association-dataset:622785fb3283a376d3701740847b4f95abe403dee8c394fb6c9e9abbb916a154",
+          "schema_version": "personal-association-dataset-v0.1",
+          "rules_version": "personal-association-dataset-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_response_reference_id": "pt-descriptive-response-metric-reference:309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "source_response_reference_content_hash": "309d98cb498dace002aaa447df5caff6f7b268797c677ae02cafa1d043287b30",
+          "source_personal_reference_assessment_id": "pt-personal-response-reference-assessment:545683b5232805325cdb49e33fa171432b8fb4b90eaf8919361d3d30fe6be3fa",
+          "source_personal_reference_assessment_content_hash": "545683b5232805325cdb49e33fa171432b8fb4b90eaf8919361d3d30fe6be3fa",
+          "predictor_key": {
+            "metric_key": "duration_s",
+            "unit": "s"
+          },
+          "response_key": {
+            "metric_key": "self_reported_recovery_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "observed_pair_count": 1,
+          "eligible_numeric_pair_count": 0,
+          "ineligible_pair_count": 1,
+          "exclusion_counts": [
+            {
+              "reason": "predictor_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_missing",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_non_known",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_unit_mismatch",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_non_known",
+              "observed_count": 1
+            }
+          ],
+          "pairs": [
+            {
+              "pair_id": "pt-personal-association-pair:923a7d7b2827dec48f6f3bfbda7de9bbe5fcdd645de34aaac34c6791ed4ee59b",
+              "schema_version": "personal-association-pair-v0.1",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+              "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+              "response_observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_recovery_score",
+              "response_observation_content_hash": "5042662052429c011d08dd08e4e18aa98883323fbbfad6c6f0e131beb034a919",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "predictor_key": {
+                "metric_key": "duration_s",
+                "unit": "s"
+              },
+              "predictor_knowledge_status": "known",
+              "predictor_observed_unit": "s",
+              "predictor_value": 2700,
+              "predictor_numeric_value": 2700.0,
+              "response_key": {
+                "metric_key": "self_reported_recovery_score",
+                "unit": null,
+                "response_timing": "immediate",
+                "stimulus_modality_key": "KAYAK"
+              },
+              "response_knowledge_status": "unknown",
+              "response_value": null,
+              "response_numeric_value": null,
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "response_available_at": "2026-10-28T12:00:00.000000Z",
+              "lag_from_reference_end_status": "known",
+              "lag_from_reference_end_s": 2700.0,
+              "isolation_status": "unknown",
+              "intervening_stimulus_ids": [],
+              "eligibility": "ineligible",
+              "exclusion_reasons": [
+                "response_non_known"
+              ],
+              "association_supported": false,
+              "causal_attribution_established": false,
+              "effect_inference_authorized": false,
+              "prediction_authorized": false,
+              "planning_authorized": false,
+              "created_at": "2026-10-28T12:00:00.000000Z",
+              "content_hash_algorithm": "sha256-canonical-json-v0.1",
+              "content_hash": "923a7d7b2827dec48f6f3bfbda7de9bbe5fcdd645de34aaac34c6791ed4ee59b"
+            }
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_supported": false,
+          "prospective_validation_established": false,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "622785fb3283a376d3701740847b4f95abe403dee8c394fb6c9e9abbb916a154"
+        },
+        {
+          "dataset_id": "pt-personal-association-dataset:066e861657897b36faa2f737ca66752d49e3ca71e6955584c863deeb68e439f3",
+          "schema_version": "personal-association-dataset-v0.1",
+          "rules_version": "personal-association-dataset-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_response_reference_id": "pt-descriptive-response-metric-reference:386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "source_response_reference_content_hash": "386b3de0758f5672e54951dd473eef600161bafd1aeda1cc669d16f05c3d6794",
+          "source_personal_reference_assessment_id": "pt-personal-response-reference-assessment:80ae21969626ab5bfc83d54588f009b354aad4f9624e24b3de9dbb1b0ee40f0f",
+          "source_personal_reference_assessment_content_hash": "80ae21969626ab5bfc83d54588f009b354aad4f9624e24b3de9dbb1b0ee40f0f",
+          "predictor_key": {
+            "metric_key": "duration_s",
+            "unit": "s"
+          },
+          "response_key": {
+            "metric_key": "self_reported_rpe_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "observed_pair_count": 1,
+          "eligible_numeric_pair_count": 1,
+          "ineligible_pair_count": 0,
+          "exclusion_counts": [
+            {
+              "reason": "predictor_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_missing",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_non_known",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_unit_mismatch",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_non_known",
+              "observed_count": 0
+            }
+          ],
+          "pairs": [
+            {
+              "pair_id": "pt-personal-association-pair:fcf9765536729be15bc4d371048c004baab8f40a52fb9d152f902117e53b34ee",
+              "schema_version": "personal-association-pair-v0.1",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+              "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+              "response_observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_rpe_score",
+              "response_observation_content_hash": "82d95be63749f650d9654f710743f5e56f046061e650c02b1cf783de2934a0d3",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "predictor_key": {
+                "metric_key": "duration_s",
+                "unit": "s"
+              },
+              "predictor_knowledge_status": "known",
+              "predictor_observed_unit": "s",
+              "predictor_value": 2700,
+              "predictor_numeric_value": 2700.0,
+              "response_key": {
+                "metric_key": "self_reported_rpe_score",
+                "unit": null,
+                "response_timing": "immediate",
+                "stimulus_modality_key": "KAYAK"
+              },
+              "response_knowledge_status": "known",
+              "response_value": 5,
+              "response_numeric_value": 5.0,
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "response_available_at": "2026-10-28T12:00:00.000000Z",
+              "lag_from_reference_end_status": "known",
+              "lag_from_reference_end_s": 2700.0,
+              "isolation_status": "unknown",
+              "intervening_stimulus_ids": [],
+              "eligibility": "eligible_numeric_pair",
+              "exclusion_reasons": [],
+              "association_supported": false,
+              "causal_attribution_established": false,
+              "effect_inference_authorized": false,
+              "prediction_authorized": false,
+              "planning_authorized": false,
+              "created_at": "2026-10-28T12:00:00.000000Z",
+              "content_hash_algorithm": "sha256-canonical-json-v0.1",
+              "content_hash": "fcf9765536729be15bc4d371048c004baab8f40a52fb9d152f902117e53b34ee"
+            }
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_supported": false,
+          "prospective_validation_established": false,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "066e861657897b36faa2f737ca66752d49e3ca71e6955584c863deeb68e439f3"
+        },
+        {
+          "dataset_id": "pt-personal-association-dataset:d526e2089dea39e1ccd190480cbd6e36ffc9c3121c44b74ce05300808611244f",
+          "schema_version": "personal-association-dataset-v0.1",
+          "rules_version": "personal-association-dataset-rules-v0.1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "source_history_id": "pt-training-dynamics-history:c12:2cd111012cccfaeaba68138413aec691b83726dcd419fe27988f80a2bdd815c0",
+          "source_history_content_hash": "1bf073e1e6fd7f4093e44937cff47df91d103d426032157d0a12cee79d10052c",
+          "source_response_reference_id": "pt-descriptive-response-metric-reference:383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a",
+          "source_response_reference_content_hash": "383335838638b81aeb8ec1cc9315957344b978c41fe9c9ee4bb8e7ec8b5e662a",
+          "source_personal_reference_assessment_id": "pt-personal-response-reference-assessment:d06be91f59f0053957f29694f0e2d0c3e7474ca055a4a07fd1870f2b1e27813c",
+          "source_personal_reference_assessment_content_hash": "d06be91f59f0053957f29694f0e2d0c3e7474ca055a4a07fd1870f2b1e27813c",
+          "predictor_key": {
+            "metric_key": "duration_s",
+            "unit": "s"
+          },
+          "response_key": {
+            "metric_key": "self_reported_soreness_score",
+            "unit": null,
+            "response_timing": "immediate",
+            "stimulus_modality_key": "KAYAK"
+          },
+          "stimulus_coverage": "unknown",
+          "response_coverage": "partial",
+          "observed_pair_count": 1,
+          "eligible_numeric_pair_count": 0,
+          "ineligible_pair_count": 1,
+          "exclusion_counts": [
+            {
+              "reason": "predictor_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_missing",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_non_known",
+              "observed_count": 0
+            },
+            {
+              "reason": "predictor_unit_mismatch",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_known_non_numeric",
+              "observed_count": 0
+            },
+            {
+              "reason": "response_non_known",
+              "observed_count": 1
+            }
+          ],
+          "pairs": [
+            {
+              "pair_id": "pt-personal-association-pair:672bc35f20b8dae3f231bef5c673f666241fac746fb4116abc684c1576d3d6de",
+              "schema_version": "personal-association-pair-v0.1",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "workout_session_id": "00000000-0000-0000-0000-0000000ab631",
+              "stimulus_id": "pt-training-stimulus:session:00000000-0000-0000-0000-0000000ab631",
+              "stimulus_content_hash": "788f16afe943ab2d8be363dacf6aaf745b31f3326d8f34188fe389271b70dda4",
+              "response_observation_id": "pt-response-metric-observation:ff31b23bf205ae4ff3d694432bd729ee4097c4cb0166ce4c28c084e5c2163b9b:self_reported_soreness_score",
+              "response_observation_content_hash": "276ca69da3c9fba04f82b95d9329aaef5f911a473ab0d95933675efe3d69112f",
+              "response_evidence_id": "pt-evidence:session-feedback:f9c2e780867c7346718b4869dd952f3e5a78364c87ee3317e2a5e76e3db31269",
+              "response_evidence_hash": "c3b68f7f9484c205b7ed7b9deda17e09884e6e06ea7f4e4e41a8751cc43faabf",
+              "predictor_key": {
+                "metric_key": "duration_s",
+                "unit": "s"
+              },
+              "predictor_knowledge_status": "known",
+              "predictor_observed_unit": "s",
+              "predictor_value": 2700,
+              "predictor_numeric_value": 2700.0,
+              "response_key": {
+                "metric_key": "self_reported_soreness_score",
+                "unit": null,
+                "response_timing": "immediate",
+                "stimulus_modality_key": "KAYAK"
+              },
+              "response_knowledge_status": "unknown",
+              "response_value": null,
+              "response_numeric_value": null,
+              "response_observed_at": "2026-10-23T17:00:00.000000Z",
+              "response_available_at": "2026-10-28T12:00:00.000000Z",
+              "lag_from_reference_end_status": "known",
+              "lag_from_reference_end_s": 2700.0,
+              "isolation_status": "unknown",
+              "intervening_stimulus_ids": [],
+              "eligibility": "ineligible",
+              "exclusion_reasons": [
+                "response_non_known"
+              ],
+              "association_supported": false,
+              "causal_attribution_established": false,
+              "effect_inference_authorized": false,
+              "prediction_authorized": false,
+              "planning_authorized": false,
+              "created_at": "2026-10-28T12:00:00.000000Z",
+              "content_hash_algorithm": "sha256-canonical-json-v0.1",
+              "content_hash": "672bc35f20b8dae3f231bef5c673f666241fac746fb4116abc684c1576d3d6de"
+            }
+          ],
+          "evidence_level_ceiling": "descriptive",
+          "association_supported": false,
+          "prospective_validation_established": false,
+          "causal_attribution_established": false,
+          "effect_inference_authorized": false,
+          "readiness_inference_authorized": false,
+          "performance_prediction_authorized": false,
+          "prescription_change_authorized": false,
+          "planning_authorized": false,
+          "created_at": "2026-10-28T12:00:00.000000Z",
+          "content_hash_algorithm": "sha256-canonical-json-v0.1",
+          "content_hash": "d526e2089dea39e1ccd190480cbd6e36ffc9c3121c44b74ce05300808611244f"
+        }
+      ],
+      "evidence_level_ceiling": "descriptive",
+      "association_supported": false,
+      "prospective_validation_established": false,
+      "causal_attribution_established": false,
+      "effect_inference_authorized": false,
+      "readiness_inference_authorized": false,
+      "performance_prediction_authorized": false,
+      "prescription_change_authorized": false,
+      "planning_authorized": false,
+      "created_at": "2026-10-28T12:00:00.000000Z"
+    },
+    "planning_authorized": false,
+    "model_updated": false
+  }
+}

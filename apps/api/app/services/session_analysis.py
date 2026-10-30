@@ -20,6 +20,7 @@ from app.services.session_chart_zones import heart_rate_zones, zone_limits
 from app.services.session_sections import section_groups
 from app.services.session_plan_timeline import plan_timeline
 from app.services.session_sample_clock import sample_clock_issues
+from app.services.session_route_projection import project_routes
 
 SCHEMA = "session-analysis-v0.1"
 MAX_EXERCISES = 64
@@ -59,7 +60,7 @@ def numeric(value):
 def samples(raw, provider):
     result = {"provider": provider, "time_basis": "exercise_sample_index_times_interval",
               "exercises": [], "series": [], "unsupported": [], "issues": [],
-              "slot_count": 0, "valid_sample_count": 0}
+              "slot_count": 0, "valid_sample_count": 0, "routes": project_routes(raw, provider)}
     if provider != "POLAR":
         result["issues"].append("PROVIDER_SAMPLES_UNSUPPORTED")
         return result
@@ -176,7 +177,10 @@ async def detail(*, owner, session_id, session):
                         "intensity_max": numeric(b.intensity_max), "repeat_count": b.repeat_count,
                         "parent_block_id": str(b.parent_block_id) if b.parent_block_id else None} for b in found.blocks]}
         projection = samples(row.raw_data, row.external_provider)
-        projection["content_hash"] = hashlib.sha256(json.dumps(projection, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        projection["route_content_hash"] = hashlib.sha256(json.dumps(projection["routes"], ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        # Preserve existing manual phase-reference keys when only GPS is enriched.
+        clock_projection = {k: v for k, v in projection.items() if k not in ("routes", "route_content_hash")}
+        projection["content_hash"] = hashlib.sha256(json.dumps(clock_projection, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
         return {"schema_version": SCHEMA, "athlete_id": owner, "timezone_name": user.timezone,
                 "retrieved_at": datetime.now(UTC).isoformat(), "session": summary, "plan": plan,
                 "link_state": "linked" if plan else "linked_plan_unavailable" if row.planned_workout_id else "unlinked",

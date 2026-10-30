@@ -95,12 +95,23 @@ export default function PeriodGrid({
               {d.slice(8)}
               <small>{d.endsWith("-01") ? d.slice(5, 7) + "." : ""}</small>
             </button>
-            {addSlot && <button type="button" className="pt-add-slot" aria-label={`${formatDay(d)} · új idősáv`} onClick={() => addSlot(d)}>+</button>}
+            {addSlot && (
+              <button
+                type="button"
+                className="pt-add-slot"
+                aria-label={`${formatDay(d)} · új idősáv`}
+                title="Edzéslehetőség vagy elfoglaltság hozzáadása"
+                onClick={() => addSlot(d)}
+              >
+                + Idősáv
+              </button>
+            )}
             {activities.slice(0, 3).map((e) => (
               <button
                 type="button"
                 className={`pt-month-event pt-goal-${goalFamily(e.goal)}`}
                 key={e.key}
+                data-calendar-event={e.key}
                 aria-label={eventLabel(e, feed.timezone_name)}
                 title={eventLabel(e, feed.timezone_name)}
                 onClick={() => open(e)}
@@ -130,9 +141,47 @@ export default function PeriodGrid({
                 +{activities.length - 3} további
               </button>
             )}
-            {(byDay.get(d) ?? []).filter((e) => e.kind === "constraint").slice(0, 1).map((e) => <button type="button" key={e.key} className="pt-month-commitment" onClick={() => open(e)} title={eventLabel(e, feed.timezone_name)}><Icon name="calendar" />{e.title}</button>)}
-            {(byDay.get(d) ?? []).filter((e) => e.kind === "constraint").length > 1 && <button type="button" className="pt-more" onClick={() => selectDay(d)}>+{(byDay.get(d) ?? []).filter((e) => e.kind === "constraint").length - 1} elfoglaltság</button>}
-            {(byDay.get(d) ?? []).filter((e) => e.kind === "availability" && e.occurrence).slice(0, 1).map((e) => <button key={e.key} type="button" className="pt-more" onClick={() => open(e)}>Edzéslehetőség</button>)}
+            {(byDay.get(d) ?? [])
+              .filter((e) => e.kind === "constraint")
+              .slice(0, 1)
+              .map((e) => (
+                <button
+                  type="button"
+                  key={e.key}
+                  className="pt-month-commitment"
+                  onClick={() => open(e)}
+                  title={eventLabel(e, feed.timezone_name)}
+                >
+                  <Icon name="calendar" />
+                  {e.title}
+                </button>
+              ))}
+            {(byDay.get(d) ?? []).filter((e) => e.kind === "constraint")
+              .length > 1 && (
+              <button
+                type="button"
+                className="pt-more"
+                onClick={() => selectDay(d)}
+              >
+                +
+                {(byDay.get(d) ?? []).filter((e) => e.kind === "constraint")
+                  .length - 1}{" "}
+                elfoglaltság
+              </button>
+            )}
+            {(byDay.get(d) ?? [])
+              .filter((e) => e.kind === "availability" && e.occurrence)
+              .slice(0, 1)
+              .map((e) => (
+                <button
+                  key={e.key}
+                  type="button"
+                  className="pt-more"
+                  onClick={() => open(e)}
+                >
+                  Edzéslehetőség
+                </button>
+              ))}
             {a?.status === "available" && (
               <small className="pt-notice">{a.windows.length} idősáv</small>
             )}

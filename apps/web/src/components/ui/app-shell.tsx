@@ -19,7 +19,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname(),
     [compact, setCompact] = useState(false);
   const current = navigation.find((item) =>
-    item.href === "/" ? pathname === "/" : pathname.startsWith(item.href),
+    item.href === "/"
+      ? pathname === "/"
+      : pathname.startsWith(item.href) ||
+        (item.href === "/planning-goals" && pathname === "/personal-response"),
   );
   return (
     <div className={`pt-frame${compact ? " pt-compact" : ""}`}>
@@ -44,7 +47,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <div className="pt-nav-bottom">
+        <div className="pt-nav-bottom pt-nav-tools">
           <Link href="/coach" prefetch={false} title="Részletes edzéslista">
             <Icon name="activity" />
             <span>Edzéslista</span>
@@ -53,6 +56,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             type="button"
             onClick={() => setCompact((x) => !x)}
             aria-label={compact ? "Menü kinyitása" : "Menü összecsukása"}
+            title={compact ? "Menü kinyitása" : "Menü összecsukása"}
             aria-expanded={!compact}
           >
             <Icon name="menu" />

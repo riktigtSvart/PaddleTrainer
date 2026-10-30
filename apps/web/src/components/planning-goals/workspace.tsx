@@ -1,4 +1,5 @@
 "use client";
+import { LOCAL_REFRESH_EVENT } from "@/lib/data-connections/preferences";
 import Link from "next/link";
 import { loadDetail as loadCycle } from "@/lib/planning-cycles/client";
 import type { Detail as CycleDetail } from "@/lib/planning-cycles/contracts";
@@ -103,6 +104,13 @@ export default function GoalWorkspace({
     focusStatus();
   }
 
+  useEffect(() => {
+    const updated = () => {
+      if (!pending && !busy && !creating) setReload((n) => n + 1);
+    };
+    window.addEventListener(LOCAL_REFRESH_EVENT, updated);
+    return () => window.removeEventListener(LOCAL_REFRESH_EVENT, updated);
+  }, [pending, busy, creating]);
   useEffect(() => {
     if (!initialCycle) return;
     const controller = new AbortController();

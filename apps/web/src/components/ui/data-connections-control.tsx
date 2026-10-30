@@ -3,6 +3,14 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import Icon from "./icon";
 import {
+  LOCAL_REFRESH_EVENT,
+  localChoice,
+  readChoice,
+  preferenceKey,
+  choiceProvider,
+} from "@/lib/data-connections/preferences";
+import type { RefreshChoice } from "@/lib/data-connections/preferences";
+import {
   ConnectionError,
   errorText,
   findSync,
@@ -47,8 +55,12 @@ export default function DataConnectionsControl() {
     [notice, setNotice] = useState("");
   const [retryAllowed, setRetryAllowed] = useState(false),
     [rejected, setRejected] = useState(false);
-  const [revision, setRevision] = useState(0),
-    [pastDays, setPastDays] = useState(35);
+  const [revision, setRevision] = useState(0);
+  const [choiceState, setChoiceState] = useState<{
+    owner: string;
+    value: RefreshChoice;
+  } | null>(null);
+  const restoredOwner = useRef<string | null>(null);
   const container = useRef<HTMLDivElement>(null),
     trigger = useRef<HTMLButtonElement>(null),
     closeButton = useRef<HTMLButtonElement>(null);
@@ -87,7 +99,11 @@ export default function DataConnectionsControl() {
       setPending(null);
       setRetryAllowed(false);
       setRejected(false);
-      setNotice(receipt.run.state === "succeeded" ? "A frissítés befejeződött. Az átvett adatok elérhetők." : "");
+      setNotice(
+        receipt.run.state === "succeeded"
+          ? "A frissítés befejeződött. Az átvett adatok elérhetők."
+          : "",
+      );
       setError("");
       setRevision((n) => n + 1);
     } catch {
@@ -132,6 +148,19 @@ export default function DataConnectionsControl() {
         const status = await loadStatus(abort.signal);
         if (abort.signal.aborted) return;
         setData(status);
+        if (restoredOwner.current !== status.athlete_id) {
+          restoredOwner.current = status.athlete_id;
+          let value: RefreshChoice = localChoice;
+          try {
+            const raw = localStorage.getItem(preferenceKey(status.athlete_id));
+            if (raw) value = readChoice(raw, status.athlete_id);
+          } catch {
+            setNotice(
+              "A korábbi frissítési beállítás nem olvasható; válaszd ki újra a műveletet.",
+            );
+          }
+          setChoiceState({ owner: status.athlete_id, value });
+        }
         for (const p of status.providers) {
           if (!p.last_run) continue;
           const current = p.last_run.request_id + ":" + p.last_run.state;
@@ -232,7 +261,7 @@ export default function DataConnectionsControl() {
       setRevision((n) => n + 1);
     }
   }
-  async function start(provider: Provider) {
+  async function start(provider: Provider, chosen?: RefreshChoice) {
     if (
       !data ||
       !ready ||
@@ -246,8 +275,11 @@ export default function DataConnectionsControl() {
         readBody({
           request_id: crypto.randomUUID(),
           provider: provider.key,
-          datasets: provider.allowed_datasets,
-          past_days: pastDays,
+          datasets:
+            chosen?.mode === "provider"
+              ? chosen.datasets
+              : provider.allowed_datasets,
+          past_days: chosen?.mode === "provider" ? chosen.pastDays : 35,
           future_days: 30,
         }),
       );
@@ -281,6 +313,47 @@ export default function DataConnectionsControl() {
       setError("A függő kérés nem törölhető a böngésző tárhelyéről.");
     }
   }
+  const choice =
+    choiceState?.owner === data?.athlete_id
+      ? (choiceState?.value ?? localChoice)
+      : localChoice;
+  function choose(value: RefreshChoice) {
+    if (!data || busy) return;
+    setChoiceState({ owner: data.athlete_id, value });
+    try {
+      localStorage.setItem(
+        preferenceKey(data.athlete_id),
+        JSON.stringify({ version: 1, owner: data.athlete_id, choice: value }),
+      );
+    } catch {
+      setNotice(
+        "Ez a frissítési beállítás csak a jelenlegi megnyitásban marad meg.",
+      );
+    }
+  }
+  function localRefresh() {
+    window.dispatchEvent(new Event(LOCAL_REFRESH_EVENT));
+    setRevision((n) => n + 1);
+    setNotice(
+      "A tárolt adatok újraolvasását kértük. Szolgáltatói adatátvétel nem indult.",
+    );
+  }
+  async function repeat() {
+    if (busy || !ready || storageBlocked) return;
+    if (choice.mode === "local") {
+      localRefresh();
+      return;
+    }
+    const provider = data && choiceProvider(choice, data);
+    if (!provider) {
+      setOpen(true);
+      setNotice(
+        "A korábbi szolgáltatói művelet most nem indítható. Ellenőrizd a kapcsolatot és az engedélyezett adatokat.",
+      );
+      return;
+    }
+    await start(provider, choice);
+  }
   const visible = data?.providers.filter((p) => p.implemented) ?? [];
   const busy =
     sending ||
@@ -291,8 +364,11 @@ export default function DataConnectionsControl() {
     ? "Állapot ellenőrzendő"
     : warning
       ? visible.some(connectionAttention)
-        ? "Kapcsolat ellenőrzendő" : "Frissítés ellenőrzendő"
-      : visible.some(p => continuationOnly(p.last_run)) ? "Átvétel folytatható" : "";
+        ? "Kapcsolat ellenőrzendő"
+        : "Frissítés ellenőrzendő"
+      : visible.some((p) => continuationOnly(p.last_run))
+        ? "Átvétel folytatható"
+        : "";
   const title = !data
     ? "Adatkapcsolatok · állapot betöltése"
     : visible
@@ -304,36 +380,64 @@ export default function DataConnectionsControl() {
 
   return (
     <div className="pt-connections" ref={container}>
-      <button
-        type="button"
-        className={`pt-button pt-connection-trigger${warning ? " needs-attention" : ""}`}
-        ref={trigger}
-        aria-label="Adatkapcsolatok"
-        aria-expanded={open}
-        aria-controls={panelId}
-        aria-haspopup="dialog"
-        title={title}
-        onClick={() => {
-          setOpen((x) => !x);
-          setRevision((n) => n + 1);
-        }}
-      >
-        <Icon name="refresh" className={busy ? "pt-spinning" : undefined} />
-        <span className="pt-connection-badge">
-          <Icon
-            name={
-              warning
-                ? "alert"
-                : busy || visible.some(p => continuationOnly(p.last_run))
-                  ? "clock"
-                  : visible.some(hasSuccessfulTransfer)
-                    ? "check"
-                    : "clock"
-            }
-          />
-        </span>
-        {short && <span className="pt-connection-warning">{short}</span>}
-      </button>
+      <div className="pt-refresh-split">
+        <button
+          type="button"
+          className="pt-button pt-refresh-main"
+          disabled={
+            !ready ||
+            !data ||
+            choiceState?.owner !== data.athlete_id ||
+            busy ||
+            storageBlocked
+          }
+          onClick={() => void repeat()}
+          title={
+            choice.mode === "local"
+              ? "Tárolt adatok újraolvasása · nincs szolgáltatói szinkronizálás"
+              : `${choice.provider} · legutóbb választott adatfajták és időszak`
+          }
+        >
+          <Icon name="refresh" className={busy ? "pt-spinning" : undefined} />
+          <span>{busy ? "Frissítés…" : "Frissítés"}</span>
+        </button>
+        <button
+          type="button"
+          className={`pt-button pt-connection-trigger${warning ? " needs-attention" : ""}`}
+          ref={trigger}
+          aria-label="Adatkapcsolatok"
+          aria-expanded={open}
+          aria-controls={panelId}
+          aria-haspopup="dialog"
+          title={title}
+          onClick={() => {
+            setOpen((x) => !x);
+            setRevision((n) => n + 1);
+          }}
+        >
+          <Icon name="right" />
+          <span className="pt-connection-badge">
+            <Icon
+              name={
+                warning
+                  ? "alert"
+                  : busy || visible.some((p) => continuationOnly(p.last_run))
+                    ? "clock"
+                    : visible.some(hasSuccessfulTransfer)
+                      ? "check"
+                      : "clock"
+              }
+            />
+          </span>
+          {short && <span className="pt-connection-warning">{short}</span>}
+        </button>
+      </div>
+      <span className="pt-refresh-caption">
+        {choice.mode === "local"
+          ? "Tárolt adatok"
+          : (data?.providers.find((p) => p.key === choice.provider)?.label ??
+            choice.provider)}
+      </span>
       <span className="pt-sr-only" role="status">
         {busy ? "Adatfrissítés vagy eredményellenőrzés folyamatban" : short}
       </span>
@@ -372,6 +476,103 @@ export default function DataConnectionsControl() {
           {!data && (
             <p className="pt-notice">A tárolt kapcsolati állapot betöltése…</p>
           )}
+          {data && (
+            <fieldset className="pt-refresh-choice" disabled={busy}>
+              <legend>A főgomb művelete</legend>
+              <label>
+                <input
+                  type="radio"
+                  name={panelId + "choice"}
+                  checked={choice.mode === "local"}
+                  onChange={() => choose(localChoice)}
+                />
+                Tárolt adatok újraolvasása
+              </label>
+              {visible.map((p) => (
+                <label key={p.key}>
+                  <input
+                    type="radio"
+                    name={panelId + "choice"}
+                    checked={
+                      choice.mode === "provider" && choice.provider === p.key
+                    }
+                    disabled={
+                      p.connection_state !== "connected" ||
+                      !p.manual_sync_supported ||
+                      !p.allowed_datasets.length
+                    }
+                    onChange={() =>
+                      choose({
+                        mode: "provider",
+                        provider: p.key,
+                        pastDays: 35,
+                        datasets: [...p.allowed_datasets],
+                      })
+                    }
+                  />
+                  {p.label} · adatok átvétele
+                </label>
+              ))}
+              {choice.mode === "provider" && (
+                <>
+                  <label>
+                    Visszamenőleges időszak
+                    <select
+                      value={choice.pastDays}
+                      onChange={(e) =>
+                        choose({
+                          ...choice,
+                          pastDays: Number(e.target.value) as 7 | 35 | 89,
+                        })
+                      }
+                    >
+                      <option value={7}>7 nap</option>
+                      <option value={35}>35 nap</option>
+                      <option value={89}>89 nap</option>
+                    </select>
+                  </label>
+                  {data.providers
+                    .find((p) => p.key === choice.provider)
+                    ?.allowed_datasets.map((dataset) => (
+                      <label key={dataset}>
+                        <input
+                          type="checkbox"
+                          checked={choice.datasets.includes(dataset)}
+                          disabled={
+                            choice.datasets.length === 1 &&
+                            choice.datasets.includes(dataset)
+                          }
+                          onChange={(e) =>
+                            choose({
+                              ...choice,
+                              datasets: e.target.checked
+                                ? [...choice.datasets, dataset]
+                                : choice.datasets.filter((d) => d !== dataset),
+                            })
+                          }
+                        />
+                        {datasetLabels[dataset]}
+                      </label>
+                    ))}
+                  <small>
+                    Az edzéstervekhez a következő 30 napot is kérjük.
+                  </small>
+                </>
+              )}
+              <button
+                type="button"
+                className="pt-button pt-primary"
+                disabled={busy || storageBlocked || !ready}
+                onClick={() => void repeat()}
+              >
+                Kiválasztott művelet indítása
+              </button>
+              <small>
+                A választás megjegyezhető; a kiválasztás önmagában nem indít
+                adatátvételt.
+              </small>
+            </fieldset>
+          )}
           {data &&
             visible.map((provider) => (
               <section className="pt-provider" key={provider.key}>
@@ -384,7 +585,8 @@ export default function DataConnectionsControl() {
                   >
                     <Icon
                       name={
-                        provider.last_run?.state === "running" || continuationOnly(provider.last_run)
+                        provider.last_run?.state === "running" ||
+                        continuationOnly(provider.last_run)
                           ? "clock"
                           : attention(provider)
                             ? "alert"
@@ -399,9 +601,7 @@ export default function DataConnectionsControl() {
                 <dl>
                   <div>
                     <dt>Legutóbbi frissítés vége</dt>
-                    <dd>
-                      {lastRunTime(provider, data.timezone_name)}
-                    </dd>
+                    <dd>{lastRunTime(provider, data.timezone_name)}</dd>
                   </div>
                   <div>
                     <dt>Legfrissebb átvett edzés</dt>
@@ -413,9 +613,17 @@ export default function DataConnectionsControl() {
                     </dd>
                   </div>
                 </dl>
-                {provider.last_run && provider.last_run.state !== "running" && runMessages(provider.last_run).map(line => (
-                  <p key={line} className="pt-notice" role={attention(provider) ? "status" : undefined}>{line}</p>
-                ))}
+                {provider.last_run &&
+                  provider.last_run.state !== "running" &&
+                  runMessages(provider.last_run).map((line) => (
+                    <p
+                      key={line}
+                      className="pt-notice"
+                      role={attention(provider) ? "status" : undefined}
+                    >
+                      {line}
+                    </p>
+                  ))}
                 {provider.connection_state === "connected" && (
                   <>
                     <button
@@ -429,42 +637,38 @@ export default function DataConnectionsControl() {
                         storageBlocked ||
                         !ready
                       }
-                      onClick={() => void start(provider)}
+                      onClick={() => {
+                        const selected: RefreshChoice =
+                          choice.mode === "provider" &&
+                          choice.provider === provider.key
+                            ? choice
+                            : {
+                                mode: "provider",
+                                provider: provider.key,
+                                pastDays: 35,
+                                datasets: [...provider.allowed_datasets],
+                              };
+                        choose(selected);
+                        void start(provider, selected);
+                      }}
                     >
                       <Icon name="refresh" />
                       {busy ? "Folyamatban…" : "Szinkronizálás"}
                     </button>
                     <details className="pt-sync-options">
-                      <summary>Átvett adatok és időszak</summary>
+                      <summary>Átvételi tudnivalók</summary>
                       <p>
+                        A szolgáltatóhoz engedélyezett adatfajták:{" "}
                         {provider.allowed_datasets
                           .map((d) => datasetLabels[d])
-                          .join(", ") || "Nincs engedélyezett adatfajta."}{" "}
-                        {provider.allowed_datasets.includes("session_details")
-                          ? "· A hiányzó részleteket a legutóbbi napoktól, több lépésben vesszük át. A hátralévő mennyiséget az eredmény mutatja."
-                          : "· alapadatok"}
-                      </p>
-                      <label>
-                        Visszamenőleges időszak
-                        <select
-                          aria-label="Visszamenőleges időszak"
-                          disabled={busy}
-                          value={pastDays}
-                          onChange={(e) => setPastDays(Number(e.target.value))}
-                        >
-                          <option value={7}>7 nap</option>
-                          <option value={35}>35 nap</option>
-                          <option value={89}>89 nap</option>
-                        </select>
-                      </label>
-                      <p>
-                        Az időszak a mai napot is tartalmazza; az edzéstervekhez
-                        a következő 30 nap is bekerül.
+                          .join(", ")}
+                        . A főgomb műveletét, adatfajtáit és időszakát fent
+                        választhatod ki.
                       </p>
                       <p>
-                        A frissítés az edzéseket, az engedélyezett részletes
-                        adatokat és a terveket veszi át. Az alvás, aktivitás és további állapotadatok a
-                        profil Előzmények lapján kezelhetők.
+                        A részletes edzésadatok átvétele több lépésben
+                        folytatható. Alvás és aktivitás a Sportolói profil
+                        Előzmények lapján kezelhető.
                       </p>
                     </details>
                   </>
@@ -492,7 +696,10 @@ export default function DataConnectionsControl() {
                     <summary>Legutóbbi frissítés részletei</summary>
                     <p className="pt-notice">
                       Utolsó kihagyás nélküli frissítés:{" "}
-                      {displayTime(provider.last_success_at, data.timezone_name)}
+                      {displayTime(
+                        provider.last_success_at,
+                        data.timezone_name,
+                      )}
                       {provider.last_success_datasets.length > 0 &&
                         ` · ${provider.last_success_datasets.map((d) => datasetLabels[d]).join(", ")}`}
                     </p>
@@ -507,7 +714,9 @@ export default function DataConnectionsControl() {
                         <span>
                           {resultCounts(d)}
                           {resultDetails(d).map((line) => (
-                            <span className="pt-sync-detail" key={line}>{line}</span>
+                            <span className="pt-sync-detail" key={line}>
+                              {line}
+                            </span>
                           ))}
                           {d.error_code && (
                             <>
@@ -551,6 +760,13 @@ export default function DataConnectionsControl() {
               )}
             </div>
           )}
+          <button
+            type="button"
+            className="pt-button pt-local-check"
+            onClick={localRefresh}
+          >
+            Tárolt adatok újraolvasása
+          </button>
           <button
             type="button"
             className="pt-button pt-local-check"

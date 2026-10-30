@@ -1393,3 +1393,8 @@ summary:focus-visible {
 .pt-duration-estimate ul { padding-left: 18px; list-style: disc; }
 .pt-duration-estimate li { margin-top: 6px; }
 .pt-duration-estimate summary { cursor: pointer; }
+
+.pt-development-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.pt-development-nav a { display: inline-flex; padding: 9px 14px; border: 1px solid var(--pt-line); border-radius: 9px; color: var(--pt-muted); font-size: 14px; }
+.pt-development-nav a[aria-current="page"] { color: var(--pt-accent); background: var(--pt-accent-bg); border-color: var(--pt-accent); }
+.pt-development-nav a:focus-visible { outline: 2px solid var(--pt-accent); outline-offset: 3px; }

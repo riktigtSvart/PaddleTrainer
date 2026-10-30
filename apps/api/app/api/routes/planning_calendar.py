@@ -177,24 +177,29 @@ async def personal_feedback_inputs(db: DB, owner: Owner, start_date: Day | None 
     now = feedback_learning._now()
     if (start_date is None) != (end_date is None):
         raise error(422,"CALENDAR_DATE_RANGE_INVALID")
+    from zoneinfo import ZoneInfo
+    from sqlalchemy import select
+    from app.models.entities import User
+    user = (await db.execute(select(User).where(User.id == UUID(owner)))).scalar_one()
+    timezone_name = user.timezone
+    zone = ZoneInfo(timezone_name)
     if start_date:
         valid_range(start_date,end_date)
-        from zoneinfo import ZoneInfo
-        from sqlalchemy import select
-        from app.models.entities import User
-        user = (await db.execute(select(User).where(User.id == UUID(owner)))).scalar_one()
-        zone = ZoneInfo(user.timezone)
         start = datetime.combine(datetime.fromisoformat(start_date).date(),time.min,tzinfo=zone).astimezone(UTC)
         end = min(now, datetime.combine(datetime.fromisoformat(end_date).date() + timedelta(days=1),time.min,tzinfo=zone).astimezone(UTC))
     else:
         start, end = now - timedelta(days=90), now
+    if start > end:
+        raise error(422,"CALENDAR_DATE_RANGE_INVALID")
     try:
         result = await call(assemble_feedback_personal_inputs(session=db,athlete_id=owner,
             history_id="pt-training-dynamics-history:c12:" + service.digest({"owner":owner,"start":start.isoformat(),"end":end.isoformat(),"cutoff":now.isoformat()}),
-            window_start_at=start,as_of=end,information_cutoff_at=now,
+            window_start_at=start,as_of=now,information_cutoff_at=now,observation_end_at=end,
             predictor_keys=(PersonalAssociationPredictorKey(metric_key="duration_s",unit="s"),),created_at=now))
         return {"schema_version":"feedback-personal-inputs-v0.1","athlete_id":owner,
-            "information_cutoff_at":now.isoformat(),"window_start_at":start.isoformat(),"as_of":end.isoformat(),"assembly":to_contract_primitive(result),"planning_authorized":False,"model_updated":False}
+            "timezone_name":timezone_name,"response_window_end_at":end.isoformat(),
+            "selection_scope":"response_observed_at",
+            "information_cutoff_at":now.isoformat(),"window_start_at":start.isoformat(),"as_of":now.isoformat(),"assembly":to_contract_primitive(result),"planning_authorized":False,"model_updated":False}
     finally:
         await db.rollback()
 

@@ -19,24 +19,52 @@ import { estimateLabel, estimateRange } from "@/lib/calendar/duration-estimate";
 import EditableSlot from "./editable-slot";
 import { canTransform, canMoveTraining } from "@/lib/calendar/slot-transform";
 import type { SlotChange } from "@/lib/calendar/slot-transform";
-export function eventDuration(e: CalendarEvent) { return e.durationEstimate ? estimateLabel(e.durationEstimate) : formatDuration(e.duration); }
+export function eventDuration(e: CalendarEvent) {
+  return e.durationEstimate
+    ? estimateLabel(e.durationEstimate)
+    : formatDuration(e.duration);
+}
 
 export function eventLabel(event: CalendarEvent, zone: string) {
   const when = event.start
     ? localParts(event.start, zone).clock +
-      (event.end ? "–" + (event.durationEstimate ? "~" : "") + localParts(event.end, zone).clock : " · végidő nélkül")
+      (event.end
+        ? "–" +
+          (event.durationEstimate ? "~" : "") +
+          localParts(event.end, zone).clock
+        : " · végidő nélkül")
     : "Időpont nélkül";
   const plan = event.pairedPlan;
   const plannedWhen = plan
     ? `${formatDay(plan.date)} ${plan.start ? localParts(plan.start, zone).clock : "időpont nélkül"}`
     : "";
-  const status = event.kind === "constraint" || event.occurrence ? constraintDescription(event) : event.kind === "availability" ? "edzéslehetőség"
-    : event.kind === "planned" ? "tervezett"
-      : event.linkedPlanId ? "tervhez párosított teljesítés" : "teljesített";
-  const parts = [event.title, when, status, eventDuration(event),
-    ...(event.kind === "planned" || event.kind === "session" ? [event.goal ? goalLabels[event.goal] : "fő cél nincs megadva"] : [])];
-  if (event.conflict) parts.push(event.conflict === "review" ? "időpont tisztázandó" : "időpont ütközik");
-  if (event.durationEstimate) parts.push(`személyes időbecslés · ${estimateRange(event.durationEstimate)} · ${event.durationEstimate.sample_count} megfigyelés`);
+  const status =
+    event.kind === "constraint" || event.occurrence
+      ? constraintDescription(event)
+      : event.kind === "availability"
+        ? "edzéslehetőség"
+        : event.kind === "planned"
+          ? "tervezett"
+          : event.linkedPlanId
+            ? "tervhez párosított teljesítés"
+            : "teljesített";
+  const parts = [
+    event.title,
+    when,
+    status,
+    eventDuration(event),
+    ...(event.kind === "planned" || event.kind === "session"
+      ? [event.goal ? goalLabels[event.goal] : "fő cél nincs megadva"]
+      : []),
+  ];
+  if (event.conflict)
+    parts.push(
+      event.conflict === "review" ? "időpont tisztázandó" : "időpont ütközik",
+    );
+  if (event.durationEstimate)
+    parts.push(
+      `személyes időbecslés · ${estimateRange(event.durationEstimate)} · ${event.durationEstimate.sample_count} megfigyelés`,
+    );
   else if (event.endEstimated) parts.push("végidő az időtartamból becsülve");
   if (plan) parts.push(`Terv: ${plan.title}`, plannedWhen, eventDuration(plan));
   return parts.join(" · ");
@@ -48,7 +76,9 @@ function timeLabel(minute: number) {
     .padStart(2, "0")}:${(n % 60).toString().padStart(2, "0")}`;
 }
 function shortTitle(event: CalendarEvent) {
-  return event.kind === "availability" && !event.occurrence ? "Edzéslehetőség" : event.title;
+  return event.kind === "availability" && !event.occurrence
+    ? "Edzéslehetőség"
+    : event.title;
 }
 export default function TimeGrid({
   feed,
@@ -99,11 +129,13 @@ export default function TimeGrid({
   );
   const outside = new Set(
     all
-      .filter(
-        (s) =>
-          s.point ? s.top < from * 60 || s.top >= to * 60
-            : s.top < from * 60 || s.bottom > to * 60 ||
-              s.top >= to * 60 || s.bottom <= from * 60,
+      .filter((s) =>
+        s.point
+          ? s.top < from * 60 || s.top >= to * 60
+          : s.top < from * 60 ||
+            s.bottom > to * 60 ||
+            s.top >= to * 60 ||
+            s.bottom <= from * 60,
       )
       .map((s) => s.event.key),
   );
@@ -113,14 +145,18 @@ export default function TimeGrid({
       bottom = Math.min(s.bottom, to * 60);
     if (s.point ? top >= to * 60 || s.top < from * 60 : bottom <= top)
       return null;
-    const available = s.event.kind === "availability", busy = s.event.kind === "constraint", background = available || busy;
+    const available = s.event.kind === "availability",
+      busy = s.event.kind === "constraint",
+      background = available || busy;
     const actualHeight = s.point ? 0 : ((bottom - top) / 60) * hour;
-    const enlarged = !background && !s.point && actualHeight < MIN_ACTIVITY_HEIGHT;
+    const enlarged =
+      !background && !s.point && actualHeight < MIN_ACTIVITY_HEIGHT;
     const style: CSSProperties = {
       top: `${((top / 60 - from) / (to - from)) * 100}%`,
       height: background
         ? `${((bottom - top) / 60 / (to - from)) * 100}%`
-        : s.point ? MIN_ACTIVITY_HEIGHT
+        : s.point
+          ? MIN_ACTIVITY_HEIGHT
           : `max(${MIN_ACTIVITY_HEIGHT}px, ${((bottom - top) / 60 / (to - from)) * 100}%)`,
       zIndex: available ? 0 : busy ? 1 : 2,
     };
@@ -128,15 +164,23 @@ export default function TimeGrid({
       style.left = `${(s.lane / s.lanes) * 100}%`;
       style.width = `calc(${100 / s.lanes}% - 6px)`;
     }
-    const small = !background && Math.max(MIN_ACTIVITY_HEIGHT, actualHeight) < 44;
+    const small =
+      !background && Math.max(MIN_ACTIVITY_HEIGHT, actualHeight) < 44;
     const label =
       eventLabel(s.event, feed.timezone_name) +
       (s.clockChange ? " · óraátállítás érinti" : "") +
       (enlarged ? " · jelölés az olvashatóság miatt nagyítva" : "");
     const className = `pt-event pt-goal-${goalFamily(s.event.goal)}${available ? " is-available" : ""}${busy ? " is-commitment" : ""}${s.event.occurrence?.details.firmness === "flexible" ? " is-flexible" : ""}${s.event.conflict ? " has-conflict" : ""}${s.event.kind === "session" ? " is-actual" : ""}${s.point ? " is-point" : ""}${small ? " is-short" : ""}${enlarged ? " is-enlarged" : ""}`;
-    const content = <>
+    const content = (
+      <>
         {enlarged && (
-          <span className="pt-event-true-end" style={{ top: `calc(var(--pt-hour) * ${(bottom - top) / 60} - 1px)` }} aria-hidden="true" />
+          <span
+            className="pt-event-true-end"
+            style={{
+              top: `calc(var(--pt-hour) * ${(bottom - top) / 60} - 1px)`,
+            }}
+            aria-hidden="true"
+          />
         )}
         <span className="pt-event-label">
           {!background && <Icon name={sportIcon(s.event.sport)} />}
@@ -144,9 +188,7 @@ export default function TimeGrid({
           {s.event.conflict && <Icon name="alert" />}
           <span>{shortTitle(s.event)}</span>
           {!background && (
-            <span className="pt-event-duration">
-              {eventDuration(s.event)}
-            </span>
+            <span className="pt-event-duration">{eventDuration(s.event)}</span>
           )}
           {s.event.kind === "session" && (
             <span className="pt-event-status" aria-hidden="true">
@@ -162,13 +204,48 @@ export default function TimeGrid({
               : eventDuration(s.event)}
           </span>
         )}
-    </>;
-    const button = <button type="button" key={s.event.key} className={className} style={style}
-      onClick={() => open(s.event)} aria-label={label} title={label}>{content}</button>;
-    return onTransform && (background && canTransform(s.event) || canMoveTraining(s.event)) && !s.point && !s.clockChange
-      ? <EditableSlot key={s.event.key} event={s.event} segment={s} zone={feed.timezone_name} hours={to - from}
-        style={style} className={className} label={label} disabled={editDisabled} onTransform={onTransform} open={() => open(s.event)}>{content}</EditableSlot>
-      : button;
+      </>
+    );
+    const button = (
+      <button
+        type="button"
+        key={s.event.key}
+        className={className}
+        style={style}
+        onClick={() => open(s.event)}
+        data-calendar-event={s.event.key}
+        aria-label={label}
+        title={
+          s.event.kind === "planned" || s.event.kind === "session"
+            ? undefined
+            : label
+        }
+      >
+        {content}
+      </button>
+    );
+    return onTransform &&
+      ((background && canTransform(s.event)) || canMoveTraining(s.event)) &&
+      !s.point &&
+      !s.clockChange ? (
+      <EditableSlot
+        key={s.event.key}
+        event={s.event}
+        segment={s}
+        zone={feed.timezone_name}
+        hours={to - from}
+        style={style}
+        className={className}
+        label={label}
+        disabled={editDisabled}
+        onTransform={onTransform}
+        open={() => open(s.event)}
+      >
+        {content}
+      </EditableSlot>
+    ) : (
+      button
+    );
   }
   return (
     <>
@@ -192,12 +269,20 @@ export default function TimeGrid({
           }
         >
           <div className="pt-grid-head">
-            <div className="pt-grid-label">{feed.timezone_name}</div>
+            <div className="pt-grid-label">Óra</div>
             {days.map((date) => {
               const a = feed.availability.days.find((d) => d.date === date);
-              const declared = opportunities?.filter((w) => w.source_date === date || w.start_at && w.end_at &&
-                localParts(w.start_at, feed.timezone_name).date <= date &&
-                (localParts(w.end_at, feed.timezone_name).date > date || localParts(w.end_at, feed.timezone_name).date === date && localParts(w.end_at, feed.timezone_name).clock !== "00:00")).length;
+              const declared = opportunities?.filter(
+                (w) =>
+                  w.source_date === date ||
+                  (w.start_at &&
+                    w.end_at &&
+                    localParts(w.start_at, feed.timezone_name).date <= date &&
+                    (localParts(w.end_at, feed.timezone_name).date > date ||
+                      (localParts(w.end_at, feed.timezone_name).date === date &&
+                        localParts(w.end_at, feed.timezone_name).clock !==
+                          "00:00"))),
+              ).length;
               return (
                 <div
                   className={`pt-grid-day-head${date === feed.local_today ? " is-today" : ""}`}
@@ -208,21 +293,41 @@ export default function TimeGrid({
                     {formatDay(date, true)}
                   </button>
                   <small>
-                    {a?.status === "unavailable" ? "Edzésre nem elérhető" : declared && (a?.max_total_minutes === null || a?.max_total_minutes === undefined)
-                      ? `${declared} megadott idősáv`
-                      : !a || a.status === "unknown"
-                      ? "Keret nincs megadva"
-                      : a.max_total_minutes === null
-                          ? `${a.windows.length} megadott idősáv`
-                          : `Napi keret: ${a.max_total_minutes} p`}
+                    {a?.status === "unavailable" ? (
+                      "Edzésre nem elérhető"
+                    ) : declared &&
+                      (a?.max_total_minutes === null ||
+                        a?.max_total_minutes === undefined) ? (
+                      `${declared} megadott idősáv`
+                    ) : !a || a.status === "unknown" ? (
+                      <span aria-label="Nincs megadott idősáv">—</span>
+                    ) : a.max_total_minutes === null ? (
+                      `${a.windows.length} megadott idősáv`
+                    ) : (
+                      `Napi keret: ${a.max_total_minutes} p`
+                    )}
                   </small>
-                  {addSlot && <button className="pt-add-slot" type="button" aria-label={`${formatDay(date)} · új idősáv`} onClick={() => addSlot(date)}>+</button>}
+                  {addSlot && (
+                    <button
+                      className="pt-add-slot"
+                      type="button"
+                      aria-label={`${formatDay(date)} · új idősáv`}
+                      title="Edzéslehetőség vagy elfoglaltság hozzáadása"
+                      onClick={() => addSlot(date)}
+                    >
+                      + Idősáv
+                    </button>
+                  )}
                 </div>
               );
             })}
           </div>
           <div className="pt-grid-unscheduled">
-            <div className="pt-grid-label">Időpont nélkül</div>
+            <div className="pt-grid-label">
+              Időpont
+              <br />
+              nélkül
+            </div>
             {days.map((date) => (
               <div className="pt-unscheduled-day" key={date}>
                 {events
@@ -260,10 +365,15 @@ export default function TimeGrid({
               );
               const busy = perDay.filter((s) => s.event.kind === "constraint");
               const activity = allocateLanes(
-                perDay.filter((s) => s.event.kind !== "availability" && s.event.kind !== "constraint" &&
-                  (s.point ? s.top >= from * 60 && s.top < to * 60
-                    : s.bottom > from * 60 && s.top < to * 60)),
-                MIN_ACTIVITY_HEIGHT / hour * 60,
+                perDay.filter(
+                  (s) =>
+                    s.event.kind !== "availability" &&
+                    s.event.kind !== "constraint" &&
+                    (s.point
+                      ? s.top >= from * 60 && s.top < to * 60
+                      : s.bottom > from * 60 && s.top < to * 60),
+                ),
+                (MIN_ACTIVITY_HEIGHT / hour) * 60,
                 from * 60,
               );
               return (

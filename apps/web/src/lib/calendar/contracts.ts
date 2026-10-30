@@ -57,7 +57,11 @@ export function goalFamily(goal: string | null | undefined): Family {
 export type Reference = { artifact_id: string; content_hash: string };
 export type GoalTag = Reference & { primary_goal: string | null };
 export type Planned = {
-  reschedule?: { allowed: boolean; blocked_reason: string | null; source_hash: string };
+  reschedule?: {
+    allowed: boolean;
+    blocked_reason: string | null;
+    source_hash: string;
+  };
   duration_estimate?: DurationEstimate | null;
   id: string;
   date: string;
@@ -235,10 +239,28 @@ export function readFeed(value: unknown): Feed {
       );
       tag(r.goal_tag);
       if (kind === "planned") {
-        if (r.reschedule !== undefined) { const m = object(r.reschedule); requireValue(typeof m.allowed === "boolean" && (m.allowed ? m.blocked_reason === null : typeof m.blocked_reason === "string") && typeof m.source_hash === "string" && /^[a-f0-9]{64}$/.test(m.source_hash)); }
+        if (r.reschedule !== undefined) {
+          const m = object(r.reschedule);
+          requireValue(
+            typeof m.allowed === "boolean" &&
+              (m.allowed
+                ? m.blocked_reason === null
+                : typeof m.blocked_reason === "string") &&
+              typeof m.source_hash === "string" &&
+              /^[a-f0-9]{64}$/.test(m.source_hash),
+          );
+        }
         if (r.duration_estimate !== undefined && r.duration_estimate !== null) {
-          const estimate = readDurationEstimate(r.duration_estimate, r.id as string, x.athlete_id as string);
-          requireValue(r.duration_sec === null && estimate.sport === r.sport && estimate.distance_m === r.distance_m);
+          const estimate = readDurationEstimate(
+            r.duration_estimate,
+            r.id as string,
+            x.athlete_id as string,
+          );
+          requireValue(
+            r.duration_sec === null &&
+              estimate.sport === r.sport &&
+              estimate.distance_m === r.distance_m,
+          );
         }
         requireDay(r.date);
         requireValue(
@@ -325,7 +347,7 @@ export function readFeed(value: unknown): Feed {
   }
   return x as Feed;
 }
-export type Span = 1 | 7 | 28 | 144;
+export type Span = 1 | 7 | 28 | 144 | 168;
 export function dateDistance(first: string, last: string) {
   return Math.round(
     (Date.parse(last + "T12:00:00Z") - Date.parse(first + "T12:00:00Z")) /
@@ -343,7 +365,9 @@ export function viewRange(anchor: string, span: Span) {
   day(anchor);
   const weekday = new Date(anchor + "T12:00:00Z").getUTCDay();
   const start =
-    span === 7 || span === 28 ? addDays(anchor, -((weekday + 6) % 7)) : anchor;
+    span === 7 || span === 28 || span === 168
+      ? addDays(anchor, -((weekday + 6) % 7))
+      : anchor;
   return { start, end: addDays(start, span - 1) };
 }
 export function formatDay(value: string, weekday = false) {
@@ -418,11 +442,13 @@ export function eventsFrom(feed: Feed): CalendarEvent[] {
     end:
       p.planned_start_time && (p.duration_sec !== null || p.duration_estimate)
         ? new Date(
-            Date.parse(p.planned_start_time) + (p.duration_sec ?? p.duration_estimate!.duration_sec) * 1000,
+            Date.parse(p.planned_start_time) +
+              (p.duration_sec ?? p.duration_estimate!.duration_sec) * 1000,
           ).toISOString()
         : null,
     duration: p.duration_sec ?? p.duration_estimate?.duration_sec ?? null,
-    durationEstimate: p.duration_sec === null ? p.duration_estimate ?? undefined : undefined,
+    durationEstimate:
+      p.duration_sec === null ? (p.duration_estimate ?? undefined) : undefined,
     endEstimated: p.duration_sec === null && !!p.duration_estimate,
     goal: p.goal_tag?.primary_goal ?? null,
     goalTag: p.goal_tag,
@@ -544,7 +570,9 @@ export function segments(
 }
 export const MIN_ACTIVITY_HEIGHT = 32;
 export function allocateLanes(
-  input: Segment[], minimumMinutes = 1, clipStart = 0,
+  input: Segment[],
+  minimumMinutes = 1,
+  clipStart = 0,
 ): Segment[] {
   const sorted = input
     .map((x) => ({ ...x }))

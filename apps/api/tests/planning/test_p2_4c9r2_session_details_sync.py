@@ -39,7 +39,7 @@ def connections(tmp_path, monkeypatch):
         if features is None:
             env.provider_calls.append(("sessions", first.isoformat(), last.isoformat()))
             return deepcopy(env.session_payload)
-        assert features == ["statistics", "samples", "zones", "laps"]
+        assert features == ["statistics", "samples", "zones", "laps", "routes"]
         assert last == first + timedelta(days=1)
         env.detail_calls.append(first.isoformat())
         if env.on_detail:
@@ -245,7 +245,7 @@ def test_actual_polar_transport_requests_one_day_with_all_optional_features(conn
     captured = []
     def handler(request):
         assert request.url.path == "/v4/data/training-sessions/list"
-        assert request.url.params.get_list("features") == ["statistics", "samples", "zones", "laps"]
+        assert request.url.params.get_list("features") == ["statistics", "samples", "zones", "laps", "routes"]
         assert request.url.params["from"] == "2026-10-22T00:00:00"
         assert request.url.params["to"] == "2026-10-23T00:00:00"
         captured.append(True)

@@ -19,7 +19,8 @@ from app.services.provider_payload_archive import archive_payload
 
 LEGACY_FEATURES = ["statistics", "samples"]
 ZONE_FEATURES = ["statistics", "samples", "zones"]
-FEATURES = ["statistics", "samples", "zones", "laps"]
+LAP_FEATURES = ["statistics", "samples", "zones", "laps"]
+FEATURES = [*LAP_FEATURES, "routes"]
 DAY_LIMIT = 5
 ROW_LIMIT = 2000
 RECEIPT_LIMIT = 10000
@@ -118,6 +119,10 @@ def merge_details(stored, incoming, external_id):
             require(len(native_ids) == len(native) and None not in native_ids and set(native_ids) == set(ids)
                     and len(set(native_ids)) == len(native_ids), "POLAR_DETAILS_EXERCISE_SET_CONFLICT")
         for exercise in native:
+            if isinstance(exercise, dict) and exercise.get("routes"):
+                require(_id(exercise) in by_id, "POLAR_DETAILS_EXERCISE_SET_CONFLICT")
+                target = next(e for e in result["exerciseSamples"] if _id(e) == _id(exercise))
+                target["routes"] = additive(exercise["routes"], target.get("routes"))
             if isinstance(exercise, dict) and exercise.get("laps"):
                 require(_id(exercise) in by_id, "POLAR_DETAILS_EXERCISE_SET_CONFLICT")
                 target = next(e for e in result["exerciseSamples"] if _id(e) == _id(exercise))
@@ -201,7 +206,7 @@ async def synchronize_details(db, user, *, first, last, report):
         value = record.raw_data
         require(isinstance(value, dict) and record.provider_record_id == "sync:" + digest(value) and value.get("athlete_id") == owner
                 and value.get("schema_version") == "polar-session-details-fetch-v0.1"
-                and value.get("features") in (LEGACY_FEATURES, ZONE_FEATURES, FEATURES),
+                and value.get("features") in (LEGACY_FEATURES, ZONE_FEATURES, LAP_FEATURES, FEATURES),
                 "POLAR_DETAILS_RECEIPT_INVALID")
         candidate = requested.get(value.get("session_id"))
         if candidate and value.get("source_signature") == candidate["signature"]:

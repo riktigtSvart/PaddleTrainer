@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DevelopmentNavigation from "@/components/ui/development-navigation";
 import type { Metadata } from "next";
 import GoalWorkspace from "@/components/planning-goals/workspace";
 
@@ -27,11 +28,9 @@ export default async function PlanningGoalsPage({
       ? period
       : "";
   return (
-    <main
-      lang="hu"
-      className="min-h-screen bg-zinc-950 px-4 py-8 text-zinc-100 sm:px-6 sm:py-10"
-    >
-      <div className="mx-auto max-w-5xl">
+    <main lang="hu" className="pt-development-page">
+      <div className="pt-development-body">
+        <DevelopmentNavigation />
         <Link href="/" className="text-sm text-zinc-300 hover:text-teal-200">
           ← Napirend
         </Link>

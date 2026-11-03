@@ -1,0 +1,3333 @@
+{
+  "review": {
+    "artifact_id": "pt-training-plan:45b462894147b9961c1670200feb96b09677ba739b3ad020a1567ecb5a19d9e3",
+    "program_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+    "created_at": "2026-10-23T10:00:00.000013+00:00",
+    "previous_reference": null,
+    "decision_key": "89d5b0267efab2a5e0e35bbf0123d90377fc94f3ba07528ee0083c45bcc6efaa",
+    "start_date": "2026-10-24",
+    "end_date": "2026-10-29",
+    "timezone_name": "Europe/Budapest",
+    "active_window_end": null,
+    "program_reference": {
+      "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+      "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5"
+    },
+    "inputs": {
+      "schema_version": "planning-inputs-v0.1",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "program_reference": {
+        "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+        "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5"
+      },
+      "captured_at": "2026-10-23T10:00:00.000009+00:00",
+      "timezone_name": "Europe/Budapest",
+      "start_date": "2026-10-24",
+      "end_date": "2026-10-29",
+      "periods": [
+        {
+          "end_date": "2027-01-14",
+          "id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "key": "macro-1",
+          "parent_id": null,
+          "period_type": "MACROCYCLE",
+          "start_date": "2026-10-23",
+          "title": "Első makrociklus"
+        },
+        {
+          "end_date": "2026-11-19",
+          "id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "key": "m0",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-10-23",
+          "title": "Felülvizsgálandó blokk"
+        },
+        {
+          "end_date": "2026-12-17",
+          "id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+          "key": "m1",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-11-20",
+          "title": "Felülvizsgálandó blokk"
+        },
+        {
+          "end_date": "2027-01-14",
+          "id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+          "key": "m2",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-12-18",
+          "title": "Felülvizsgálandó blokk"
+        }
+      ],
+      "competitions": [],
+      "declared_goals": [
+        {
+          "key": "regular_activity",
+          "target_description": "Heti három alkalom"
+        }
+      ],
+      "program_sport": "Kajak",
+      "goal_versions": [
+        {
+          "kind": "macrocycle_capability_plan",
+          "period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "artifact": {
+            "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77",
+            "schema_version": "macrocycle-capability-plan-v0.1",
+            "rules_version": "explicit-cycle-goal-rules-v0.1",
+            "athlete_id": "11111111-1111-4111-8111-111111111111",
+            "catalog_version": "capability-measurement-catalog-v0.1",
+            "catalog_content_hash": "596c5f97a1420090eb52222600629efb91fd1207f71eb61b7554cb8c040310bf",
+            "proposal": {
+              "macrocycle_period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "revision": 1,
+              "supersedes": null,
+              "goals": [
+                {
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                }
+              ],
+              "mesocycle_directives": [
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                }
+              ],
+              "rationale": "test"
+            },
+            "sources": {
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "timezone_name": "Europe/Budapest",
+              "hierarchy": [
+                {
+                  "period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": null,
+                  "period_type": "MACROCYCLE",
+                  "title": "Első makrociklus",
+                  "start_date": "2026-10-23",
+                  "end_date": "2027-01-14",
+                  "legacy_objectives": []
+                }
+              ],
+              "mesocycles": [
+                {
+                  "period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-10-23",
+                  "end_date": "2026-11-19",
+                  "legacy_objectives": []
+                },
+                {
+                  "period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-11-20",
+                  "end_date": "2026-12-17",
+                  "legacy_objectives": []
+                },
+                {
+                  "period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-12-18",
+                  "end_date": "2027-01-14",
+                  "legacy_objectives": []
+                }
+              ]
+            },
+            "previous_source": null,
+            "unassigned_capability_keys": [
+              "VO2_CAPACITY",
+              "PADDLING_ECONOMY",
+              "POWER_RFD",
+              "MUSCULOSKELETAL_ROBUSTNESS",
+              "TECHNICAL_STABILITY_UNDER_FATIGUE",
+              "LONG_DURATION_DURABILITY",
+              "PACING_COMPETENCE",
+              "SPRINT_SPEED_AND_START",
+              "MUSCULAR_ENDURANCE",
+              "HIGH_INTENSITY_AND_ANAEROBIC_PROFILE"
+            ],
+            "authority": {
+              "shadow_only": true,
+              "capability_change_established": false,
+              "physiological_adaptation_established": false,
+              "comparative_utility_endpoint_preregistered": false,
+              "planning_utility_supported": false,
+              "causal_attribution_established": false,
+              "planning_authorized": false,
+              "planner_runtime_modified": false
+            },
+            "created_at": "2026-10-23T10:00:00.000005Z",
+            "content_hash_algorithm": "sha256-canonical-json-v0.1",
+            "content_hash": "6b5cdff6efca46aeaa73b3989d5f45b235dde37d5ee376df7cfa19b996261569"
+          },
+          "available_at": "2026-10-23T10:00:00.000006+00:00"
+        }
+      ],
+      "profile": {
+        "reference": {
+          "artifact_id": "pt-athlete:60a6d607ed7e2905aadd75354473a17693a72d0556f5d349ddfc0260fe28f7d6",
+          "content_hash": "0ec8dc7d50e0637ee9f1021a9d352112f604c904a2c80fc08c16bf9ec7821a2a",
+          "available_at": "2026-10-23T10:00:00.000002+00:00"
+        },
+        "data": {
+          "accessibility_needs": "",
+          "birth_date": "1982-05-30",
+          "competition_category": "",
+          "constraint_status": "none_known",
+          "constraints": [],
+          "interruption": "none",
+          "last_training_date": null,
+          "manual_observations": [],
+          "participation": "unrestricted",
+          "recovery_notes": "",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "sex_reference": "female",
+          "source_selections": [],
+          "source_window": null,
+          "sport_history": [
+            {
+              "current": true,
+              "discipline": "Síkvíz",
+              "last_active_date": null,
+              "level": "professional",
+              "notes": "",
+              "sport": "Kajak",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            }
+          ],
+          "sport_history_status": "recorded",
+          "target_sport": "Kajak",
+          "typical_days_per_week": 3,
+          "typical_minutes_per_week": 180
+        }
+      },
+      "calendar_reference": null,
+      "availability_reference": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "content_hash": "25eb55be6540a643f1d2f24005c240aa2cd8927a94f4618ad2d6be0b6dac88f8"
+      },
+      "boundary_reference": null,
+      "competition_reference": null,
+      "days": [
+        {
+          "date": "2026-10-24",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-24:morning",
+              "source_date": "2026-10-24",
+              "start_at": "2026-10-24T06:00:00+00:00",
+              "end_at": "2026-10-24T08:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-24T06:00:00+00:00",
+                  "end_at": "2026-10-24T08:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-25",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-25:morning",
+              "source_date": "2026-10-25",
+              "start_at": "2026-10-25T07:00:00+00:00",
+              "end_at": "2026-10-25T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-25T07:00:00+00:00",
+                  "end_at": "2026-10-25T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-26",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-26:morning",
+              "source_date": "2026-10-26",
+              "start_at": "2026-10-26T07:00:00+00:00",
+              "end_at": "2026-10-26T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-26T07:00:00+00:00",
+                  "end_at": "2026-10-26T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-27",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-27:morning",
+              "source_date": "2026-10-27",
+              "start_at": "2026-10-27T07:00:00+00:00",
+              "end_at": "2026-10-27T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-27T07:00:00+00:00",
+                  "end_at": "2026-10-27T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-28",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-28:morning",
+              "source_date": "2026-10-28",
+              "start_at": "2026-10-28T07:00:00+00:00",
+              "end_at": "2026-10-28T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-28T07:00:00+00:00",
+                  "end_at": "2026-10-28T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-29",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-29:morning",
+              "source_date": "2026-10-29",
+              "start_at": "2026-10-29T07:00:00+00:00",
+              "end_at": "2026-10-29T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-29T07:00:00+00:00",
+                  "end_at": "2026-10-29T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        }
+      ],
+      "existing_plans": [],
+      "existing_conflicts": [],
+      "recent_sessions": [],
+      "recovery_records": [],
+      "recent_window": {
+        "start_at": "2026-10-08T22:00:00+00:00",
+        "end_at": "2026-10-23T10:00:00.000009+00:00",
+        "coverage": "stored_records_only_not_exhaustive"
+      },
+      "feedback": [],
+      "gaps": [
+        "NO_RECENT_SELF_REPORT",
+        "NO_RECENT_RECOVERY_RECORD"
+      ],
+      "planner_connection": {
+        "inputs_assembled": true,
+        "workout_generator_connected": false,
+        "dose_policy_connected": false,
+        "personal_model_applied": false
+      },
+      "capture_finished_at": "2026-10-23T10:00:00.000012+00:00",
+      "mutable_source_semantics": "current_read_span",
+      "historical_replay_supported": false,
+      "windows_share_budgets_across_days": true,
+      "revalidate_before_planning": true,
+      "durable": false,
+      "has_more": false,
+      "planning_authorized": false,
+      "workouts_created": false,
+      "workouts_changed": false,
+      "goal_suggestions": {
+        "schema_version": "planning-goal-suggestions-v0.2",
+        "rules_version": "mesocycle-strategy-v0.1",
+        "registry_reference": {
+          "version": "workout_family_registry_v0.1",
+          "content_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853"
+        },
+        "macrocycles": [
+          {
+            "macrocycle_period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+            "base_reference": {
+              "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77",
+              "content_hash": "6b5cdff6efca46aeaa73b3989d5f45b235dde37d5ee376df7cfa19b996261569"
+            },
+            "base_revision": 1,
+            "rows": [
+              {
+                "capability_key": "MAX_STRENGTH",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "STRENGTH_REFERENCE_AND_DEVELOPMENT",
+                    "family_version": "v0.1",
+                    "modality_key": "STRENGTH",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              },
+              {
+                "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "KAYAK_EASY_TECHNICAL",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "secondary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  },
+                  {
+                    "family_key": "KAYAK_LONG_AEROBIC",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  },
+                  {
+                    "family_key": "RUN_EASY_AEROBIC_FALLBACK",
+                    "family_version": "v0.1",
+                    "modality_key": "RUN",
+                    "match": "secondary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              },
+              {
+                "capability_key": "TECHNICAL_SKILL",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "KAYAK_EASY_TECHNICAL",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              }
+            ],
+            "unprofiled_event_keys": [],
+            "unmapped_goal_keys": [
+              "regular_activity"
+            ],
+            "strategy_periods": [
+              {
+                "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-10-23",
+                    "end_date": "2026-11-19",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              },
+              {
+                "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-11-20",
+                    "end_date": "2026-12-17",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              },
+              {
+                "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-12-18",
+                    "end_date": "2027-01-14",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              }
+            ],
+            "primary_focus_limit": 2
+          }
+        ],
+        "review_required": true,
+        "periodization_inferred": true,
+        "dose_selected": false,
+        "family_selection_authorized": false,
+        "committed": false,
+        "strategy": {
+          "schema_version": "planning-strategy-v0.1",
+          "policy": {
+            "specific_window_days": 42,
+            "readiness_window_days": 14,
+            "transition_days": 7,
+            "max_primary_capabilities": 2,
+            "acute_signal_hours": 48,
+            "high_self_report_score": 7
+          },
+          "sources": [
+            {
+              "key": "kayak-periodization-2010",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/20414669/",
+              "use": "Kajakos általános–specifikus sorrend és korlátozott számú párhuzamos hangsúly.",
+              "limit": "Kis létszámú elit minta; a terhelés és a fejlődés mértéke nem másolható át."
+            },
+            {
+              "key": "kayak-combined-2009",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/19396614/",
+              "use": "Az állóképességi és neuromuszkuláris felkészülés összekapcsolásának mintája.",
+              "limit": "Elit kajakos edzésminta, nem személyes hatásbecslés."
+            },
+            {
+              "key": "taper-2007",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/17762369/",
+              "use": "A főverseny előtti frissítés elkülönítése az új képességépítéstől.",
+              "limit": "A 14 napos jelölés csak szerkeszthető kezdőablak; terheléscsökkentést itt nem írunk elő."
+            }
+          ],
+          "source_basis": "evidence_informed_product_heuristic",
+          "profile_context": {
+            "paddling": true,
+            "beginner_or_returning": false,
+            "restricted": false,
+            "participation": "unrestricted",
+            "notes": [],
+            "profile_available": true
+          },
+          "recent_review_signals": [],
+          "personal_response_model": {
+            "applied": false,
+            "status": "no_prescription_validated_model_connected",
+            "reason": "A megfigyelések és leíró összefüggések önmagukban nem igazolnak személyes fejlődési vagy terhelési modellt."
+          },
+          "boundaries_changed": false,
+          "race_dates_changed": false,
+          "workouts_created": false,
+          "dose_selected": false
+        },
+        "event_titles": {}
+      },
+      "content_hash": "e4ed7eceb6a27a2767d150cb800d04bd9e09fa6f17af57427e837c901f5f3b50"
+    },
+    "plan_snapshots": [],
+    "result": {
+      "policy": {
+        "version": "training-plan-policy-v0.1",
+        "max_sessions_per_day": 1,
+        "default_sessions_per_7_days": 2,
+        "max_sessions_per_7_days": 3,
+        "default_minutes_per_7_days": 90,
+        "max_minutes_per_7_days": 180,
+        "minimum_gap_hours": 36,
+        "new_session_lead_minutes": 15,
+        "personal_response_model_applied": false,
+        "missed_load_is_not_repaid": true
+      },
+      "entry_review": {
+        "policy_version": "athlete-intake-review-policy-v0.1",
+        "evaluated_on": "2026-10-23",
+        "age_years": 44,
+        "age_path": "adult",
+        "global_entry_gate": "OPEN",
+        "participation_status": "READY",
+        "entry_mode": "NORMAL_START",
+        "reasons": [],
+        "clinical_clearance": false,
+        "weight_change_requires_review": false,
+        "constraints": [],
+        "accessibility_needs": ""
+      },
+      "blockers": [],
+      "events": [],
+      "review_signals": [],
+      "proposals": [
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-24",
+          "start_at": "2026-10-24T06:00:00+00:00",
+          "end_at": "2026-10-24T06:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-24:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "88f9ec0809eb7cc9589d40300b691c7c8c1445468a5d6d68671fe36040ef7de8"
+        },
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-26",
+          "start_at": "2026-10-26T07:00:00+00:00",
+          "end_at": "2026-10-26T07:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-26:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "c28bb5066a6b267e6f567ba6edadd8ebcb9d1696414d4db9389c6d74d76b22eb"
+        },
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-28",
+          "start_at": "2026-10-28T07:00:00+00:00",
+          "end_at": "2026-10-28T07:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-28:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "fdf5543b46a6221b02afcda2fd3d214bf94e4f4ce0007cac82c476265397c988"
+        }
+      ],
+      "create": [
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-24",
+          "start_at": "2026-10-24T06:00:00+00:00",
+          "end_at": "2026-10-24T06:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-24:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "88f9ec0809eb7cc9589d40300b691c7c8c1445468a5d6d68671fe36040ef7de8"
+        },
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-26",
+          "start_at": "2026-10-26T07:00:00+00:00",
+          "end_at": "2026-10-26T07:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-26:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "c28bb5066a6b267e6f567ba6edadd8ebcb9d1696414d4db9389c6d74d76b22eb"
+        },
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-28",
+          "start_at": "2026-10-28T07:00:00+00:00",
+          "end_at": "2026-10-28T07:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-28:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "fdf5543b46a6221b02afcda2fd3d214bf94e4f4ce0007cac82c476265397c988"
+        }
+      ],
+      "keep": [],
+      "cancel": [],
+      "days_without_proposal": [
+        {
+          "date": "2026-10-25",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        },
+        {
+          "date": "2026-10-27",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        },
+        {
+          "date": "2026-10-29",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        }
+      ],
+      "uncovered_capabilities": [
+        "MAX_STRENGTH",
+        "PERIPHERAL_OXIDATIVE_CAPACITY"
+      ],
+      "protected_workout_ids": [],
+      "personal_model_applied": false,
+      "automatic_plan_mutation": false
+    },
+    "committed_plan": false,
+    "requires_explicit_acceptance": true,
+    "schema_version": "training-plan-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "content_hash": "23f12375dff5f360ae2e7489002f22e010b1339bf16c39b3fae105f7f3440e9a"
+  },
+  "receipt": {
+    "artifact": {
+      "artifact_id": "pt-training-plan:e888d146a880ae4e9f798779927e44c122ca679b93d90bfe31770c6504465921",
+      "program_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+      "created_at": "2026-10-23T10:00:00.000021+00:00",
+      "proposal": {
+        "request_id": "00000000-0000-0000-0000-00000002c0b1",
+        "review_reference": {
+          "artifact_id": "pt-training-plan:45b462894147b9961c1670200feb96b09677ba739b3ad020a1567ecb5a19d9e3",
+          "content_hash": "23f12375dff5f360ae2e7489002f22e010b1339bf16c39b3fae105f7f3440e9a"
+        },
+        "acknowledge_reviewed_plan": true,
+        "program_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877"
+      },
+      "review_reference": {
+        "artifact_id": "pt-training-plan:45b462894147b9961c1670200feb96b09677ba739b3ad020a1567ecb5a19d9e3",
+        "content_hash": "23f12375dff5f360ae2e7489002f22e010b1339bf16c39b3fae105f7f3440e9a"
+      },
+      "start_date": "2026-10-24",
+      "end_date": "2026-10-29",
+      "created_workouts": {
+        "74c84394-aae1-5b20-811f-880bd9bee236": {
+          "workout_hash": "af29d8ab12509d767d591924219f5eecdee00d17119f51686f7f6e7f20dffcd6",
+          "marker": {
+            "program_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+            "review_id": "pt-training-plan:45b462894147b9961c1670200feb96b09677ba739b3ad020a1567ecb5a19d9e3",
+            "candidate_key": "88f9ec0809eb7cc9589d40300b691c7c8c1445468a5d6d68671fe36040ef7de8"
+          },
+          "candidate_key": "88f9ec0809eb7cc9589d40300b691c7c8c1445468a5d6d68671fe36040ef7de8",
+          "template_key": "KAYAK_EASY_TECHNICAL"
+        },
+        "eab1ab0f-a2fd-5a67-a5a7-e9803767b2a7": {
+          "workout_hash": "ad225041d82837ce323148ad5c0fbf18771fe23eec1dcfff051afb24cf203212",
+          "marker": {
+            "program_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+            "review_id": "pt-training-plan:45b462894147b9961c1670200feb96b09677ba739b3ad020a1567ecb5a19d9e3",
+            "candidate_key": "c28bb5066a6b267e6f567ba6edadd8ebcb9d1696414d4db9389c6d74d76b22eb"
+          },
+          "candidate_key": "c28bb5066a6b267e6f567ba6edadd8ebcb9d1696414d4db9389c6d74d76b22eb",
+          "template_key": "KAYAK_EASY_TECHNICAL"
+        },
+        "b001b6e9-65f5-59b1-acf8-bbe6a644de3a": {
+          "workout_hash": "67883b39fa08be20f046295d5c0a7a6e052818d84e040f478ac5259622a71bcd",
+          "marker": {
+            "program_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+            "review_id": "pt-training-plan:45b462894147b9961c1670200feb96b09677ba739b3ad020a1567ecb5a19d9e3",
+            "candidate_key": "fdf5543b46a6221b02afcda2fd3d214bf94e4f4ce0007cac82c476265397c988"
+          },
+          "candidate_key": "fdf5543b46a6221b02afcda2fd3d214bf94e4f4ce0007cac82c476265397c988",
+          "template_key": "KAYAK_EASY_TECHNICAL"
+        }
+      },
+      "cancelled_workout_ids": [],
+      "kept_workout_ids": [],
+      "authority_scope": "explicitly_reviewed_current_application_sample_plan",
+      "personal_model_applied": false,
+      "provider_writeback": false,
+      "schema_version": "training-plan-v0.1",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "content_hash": "45ccca24748debaa51810d6a0b6da53a79c6d82d605913153dbf61376fb36e19"
+    },
+    "reused": false,
+    "committed": true
+  },
+  "catalog": {
+    "schema_version": "cycle-creation-catalog-v0.1",
+    "rules_version": "cycle-creation-rules-v0.1",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-23",
+    "olympics": [
+      {
+        "key": "la-2028",
+        "kind": "summer",
+        "title": "Los Angeles 2028",
+        "start_date": "2028-07-14",
+        "end_date": "2028-07-30"
+      },
+      {
+        "key": "alpes-2030",
+        "kind": "winter",
+        "title": "Francia-Alpok 2030",
+        "start_date": "2030-02-01",
+        "end_date": "2030-02-17"
+      },
+      {
+        "key": "brisbane-2032",
+        "kind": "summer",
+        "title": "Brisbane 2032",
+        "start_date": "2032-07-23",
+        "end_date": "2032-08-08"
+      },
+      {
+        "key": "utah-2034",
+        "kind": "winter",
+        "title": "Salt Lake City–Utah 2034",
+        "start_date": "2034-02-10",
+        "end_date": "2034-02-26"
+      }
+    ],
+    "calendar_version": "ioc-games-calendar-2026-10-22",
+    "calendar_source": "https://www.olympics.com/ioc/faq/sports-programme-and-results/where-will-the-next-olympic-games-be-held",
+    "goals": {
+      "performance": "Versenycél / sportteljesítmény",
+      "aerobic_fitness": "Állóképesség javítása vagy fenntartása",
+      "strength": "Erő és mindennapi terhelhetőség",
+      "regular_activity": "Rendszeres mozgás kialakítása",
+      "weight_loss": "Testsúlycsökkentés",
+      "weight_maintenance": "Testsúly megtartása",
+      "wellbeing": "Közérzet és élvezhető mozgás",
+      "mobility": "Mozgékonyság"
+    },
+    "planning_context_version": "cycle-planning-basis-v0.1",
+    "boundary_revision_schema": "cycle-mesocycle-boundary-revision-v0.1",
+    "race_min_days": 28,
+    "race_max_calendar_months": 12,
+    "default_recreation_weeks": 12,
+    "default_mesocycle_days": 28,
+    "limits_are_product_policy": true
+  },
+  "programs": {
+    "items": [
+      {
+        "identity_scope": "APPLICATION_DEMO_USER",
+        "artifact": {
+          "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "calendar_snapshot": null,
+          "capability_goals_preregistered": false,
+          "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5",
+          "created_at": "2026-10-22T09:00:00.000001+00:00",
+          "periods": [
+            {
+              "end_date": "2027-01-14",
+              "id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "key": "macro-1",
+              "parent_id": null,
+              "period_type": "MACROCYCLE",
+              "start_date": "2026-10-23",
+              "title": "Első makrociklus"
+            },
+            {
+              "end_date": "2026-11-19",
+              "id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "key": "m0",
+              "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "period_type": "MESOCYCLE",
+              "start_date": "2026-10-23",
+              "title": "Felülvizsgálandó blokk"
+            },
+            {
+              "end_date": "2026-12-17",
+              "id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+              "key": "m1",
+              "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "period_type": "MESOCYCLE",
+              "start_date": "2026-11-20",
+              "title": "Felülvizsgálandó blokk"
+            },
+            {
+              "end_date": "2027-01-14",
+              "id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+              "key": "m2",
+              "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "period_type": "MESOCYCLE",
+              "start_date": "2026-12-18",
+              "title": "Felülvizsgálandó blokk"
+            }
+          ],
+          "planning_authorized": false,
+          "program_family_id": "00000000-0000-0000-0000-00000000c351",
+          "proposal": {
+            "competitions": [],
+            "continued_from": null,
+            "end_date": null,
+            "goals": [
+              {
+                "key": "regular_activity",
+                "target_description": "Heti három alkalom"
+              }
+            ],
+            "macrocycles": [
+              {
+                "end_date": "2027-01-14",
+                "key": "macro-1",
+                "mesocycles": [
+                  {
+                    "end_date": "2026-11-19",
+                    "key": "m0",
+                    "start_date": "2026-10-23",
+                    "title": "Felülvizsgálandó blokk"
+                  },
+                  {
+                    "end_date": "2026-12-17",
+                    "key": "m1",
+                    "start_date": "2026-11-20",
+                    "title": "Felülvizsgálandó blokk"
+                  },
+                  {
+                    "end_date": "2027-01-14",
+                    "key": "m2",
+                    "start_date": "2026-12-18",
+                    "title": "Felülvizsgálandó blokk"
+                  }
+                ],
+                "season_key": null,
+                "start_date": "2026-10-23",
+                "title": "Első makrociklus"
+              }
+            ],
+            "mode": "recreation",
+            "olympic_key": null,
+            "program_id": "00000000-0000-0000-0000-00000000c351",
+            "seasons": [],
+            "sport": "Kajak",
+            "start_date": "2026-10-23",
+            "title": "Teszt felkészülés"
+          },
+          "rules_version": "cycle-creation-rules-v0.1",
+          "schema_version": "cycle-program-registration-v0.1",
+          "timezone_name": "Europe/Budapest",
+          "workouts_created": false
+        },
+        "durable_available_at": "2026-10-22T09:00:00.000002+00:00",
+        "reused": true,
+        "committed": true,
+        "planning_authorized": false,
+        "workouts_created": false
+      }
+    ],
+    "limit": 25,
+    "offset": 0,
+    "has_more": false
+  },
+  "detail": {
+    "program": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "calendar_snapshot": null,
+        "capability_goals_preregistered": false,
+        "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5",
+        "created_at": "2026-10-22T09:00:00.000001+00:00",
+        "periods": [
+          {
+            "end_date": "2027-01-14",
+            "id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+            "key": "macro-1",
+            "parent_id": null,
+            "period_type": "MACROCYCLE",
+            "start_date": "2026-10-23",
+            "title": "Első makrociklus"
+          },
+          {
+            "end_date": "2026-11-19",
+            "id": "17635834-0a01-55ab-9a96-813ef1846d64",
+            "key": "m0",
+            "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+            "period_type": "MESOCYCLE",
+            "start_date": "2026-10-23",
+            "title": "Felülvizsgálandó blokk"
+          },
+          {
+            "end_date": "2026-12-17",
+            "id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+            "key": "m1",
+            "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+            "period_type": "MESOCYCLE",
+            "start_date": "2026-11-20",
+            "title": "Felülvizsgálandó blokk"
+          },
+          {
+            "end_date": "2027-01-14",
+            "id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+            "key": "m2",
+            "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+            "period_type": "MESOCYCLE",
+            "start_date": "2026-12-18",
+            "title": "Felülvizsgálandó blokk"
+          }
+        ],
+        "planning_authorized": false,
+        "program_family_id": "00000000-0000-0000-0000-00000000c351",
+        "proposal": {
+          "competitions": [],
+          "continued_from": null,
+          "end_date": null,
+          "goals": [
+            {
+              "key": "regular_activity",
+              "target_description": "Heti három alkalom"
+            }
+          ],
+          "macrocycles": [
+            {
+              "end_date": "2027-01-14",
+              "key": "macro-1",
+              "mesocycles": [
+                {
+                  "end_date": "2026-11-19",
+                  "key": "m0",
+                  "start_date": "2026-10-23",
+                  "title": "Felülvizsgálandó blokk"
+                },
+                {
+                  "end_date": "2026-12-17",
+                  "key": "m1",
+                  "start_date": "2026-11-20",
+                  "title": "Felülvizsgálandó blokk"
+                },
+                {
+                  "end_date": "2027-01-14",
+                  "key": "m2",
+                  "start_date": "2026-12-18",
+                  "title": "Felülvizsgálandó blokk"
+                }
+              ],
+              "season_key": null,
+              "start_date": "2026-10-23",
+              "title": "Első makrociklus"
+            }
+          ],
+          "mode": "recreation",
+          "olympic_key": null,
+          "program_id": "00000000-0000-0000-0000-00000000c351",
+          "seasons": [],
+          "sport": "Kajak",
+          "start_date": "2026-10-23",
+          "title": "Teszt felkészülés"
+        },
+        "rules_version": "cycle-creation-rules-v0.1",
+        "schema_version": "cycle-program-registration-v0.1",
+        "timezone_name": "Europe/Budapest",
+        "workouts_created": false
+      },
+      "durable_available_at": "2026-10-22T09:00:00.000002+00:00",
+      "reused": true,
+      "committed": true,
+      "planning_authorized": false,
+      "workouts_created": false
+    },
+    "competition_revisions": [],
+    "boundary_revisions": []
+  },
+  "after_review": {
+    "artifact_id": "pt-training-plan:438a3f7b7682910a69d9fe3476ad529a1a40c025ca4b7da04aecd0f826403c9c",
+    "program_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+    "created_at": "2026-10-23T10:00:00.000028+00:00",
+    "previous_reference": {
+      "artifact_id": "pt-training-plan:45b462894147b9961c1670200feb96b09677ba739b3ad020a1567ecb5a19d9e3",
+      "content_hash": "23f12375dff5f360ae2e7489002f22e010b1339bf16c39b3fae105f7f3440e9a"
+    },
+    "decision_key": "1a4a0f7b5fc6a3cb616bb70747799097eacaf837f8ace988d8b510fa33478b74",
+    "start_date": "2026-10-24",
+    "end_date": "2026-10-29",
+    "timezone_name": "Europe/Budapest",
+    "active_window_end": null,
+    "program_reference": {
+      "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+      "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5"
+    },
+    "inputs": {
+      "schema_version": "planning-inputs-v0.1",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "program_reference": {
+        "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+        "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5"
+      },
+      "captured_at": "2026-10-23T10:00:00.000024+00:00",
+      "timezone_name": "Europe/Budapest",
+      "start_date": "2026-10-24",
+      "end_date": "2026-10-29",
+      "periods": [
+        {
+          "end_date": "2027-01-14",
+          "id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "key": "macro-1",
+          "parent_id": null,
+          "period_type": "MACROCYCLE",
+          "start_date": "2026-10-23",
+          "title": "Első makrociklus"
+        },
+        {
+          "end_date": "2026-11-19",
+          "id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "key": "m0",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-10-23",
+          "title": "Felülvizsgálandó blokk"
+        },
+        {
+          "end_date": "2026-12-17",
+          "id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+          "key": "m1",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-11-20",
+          "title": "Felülvizsgálandó blokk"
+        },
+        {
+          "end_date": "2027-01-14",
+          "id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+          "key": "m2",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-12-18",
+          "title": "Felülvizsgálandó blokk"
+        }
+      ],
+      "competitions": [],
+      "declared_goals": [
+        {
+          "key": "regular_activity",
+          "target_description": "Heti három alkalom"
+        }
+      ],
+      "program_sport": "Kajak",
+      "goal_versions": [
+        {
+          "kind": "macrocycle_capability_plan",
+          "period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "artifact": {
+            "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77",
+            "schema_version": "macrocycle-capability-plan-v0.1",
+            "rules_version": "explicit-cycle-goal-rules-v0.1",
+            "athlete_id": "11111111-1111-4111-8111-111111111111",
+            "catalog_version": "capability-measurement-catalog-v0.1",
+            "catalog_content_hash": "596c5f97a1420090eb52222600629efb91fd1207f71eb61b7554cb8c040310bf",
+            "proposal": {
+              "macrocycle_period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "revision": 1,
+              "supersedes": null,
+              "goals": [
+                {
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                }
+              ],
+              "mesocycle_directives": [
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                }
+              ],
+              "rationale": "test"
+            },
+            "sources": {
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "timezone_name": "Europe/Budapest",
+              "hierarchy": [
+                {
+                  "period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": null,
+                  "period_type": "MACROCYCLE",
+                  "title": "Első makrociklus",
+                  "start_date": "2026-10-23",
+                  "end_date": "2027-01-14",
+                  "legacy_objectives": []
+                }
+              ],
+              "mesocycles": [
+                {
+                  "period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-10-23",
+                  "end_date": "2026-11-19",
+                  "legacy_objectives": []
+                },
+                {
+                  "period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-11-20",
+                  "end_date": "2026-12-17",
+                  "legacy_objectives": []
+                },
+                {
+                  "period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-12-18",
+                  "end_date": "2027-01-14",
+                  "legacy_objectives": []
+                }
+              ]
+            },
+            "previous_source": null,
+            "unassigned_capability_keys": [
+              "VO2_CAPACITY",
+              "PADDLING_ECONOMY",
+              "POWER_RFD",
+              "MUSCULOSKELETAL_ROBUSTNESS",
+              "TECHNICAL_STABILITY_UNDER_FATIGUE",
+              "LONG_DURATION_DURABILITY",
+              "PACING_COMPETENCE",
+              "SPRINT_SPEED_AND_START",
+              "MUSCULAR_ENDURANCE",
+              "HIGH_INTENSITY_AND_ANAEROBIC_PROFILE"
+            ],
+            "authority": {
+              "shadow_only": true,
+              "capability_change_established": false,
+              "physiological_adaptation_established": false,
+              "comparative_utility_endpoint_preregistered": false,
+              "planning_utility_supported": false,
+              "causal_attribution_established": false,
+              "planning_authorized": false,
+              "planner_runtime_modified": false
+            },
+            "created_at": "2026-10-23T10:00:00.000005Z",
+            "content_hash_algorithm": "sha256-canonical-json-v0.1",
+            "content_hash": "6b5cdff6efca46aeaa73b3989d5f45b235dde37d5ee376df7cfa19b996261569"
+          },
+          "available_at": "2026-10-23T10:00:00.000006+00:00"
+        }
+      ],
+      "profile": {
+        "reference": {
+          "artifact_id": "pt-athlete:60a6d607ed7e2905aadd75354473a17693a72d0556f5d349ddfc0260fe28f7d6",
+          "content_hash": "0ec8dc7d50e0637ee9f1021a9d352112f604c904a2c80fc08c16bf9ec7821a2a",
+          "available_at": "2026-10-23T10:00:00.000002+00:00"
+        },
+        "data": {
+          "accessibility_needs": "",
+          "birth_date": "1982-05-30",
+          "competition_category": "",
+          "constraint_status": "none_known",
+          "constraints": [],
+          "interruption": "none",
+          "last_training_date": null,
+          "manual_observations": [],
+          "participation": "unrestricted",
+          "recovery_notes": "",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "sex_reference": "female",
+          "source_selections": [],
+          "source_window": null,
+          "sport_history": [
+            {
+              "current": true,
+              "discipline": "Síkvíz",
+              "last_active_date": null,
+              "level": "professional",
+              "notes": "",
+              "sport": "Kajak",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            }
+          ],
+          "sport_history_status": "recorded",
+          "target_sport": "Kajak",
+          "typical_days_per_week": 3,
+          "typical_minutes_per_week": 180
+        }
+      },
+      "calendar_reference": null,
+      "availability_reference": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "content_hash": "25eb55be6540a643f1d2f24005c240aa2cd8927a94f4618ad2d6be0b6dac88f8"
+      },
+      "boundary_reference": null,
+      "competition_reference": null,
+      "days": [
+        {
+          "date": "2026-10-24",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-24:morning",
+              "source_date": "2026-10-24",
+              "start_at": "2026-10-24T06:00:00+00:00",
+              "end_at": "2026-10-24T08:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-24T06:00:00+00:00",
+                  "end_at": "2026-10-24T08:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-25",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-25:morning",
+              "source_date": "2026-10-25",
+              "start_at": "2026-10-25T07:00:00+00:00",
+              "end_at": "2026-10-25T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-25T07:00:00+00:00",
+                  "end_at": "2026-10-25T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-26",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-26:morning",
+              "source_date": "2026-10-26",
+              "start_at": "2026-10-26T07:00:00+00:00",
+              "end_at": "2026-10-26T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-26T07:00:00+00:00",
+                  "end_at": "2026-10-26T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-27",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-27:morning",
+              "source_date": "2026-10-27",
+              "start_at": "2026-10-27T07:00:00+00:00",
+              "end_at": "2026-10-27T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-27T07:00:00+00:00",
+                  "end_at": "2026-10-27T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-28",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-28:morning",
+              "source_date": "2026-10-28",
+              "start_at": "2026-10-28T07:00:00+00:00",
+              "end_at": "2026-10-28T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-28T07:00:00+00:00",
+                  "end_at": "2026-10-28T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-29",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-29:morning",
+              "source_date": "2026-10-29",
+              "start_at": "2026-10-29T07:00:00+00:00",
+              "end_at": "2026-10-29T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-29T07:00:00+00:00",
+                  "end_at": "2026-10-29T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        }
+      ],
+      "existing_plans": [
+        {
+          "timing": {
+            "id": "74c84394-aae1-5b20-811f-880bd9bee236",
+            "title": "Könnyű technikai kajak · 30 perc",
+            "date": "2026-10-24",
+            "start_at": "2026-10-24T06:00:00+00:00",
+            "duration_sec": 1800,
+            "duration_estimate": null
+          },
+          "workout": {
+            "id": "74c84394-aae1-5b20-811f-880bd9bee236",
+            "date": "2026-10-24",
+            "planned_start_time": "2026-10-24T06:00:00",
+            "sport": "KAYAK",
+            "title": "Könnyű technikai kajak · 30 perc",
+            "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+            "duration_sec": 1800,
+            "distance_m": null,
+            "intensity_type": null,
+            "status": "PLANNED",
+            "source": "PADDLETRAINER_C18_4",
+            "polar_target_id": null,
+            "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+            "blocks": [
+              {
+                "position": 1,
+                "block_type": "WARMUP",
+                "name": "Könnyű bemelegítés",
+                "duration_sec": 600,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "e85ce2a0-2c80-417d-9483-1445eb019470"
+              },
+              {
+                "position": 2,
+                "block_type": "WORK",
+                "name": "Nyugodt evezés, egy ismert technikai fókusz",
+                "duration_sec": 900,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "8fdcf37e-46af-43f8-b09a-7fa3e704d47f"
+              },
+              {
+                "position": 3,
+                "block_type": "COOLDOWN",
+                "name": "Levezetés",
+                "duration_sec": 300,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "543709c6-24f0-47aa-9e39-e8fe001b777d"
+              }
+            ]
+          },
+          "authority_status": "current_application_projection_not_authoritative_revision"
+        },
+        {
+          "timing": {
+            "id": "eab1ab0f-a2fd-5a67-a5a7-e9803767b2a7",
+            "title": "Könnyű technikai kajak · 30 perc",
+            "date": "2026-10-26",
+            "start_at": "2026-10-26T07:00:00+00:00",
+            "duration_sec": 1800,
+            "duration_estimate": null
+          },
+          "workout": {
+            "id": "eab1ab0f-a2fd-5a67-a5a7-e9803767b2a7",
+            "date": "2026-10-26",
+            "planned_start_time": "2026-10-26T07:00:00",
+            "sport": "KAYAK",
+            "title": "Könnyű technikai kajak · 30 perc",
+            "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+            "duration_sec": 1800,
+            "distance_m": null,
+            "intensity_type": null,
+            "status": "PLANNED",
+            "source": "PADDLETRAINER_C18_4",
+            "polar_target_id": null,
+            "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+            "blocks": [
+              {
+                "position": 1,
+                "block_type": "WARMUP",
+                "name": "Könnyű bemelegítés",
+                "duration_sec": 600,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "8cadad18-c47f-408f-9a76-0d371b626f6e"
+              },
+              {
+                "position": 2,
+                "block_type": "WORK",
+                "name": "Nyugodt evezés, egy ismert technikai fókusz",
+                "duration_sec": 900,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "20ef2434-2609-4bc3-bd27-79a879db0a88"
+              },
+              {
+                "position": 3,
+                "block_type": "COOLDOWN",
+                "name": "Levezetés",
+                "duration_sec": 300,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "977f13f2-eaa6-4e42-86b2-e9ff32d8404e"
+              }
+            ]
+          },
+          "authority_status": "current_application_projection_not_authoritative_revision"
+        },
+        {
+          "timing": {
+            "id": "b001b6e9-65f5-59b1-acf8-bbe6a644de3a",
+            "title": "Könnyű technikai kajak · 30 perc",
+            "date": "2026-10-28",
+            "start_at": "2026-10-28T07:00:00+00:00",
+            "duration_sec": 1800,
+            "duration_estimate": null
+          },
+          "workout": {
+            "id": "b001b6e9-65f5-59b1-acf8-bbe6a644de3a",
+            "date": "2026-10-28",
+            "planned_start_time": "2026-10-28T07:00:00",
+            "sport": "KAYAK",
+            "title": "Könnyű technikai kajak · 30 perc",
+            "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+            "duration_sec": 1800,
+            "distance_m": null,
+            "intensity_type": null,
+            "status": "PLANNED",
+            "source": "PADDLETRAINER_C18_4",
+            "polar_target_id": null,
+            "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+            "blocks": [
+              {
+                "position": 1,
+                "block_type": "WARMUP",
+                "name": "Könnyű bemelegítés",
+                "duration_sec": 600,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "460e1498-f569-4b28-8112-293a63a48b60"
+              },
+              {
+                "position": 2,
+                "block_type": "WORK",
+                "name": "Nyugodt evezés, egy ismert technikai fókusz",
+                "duration_sec": 900,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "0f065d5b-de18-448c-8d2e-e5b01e5dad9d"
+              },
+              {
+                "position": 3,
+                "block_type": "COOLDOWN",
+                "name": "Levezetés",
+                "duration_sec": 300,
+                "distance_m": null,
+                "intensity_type": null,
+                "intensity_min": null,
+                "intensity_max": null,
+                "repeat_count": null,
+                "parent_block_id": null,
+                "id": "f93e1cbb-7370-46f7-bdfb-f94f2a24cc5b"
+              }
+            ]
+          },
+          "authority_status": "current_application_projection_not_authoritative_revision"
+        }
+      ],
+      "existing_conflicts": [],
+      "recent_sessions": [],
+      "recovery_records": [],
+      "recent_window": {
+        "start_at": "2026-10-08T22:00:00+00:00",
+        "end_at": "2026-10-23T10:00:00.000024+00:00",
+        "coverage": "stored_records_only_not_exhaustive"
+      },
+      "feedback": [],
+      "gaps": [
+        "NO_RECENT_SELF_REPORT",
+        "NO_RECENT_RECOVERY_RECORD"
+      ],
+      "planner_connection": {
+        "inputs_assembled": true,
+        "workout_generator_connected": false,
+        "dose_policy_connected": false,
+        "personal_model_applied": false
+      },
+      "capture_finished_at": "2026-10-23T10:00:00.000027+00:00",
+      "mutable_source_semantics": "current_read_span",
+      "historical_replay_supported": false,
+      "windows_share_budgets_across_days": true,
+      "revalidate_before_planning": true,
+      "durable": false,
+      "has_more": false,
+      "planning_authorized": false,
+      "workouts_created": false,
+      "workouts_changed": false,
+      "goal_suggestions": {
+        "schema_version": "planning-goal-suggestions-v0.2",
+        "rules_version": "mesocycle-strategy-v0.1",
+        "registry_reference": {
+          "version": "workout_family_registry_v0.1",
+          "content_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853"
+        },
+        "macrocycles": [
+          {
+            "macrocycle_period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+            "base_reference": {
+              "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77",
+              "content_hash": "6b5cdff6efca46aeaa73b3989d5f45b235dde37d5ee376df7cfa19b996261569"
+            },
+            "base_revision": 1,
+            "rows": [
+              {
+                "capability_key": "MAX_STRENGTH",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "STRENGTH_REFERENCE_AND_DEVELOPMENT",
+                    "family_version": "v0.1",
+                    "modality_key": "STRENGTH",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              },
+              {
+                "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "KAYAK_EASY_TECHNICAL",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "secondary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  },
+                  {
+                    "family_key": "KAYAK_LONG_AEROBIC",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  },
+                  {
+                    "family_key": "RUN_EASY_AEROBIC_FALLBACK",
+                    "family_version": "v0.1",
+                    "modality_key": "RUN",
+                    "match": "secondary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              },
+              {
+                "capability_key": "TECHNICAL_SKILL",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "KAYAK_EASY_TECHNICAL",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              }
+            ],
+            "unprofiled_event_keys": [],
+            "unmapped_goal_keys": [
+              "regular_activity"
+            ],
+            "strategy_periods": [
+              {
+                "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-10-23",
+                    "end_date": "2026-11-19",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              },
+              {
+                "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-11-20",
+                    "end_date": "2026-12-17",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              },
+              {
+                "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-12-18",
+                    "end_date": "2027-01-14",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              }
+            ],
+            "primary_focus_limit": 2
+          }
+        ],
+        "review_required": true,
+        "periodization_inferred": true,
+        "dose_selected": false,
+        "family_selection_authorized": false,
+        "committed": false,
+        "strategy": {
+          "schema_version": "planning-strategy-v0.1",
+          "policy": {
+            "specific_window_days": 42,
+            "readiness_window_days": 14,
+            "transition_days": 7,
+            "max_primary_capabilities": 2,
+            "acute_signal_hours": 48,
+            "high_self_report_score": 7
+          },
+          "sources": [
+            {
+              "key": "kayak-periodization-2010",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/20414669/",
+              "use": "Kajakos általános–specifikus sorrend és korlátozott számú párhuzamos hangsúly.",
+              "limit": "Kis létszámú elit minta; a terhelés és a fejlődés mértéke nem másolható át."
+            },
+            {
+              "key": "kayak-combined-2009",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/19396614/",
+              "use": "Az állóképességi és neuromuszkuláris felkészülés összekapcsolásának mintája.",
+              "limit": "Elit kajakos edzésminta, nem személyes hatásbecslés."
+            },
+            {
+              "key": "taper-2007",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/17762369/",
+              "use": "A főverseny előtti frissítés elkülönítése az új képességépítéstől.",
+              "limit": "A 14 napos jelölés csak szerkeszthető kezdőablak; terheléscsökkentést itt nem írunk elő."
+            }
+          ],
+          "source_basis": "evidence_informed_product_heuristic",
+          "profile_context": {
+            "paddling": true,
+            "beginner_or_returning": false,
+            "restricted": false,
+            "participation": "unrestricted",
+            "notes": [],
+            "profile_available": true
+          },
+          "recent_review_signals": [],
+          "personal_response_model": {
+            "applied": false,
+            "status": "no_prescription_validated_model_connected",
+            "reason": "A megfigyelések és leíró összefüggések önmagukban nem igazolnak személyes fejlődési vagy terhelési modellt."
+          },
+          "boundaries_changed": false,
+          "race_dates_changed": false,
+          "workouts_created": false,
+          "dose_selected": false
+        },
+        "event_titles": {}
+      },
+      "content_hash": "dcb35747dfd9362b67684e6af501cbbbbe3f6cf4ba900dbea183cb27fe6c3f13"
+    },
+    "plan_snapshots": [
+      {
+        "workout": {
+          "id": "74c84394-aae1-5b20-811f-880bd9bee236",
+          "date": "2026-10-24",
+          "planned_start_time": "2026-10-24T06:00:00+00:00",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "distance_m": null,
+          "intensity_type": null,
+          "status": "PLANNED",
+          "source": "PADDLETRAINER_C18_4",
+          "polar_target_id": null,
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ]
+        },
+        "workout_hash": "af29d8ab12509d767d591924219f5eecdee00d17119f51686f7f6e7f20dffcd6",
+        "owned_sample": true,
+        "linked": false,
+        "replaceable": true,
+        "template_key": "KAYAK_EASY_TECHNICAL",
+        "candidate_key": "88f9ec0809eb7cc9589d40300b691c7c8c1445468a5d6d68671fe36040ef7de8"
+      },
+      {
+        "workout": {
+          "id": "eab1ab0f-a2fd-5a67-a5a7-e9803767b2a7",
+          "date": "2026-10-26",
+          "planned_start_time": "2026-10-26T07:00:00+00:00",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "distance_m": null,
+          "intensity_type": null,
+          "status": "PLANNED",
+          "source": "PADDLETRAINER_C18_4",
+          "polar_target_id": null,
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ]
+        },
+        "workout_hash": "ad225041d82837ce323148ad5c0fbf18771fe23eec1dcfff051afb24cf203212",
+        "owned_sample": true,
+        "linked": false,
+        "replaceable": true,
+        "template_key": "KAYAK_EASY_TECHNICAL",
+        "candidate_key": "c28bb5066a6b267e6f567ba6edadd8ebcb9d1696414d4db9389c6d74d76b22eb"
+      },
+      {
+        "workout": {
+          "id": "b001b6e9-65f5-59b1-acf8-bbe6a644de3a",
+          "date": "2026-10-28",
+          "planned_start_time": "2026-10-28T07:00:00+00:00",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "distance_m": null,
+          "intensity_type": null,
+          "status": "PLANNED",
+          "source": "PADDLETRAINER_C18_4",
+          "polar_target_id": null,
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ]
+        },
+        "workout_hash": "67883b39fa08be20f046295d5c0a7a6e052818d84e040f478ac5259622a71bcd",
+        "owned_sample": true,
+        "linked": false,
+        "replaceable": true,
+        "template_key": "KAYAK_EASY_TECHNICAL",
+        "candidate_key": "fdf5543b46a6221b02afcda2fd3d214bf94e4f4ce0007cac82c476265397c988"
+      }
+    ],
+    "result": {
+      "policy": {
+        "version": "training-plan-policy-v0.1",
+        "max_sessions_per_day": 1,
+        "default_sessions_per_7_days": 2,
+        "max_sessions_per_7_days": 3,
+        "default_minutes_per_7_days": 90,
+        "max_minutes_per_7_days": 180,
+        "minimum_gap_hours": 36,
+        "new_session_lead_minutes": 15,
+        "personal_response_model_applied": false,
+        "missed_load_is_not_repaid": true
+      },
+      "entry_review": {
+        "policy_version": "athlete-intake-review-policy-v0.1",
+        "evaluated_on": "2026-10-23",
+        "age_years": 44,
+        "age_path": "adult",
+        "global_entry_gate": "OPEN",
+        "participation_status": "READY",
+        "entry_mode": "NORMAL_START",
+        "reasons": [],
+        "clinical_clearance": false,
+        "weight_change_requires_review": false,
+        "constraints": [],
+        "accessibility_needs": ""
+      },
+      "blockers": [],
+      "events": [],
+      "review_signals": [],
+      "proposals": [
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-24",
+          "start_at": "2026-10-24T06:00:00+00:00",
+          "end_at": "2026-10-24T06:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-24:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "88f9ec0809eb7cc9589d40300b691c7c8c1445468a5d6d68671fe36040ef7de8"
+        },
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-26",
+          "start_at": "2026-10-26T07:00:00+00:00",
+          "end_at": "2026-10-26T07:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-26:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "c28bb5066a6b267e6f567ba6edadd8ebcb9d1696414d4db9389c6d74d76b22eb"
+        },
+        {
+          "template_key": "KAYAK_EASY_TECHNICAL",
+          "template_version": "v0.1",
+          "family_registry_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853",
+          "guardrails": [
+            "NO_FORCED_HR_TARGET",
+            "NO_INTENSITY_CHASING"
+          ],
+          "date": "2026-10-28",
+          "start_at": "2026-10-28T07:00:00+00:00",
+          "end_at": "2026-10-28T07:30:00+00:00",
+          "training_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "sport": "KAYAK",
+          "title": "Könnyű technikai kajak · 30 perc",
+          "description": "10 perc könnyű bemelegítés; 15 perc nyugodt evezés, egy ismert technikai elemre figyelve; 5 perc levezetés. Könnyű, beszélgetős érzet (RPE 2–3/10), pulzuscél nélkül. A technika romlásakor rövidíts; az időt nem kell kitölteni.",
+          "duration_sec": 1800,
+          "blocks": [
+            {
+              "position": 1,
+              "block_type": "WARMUP",
+              "name": "Könnyű bemelegítés",
+              "duration_sec": 600,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 2,
+              "block_type": "WORK",
+              "name": "Nyugodt evezés, egy ismert technikai fókusz",
+              "duration_sec": 900,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            },
+            {
+              "position": 3,
+              "block_type": "COOLDOWN",
+              "name": "Levezetés",
+              "duration_sec": 300,
+              "distance_m": null,
+              "intensity_type": null,
+              "intensity_min": null,
+              "intensity_max": null,
+              "repeat_count": null,
+              "parent_block_id": null
+            }
+          ],
+          "opportunity_key": "legacy:2026-10-28:morning",
+          "capability_key": "TECHNICAL_SKILL",
+          "role": "primary_development",
+          "duration_reference_session_id": null,
+          "rationale": "TECHNICAL_SKILL · primary_development. A megadott sport-, eszköz- és időkeretbe illesztett minta; elmaradt terhelést nem pótol.",
+          "candidate_key": "fdf5543b46a6221b02afcda2fd3d214bf94e4f4ce0007cac82c476265397c988"
+        }
+      ],
+      "create": [],
+      "keep": [
+        "74c84394-aae1-5b20-811f-880bd9bee236",
+        "eab1ab0f-a2fd-5a67-a5a7-e9803767b2a7",
+        "b001b6e9-65f5-59b1-acf8-bbe6a644de3a"
+      ],
+      "cancel": [],
+      "days_without_proposal": [
+        {
+          "date": "2026-10-25",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        },
+        {
+          "date": "2026-10-27",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        },
+        {
+          "date": "2026-10-29",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        }
+      ],
+      "uncovered_capabilities": [
+        "MAX_STRENGTH",
+        "PERIPHERAL_OXIDATIVE_CAPACITY"
+      ],
+      "protected_workout_ids": [],
+      "personal_model_applied": false,
+      "automatic_plan_mutation": false
+    },
+    "committed_plan": false,
+    "requires_explicit_acceptance": true,
+    "schema_version": "training-plan-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "content_hash": "406c31cd5ea802768cb42bf7e04d6ef87112236d332de69d2e385dcc524cec08"
+  }
+}

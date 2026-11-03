@@ -39,6 +39,10 @@ class AuditArtifactKind(StrEnum):
     DATA_SYNC_STARTED = "data_sync_started"
     DATA_SYNC_SUCCEEDED = "data_sync_succeeded"
     DATA_SYNC_FAILED = "data_sync_failed"
+    TRAINING_PLAN_REVIEW = "training_plan_review"
+    TRAINING_PLAN_ACCEPTANCE = "training_plan_acceptance"
+    TRAINING_PLAN_OUTCOME = "training_plan_outcome"
+    TRAINING_OPTIONS = "training_options"
 
 
 class AuditArtifactSaveStatus(StrEnum):

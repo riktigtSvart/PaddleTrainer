@@ -146,6 +146,7 @@ class ProfileData(Closed):
     typical_days_per_week: int | None = Field(default=None, ge=0, le=7)
     typical_minutes_per_week: int | None = Field(default=None, ge=0, le=10080)
     resources: list[Title] = Field(default_factory=list, max_length=32)
+    duration_doubling_slowdown_pct: int | None = Field(default=None, ge=0, le=20, strict=True)
     accessibility_needs: Text = ""
     recovery_notes: Text = ""
     manual_observations: list[ManualObservation] = Field(default_factory=list, max_length=200)
@@ -192,9 +193,9 @@ class SessionWindow(Closed):
     start_fold: Literal[0, 1] | None = None
     end_fold: Literal[0, 1] | None = None
     max_minutes: int = Field(ge=1, le=1440)
-    sport_scope: Literal["unknown", "any", "specified"] = "unknown"
+    sport_scope: Literal["unknown", "any", "specified"] = "any"
     sports: list[Title] = Field(default_factory=list, max_length=16)
-    effort_cap: Literal["unknown", "easy", "moderate", "any"] = "unknown"
+    effort_cap: Literal["unknown", "easy", "moderate", "any"] = "any"
     resources: list[Title] = Field(default_factory=list, max_length=32)
     location: Short = ""
     notes: Text = ""

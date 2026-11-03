@@ -3,6 +3,7 @@ import AppShell from "@/components/ui/app-shell";
 import { themeBootstrap } from "@/lib/ui/theme";
 import "./globals.css";
 import "@/styles/compact-workspace.css";
+import "@/styles/training-planning.css";
 
 export const metadata: Metadata = {
   title: { default: "PaddleTrainer", template: "%s · PaddleTrainer" },

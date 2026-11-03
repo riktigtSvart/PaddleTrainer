@@ -316,7 +316,9 @@ export default function CalendarForm({
                       }
                     >
                       <option value="unknown">Még nincs megadva</option>
-                      <option value="any">Bármely tervezett sportág</option>
+                      <option value="any">
+                        Általános edzéslehetőség (alapértelmezés)
+                      </option>
                       <option value="specified">Csak megadott sportágak</option>
                     </Select>
                     <Select
@@ -348,7 +350,7 @@ export default function CalendarForm({
                       />
                     )}
                     <Field
-                      label="Elérhető eszközök (vesszővel elválasztva)"
+                      label="Itt elérhető további eszközök · üresen a profil eszközeit használjuk"
                       defaultValue={w.resources.join(", ")}
                       onChange={(e) =>
                         windowEdit(d.date, w.key, {

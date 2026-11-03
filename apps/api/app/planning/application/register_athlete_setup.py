@@ -89,6 +89,11 @@ async def lock_owner(session, owner):
 def decode(record, *, owner, kind):
     artifact = json.loads(record.contract_json)
     raw = {k: v for k, v in artifact.items() if k != "content_hash"}
+    validated = INPUTS[kind].model_validate(artifact["proposal"]).model_dump()
+    # Preserve pre-C18.5 immutable profiles byte for byte. The new optional
+    # setting is absent in those contracts, rather than retroactively null.
+    if kind == "profile" and "duration_doubling_slowdown_pct" not in artifact["proposal"]["data"]:
+        validated["data"].pop("duration_doubling_slowdown_pct", None)
     if not (
         record.athlete_id == owner
         and artifact["athlete_id"] == owner
@@ -107,7 +112,7 @@ def decode(record, *, owner, kind):
         and canonical_json(artifact) == record.contract_json
         and artifact["planning_authorized"] is False
         and artifact["workouts_created"] is False
-        and INPUTS[kind].model_validate(artifact["proposal"]).model_dump() == artifact["proposal"]
+        and validated == artifact["proposal"]
     ):
         raise SetupStorageError("Athlete artifact metadata differs.")
     if kind != "polar_import":

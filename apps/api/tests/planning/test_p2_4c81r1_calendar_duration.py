@@ -31,7 +31,7 @@ def agenda(tmp_path, monkeypatch):
             distance_m=6000, duration_sec=None, source='POLAR', raw_data={'provider_duration':None}),
             WorkoutSession(id=UUID(OBSERVATION), user_id=UUID(ATHLETE), external_id='personal-6km', sport=Sport.KAYAK,
             started_at=datetime(2026,10,26,5,tzinfo=UTC), ended_at=datetime(2026,10,26,5,33,20,tzinfo=UTC),
-            duration_sec=2000, distance_m=6000, raw_data={'measured':True})]); db.commit()
+            duration_sec=2000, distance_m=6000, created_at=NOW, raw_data={'measured':True})]); db.commit()
     r = env.client.post(BASE+'/constraints',json=body(rules=[rule(start_date='2026-10-26', weekdays=[1,3],details=details(start_time='08:00',end_time='17:00'))]))
     assert r.status_code==201,r.text
     try: yield env
@@ -58,7 +58,8 @@ def test_scaling_and_robust_center_keep_atypical_observation_without_using_it():
     e=estimate([observation(82003,2000),observation(82004,2100),observation(82005,18000)])
     assert e['duration_sec']==2050 and e['sample_count']==2 and len(e['samples'])==3
     assert not next(s for s in e['samples'] if s['session_id']==str(UUID(int=82005)))['used']
-    assert estimate([observation(distance=6600,seconds=2200)])['duration_sec']==2000
+    e = estimate([observation(distance=6600,seconds=2200)])
+    assert e['duration_sec'] == round(2200 * (6000 / 6600) ** e['exponent'])
 def test_two_strongly_different_samples_are_insufficient():
     assert estimate([observation(82003,2000),observation(82004,9000)]) is None
 def test_recent_candidate_cap_is_explicit_and_order_independent():

@@ -42,7 +42,7 @@ def segmented_agenda(tmp_path, monkeypatch):
         for i, (start, end, distance, duration) in enumerate(HISTORY):
             db.add(WorkoutSession(id=UUID(int=85000+i), user_id=UUID(ATHLETE), external_id=f"segmented-{i}",
                 sport=Sport.KAYAK, started_at=datetime.fromisoformat(start), ended_at=datetime.fromisoformat(end),
-                distance_m=distance, duration_sec=duration, raw_data={"fixture": True}))
+                distance_m=distance, duration_sec=duration, created_at=datetime(2026, 10, 26, 10, tzinfo=UTC), raw_data={"fixture": True}))
         for i, (kind, distance, name, lower) in enumerate([
             (BlockType.WARMUP, 1000, "Warm Up 1km", 1),
             (BlockType.WORK, 2000, "2km upwards", 2),
@@ -65,7 +65,7 @@ def target(env):
 def test_segmented_target_receives_same_transparent_estimate_in_feed_and_conflicts(segmented_agenda):
     p = target(segmented_agenda)
     e = p["duration_estimate"]
-    assert e is not None and (e["duration_sec"], e["lower_sec"], e["upper_sec"]) == (2120, 1680, 2580)
+    assert e is not None and (e["duration_sec"], e["lower_sec"], e["upper_sec"]) == (2122, 1620, 2580)
     assert len(e["samples"]) == 12 and e["sample_count"] == 10
     assert len(p["blocks"]) == 3 and sum(b["distance_m"] for b in p["blocks"]) == 6000
     assert p["duration_sec"] is None and all(b["duration_sec"] is None for b in p["blocks"])

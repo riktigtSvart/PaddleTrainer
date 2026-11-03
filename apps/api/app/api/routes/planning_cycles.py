@@ -252,3 +252,19 @@ async def revise_boundary(payload: BoundaryRevisionInput, response: Response, db
     )
     response.status_code = 200 if result["reused"] else 201
     return result
+
+
+@router.get("/programs/{identity}/planning-inputs")
+async def planning_inputs(identity: Identity, db: DB, owner: Owner,
+    start_date: Annotated[str | None, Query(pattern=r"^\d{4}-\d{2}-\d{2}$")] = None,
+    end_date: Annotated[str | None, Query(pattern=r"^\d{4}-\d{2}-\d{2}$")] = None):
+    from app.services import planning_inputs as inputs
+    _fresh(db)
+    try:
+        return await inputs.capture(owner=owner,identity=identity,session=db,first=start_date,last=end_date)
+    except inputs.PlanningInputError as exc:
+        raise error(409,str(exc)) from None
+    except service.CycleNotFound:
+        raise error(404,"CYCLE_PROGRAM_NOT_FOUND") from None
+    except (domain.CycleRuleError, service.CycleStorageError, RuntimeError, ValueError, LookupError, TypeError):
+        raise error(503,"PLANNING_INPUT_SOURCE_UNAVAILABLE") from None

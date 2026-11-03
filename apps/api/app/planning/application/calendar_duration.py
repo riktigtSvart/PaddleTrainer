@@ -8,6 +8,8 @@ from sqlalchemy import select
 
 from app.models.entities import WorkoutSession, WorkoutStatus
 from app.planning.domain import calendar_duration as domain
+from app.planning.application import register_athlete_setup as setup
+from app.planning.infrastructure.repositories.postgres_planning_audit import SqlAlchemyPlanningAuditRepository
 from app.planning.infrastructure.adapters.athlete_history import aware
 
 HISTORY_LIMIT = 4000
@@ -56,11 +58,19 @@ async def project(*, owner, plans, session, now, zone):
         return {}  # No inference from silently truncated history.
     observations = [{"id": str(s.id), "sport": s.sport.value, "started_at": aware(s.started_at).isoformat(),
         "ended_at": aware(s.ended_at).isoformat() if s.ended_at else None,
-        "duration_sec": s.duration_sec, "distance_m": s.distance_m} for s in rows]
+        "duration_sec": s.duration_sec, "distance_m": s.distance_m,
+        "available_at": aware(s.created_at).isoformat()} for s in rows]
+    profile = await setup.latest(SqlAlchemyPlanningAuditRepository(session), session, owner, "profile")
     result = {}
     for p in eligible:
+        setting, coefficient_ref = domain.DEFAULT_SLOWDOWN_PCT, None
+        if profile and aware(profile[1].persisted_at) <= cutoffs[str(p.id)]:
+            value = profile[0]["proposal"]["data"].get("duration_doubling_slowdown_pct")
+            if value is not None and domain.profile_matches_sport(profile[0]["proposal"]["data"]["target_sport"], p.sport.value):
+                setting, coefficient_ref = value, setup.domain.reference(profile[0])
         item = domain.estimate(owner=owner, plan_id=str(p.id), sport=p.sport.value, distance_m=p.distance_m,
-            cutoff=cutoffs[str(p.id)], observations=observations)
+            cutoff=cutoffs[str(p.id)], observations=observations,
+            doubling_slowdown_pct=setting, coefficient_profile_reference=coefficient_ref)
         if item:
             result[str(p.id)] = item
     return result

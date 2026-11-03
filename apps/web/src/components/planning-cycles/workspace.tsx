@@ -1,4 +1,6 @@
 "use client";
+import { PlanningInputPanel } from "./planning-inputs";
+import { TrainingPlanPanel } from "./training-plan";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -106,7 +108,10 @@ function emptyProgram(
   };
 }
 
-export default function CycleWorkspace() {
+export default function CycleWorkspace({
+  creationOnly = false,
+  onSelected,
+}: { creationOnly?: boolean; onSelected?: (value: Detail) => void } = {}) {
   const [athleteRefs, setAthleteRefs] = useState<Program["athlete_context"]>();
   const [catalog, setCatalog] = useState<Catalog | null>(null),
     [history, setHistory] = useState<Receipt[]>([]);
@@ -376,6 +381,7 @@ export default function CycleWorkspace() {
       const result = await loadDetail(id);
       if (sequence === detailSequence.current) {
         setDetail(result);
+        onSelected?.(result);
         setFailure("");
       }
     } catch (e) {
@@ -1041,9 +1047,57 @@ export default function CycleWorkspace() {
               </button>
             )}
           </Card>
-          {detail && (
+          {detail && creationOnly && (
+            <Card title="Kiválasztott felkészülés">
+              <ProgramSummary
+                value={detail.program.artifact.proposal}
+                labels={catalog.goals}
+              />
+              <p>
+                A fejlesztési stratégia és a konkrét edzésterv a következő
+                tervezési lépésekben folytatható.
+              </p>
+            </Card>
+          )}
+          {detail && !creationOnly && (
             <Card title="A kiválasztott felkészülés">
               <div className="space-y-6">
+                <TrainingPlanPanel
+                  key={`training:${detail.program.artifact.artifact_id}:${detail.boundary_revisions.at(-1)?.artifact.content_hash ?? "base"}:${detail.competition_revisions.at(-1)?.artifact.content_hash ?? "base"}`}
+                  owner={detail.program.artifact.athlete_id}
+                  reference={{
+                    artifact_id: detail.program.artifact.artifact_id,
+                    content_hash: detail.program.artifact.content_hash,
+                  }}
+                  zone={catalog.timezone_name}
+                  today={catalog.local_today}
+                  initialDate={
+                    detail.program.artifact.proposal.start_date >
+                    catalog.local_today
+                      ? detail.program.artifact.proposal.start_date
+                      : catalog.local_today
+                  }
+                  periods={
+                    detail.boundary_revisions.at(-1)?.artifact.periods ??
+                    detail.program.artifact.periods
+                  }
+                />
+                <PlanningInputPanel
+                  key={`${detail.program.artifact.artifact_id}:${detail.boundary_revisions.at(-1)?.artifact.content_hash ?? "base"}:${detail.competition_revisions.at(-1)?.artifact.content_hash ?? "base"}`}
+                  initialDate={
+                    detail.program.artifact.proposal.start_date >
+                    catalog.local_today
+                      ? detail.program.artifact.proposal.start_date
+                      : catalog.local_today
+                  }
+                  owner={detail.program.artifact.athlete_id}
+                  reference={{
+                    artifact_id: detail.program.artifact.artifact_id,
+                    content_hash: detail.program.artifact.content_hash,
+                  }}
+                  zone={catalog.timezone_name}
+                  today={catalog.local_today}
+                />
                 <ProgramSummary
                   value={{
                     ...detail.program.artifact.proposal,

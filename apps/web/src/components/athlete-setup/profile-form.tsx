@@ -10,15 +10,20 @@ import type {
   SportHistory,
   Constraint,
 } from "@/lib/athlete-setup/contracts";
+import { useState } from "react";
+import Link from "next/link";
 export default function ProfileForm({
   value,
   onChange,
   today,
+  planning = false,
 }: {
   value: Profile;
   onChange: (v: Profile) => void;
   today: string;
+  planning?: boolean;
 }) {
+  const [resourceText, setResourceText] = useState(value.resources.join(", "));
   const edit = (p: Partial<Profile>) => onChange({ ...value, ...p });
   const sport = (i: number, p: Partial<SportHistory>) =>
     edit({
@@ -33,11 +38,28 @@ export default function ProfileForm({
       ),
     });
   return (
-    <div className="space-y-7">
+    <div className={`space-y-7${planning ? " pt-profile-planning" : ""}`}>
+      {planning ? (
+        <p className="pt-options-meta">
+          Itt a személyes alapadatokat, sporttapasztalatot és a mozgást érintő
+          kereteket add meg. A helyszíneket és az időbeosztást a következő
+          lépésekben állíthatod be.
+        </p>
+      ) : (
+        <div className="rounded-xl bg-teal-500/10 p-4 text-sm leading-6">
+          <p className="font-semibold">1. Ismerjük meg a kiindulópontodat</p>
+          <p>
+            A kezdőtervhez az életkor, a célsport, a sportmúlt, a részvételi
+            keret és az elérhető eszközök szükségesek. Minden bizonytalan
+            választ külön jelezhetsz; mentés után megmutatjuk, mit kell még
+            tisztázni.
+          </p>
+        </div>
+      )}
       <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className="mb-3 font-semibold">Alapadatok</legend>
         <Field
-          label="Születési dátum (ha ismert)"
+          label="Születési dátum · a kezdőtervhez szükséges"
           name="birth_date"
           type="date"
           max={today}
@@ -71,13 +93,15 @@ export default function ProfileForm({
           value={value.target_sport}
           onChange={(e) => edit({ target_sport: e.target.value })}
         />
-        <Field
-          label="Versenykategória (opcionális)"
-          name="competition_category"
-          maxLength={200}
-          value={value.competition_category}
-          onChange={(e) => edit({ competition_category: e.target.value })}
-        />
+        {!planning && (
+          <Field
+            label="Versenykategória (opcionális)"
+            name="competition_category"
+            maxLength={200}
+            value={value.competition_category}
+            onChange={(e) => edit({ competition_category: e.target.value })}
+          />
+        )}
       </fieldset>
       <fieldset className="space-y-4">
         <legend className="mb-3 font-semibold">Sportmúlt, sportáganként</legend>
@@ -409,19 +433,33 @@ export default function ProfileForm({
             </option>
           ))}
         </Select>
-        <Area
-          label="Az app használatához szükséges hozzáférési segítség (opcionális)"
-          maxLength={2000}
-          value={value.accessibility_needs}
-          onChange={(e) => edit({ accessibility_needs: e.target.value })}
-        />
+        {!planning && (
+          <Area
+            label="Az app használatához szükséges hozzáférési segítség (opcionális)"
+            maxLength={2000}
+            value={value.accessibility_needs}
+            onChange={(e) => edit({ accessibility_needs: e.target.value })}
+          />
+        )}
       </fieldset>
       <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className="mb-3 font-semibold">
-          Gyakorlati és regenerációs háttér
+          {planning
+            ? "Heti edzési keret és visszatérés"
+            : "Gyakorlati és regenerációs háttér"}
         </legend>
+        {planning && (
+          <p className="pt-options-meta sm:col-span-2">
+            A teljes hétre szánt összesített edzésmennyiséget add meg. A
+            napokra bontott időablakokat az Általános órarend tartalmazza.
+          </p>
+        )}
         <Field
-          label="Általában hány napon tudsz edzeni hetente? (ha ismert)"
+          label={
+            planning
+              ? "Hetente legfeljebb hány napon szeretnél edzeni?"
+              : "Általában hány napon tudsz edzeni hetente? (ha ismert)"
+          }
           type="number"
           min={0}
           max={7}
@@ -435,7 +473,11 @@ export default function ProfileForm({
           }
         />
         <Field
-          label="Szokásos heti időkeret, percben (ha ismert)"
+          label={
+            planning
+              ? "Heti összesített edzésidőkeret, percben · ha ismert"
+              : "Szokásos heti időkeret, percben (ha ismert)"
+          }
           type="number"
           min={0}
           max={10080}
@@ -466,23 +508,126 @@ export default function ProfileForm({
           value={value.last_training_date ?? ""}
           onChange={(e) => edit({ last_training_date: e.target.value || null })}
         />
-        <Field
-          label="Általában elérhető eszközök, helyszínek (vesszővel elválasztva)"
-          defaultValue={value.resources.join(", ")}
-          onChange={(e) => edit({ resources: list(e.target.value) })}
-        />
-        <Area
-          label="Alvás, munka, stressz és regeneráció körülményei (opcionális)"
-          maxLength={2000}
-          value={value.recovery_notes}
-          onChange={(e) => edit({ recovery_notes: e.target.value })}
-        />
+        {!planning && (
+          <>
+            <Field
+              label="Általában elérhető eszközök, helyszínek (vesszővel elválasztva)"
+              placeholder="Például: kajak, kézisúlyzó"
+              value={resourceText}
+              onChange={(e) => {
+                setResourceText(e.target.value);
+                edit({ resources: list(e.target.value) });
+              }}
+            />
+            <div className="space-y-2 text-sm sm:col-span-2">
+              <p>
+                Csak a ténylegesen hozzáférhető eszközöket jelöld. Ezeket
+                használjuk az általános edzéslehetőségeknél.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {["kajak", "kajakergométer", "kézisúlyzó"].map((resource) => (
+                  <button
+                    type="button"
+                    className={secondaryClass}
+                    key={resource}
+                    aria-pressed={value.resources.some(
+                      (r) => r.toLocaleLowerCase("hu") === resource,
+                    )}
+                    onClick={() => {
+                      const resources = value.resources.some(
+                        (r) => r.toLocaleLowerCase("hu") === resource,
+                      )
+                        ? value.resources.filter(
+                            (r) => r.toLocaleLowerCase("hu") !== resource,
+                          )
+                        : [...value.resources, resource];
+                      setResourceText(resources.join(", "));
+                      edit({ resources });
+                    }}
+                  >
+                    {value.resources.some(
+                      (r) => r.toLocaleLowerCase("hu") === resource,
+                    )
+                      ? "✓ "
+                      : "+ "}
+                    {resource}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </fieldset>
-      <p className="text-sm text-zinc-400">
-        A közelmúlt edzéseit, alvását, lépéseit, pulzusát és kiinduló méréseit a
-        „Mérések és órás adatok” részen veheted át vagy írhatod be kézzel. A
-        felmérés önbevallott tervezési keret, nem orvosi engedély.
-      </p>
+      <details className="pt-profile-extras" open={planning ? undefined : true}>
+        <summary>Becslés és további személyes adatok · opcionális</summary>
+        <div className="grid gap-4 sm:grid-cols-2 mt-4">
+          {planning && (
+            <>
+              <Field
+                label="Versenykategória (opcionális)"
+                name="competition_category"
+                maxLength={200}
+                value={value.competition_category}
+                onChange={(e) => edit({ competition_category: e.target.value })}
+              />
+              <Area
+                label="Az app használatához szükséges hozzáférési segítség (opcionális)"
+                maxLength={2000}
+                value={value.accessibility_needs}
+                onChange={(e) => edit({ accessibility_needs: e.target.value })}
+              />
+            </>
+          )}
+          <Field
+            label="Célsportodnál távduplázáskor feltételezett többlet (%) · opcionális"
+            type="number"
+            min={0}
+            max={20}
+            step={1}
+            placeholder="5"
+            value={value.duration_doubling_slowdown_pct ?? ""}
+            onChange={(e) =>
+              edit({
+                duration_doubling_slowdown_pct:
+                  e.target.value === "" ? null : Number(e.target.value),
+              })
+            }
+          />
+          <p className="text-sm leading-6 text-zinc-400">
+            Üresen 5%-kal indulunk: kétszeres távhoz 2 × 1,05 idő. Ez
+            módosítható tervezési feltételezés. A mentett érték a célsporthoz és
+            az adott profilváltozathoz tartozik; a becslés forrásánál
+            megmutatjuk, melyiket használtuk. A többi sportág az 5%-os
+            alapértéket használja.
+          </p>
+          <Area
+            label="Alvás, munka, stressz és regeneráció körülményei (opcionális)"
+            maxLength={2000}
+            value={value.recovery_notes}
+            onChange={(e) => edit({ recovery_notes: e.target.value })}
+          />
+        </div>
+      </details>
+      {planning ? (
+        <p className="pt-options-meta">
+          A méréseket és a testsúlyadatokat az Előzmények és kiindulópont
+          lépésben adhatod meg. A felszerelést a{" "}
+          <Link className="underline" href="/training-options/locations">
+            helyszíneknél
+          </Link>
+          , az időbeosztást az{" "}
+          <Link className="underline" href="/training-options/schedule">
+            általános órarendben
+          </Link>{" "}
+          állíthatod be.
+        </p>
+      ) : (
+        <p className="text-sm text-zinc-400">
+          A közelmúlt edzéseit, alvását, lépéseit, pulzusát és kiinduló méréseit
+          a „Mérések és órás adatok” részen veheted át vagy írhatod be kézzel. A
+          felmérés önbevallott tervezési keret, nem orvosi engedély.
+        </p>
+      )}
     </div>
   );
 }

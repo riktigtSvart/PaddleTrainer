@@ -9,11 +9,20 @@ from sqlalchemy import and_, exists, extract, func, or_, select
 from sqlalchemy.orm import selectinload
 
 from app.models.entities import PlannedWorkout, User, WorkoutSession, WorkoutStatus
-from app.planning.application import register_athlete_setup as setup
 from app.planning.application import calendar_duration
-from app.planning.domain import athlete_setup, calendar_constraints as domain
-from app.planning.domain.common.serialization import CONTENT_HASH_ALGORITHM, canonical_json, compute_content_hash
-from app.planning.domain.persistence.audit import AuditArtifactKind, AuditArtifactRecord, AuditArtifactSaveStatus
+from app.planning.application import register_athlete_setup as setup
+from app.planning.domain import athlete_setup
+from app.planning.domain import calendar_constraints as domain
+from app.planning.domain.common.serialization import (
+    CONTENT_HASH_ALGORITHM,
+    canonical_json,
+    compute_content_hash,
+)
+from app.planning.domain.persistence.audit import (
+    AuditArtifactKind,
+    AuditArtifactRecord,
+    AuditArtifactSaveStatus,
+)
 from app.planning.infrastructure.adapters.athlete_history import aware
 from app.planning.infrastructure.persistence.sqlalchemy_models import PlanningAuditArtifactRow
 from app.schemas.calendar_constraints import ScheduleInput
@@ -185,17 +194,29 @@ async def projected(*, owner, repository, session, first, last, proposal=None, a
         rows = [p for p in rows if calendar_duration.reaches_view(p, a, b, low, high, estimates.get(str(p.id)))]
         estimates = {str(p.id): estimates[str(p.id)] for p in rows if str(p.id) in estimates}
         plans = [{"id": str(p.id), "title": p.title,
+            "sport": p.sport.value,
             "date": aware(p.planned_start_time).astimezone(ZoneInfo(user.timezone)).date().isoformat() if p.planned_start_time else p.date.isoformat(),
             "start_at": aware(p.planned_start_time).isoformat() if p.planned_start_time else None,
             "duration_sec": p.duration_sec, "duration_estimate": estimates.get(str(p.id))} for p in rows]
-        groups = domain.opportunities(calendar, occurrences, first, last, user.timezone)
+        from app.planning.domain import training_options as location_domain
+        from app.services import training_options
+        options = await training_options.latest(repository, session, owner)
+        location_projection = location_domain.expand(options[0]["proposal"]["data"], first, last, user.timezone) if options else {"occurrences": [], "override_days": []}
+        groups = domain.opportunities(calendar, occurrences + location_projection["occurrences"], first, last, user.timezone)
+        # A declared current opportunity replaces the old general day, rather than
+        # leaving an unrestricted fallback that could bypass the selected venues.
+        groups = [group for group in groups if group["source_date"] not in location_projection["override_days"] or group["source"] == "training_options"]
         domain.require(len(groups) <= domain.MAX_OCCURRENCES, "CALENDAR_CONSTRAINT_RANGE_TOO_DENSE")
-        zone_review = state["timezone_name"] != user.timezone or calendar is not None and calendar["timezone_name"] != user.timezone
+        zone_review = state["timezone_name"] != user.timezone or calendar is not None and calendar["timezone_name"] != user.timezone or options is not None and options[0]["proposal"]["data"]["timezone_name"] != user.timezone
         if zone_review:
             for group in groups:
                 group.update(known=False, usable_minutes=None, intervals=[])
         impacts = domain.conflicts(plans, occurrences)
-        impacts += domain.opportunity_conflicts(plans, groups, calendar, {c["plan_id"] for c in impacts if c["severity"] == "fixed"})
+        impact_days = {day["date"]: day for day in calendar["days"]} if calendar else {}
+        for day in location_projection["override_days"]:
+            if not any(group["source_date"] == day for group in groups):
+                impact_days[day] = {"date": day, "status": "unavailable"}
+        impacts += domain.opportunity_conflicts(plans, groups, {"days": list(impact_days.values())}, {c["plan_id"] for c in impacts if c["severity"] == "fixed"})
         domain.require(len(impacts) <= domain.MAX_OCCURRENCES, "CALENDAR_CONSTRAINT_RANGE_TOO_DENSE")
         return {**({"_plan_timings": plans} if include_timings else {}), "schema_version": SCHEMA, "athlete_id": owner, "timezone_name": user.timezone,
             "local_today": today.isoformat(), "start_date": first, "end_date": last,
@@ -204,6 +225,7 @@ async def projected(*, owner, repository, session, first, last, proposal=None, a
             "availability": setup.receipt(*availability, True) if availability else None,
             "occurrences": occurrences, "conflicts": impacts,
             "duration_estimates": estimates,
+            **({"training_options_reference": training_options.reference(options[0]), "training_options_available_at": options[1].persisted_at.isoformat(), "training_options_override_days": location_projection["override_days"], "training_options_schedule_start_date": options[0]["proposal"]["data"]["schedule_start_date"], "training_options_schedule_end_date": options[0]["proposal"]["data"]["schedule_end_date"]} if options else {}),
             "opportunities": groups, "timezone_review_required": bool(zone_review),
             "proposal_hash": digest(proposal) if proposal else None,
             "availability_proposal_hash": digest(availability_proposal) if availability_proposal else None,

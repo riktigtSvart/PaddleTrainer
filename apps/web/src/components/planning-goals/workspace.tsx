@@ -245,6 +245,7 @@ export default function GoalWorkspace({
           ? "A korábban mentett, azonos kérés eredménye visszaállítva."
           : "A szerver igazolta a tartós mentést. Az eredmény megjelent az előzményekben.",
       );
+      window.dispatchEvent(new Event(LOCAL_REFRESH_EVENT));
     } catch (error) {
       setFailure(
         error instanceof Error
@@ -322,9 +323,11 @@ export default function GoalWorkspace({
   const locked = busy || pending !== null;
   const period = loaded?.periods.find((p) => p.id === periodId);
   const macroItems = loaded?.pages["macrocycle-plans"].items as
-    Receipt<MacroArtifact>[] | undefined;
+    | Receipt<MacroArtifact>[]
+    | undefined;
   const protocolItems = loaded?.pages["mesocycle-protocols"].items as
-    Receipt<ProtocolArtifact>[] | undefined;
+    | Receipt<ProtocolArtifact>[]
+    | undefined;
   const macroOptions =
     macroItems?.filter((item) =>
       item.artifact.sources.mesocycles.some((p) => p.period_id === periodId),
@@ -612,6 +615,22 @@ export default function GoalWorkspace({
                     key={periodId + (base?.artifact.artifact_id ?? "new")}
                     catalog={loaded.catalog}
                     suggestedCapabilities={suggestedCapabilities}
+                    cycle={
+                      cycleContext
+                        ? {
+                            owner: cycleContext.program.artifact.athlete_id,
+                            reference: cycleContext.program.artifact,
+                            zone: cycleContext.program.artifact.timezone_name,
+                            today: new Intl.DateTimeFormat("en-CA", {
+                              timeZone:
+                                cycleContext.program.artifact.timezone_name,
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }).format(new Date()),
+                          }
+                        : undefined
+                    }
                     period={period}
                     periods={loaded.periods}
                     base={base as Receipt<MacroArtifact> | undefined}

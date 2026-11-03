@@ -1,0 +1,2779 @@
+{
+  "review": {
+    "artifact_id": "pt-training-plan:b522422001fb5aa407aeb3ddc400ca5c80aa6cfa6810a9e1395d4af9423dcb8f",
+    "program_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+    "created_at": "2026-10-23T10:00:00.000015+00:00",
+    "previous_reference": null,
+    "decision_key": "3fa1c577371678ea35cd9beef36af7e78ae9b0691f4f69ca1d6918b18e216d46",
+    "start_date": "2026-10-24",
+    "end_date": "2026-10-29",
+    "timezone_name": "Europe/Budapest",
+    "active_window_end": null,
+    "program_reference": {
+      "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+      "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5"
+    },
+    "inputs": {
+      "schema_version": "planning-inputs-v0.1",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "program_reference": {
+        "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+        "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5"
+      },
+      "captured_at": "2026-10-23T10:00:00.000011+00:00",
+      "timezone_name": "Europe/Budapest",
+      "start_date": "2026-10-24",
+      "end_date": "2026-10-29",
+      "periods": [
+        {
+          "end_date": "2027-01-14",
+          "id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "key": "macro-1",
+          "parent_id": null,
+          "period_type": "MACROCYCLE",
+          "start_date": "2026-10-23",
+          "title": "Első makrociklus"
+        },
+        {
+          "end_date": "2026-11-19",
+          "id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "key": "m0",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-10-23",
+          "title": "Felülvizsgálandó blokk"
+        },
+        {
+          "end_date": "2026-12-17",
+          "id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+          "key": "m1",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-11-20",
+          "title": "Felülvizsgálandó blokk"
+        },
+        {
+          "end_date": "2027-01-14",
+          "id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+          "key": "m2",
+          "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "period_type": "MESOCYCLE",
+          "start_date": "2026-12-18",
+          "title": "Felülvizsgálandó blokk"
+        }
+      ],
+      "competitions": [],
+      "declared_goals": [
+        {
+          "key": "regular_activity",
+          "target_description": "Heti három alkalom"
+        }
+      ],
+      "program_sport": "Kajak",
+      "goal_versions": [
+        {
+          "kind": "macrocycle_capability_plan",
+          "period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "artifact": {
+            "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77",
+            "schema_version": "macrocycle-capability-plan-v0.1",
+            "rules_version": "explicit-cycle-goal-rules-v0.1",
+            "athlete_id": "11111111-1111-4111-8111-111111111111",
+            "catalog_version": "capability-measurement-catalog-v0.1",
+            "catalog_content_hash": "596c5f97a1420090eb52222600629efb91fd1207f71eb61b7554cb8c040310bf",
+            "proposal": {
+              "macrocycle_period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "revision": 1,
+              "supersedes": null,
+              "goals": [
+                {
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                }
+              ],
+              "mesocycle_directives": [
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "TECHNICAL_SKILL",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                },
+                {
+                  "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "capability_key": "MAX_STRENGTH",
+                  "role": "primary_development",
+                  "rationale": "explicit"
+                }
+              ],
+              "rationale": "test"
+            },
+            "sources": {
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "timezone_name": "Europe/Budapest",
+              "hierarchy": [
+                {
+                  "period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": null,
+                  "period_type": "MACROCYCLE",
+                  "title": "Első makrociklus",
+                  "start_date": "2026-10-23",
+                  "end_date": "2027-01-14",
+                  "legacy_objectives": []
+                }
+              ],
+              "mesocycles": [
+                {
+                  "period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-10-23",
+                  "end_date": "2026-11-19",
+                  "legacy_objectives": []
+                },
+                {
+                  "period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-11-20",
+                  "end_date": "2026-12-17",
+                  "legacy_objectives": []
+                },
+                {
+                  "period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                  "athlete_id": "11111111-1111-4111-8111-111111111111",
+                  "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+                  "period_type": "MESOCYCLE",
+                  "title": "Felülvizsgálandó blokk",
+                  "start_date": "2026-12-18",
+                  "end_date": "2027-01-14",
+                  "legacy_objectives": []
+                }
+              ]
+            },
+            "previous_source": null,
+            "unassigned_capability_keys": [
+              "VO2_CAPACITY",
+              "PADDLING_ECONOMY",
+              "POWER_RFD",
+              "MUSCULOSKELETAL_ROBUSTNESS",
+              "TECHNICAL_STABILITY_UNDER_FATIGUE",
+              "LONG_DURATION_DURABILITY",
+              "PACING_COMPETENCE",
+              "SPRINT_SPEED_AND_START",
+              "MUSCULAR_ENDURANCE",
+              "HIGH_INTENSITY_AND_ANAEROBIC_PROFILE"
+            ],
+            "authority": {
+              "shadow_only": true,
+              "capability_change_established": false,
+              "physiological_adaptation_established": false,
+              "comparative_utility_endpoint_preregistered": false,
+              "planning_utility_supported": false,
+              "causal_attribution_established": false,
+              "planning_authorized": false,
+              "planner_runtime_modified": false
+            },
+            "created_at": "2026-10-23T10:00:00.000005Z",
+            "content_hash_algorithm": "sha256-canonical-json-v0.1",
+            "content_hash": "6b5cdff6efca46aeaa73b3989d5f45b235dde37d5ee376df7cfa19b996261569"
+          },
+          "available_at": "2026-10-23T10:00:00.000006+00:00"
+        }
+      ],
+      "profile": {
+        "reference": {
+          "artifact_id": "pt-athlete:9bd81dadf624892195a5bbad910725326f969ad62dbb27be16159de2c22c3603",
+          "content_hash": "de3b95311c76a0cdb151c93509a4ab269eae66f8f71313e9615d9114514cd841",
+          "available_at": "2026-10-23T10:00:00.000009+00:00"
+        },
+        "data": {
+          "accessibility_needs": "",
+          "birth_date": "1982-05-30",
+          "competition_category": "",
+          "constraint_status": "none_known",
+          "constraints": [],
+          "duration_doubling_slowdown_pct": null,
+          "interruption": "none",
+          "last_training_date": null,
+          "manual_observations": [],
+          "participation": "unrestricted",
+          "recovery_notes": "",
+          "resources": [
+            "kajak"
+          ],
+          "sex_reference": "female",
+          "source_selections": [],
+          "source_window": null,
+          "sport_history": [
+            {
+              "current": true,
+              "discipline": "Síkvíz",
+              "last_active_date": null,
+              "level": "professional",
+              "notes": "",
+              "sport": "Kajak",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            }
+          ],
+          "sport_history_status": "recorded",
+          "target_sport": "Kajak",
+          "typical_days_per_week": 6,
+          "typical_minutes_per_week": 450
+        }
+      },
+      "calendar_reference": null,
+      "availability_reference": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "content_hash": "25eb55be6540a643f1d2f24005c240aa2cd8927a94f4618ad2d6be0b6dac88f8"
+      },
+      "boundary_reference": null,
+      "competition_reference": null,
+      "days": [
+        {
+          "date": "2026-10-24",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-24:morning",
+              "source_date": "2026-10-24",
+              "start_at": "2026-10-24T06:00:00+00:00",
+              "end_at": "2026-10-24T08:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-24T06:00:00+00:00",
+                  "end_at": "2026-10-24T08:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-25",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-25:morning",
+              "source_date": "2026-10-25",
+              "start_at": "2026-10-25T07:00:00+00:00",
+              "end_at": "2026-10-25T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-25T07:00:00+00:00",
+                  "end_at": "2026-10-25T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-26",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-26:morning",
+              "source_date": "2026-10-26",
+              "start_at": "2026-10-26T07:00:00+00:00",
+              "end_at": "2026-10-26T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-26T07:00:00+00:00",
+                  "end_at": "2026-10-26T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-27",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-27:morning",
+              "source_date": "2026-10-27",
+              "start_at": "2026-10-27T07:00:00+00:00",
+              "end_at": "2026-10-27T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-27T07:00:00+00:00",
+                  "end_at": "2026-10-27T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-28",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-28:morning",
+              "source_date": "2026-10-28",
+              "start_at": "2026-10-28T07:00:00+00:00",
+              "end_at": "2026-10-28T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-28T07:00:00+00:00",
+                  "end_at": "2026-10-28T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        },
+        {
+          "date": "2026-10-29",
+          "availability_state": "opportunities",
+          "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_roles": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "TECHNICAL_SKILL",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "MAX_STRENGTH",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "opportunities": [
+            {
+              "key": "legacy:2026-10-29:morning",
+              "source_date": "2026-10-29",
+              "start_at": "2026-10-29T07:00:00+00:00",
+              "end_at": "2026-10-29T09:00:00+00:00",
+              "max_minutes": 90,
+              "source": "athlete_availability",
+              "daily_max_minutes": 90,
+              "constraints": {
+                "sport_scope": "specified",
+                "sports": [
+                  "Kajak",
+                  "Erőnlét"
+                ],
+                "effort_cap": "moderate",
+                "resources": [
+                  "Kajak",
+                  "Kézisúlyzó"
+                ],
+                "location": "Otthon"
+              },
+              "known": true,
+              "usable_minutes": 90,
+              "intervals": [
+                {
+                  "start_at": "2026-10-29T07:00:00+00:00",
+                  "end_at": "2026-10-29T09:00:00+00:00"
+                }
+              ]
+            }
+          ],
+          "daily_max_minutes": 90
+        }
+      ],
+      "existing_plans": [
+        {
+          "timing": {
+            "id": "00000000-0000-0000-0000-00000002d62d",
+            "title": "9km folyamatos evezés",
+            "date": "2026-10-24",
+            "start_at": "2026-10-24T06:00:00+00:00",
+            "duration_sec": null,
+            "duration_estimate": {
+              "schema_version": "calendar-duration-estimate-v0.2",
+              "method": "personal_power_law_median_v1",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "plan_id": "00000000-0000-0000-0000-00000002d62d",
+              "sport": "KAYAK",
+              "distance_m": "9000.0",
+              "as_of": "2026-10-23T10:00:00.000012+00:00",
+              "lookback_days": 90,
+              "candidate_limit": 12,
+              "duration_sec": 3087,
+              "lower_sec": 2580,
+              "upper_sec": 3600,
+              "sample_count": 1,
+              "samples": [
+                {
+                  "session_id": "00000000-0000-0000-0000-00000002c113",
+                  "started_at": "2026-10-21T06:00:00+00:00",
+                  "ended_at": "2026-10-21T06:33:20+00:00",
+                  "distance_m": "6000.0",
+                  "elapsed_sec": "2000.0",
+                  "basis": "elapsed",
+                  "projected_sec": "3086.854789673045",
+                  "used": true
+                }
+              ],
+              "range_is_calibrated": false,
+              "doubling_slowdown_pct": 5,
+              "exponent": "1.070389327891",
+              "coefficient_source": "planning_default",
+              "coefficient_profile_reference": null,
+              "extrapolated": true,
+              "max_distance_ratio": 2,
+              "conditions_verified": false,
+              "personal_coefficient_fitted": false
+            }
+          },
+          "workout": {
+            "id": "00000000-0000-0000-0000-00000002d62d",
+            "date": "2026-10-24",
+            "planned_start_time": "2026-10-24T06:00:00",
+            "sport": "KAYAK",
+            "title": "9km folyamatos evezés",
+            "description": null,
+            "duration_sec": null,
+            "distance_m": "9000.0",
+            "intensity_type": null,
+            "status": "PLANNED",
+            "source": "POLAR",
+            "polar_target_id": null,
+            "training_period_id": null,
+            "blocks": []
+          },
+          "authority_status": "current_application_projection_not_authoritative_revision"
+        },
+        {
+          "timing": {
+            "id": "00000000-0000-0000-0000-00000002d62e",
+            "title": "Pontosítandó edzés",
+            "date": "2026-10-26",
+            "start_at": "2026-10-26T06:00:00+00:00",
+            "duration_sec": null,
+            "duration_estimate": null
+          },
+          "workout": {
+            "id": "00000000-0000-0000-0000-00000002d62e",
+            "date": "2026-10-26",
+            "planned_start_time": "2026-10-26T06:00:00",
+            "sport": "OTHER",
+            "title": "Pontosítandó edzés",
+            "description": null,
+            "duration_sec": null,
+            "distance_m": null,
+            "intensity_type": null,
+            "status": "PLANNED",
+            "source": "POLAR",
+            "polar_target_id": null,
+            "training_period_id": null,
+            "blocks": []
+          },
+          "authority_status": "current_application_projection_not_authoritative_revision"
+        }
+      ],
+      "existing_conflicts": [
+        {
+          "plan_id": "00000000-0000-0000-0000-00000002d62e",
+          "plan_title": "Pontosítandó edzés",
+          "occurrence_key": "availability:2026-10-26",
+          "constraint_title": "Megadott edzéslehetőség",
+          "date": "2026-10-26",
+          "severity": "review",
+          "code": "OPPORTUNITY_FIT_UNKNOWN"
+        }
+      ],
+      "recent_sessions": [
+        {
+          "id": "00000000-0000-0000-0000-00000002c113",
+          "name": null,
+          "sport": "KAYAK",
+          "started_at": "2026-10-21T06:00:00+00:00",
+          "ended_at": "2026-10-21T06:33:20+00:00",
+          "duration_sec": 2000,
+          "distance_m": "6000.0",
+          "planned_workout_id": null,
+          "calories": null,
+          "avg_hr": null,
+          "max_hr": null,
+          "avg_speed": null,
+          "max_speed": null,
+          "avg_power": null,
+          "max_power": null,
+          "cardio_load": null,
+          "perceived_load": null,
+          "rpe": null
+        }
+      ],
+      "recovery_records": [],
+      "recent_window": {
+        "start_at": "2026-10-08T22:00:00+00:00",
+        "end_at": "2026-10-23T10:00:00.000011+00:00",
+        "coverage": "stored_records_only_not_exhaustive"
+      },
+      "feedback": [],
+      "gaps": [
+        "NO_RECENT_SELF_REPORT",
+        "NO_RECENT_RECOVERY_RECORD",
+        "EXISTING_PLAN_CONFLICTS"
+      ],
+      "planner_connection": {
+        "inputs_assembled": true,
+        "workout_generator_connected": false,
+        "dose_policy_connected": false,
+        "personal_model_applied": false
+      },
+      "capture_finished_at": "2026-10-23T10:00:00.000014+00:00",
+      "mutable_source_semantics": "current_read_span",
+      "historical_replay_supported": false,
+      "windows_share_budgets_across_days": true,
+      "revalidate_before_planning": true,
+      "durable": false,
+      "has_more": false,
+      "planning_authorized": false,
+      "workouts_created": false,
+      "workouts_changed": false,
+      "goal_suggestions": {
+        "schema_version": "planning-goal-suggestions-v0.2",
+        "rules_version": "mesocycle-strategy-v0.1",
+        "registry_reference": {
+          "version": "workout_family_registry_v0.1",
+          "content_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853"
+        },
+        "macrocycles": [
+          {
+            "macrocycle_period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+            "base_reference": {
+              "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77",
+              "content_hash": "6b5cdff6efca46aeaa73b3989d5f45b235dde37d5ee376df7cfa19b996261569"
+            },
+            "base_revision": 1,
+            "rows": [
+              {
+                "capability_key": "MAX_STRENGTH",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "STRENGTH_REFERENCE_AND_DEVELOPMENT",
+                    "family_version": "v0.1",
+                    "modality_key": "STRENGTH",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              },
+              {
+                "capability_key": "PERIPHERAL_OXIDATIVE_CAPACITY",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "KAYAK_EASY_TECHNICAL",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "secondary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  },
+                  {
+                    "family_key": "KAYAK_LONG_AEROBIC",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  },
+                  {
+                    "family_key": "RUN_EASY_AEROBIC_FALLBACK",
+                    "family_version": "v0.1",
+                    "modality_key": "RUN",
+                    "match": "secondary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              },
+              {
+                "capability_key": "TECHNICAL_SKILL",
+                "role": "primary_development",
+                "rationale": "explicit",
+                "origin": "recorded",
+                "sources": [
+                  {
+                    "kind": "recorded_goal",
+                    "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+                  }
+                ],
+                "mesocycle_directives": [
+                  {
+                    "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  },
+                  {
+                    "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                    "role": "primary_development",
+                    "rationale": "explicit",
+                    "origin": "recorded"
+                  }
+                ],
+                "family_links": [
+                  {
+                    "family_key": "KAYAK_EASY_TECHNICAL",
+                    "family_version": "v0.1",
+                    "modality_key": "KAYAK",
+                    "match": "primary",
+                    "eligibility_evaluated": false,
+                    "selected": false
+                  }
+                ],
+                "family_coverage": "linked_not_evaluated"
+              }
+            ],
+            "unprofiled_event_keys": [],
+            "unmapped_goal_keys": [
+              "regular_activity"
+            ],
+            "strategy_periods": [
+              {
+                "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-10-23",
+                    "end_date": "2026-11-19",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              },
+              {
+                "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-11-20",
+                    "end_date": "2026-12-17",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              },
+              {
+                "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                "title": "Felülvizsgálandó blokk",
+                "phase": "general",
+                "label": "Általános fejlesztés",
+                "segments": [
+                  {
+                    "start_date": "2026-12-18",
+                    "end_date": "2027-01-14",
+                    "days": 28,
+                    "phase": "general",
+                    "label": "Általános fejlesztés",
+                    "event_key": null,
+                    "event_title": null,
+                    "event_precision": null
+                  }
+                ],
+                "confidence": "limited",
+                "current_overlay": null
+              }
+            ],
+            "primary_focus_limit": 2
+          }
+        ],
+        "review_required": true,
+        "periodization_inferred": true,
+        "dose_selected": false,
+        "family_selection_authorized": false,
+        "committed": false,
+        "strategy": {
+          "schema_version": "planning-strategy-v0.1",
+          "policy": {
+            "specific_window_days": 42,
+            "readiness_window_days": 14,
+            "transition_days": 7,
+            "max_primary_capabilities": 2,
+            "acute_signal_hours": 48,
+            "high_self_report_score": 7
+          },
+          "sources": [
+            {
+              "key": "kayak-periodization-2010",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/20414669/",
+              "use": "Kajakos általános–specifikus sorrend és korlátozott számú párhuzamos hangsúly.",
+              "limit": "Kis létszámú elit minta; a terhelés és a fejlődés mértéke nem másolható át."
+            },
+            {
+              "key": "kayak-combined-2009",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/19396614/",
+              "use": "Az állóképességi és neuromuszkuláris felkészülés összekapcsolásának mintája.",
+              "limit": "Elit kajakos edzésminta, nem személyes hatásbecslés."
+            },
+            {
+              "key": "taper-2007",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/17762369/",
+              "use": "A főverseny előtti frissítés elkülönítése az új képességépítéstől.",
+              "limit": "A 14 napos jelölés csak szerkeszthető kezdőablak; terheléscsökkentést itt nem írunk elő."
+            }
+          ],
+          "source_basis": "evidence_informed_product_heuristic",
+          "profile_context": {
+            "paddling": true,
+            "beginner_or_returning": false,
+            "restricted": false,
+            "participation": "unrestricted",
+            "notes": [],
+            "profile_available": true
+          },
+          "recent_review_signals": [],
+          "personal_response_model": {
+            "applied": false,
+            "status": "no_prescription_validated_model_connected",
+            "reason": "A megfigyelések és leíró összefüggések önmagukban nem igazolnak személyes fejlődési vagy terhelési modellt."
+          },
+          "boundaries_changed": false,
+          "race_dates_changed": false,
+          "workouts_created": false,
+          "dose_selected": false
+        },
+        "event_titles": {}
+      },
+      "content_hash": "138b549e81904623ef0aab32ffd478d0b8b0350c2c7c267951f192b033289d25"
+    },
+    "plan_snapshots": [
+      {
+        "workout": {
+          "id": "00000000-0000-0000-0000-00000002d62d",
+          "date": "2026-10-24",
+          "planned_start_time": "2026-10-24T06:00:00+00:00",
+          "sport": "KAYAK",
+          "title": "9km folyamatos evezés",
+          "description": null,
+          "duration_sec": null,
+          "distance_m": "9000.0",
+          "intensity_type": null,
+          "status": "PLANNED",
+          "source": "POLAR",
+          "polar_target_id": null,
+          "training_period_id": null,
+          "blocks": []
+        },
+        "workout_hash": "9f50f4b50bb03c1f91aff051c78f35a755846332ed1e203c4d1e72c29b7f5a84",
+        "owned_sample": false,
+        "linked": false,
+        "replaceable": false,
+        "template_key": null,
+        "candidate_key": null,
+        "duration_estimate": {
+          "schema_version": "calendar-duration-estimate-v0.2",
+          "method": "personal_power_law_median_v1",
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "plan_id": "00000000-0000-0000-0000-00000002d62d",
+          "sport": "KAYAK",
+          "distance_m": "9000.0",
+          "as_of": "2026-10-23T10:00:00.000015+00:00",
+          "lookback_days": 90,
+          "candidate_limit": 12,
+          "duration_sec": 3087,
+          "lower_sec": 2580,
+          "upper_sec": 3600,
+          "sample_count": 1,
+          "samples": [
+            {
+              "session_id": "00000000-0000-0000-0000-00000002c113",
+              "started_at": "2026-10-21T06:00:00+00:00",
+              "ended_at": "2026-10-21T06:33:20+00:00",
+              "distance_m": "6000.0",
+              "elapsed_sec": "2000.0",
+              "basis": "elapsed",
+              "projected_sec": "3086.854789673045",
+              "used": true
+            }
+          ],
+          "range_is_calibrated": false,
+          "doubling_slowdown_pct": 5,
+          "exponent": "1.070389327891",
+          "coefficient_source": "planning_default",
+          "coefficient_profile_reference": null,
+          "extrapolated": true,
+          "max_distance_ratio": 2,
+          "conditions_verified": false,
+          "personal_coefficient_fitted": false
+        }
+      },
+      {
+        "workout": {
+          "id": "00000000-0000-0000-0000-00000002d62e",
+          "date": "2026-10-26",
+          "planned_start_time": "2026-10-26T06:00:00+00:00",
+          "sport": "OTHER",
+          "title": "Pontosítandó edzés",
+          "description": null,
+          "duration_sec": null,
+          "distance_m": null,
+          "intensity_type": null,
+          "status": "PLANNED",
+          "source": "POLAR",
+          "polar_target_id": null,
+          "training_period_id": null,
+          "blocks": []
+        },
+        "workout_hash": "379cf5ce49eb0491b23427875df7c9d1719ff0dc8b64f40cba6ee6c7035c0160",
+        "owned_sample": false,
+        "linked": false,
+        "replaceable": false,
+        "template_key": null,
+        "candidate_key": null,
+        "duration_estimate": null
+      }
+    ],
+    "result": {
+      "policy": {
+        "version": "training-plan-policy-v0.2",
+        "max_sessions_per_day": 1,
+        "default_sessions_per_7_days": 2,
+        "max_sessions_per_7_days": 3,
+        "default_minutes_per_7_days": 90,
+        "max_minutes_per_7_days": 180,
+        "minimum_gap_hours": 36,
+        "new_session_lead_minutes": 15,
+        "personal_response_model_applied": false,
+        "missed_load_is_not_repaid": true
+      },
+      "entry_review": {
+        "policy_version": "athlete-intake-review-policy-v0.1",
+        "evaluated_on": "2026-10-23",
+        "age_years": 44,
+        "age_path": "adult",
+        "global_entry_gate": "OPEN",
+        "participation_status": "READY",
+        "entry_mode": "NORMAL_START",
+        "reasons": [],
+        "clinical_clearance": false,
+        "weight_change_requires_review": false,
+        "constraints": [],
+        "accessibility_needs": ""
+      },
+      "blockers": [],
+      "events": [
+        {
+          "kind": "unplanned_completed",
+          "session_id": "00000000-0000-0000-0000-00000002c113",
+          "workout_id": null,
+          "title": null,
+          "sport": "KAYAK",
+          "started_at": "2026-10-21T06:00:00+00:00",
+          "date": "2026-10-21",
+          "observed_end_at": "2026-10-21T06:33:20+00:00",
+          "duration_sec": 2000,
+          "cardio_load": null,
+          "rpe": null
+        }
+      ],
+      "review_signals": [],
+      "proposals": [],
+      "create": [],
+      "keep": [],
+      "cancel": [],
+      "days_without_proposal": [
+        {
+          "date": "2026-10-24",
+          "reason": "EXISTING_TRAINING_PRESERVED"
+        },
+        {
+          "date": "2026-10-25",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        },
+        {
+          "date": "2026-10-26",
+          "reason": "EXISTING_TRAINING_PRESERVED"
+        },
+        {
+          "date": "2026-10-27",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        },
+        {
+          "date": "2026-10-28",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        },
+        {
+          "date": "2026-10-29",
+          "reason": "NO_SUPPORTED_SAMPLE_FITS"
+        }
+      ],
+      "uncovered_capabilities": [
+        "MAX_STRENGTH",
+        "PERIPHERAL_OXIDATIVE_CAPACITY",
+        "TECHNICAL_SKILL"
+      ],
+      "protected_workout_ids": [
+        "00000000-0000-0000-0000-00000002d62d",
+        "00000000-0000-0000-0000-00000002d62e"
+      ],
+      "personal_model_applied": false,
+      "automatic_plan_mutation": false,
+      "preparation": {
+        "version": "training-preparation-v0.1",
+        "available_days_per_week": 6,
+        "available_minutes_per_week": 450,
+        "max_sessions_per_7_days": 3,
+        "max_minutes_per_7_days": 180,
+        "equipment_declared": true,
+        "available_day_count": 6,
+        "strategy_ready": true,
+        "reference_templates": [],
+        "selection_issues": [
+          {
+            "date": "2026-10-25",
+            "codes": [
+              "PERSONAL_DURATION_REFERENCE_MISSING",
+              "ROLLING_BUDGET_REVIEW"
+            ]
+          },
+          {
+            "date": "2026-10-27",
+            "codes": [
+              "PERSONAL_DURATION_REFERENCE_MISSING",
+              "ROLLING_BUDGET_REVIEW"
+            ]
+          },
+          {
+            "date": "2026-10-28",
+            "codes": [
+              "PERSONAL_DURATION_REFERENCE_MISSING",
+              "ROLLING_BUDGET_REVIEW"
+            ]
+          },
+          {
+            "date": "2026-10-29",
+            "codes": [
+              "PERSONAL_DURATION_REFERENCE_MISSING",
+              "ROLLING_BUDGET_REVIEW"
+            ]
+          }
+        ],
+        "unknown_duration_workout_ids": [
+          "00000000-0000-0000-0000-00000002d62e"
+        ],
+        "estimated_duration_workout_ids": [
+          "00000000-0000-0000-0000-00000002d62d"
+        ]
+      }
+    },
+    "committed_plan": false,
+    "requires_explicit_acceptance": true,
+    "schema_version": "training-plan-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "content_hash": "0fa947434b5829ef3ef4f27a0db2ee1861917bb0cd4ee906fc17d93460d1221a"
+  },
+  "context": {
+    "schema_version": "athlete-setup-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-23",
+    "profile": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-athlete:9bd81dadf624892195a5bbad910725326f969ad62dbb27be16159de2c22c3603",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "content_hash": "de3b95311c76a0cdb151c93509a4ab269eae66f8f71313e9615d9114514cd841",
+        "created_at": "2026-10-23T10:00:00.000008+00:00",
+        "imported_observations": [],
+        "kind": "profile",
+        "planning_authorized": false,
+        "proposal": {
+          "data": {
+            "accessibility_needs": "",
+            "birth_date": "1982-05-30",
+            "competition_category": "",
+            "constraint_status": "none_known",
+            "constraints": [],
+            "duration_doubling_slowdown_pct": null,
+            "interruption": "none",
+            "last_training_date": null,
+            "manual_observations": [],
+            "participation": "unrestricted",
+            "recovery_notes": "",
+            "resources": [
+              "kajak"
+            ],
+            "sex_reference": "female",
+            "source_selections": [],
+            "source_window": null,
+            "sport_history": [
+              {
+                "current": true,
+                "discipline": "Síkvíz",
+                "last_active_date": null,
+                "level": "professional",
+                "notes": "",
+                "sport": "Kajak",
+                "start_year": 1995,
+                "usual_sessions_per_week": 5
+              }
+            ],
+            "sport_history_status": "recorded",
+            "target_sport": "Kajak",
+            "typical_days_per_week": 6,
+            "typical_minutes_per_week": 450
+          },
+          "previous_reference": {
+            "artifact_id": "pt-athlete:60a6d607ed7e2905aadd75354473a17693a72d0556f5d349ddfc0260fe28f7d6",
+            "content_hash": "d24ff071d7473c655432fe3abe4f1c19b7d960fff62aebe47da73ea6a42897fc"
+          },
+          "request_id": "00000000-0000-0000-0000-00000002d62c"
+        },
+        "review": {
+          "accessibility_needs": "",
+          "age_path": "adult",
+          "age_years": 44,
+          "clinical_clearance": false,
+          "constraints": [],
+          "entry_mode": "NORMAL_START",
+          "evaluated_on": "2026-10-23",
+          "global_entry_gate": "OPEN",
+          "participation_status": "READY",
+          "policy_version": "athlete-intake-review-policy-v0.1",
+          "reasons": [],
+          "weight_change_requires_review": false
+        },
+        "revision": 2,
+        "schema_version": "athlete-setup-v0.1",
+        "timezone_name": "Europe/Budapest",
+        "workouts_created": false
+      },
+      "durable_available_at": "2026-10-23T10:00:00.000009+00:00",
+      "committed": true,
+      "reused": true,
+      "planning_authorized": false,
+      "workouts_created": false
+    },
+    "availability": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "calendar": {
+          "all_opportunities_are_required": false,
+          "availability_status": "AVAILABLE",
+          "coverage": {
+            "available": 8,
+            "unavailable": 0,
+            "unknown": 0
+          },
+          "days": [
+            {
+              "date": "2026-10-23",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-23T08:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-23T06:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-24",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-24T08:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-24T06:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-25",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-25T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-25T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-26",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-26T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-26T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-27",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-27T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-27T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-28",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-28T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-28T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-29",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-29T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-29T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-30",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-30T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-30T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            }
+          ],
+          "workouts_created": false
+        },
+        "content_hash": "25eb55be6540a643f1d2f24005c240aa2cd8927a94f4618ad2d6be0b6dac88f8",
+        "created_at": "2026-10-23T10:00:00.000003+00:00",
+        "kind": "availability",
+        "planning_authorized": false,
+        "proposal": {
+          "data": {
+            "days": [
+              {
+                "date": "2026-10-23",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-24",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-25",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-26",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-27",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-28",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-29",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-30",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              }
+            ],
+            "end_date": "2026-10-30",
+            "mesocycle_id": null,
+            "start_date": "2026-10-23",
+            "timezone_name": "Europe/Budapest"
+          },
+          "previous_reference": null,
+          "request_id": "00000000-0000-0000-0000-00000000f231"
+        },
+        "revision": 1,
+        "schema_version": "athlete-setup-v0.1",
+        "timezone_name": "Europe/Budapest",
+        "workouts_created": false
+      },
+      "durable_available_at": "2026-10-23T10:00:00.000004+00:00",
+      "committed": true,
+      "reused": true,
+      "planning_authorized": false,
+      "workouts_created": false
+    },
+    "current_review": {
+      "policy_version": "athlete-intake-review-policy-v0.1",
+      "evaluated_on": "2026-10-23",
+      "age_years": 44,
+      "age_path": "adult",
+      "global_entry_gate": "OPEN",
+      "participation_status": "READY",
+      "entry_mode": "NORMAL_START",
+      "reasons": [],
+      "clinical_clearance": false,
+      "weight_change_requires_review": false,
+      "constraints": [],
+      "accessibility_needs": ""
+    },
+    "planning_authorized": false,
+    "workouts_created": false,
+    "references": {
+      "profile_reference": {
+        "artifact_id": "pt-athlete:9bd81dadf624892195a5bbad910725326f969ad62dbb27be16159de2c22c3603",
+        "content_hash": "de3b95311c76a0cdb151c93509a4ab269eae66f8f71313e9615d9114514cd841"
+      },
+      "availability_reference": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "content_hash": "25eb55be6540a643f1d2f24005c240aa2cd8927a94f4618ad2d6be0b6dac88f8"
+      }
+    },
+    "polar": {
+      "connected": false,
+      "domains": {
+        "sessions": false,
+        "sleep": false,
+        "nightly_recharge": false,
+        "continuous_hr": false,
+        "activity": false,
+        "tests": false
+      },
+      "source_documentation": "https://www.polar.com/polar-api-v4/"
+    }
+  },
+  "schedule": {
+    "schema_version": "calendar-constraints-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-23",
+    "start_date": "2026-10-24",
+    "end_date": "2026-10-30",
+    "retrieved_at": "2026-10-23T10:00:00.000018+00:00",
+    "reference": null,
+    "saved": null,
+    "data": {
+      "timezone_name": "Europe/Budapest",
+      "rules": [],
+      "exceptions": []
+    },
+    "availability": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-athlete:e60543ecb5f6234371f9c6928fc81e52e06549eb194d72d5b6ac292ea72aec47",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "calendar": {
+          "all_opportunities_are_required": false,
+          "availability_status": "AVAILABLE",
+          "coverage": {
+            "available": 8,
+            "unavailable": 0,
+            "unknown": 0
+          },
+          "days": [
+            {
+              "date": "2026-10-23",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-23T08:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-23T06:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-24",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-24T08:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-24T06:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-25",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-25T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-25T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-26",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-26T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-26T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-27",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-27T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-27T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-28",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-28T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-28T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-29",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-29T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-29T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-30",
+              "max_total_minutes": 90,
+              "notes": "",
+              "status": "available",
+              "windows": [
+                {
+                  "effort_cap": "moderate",
+                  "elapsed_minutes": 120,
+                  "end_at": "2026-10-30T09:00:00+00:00",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "key": "morning",
+                  "location": "Otthon",
+                  "max_minutes": 90,
+                  "notes": "",
+                  "resources": [
+                    "Kajak",
+                    "Kézisúlyzó"
+                  ],
+                  "sport_scope": "specified",
+                  "sports": [
+                    "Kajak",
+                    "Erőnlét"
+                  ],
+                  "start_at": "2026-10-30T07:00:00+00:00",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                }
+              ]
+            }
+          ],
+          "workouts_created": false
+        },
+        "content_hash": "25eb55be6540a643f1d2f24005c240aa2cd8927a94f4618ad2d6be0b6dac88f8",
+        "created_at": "2026-10-23T10:00:00.000003+00:00",
+        "kind": "availability",
+        "planning_authorized": false,
+        "proposal": {
+          "data": {
+            "days": [
+              {
+                "date": "2026-10-23",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-24",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-25",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-26",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-27",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-28",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-29",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              },
+              {
+                "date": "2026-10-30",
+                "max_total_minutes": 90,
+                "notes": "",
+                "status": "available",
+                "windows": [
+                  {
+                    "effort_cap": "moderate",
+                    "end_fold": null,
+                    "end_time": "10:00",
+                    "ends_next_day": false,
+                    "key": "morning",
+                    "location": "Otthon",
+                    "max_minutes": 90,
+                    "notes": "",
+                    "resources": [
+                      "Kajak",
+                      "Kézisúlyzó"
+                    ],
+                    "sport_scope": "specified",
+                    "sports": [
+                      "Kajak",
+                      "Erőnlét"
+                    ],
+                    "start_fold": null,
+                    "start_time": "08:00"
+                  }
+                ]
+              }
+            ],
+            "end_date": "2026-10-30",
+            "mesocycle_id": null,
+            "start_date": "2026-10-23",
+            "timezone_name": "Europe/Budapest"
+          },
+          "previous_reference": null,
+          "request_id": "00000000-0000-0000-0000-00000000f231"
+        },
+        "revision": 1,
+        "schema_version": "athlete-setup-v0.1",
+        "timezone_name": "Europe/Budapest",
+        "workouts_created": false
+      },
+      "durable_available_at": "2026-10-23T10:00:00.000004+00:00",
+      "committed": true,
+      "reused": true,
+      "planning_authorized": false,
+      "workouts_created": false
+    },
+    "occurrences": [],
+    "conflicts": [
+      {
+        "plan_id": "00000000-0000-0000-0000-00000002d62e",
+        "plan_title": "Pontosítandó edzés",
+        "occurrence_key": "availability:2026-10-26",
+        "constraint_title": "Megadott edzéslehetőség",
+        "date": "2026-10-26",
+        "severity": "review",
+        "code": "OPPORTUNITY_FIT_UNKNOWN"
+      }
+    ],
+    "duration_estimates": {
+      "00000000-0000-0000-0000-00000002d62d": {
+        "schema_version": "calendar-duration-estimate-v0.2",
+        "method": "personal_power_law_median_v1",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "plan_id": "00000000-0000-0000-0000-00000002d62d",
+        "sport": "KAYAK",
+        "distance_m": 9000.0,
+        "as_of": "2026-10-23T10:00:00.000017+00:00",
+        "lookback_days": 90,
+        "candidate_limit": 12,
+        "duration_sec": 3087,
+        "lower_sec": 2580,
+        "upper_sec": 3600,
+        "sample_count": 1,
+        "samples": [
+          {
+            "session_id": "00000000-0000-0000-0000-00000002c113",
+            "started_at": "2026-10-21T06:00:00+00:00",
+            "ended_at": "2026-10-21T06:33:20+00:00",
+            "distance_m": 6000.0,
+            "elapsed_sec": 2000.0,
+            "basis": "elapsed",
+            "projected_sec": 3086.854789673045,
+            "used": true
+          }
+        ],
+        "range_is_calibrated": false,
+        "doubling_slowdown_pct": 5,
+        "exponent": 1.070389327891,
+        "coefficient_source": "planning_default",
+        "coefficient_profile_reference": null,
+        "extrapolated": true,
+        "max_distance_ratio": 2,
+        "conditions_verified": false,
+        "personal_coefficient_fitted": false
+      }
+    },
+    "opportunities": [
+      {
+        "key": "legacy:2026-10-24:morning",
+        "source_date": "2026-10-24",
+        "start_at": "2026-10-24T06:00:00+00:00",
+        "end_at": "2026-10-24T08:00:00+00:00",
+        "max_minutes": 90,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "constraints": {
+          "sport_scope": "specified",
+          "sports": [
+            "Kajak",
+            "Erőnlét"
+          ],
+          "effort_cap": "moderate",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "location": "Otthon"
+        },
+        "known": true,
+        "usable_minutes": 90,
+        "intervals": [
+          {
+            "start_at": "2026-10-24T06:00:00+00:00",
+            "end_at": "2026-10-24T08:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "key": "legacy:2026-10-25:morning",
+        "source_date": "2026-10-25",
+        "start_at": "2026-10-25T07:00:00+00:00",
+        "end_at": "2026-10-25T09:00:00+00:00",
+        "max_minutes": 90,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "constraints": {
+          "sport_scope": "specified",
+          "sports": [
+            "Kajak",
+            "Erőnlét"
+          ],
+          "effort_cap": "moderate",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "location": "Otthon"
+        },
+        "known": true,
+        "usable_minutes": 90,
+        "intervals": [
+          {
+            "start_at": "2026-10-25T07:00:00+00:00",
+            "end_at": "2026-10-25T09:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "key": "legacy:2026-10-26:morning",
+        "source_date": "2026-10-26",
+        "start_at": "2026-10-26T07:00:00+00:00",
+        "end_at": "2026-10-26T09:00:00+00:00",
+        "max_minutes": 90,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "constraints": {
+          "sport_scope": "specified",
+          "sports": [
+            "Kajak",
+            "Erőnlét"
+          ],
+          "effort_cap": "moderate",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "location": "Otthon"
+        },
+        "known": true,
+        "usable_minutes": 90,
+        "intervals": [
+          {
+            "start_at": "2026-10-26T07:00:00+00:00",
+            "end_at": "2026-10-26T09:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "key": "legacy:2026-10-27:morning",
+        "source_date": "2026-10-27",
+        "start_at": "2026-10-27T07:00:00+00:00",
+        "end_at": "2026-10-27T09:00:00+00:00",
+        "max_minutes": 90,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "constraints": {
+          "sport_scope": "specified",
+          "sports": [
+            "Kajak",
+            "Erőnlét"
+          ],
+          "effort_cap": "moderate",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "location": "Otthon"
+        },
+        "known": true,
+        "usable_minutes": 90,
+        "intervals": [
+          {
+            "start_at": "2026-10-27T07:00:00+00:00",
+            "end_at": "2026-10-27T09:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "key": "legacy:2026-10-28:morning",
+        "source_date": "2026-10-28",
+        "start_at": "2026-10-28T07:00:00+00:00",
+        "end_at": "2026-10-28T09:00:00+00:00",
+        "max_minutes": 90,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "constraints": {
+          "sport_scope": "specified",
+          "sports": [
+            "Kajak",
+            "Erőnlét"
+          ],
+          "effort_cap": "moderate",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "location": "Otthon"
+        },
+        "known": true,
+        "usable_minutes": 90,
+        "intervals": [
+          {
+            "start_at": "2026-10-28T07:00:00+00:00",
+            "end_at": "2026-10-28T09:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "key": "legacy:2026-10-29:morning",
+        "source_date": "2026-10-29",
+        "start_at": "2026-10-29T07:00:00+00:00",
+        "end_at": "2026-10-29T09:00:00+00:00",
+        "max_minutes": 90,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "constraints": {
+          "sport_scope": "specified",
+          "sports": [
+            "Kajak",
+            "Erőnlét"
+          ],
+          "effort_cap": "moderate",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "location": "Otthon"
+        },
+        "known": true,
+        "usable_minutes": 90,
+        "intervals": [
+          {
+            "start_at": "2026-10-29T07:00:00+00:00",
+            "end_at": "2026-10-29T09:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "key": "legacy:2026-10-30:morning",
+        "source_date": "2026-10-30",
+        "start_at": "2026-10-30T07:00:00+00:00",
+        "end_at": "2026-10-30T09:00:00+00:00",
+        "max_minutes": 90,
+        "source": "athlete_availability",
+        "daily_max_minutes": 90,
+        "constraints": {
+          "sport_scope": "specified",
+          "sports": [
+            "Kajak",
+            "Erőnlét"
+          ],
+          "effort_cap": "moderate",
+          "resources": [
+            "Kajak",
+            "Kézisúlyzó"
+          ],
+          "location": "Otthon"
+        },
+        "known": true,
+        "usable_minutes": 90,
+        "intervals": [
+          {
+            "start_at": "2026-10-30T07:00:00+00:00",
+            "end_at": "2026-10-30T09:00:00+00:00"
+          }
+        ]
+      }
+    ],
+    "timezone_review_required": false,
+    "proposal_hash": null,
+    "availability_proposal_hash": null,
+    "has_more": false,
+    "absence_means_free": false,
+    "opportunities_are_required": false,
+    "planning_authorized": false,
+    "workouts_changed": false
+  }
+}

@@ -40,11 +40,20 @@ import ProfileForm from "./profile-form";
 import CalendarForm from "./calendar-form";
 import type { PeriodChoice } from "./calendar-form";
 import HistoryForm from "./history-form";
+import SetupProgress from "./setup-progress";
+import WeeklyAgreement from "./weekly-agreement";
+import { LOCAL_REFRESH_EVENT } from "@/lib/data-connections/preferences";
+import { loadConstraints } from "@/lib/calendar/constraint-client";
+import type { ScheduleContext } from "@/lib/calendar/constraints";
 const message = (e: unknown) =>
   e instanceof Error ? e.message : "A művelet nem sikerült.";
 export default function AthleteWorkspace({
   initialTab = "profile",
-}: { initialTab?: "profile" | "calendar" | "history" } = {}) {
+  embedded = false,
+}: {
+  initialTab?: "profile" | "calendar" | "history";
+  embedded?: boolean;
+} = {}) {
   const [context, setContext] = useState<Context | null>(null),
     [profile, setProfile] = useState<Profile>(emptyProfile),
     [calendar, setCalendar] = useState<Calendar | null>(null),
@@ -72,6 +81,33 @@ export default function AthleteWorkspace({
     stop = useRef(false),
     status = useRef<HTMLDivElement>(null);
   const locked = busy || !!pending || blocked || !ready;
+  const [schedule, setSchedule] = useState<ScheduleContext | null>(null);
+  useEffect(() => {
+    const select = () => {
+      const key = window.location.hash.slice(1);
+      if (["profile", "calendar", "history"].includes(key))
+        setTab(key as "profile" | "calendar" | "history");
+    };
+    select();
+    window.addEventListener("hashchange", select);
+    return () => window.removeEventListener("hashchange", select);
+  }, []);
+  useEffect(() => {
+    if (!context) return;
+    const abort = new AbortController();
+    loadConstraints(
+      { start: context.local_today, end: addDays(context.local_today, 6) },
+      abort.signal,
+    )
+      .then((c) => {
+        if (!abort.signal.aborted && c.athlete_id === context.athlete_id)
+          setSchedule(c);
+      })
+      .catch(() => {
+        /* The calendar step offers a concrete reload/error state. */
+      });
+    return () => abort.abort();
+  }, [context]);
   function report(text: string) {
     setError(text);
     requestAnimationFrame(() => {
@@ -194,6 +230,7 @@ export default function AthleteWorkspace({
       }
       const fresh = await loadContext();
       install(fresh, false);
+      window.dispatchEvent(new Event(LOCAL_REFRESH_EVENT));
       if (!remaining.items.length) {
         setSuccess(
           queue.items[0].operation === "polar-imports"
@@ -326,7 +363,7 @@ export default function AthleteWorkspace({
     }
   }
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6${embedded ? " pt-athlete-planning" : ""}`}>
       <div ref={status} tabIndex={-1} className="space-y-3 outline-none">
         {error && <Message error>{error}</Message>}
         {success && <Message>{success}</Message>}
@@ -392,53 +429,47 @@ export default function AthleteWorkspace({
         </Card>
       ) : (
         <>
-          {context.current_review && (
-            <Card title="Jelenlegi tervezési keret">
-              <p className="font-semibold">
-                {gateLabels[context.current_review.global_entry_gate] ??
-                  context.current_review.global_entry_gate}
-              </p>
-              <p className="mt-2 text-sm">
-                Életkor: {context.current_review.age_years ?? "még nem ismert"}{" "}
-                · értékelés napja: {context.current_review.evaluated_on}
-              </p>
-              {!!context.current_review.reasons.length && (
-                <ul className="mt-3 list-disc pl-5 text-sm leading-6">
-                  {context.current_review.reasons.map((r) => (
-                    <li key={r}>{reasonLabels[r] ?? r}</li>
-                  ))}
-                </ul>
-              )}
-              <p className="mt-3 text-xs text-zinc-400">
-                A megadott kereteket felhasználjuk a ciklusok áttekintéséhez. Az
-                egyéni edzésterheléshez külön tervezési döntés szükséges.
-              </p>
-            </Card>
+          {!embedded && (
+            <SetupProgress
+              context={context}
+              schedule={schedule}
+              active={tab}
+              onSelect={setTab}
+            />
           )}
-          <nav
-            aria-label="Sportolói felmérés részei"
-            className="flex flex-wrap gap-3"
-          >
-            {(
-              [
-                ["profile", "Sportolói alapok"],
-                ["calendar", "Naponkénti edzéslehetőségek"],
-                ["history", "Mérések és órás adatok"],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                type="button"
-                key={key}
-                className={tab === key ? buttonClass : secondaryClass}
-                aria-pressed={tab === key}
-                onClick={() => setTab(key)}
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
+          {context.current_review &&
+            (!embedded ||
+              (tab === "profile" &&
+                context.current_review.global_entry_gate !== "OPEN")) && (
+              <Card title="Jelenlegi tervezési keret">
+                <p className="font-semibold">
+                  {gateLabels[context.current_review.global_entry_gate] ??
+                    context.current_review.global_entry_gate}
+                </p>
+                <p className="mt-2 text-sm">
+                  Életkor:{" "}
+                  {context.current_review.age_years ?? "még nem ismert"} ·
+                  értékelés napja: {context.current_review.evaluated_on}
+                </p>
+                {!!context.current_review.reasons.length && (
+                  <ul className="mt-3 list-disc pl-5 text-sm leading-6">
+                    {context.current_review.reasons.map((r) => (
+                      <li key={r}>{reasonLabels[r] ?? r}</li>
+                    ))}
+                  </ul>
+                )}
+                <p className="mt-3 text-xs text-zinc-400">
+                  A megadott kereteket felhasználjuk a ciklusok áttekintéséhez.
+                  Az egyéni edzésterheléshez külön tervezési döntés szükséges.
+                </p>
+              </Card>
+            )}
           {tab === "profile" && (
-            <Card title="Sportolói alapok">
+            <Card
+              title={
+                embedded ? "Személyes adatok a tervezéshez" : "Sportolói alapok"
+              }
+            >
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -451,78 +482,107 @@ export default function AthleteWorkspace({
                     value={profile}
                     onChange={setProfile}
                     today={context.local_today}
+                    planning={embedded}
                   />
                   <button className={buttonClass} type="submit">
-                    Felmérés mentése
+                    {embedded ? "Személyes adatok mentése" : "Felmérés mentése"}
                   </button>
+                  {!embedded && (
+                    <button
+                      className={secondaryClass}
+                      type="button"
+                      onClick={() => setTab("calendar")}
+                    >
+                      Tovább: mikor érek rá? →
+                    </button>
+                  )}
                 </fieldset>
               </form>
             </Card>
           )}
+          {tab === "calendar" && (
+            <WeeklyAgreement
+              owner={context.athlete_id}
+              today={context.local_today}
+              onSaved={setSchedule}
+            />
+          )}
           {tab === "calendar" && calendar && (
-            <Card title="Naponkénti edzéslehetőségek">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void calendarPreview();
-                }}
-              >
-                <fieldset disabled={locked} className="space-y-6">
-                  <CalendarForm
-                    key={
-                      calendar.start_date +
-                      calendar.end_date +
-                      (calendar.mesocycle_id ?? "")
-                    }
-                    value={calendar}
-                    periods={periods}
-                    onError={report}
-                    onChange={(v) => {
-                      setCalendar(v);
-                      setReview(null);
-                    }}
-                  />
-                  <p className="text-sm">
-                    Szerkesztett időszak: {calendar.start_date} –{" "}
-                    {calendar.end_date}
-                  </p>
-                  <button className={buttonClass} type="submit">
-                    Naptár ellenőrzése és áttekintése
-                  </button>
-                </fieldset>
-              </form>
-              {review && (
-                <div className="mt-6 space-y-4 rounded-xl border border-teal-500/50 p-4">
-                  <p className="font-semibold">
-                    Mentendő naptár: {calendar.start_date} – {calendar.end_date}
-                  </p>
-                  <p className="text-sm">
-                    Elérhető: {review.coverage.available} nap · Nem elérhető:{" "}
-                    {review.coverage.unavailable} nap · Még nincs megadva:{" "}
-                    {review.coverage.unknown} nap.
-                  </p>
-                  <button
-                    className={buttonClass}
-                    disabled={locked}
-                    onClick={() =>
-                      stage({
-                        schema_version: "athlete-queue-v0.1",
-                        athlete_id: context.athlete_id,
-                        items: [
-                          {
-                            schema_version: "athlete-pending-v0.1",
-                            operation: "availability",
-                            body: review.body,
-                          },
-                        ],
-                      })
-                    }
-                  >
-                    Naptár mentése
-                  </button>
-                </div>
-              )}
-            </Card>
+            <details className="rounded-xl border border-zinc-700 p-4">
+              <summary className="cursor-pointer font-medium">
+                Napi eltérések és részletes időszaki naptár · opcionális
+              </summary>
+              <Card title="Naponkénti edzéslehetőségek">
+                <p className="mb-4 text-sm leading-6">
+                  A szokásos hetet a fenti időmegállapodás adja. Ezt a részletes
+                  naptárt csak az eltérő napokhoz vagy egy külön időszakhoz
+                  szükséges kitölteni. Egy elérhetetlennek jelölt nap felülírja
+                  a heti lehetőséget.
+                </p>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void calendarPreview();
+                  }}
+                >
+                  <fieldset disabled={locked} className="space-y-6">
+                    <CalendarForm
+                      key={
+                        calendar.start_date +
+                        calendar.end_date +
+                        (calendar.mesocycle_id ?? "")
+                      }
+                      value={calendar}
+                      periods={periods}
+                      onError={report}
+                      onChange={(v) => {
+                        setCalendar(v);
+                        setReview(null);
+                      }}
+                    />
+                    <p className="text-sm">
+                      Szerkesztett időszak: {calendar.start_date} –{" "}
+                      {calendar.end_date}
+                    </p>
+                    <button className={buttonClass} type="submit">
+                      Naptár ellenőrzése és áttekintése
+                    </button>
+                  </fieldset>
+                </form>
+                {review && (
+                  <div className="mt-6 space-y-4 rounded-xl border border-teal-500/50 p-4">
+                    <p className="font-semibold">
+                      Mentendő naptár: {calendar.start_date} –{" "}
+                      {calendar.end_date}
+                    </p>
+                    <p className="text-sm">
+                      Elérhető: {review.coverage.available} nap · Nem elérhető:{" "}
+                      {review.coverage.unavailable} nap · Még nincs megadva:{" "}
+                      {review.coverage.unknown} nap.
+                    </p>
+                    <button
+                      className={buttonClass}
+                      disabled={locked}
+                      onClick={() =>
+                        stage({
+                          schema_version: "athlete-queue-v0.1",
+                          athlete_id: context.athlete_id,
+                          items: [
+                            {
+                              schema_version: "athlete-pending-v0.1",
+                              operation: "availability",
+                              body: review.body,
+                            },
+                          ],
+                        })
+                      }
+                    >
+                      Naptár mentése
+                    </button>
+                  </div>
+                )}
+              </Card>
+            </details>
           )}
           {tab === "history" && (
             <Card title="Mérések és órás adatok">
@@ -551,18 +611,22 @@ export default function AthleteWorkspace({
               </form>
             </Card>
           )}
-          <div className="flex flex-wrap gap-3">
-            <Link className={secondaryClass} href="/planning-cycles">
-              Tovább a felkészülés és ciklusok tervezéséhez
-            </Link>
-            <Link className={secondaryClass} href="/planning-goals">
-              Ciklusonkénti képességcélok és mérési protokollok
-            </Link>
-          </div>
-          <p className="text-xs leading-5 text-zinc-400">
-            A lap részei között váltva a szerkesztett adatok megmaradnak.
-            Oldalelhagyás előtt mentsd el a felmérést és külön a naptárt.
-          </p>
+          {!embedded && (
+            <>
+              <div className="flex flex-wrap gap-3">
+                <Link className={secondaryClass} href="/planning-cycles">
+                  Tovább a felkészülés és ciklusok tervezéséhez
+                </Link>
+                <Link className={secondaryClass} href="/planning-goals">
+                  Ciklusonkénti képességcélok és mérési protokollok
+                </Link>
+              </div>
+              <p className="text-xs leading-5 text-zinc-400">
+                A lap részei között váltva a szerkesztett adatok megmaradnak.
+                Oldalelhagyás előtt mentsd el a felmérést és külön a naptárt.
+              </p>
+            </>
+          )}
         </>
       )}
     </div>

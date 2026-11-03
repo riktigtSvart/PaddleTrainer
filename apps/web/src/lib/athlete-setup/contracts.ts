@@ -8,7 +8,11 @@ export type SportHistory = {
   current: boolean;
   last_active_date: string | null;
   level:
-    "unknown" | "beginner" | "recreational" | "competitive" | "professional";
+    | "unknown"
+    | "beginner"
+    | "recreational"
+    | "competitive"
+    | "professional";
   usual_sessions_per_week: number | null;
   notes: string;
 };
@@ -78,7 +82,11 @@ export type Manual = {
 export type Profile = {
   birth_date: string | null;
   sex_reference:
-    "unknown" | "female" | "male" | "intersex" | "prefer_not_to_say";
+    | "unknown"
+    | "female"
+    | "male"
+    | "intersex"
+    | "prefer_not_to_say";
   competition_category: string;
   target_sport: string;
   sport_history_status: "unknown" | "none" | "recorded";
@@ -86,12 +94,17 @@ export type Profile = {
   constraint_status: "unknown" | "none_known" | "present";
   constraints: Constraint[];
   participation:
-    "unknown" | "unrestricted" | "adapted" | "professional_review" | "paused";
+    | "unknown"
+    | "unrestricted"
+    | "adapted"
+    | "professional_review"
+    | "paused";
   interruption: "unknown" | "none" | "returning";
   last_training_date: string | null;
   typical_days_per_week: number | null;
   typical_minutes_per_week: number | null;
   resources: string[];
+  duration_doubling_slowdown_pct?: number | null;
   accessibility_needs: string;
   recovery_notes: string;
   manual_observations: Manual[];
@@ -253,9 +266,9 @@ export function newWindow(): Window {
     start_fold: null,
     end_fold: null,
     max_minutes: 0,
-    sport_scope: "unknown",
+    sport_scope: "any",
     sports: [],
-    effort_cap: "unknown",
+    effort_cap: "any",
     resources: [],
     location: "",
     notes: "",
@@ -329,6 +342,14 @@ export function decimal(value: string): string {
   return result;
 }
 export function normalizeProfile(value: Profile, today: string): Profile {
+  const slowdown = value.duration_doubling_slowdown_pct;
+  if (
+    slowdown != null &&
+    (!Number.isInteger(slowdown) || slowdown < 0 || slowdown > 20)
+  )
+    throw new Error(
+      "A távduplázás többlete 0 és 20 közötti egész százalék legyen.",
+    );
   if (value.birth_date) {
     day(value.birth_date);
     if (value.birth_date > today)

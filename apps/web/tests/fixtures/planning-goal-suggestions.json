@@ -1,0 +1,336 @@
+{
+  "schema_version": "planning-inputs-v0.1",
+  "athlete_id": "11111111-1111-4111-8111-111111111111",
+  "program_reference": {
+    "artifact_id": "pt-cycle:0378349ba51e8f34c00dc8e4e0797df912fab6a4134ef4d6b6a5ede281afe877",
+    "content_hash": "146177428d4277a7f8bb67adfa09536c6a82e6212c9f78e799a8c1637018e3f5"
+  },
+  "captured_at": "2026-10-22T09:00:00.000006+00:00",
+  "timezone_name": "Europe/Budapest",
+  "start_date": "2026-10-23",
+  "end_date": "2026-10-23",
+  "periods": [
+    {
+      "end_date": "2027-01-14",
+      "id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+      "key": "macro-1",
+      "parent_id": null,
+      "period_type": "MACROCYCLE",
+      "start_date": "2026-10-23",
+      "title": "Első makrociklus"
+    },
+    {
+      "end_date": "2026-11-19",
+      "id": "17635834-0a01-55ab-9a96-813ef1846d64",
+      "key": "m0",
+      "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+      "period_type": "MESOCYCLE",
+      "start_date": "2026-10-23",
+      "title": "Felülvizsgálandó blokk"
+    },
+    {
+      "end_date": "2026-12-17",
+      "id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+      "key": "m1",
+      "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+      "period_type": "MESOCYCLE",
+      "start_date": "2026-11-20",
+      "title": "Felülvizsgálandó blokk"
+    },
+    {
+      "end_date": "2027-01-14",
+      "id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+      "key": "m2",
+      "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+      "period_type": "MESOCYCLE",
+      "start_date": "2026-12-18",
+      "title": "Felülvizsgálandó blokk"
+    }
+  ],
+  "competitions": [],
+  "declared_goals": [
+    {
+      "key": "regular_activity",
+      "target_description": "Heti három alkalom"
+    }
+  ],
+  "goal_versions": [
+    {
+      "kind": "macrocycle_capability_plan",
+      "period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+      "artifact": {
+        "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77",
+        "schema_version": "macrocycle-capability-plan-v0.1",
+        "rules_version": "explicit-cycle-goal-rules-v0.1",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "catalog_version": "capability-measurement-catalog-v0.1",
+        "catalog_content_hash": "596c5f97a1420090eb52222600629efb91fd1207f71eb61b7554cb8c040310bf",
+        "proposal": {
+          "macrocycle_period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+          "revision": 1,
+          "supersedes": null,
+          "goals": [
+            {
+              "capability_key": "VO2_CAPACITY",
+              "role": "primary_development",
+              "rationale": "explicit"
+            }
+          ],
+          "mesocycle_directives": [
+            {
+              "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "capability_key": "VO2_CAPACITY",
+              "role": "maintenance",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+              "capability_key": "VO2_CAPACITY",
+              "role": "maintenance",
+              "rationale": "explicit"
+            },
+            {
+              "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+              "capability_key": "VO2_CAPACITY",
+              "role": "maintenance",
+              "rationale": "explicit"
+            }
+          ],
+          "rationale": "test"
+        },
+        "sources": {
+          "athlete_id": "11111111-1111-4111-8111-111111111111",
+          "timezone_name": "Europe/Budapest",
+          "hierarchy": [
+            {
+              "period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "parent_id": null,
+              "period_type": "MACROCYCLE",
+              "title": "Első makrociklus",
+              "start_date": "2026-10-23",
+              "end_date": "2027-01-14",
+              "legacy_objectives": []
+            }
+          ],
+          "mesocycles": [
+            {
+              "period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "period_type": "MESOCYCLE",
+              "title": "Felülvizsgálandó blokk",
+              "start_date": "2026-10-23",
+              "end_date": "2026-11-19",
+              "legacy_objectives": []
+            },
+            {
+              "period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "period_type": "MESOCYCLE",
+              "title": "Felülvizsgálandó blokk",
+              "start_date": "2026-11-20",
+              "end_date": "2026-12-17",
+              "legacy_objectives": []
+            },
+            {
+              "period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+              "athlete_id": "11111111-1111-4111-8111-111111111111",
+              "parent_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+              "period_type": "MESOCYCLE",
+              "title": "Felülvizsgálandó blokk",
+              "start_date": "2026-12-18",
+              "end_date": "2027-01-14",
+              "legacy_objectives": []
+            }
+          ]
+        },
+        "previous_source": null,
+        "unassigned_capability_keys": [
+          "PERIPHERAL_OXIDATIVE_CAPACITY",
+          "PADDLING_ECONOMY",
+          "MAX_STRENGTH",
+          "POWER_RFD",
+          "MUSCULOSKELETAL_ROBUSTNESS",
+          "TECHNICAL_SKILL",
+          "TECHNICAL_STABILITY_UNDER_FATIGUE",
+          "LONG_DURATION_DURABILITY",
+          "PACING_COMPETENCE",
+          "SPRINT_SPEED_AND_START",
+          "MUSCULAR_ENDURANCE",
+          "HIGH_INTENSITY_AND_ANAEROBIC_PROFILE"
+        ],
+        "authority": {
+          "shadow_only": true,
+          "capability_change_established": false,
+          "physiological_adaptation_established": false,
+          "comparative_utility_endpoint_preregistered": false,
+          "planning_utility_supported": false,
+          "causal_attribution_established": false,
+          "planning_authorized": false,
+          "planner_runtime_modified": false
+        },
+        "created_at": "2026-10-22T09:00:00.000003Z",
+        "content_hash_algorithm": "sha256-canonical-json-v0.1",
+        "content_hash": "8e622d8f267593617c657bd6ea6659be94b4e7646baa201d6a48f2ab836aa5b8"
+      },
+      "available_at": "2026-10-22T09:00:00.000004+00:00"
+    }
+  ],
+  "profile": null,
+  "calendar_reference": null,
+  "availability_reference": null,
+  "boundary_reference": null,
+  "competition_reference": null,
+  "days": [
+    {
+      "date": "2026-10-23",
+      "availability_state": "unknown",
+      "mesocycle_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+      "capability_roles": [
+        {
+          "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+          "capability_key": "VO2_CAPACITY",
+          "role": "maintenance",
+          "rationale": "explicit"
+        }
+      ],
+      "opportunities": [],
+      "daily_max_minutes": null
+    }
+  ],
+  "existing_plans": [
+    {
+      "timing": {
+        "id": "00000000-0000-0000-0000-0000000ab24a",
+        "title": "Untimed",
+        "date": "2026-10-23",
+        "start_at": null,
+        "duration_sec": null,
+        "duration_estimate": null
+      },
+      "workout": {
+        "id": "00000000-0000-0000-0000-0000000ab24a",
+        "date": "2026-10-23",
+        "planned_start_time": null,
+        "sport": "RUNNING",
+        "title": "Untimed",
+        "description": null,
+        "duration_sec": null,
+        "distance_m": null,
+        "intensity_type": null,
+        "status": "PLANNED",
+        "source": "MANUAL",
+        "polar_target_id": null,
+        "training_period_id": null,
+        "blocks": []
+      },
+      "authority_status": "current_application_projection_not_authoritative_revision"
+    }
+  ],
+  "existing_conflicts": [],
+  "recent_sessions": [],
+  "recovery_records": [],
+  "recent_window": {
+    "start_at": "2026-10-07T22:00:00+00:00",
+    "end_at": "2026-10-22T09:00:00.000006+00:00",
+    "coverage": "stored_records_only_not_exhaustive"
+  },
+  "feedback": [],
+  "gaps": [
+    "PROFILE_NOT_RECORDED",
+    "AVAILABILITY_PARTLY_UNKNOWN",
+    "NO_RECENT_SELF_REPORT",
+    "NO_RECENT_RECOVERY_RECORD"
+  ],
+  "planner_connection": {
+    "inputs_assembled": true,
+    "workout_generator_connected": false,
+    "dose_policy_connected": false,
+    "personal_model_applied": false
+  },
+  "capture_finished_at": "2026-10-22T09:00:00.000009+00:00",
+  "mutable_source_semantics": "current_read_span",
+  "historical_replay_supported": false,
+  "windows_share_budgets_across_days": true,
+  "revalidate_before_planning": true,
+  "durable": false,
+  "has_more": false,
+  "planning_authorized": false,
+  "workouts_created": false,
+  "workouts_changed": false,
+  "goal_suggestions": {
+    "schema_version": "planning-goal-suggestions-v0.1",
+    "rules_version": "declared-goal-review-v0.1",
+    "registry_reference": {
+      "version": "workout_family_registry_v0.1",
+      "content_hash": "fe90b7bde90e37b814d236f4e17b2c7f0203667bb42df560c552bb095eefd853"
+    },
+    "macrocycles": [
+      {
+        "macrocycle_period_id": "0d9302b0-91f7-5b2e-9375-4dd0e91d92b2",
+        "base_reference": {
+          "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77",
+          "content_hash": "8e622d8f267593617c657bd6ea6659be94b4e7646baa201d6a48f2ab836aa5b8"
+        },
+        "base_revision": 1,
+        "rows": [
+          {
+            "capability_key": "VO2_CAPACITY",
+            "role": "primary_development",
+            "rationale": "explicit",
+            "origin": "recorded",
+            "sources": [
+              {
+                "kind": "recorded_goal",
+                "artifact_id": "pt-goal:c0a1006ac8f048f14960223858da53f36fc1e431be3abc49b94441b871d4fb77"
+              }
+            ],
+            "mesocycle_directives": [
+              {
+                "mesocycle_period_id": "17635834-0a01-55ab-9a96-813ef1846d64",
+                "role": "maintenance",
+                "rationale": "explicit",
+                "origin": "recorded"
+              },
+              {
+                "mesocycle_period_id": "9aa324a2-0be1-56c3-acba-6bc9f6de0667",
+                "role": "maintenance",
+                "rationale": "explicit",
+                "origin": "recorded"
+              },
+              {
+                "mesocycle_period_id": "9a215634-411a-5eb8-a2e6-6d8120d672ae",
+                "role": "maintenance",
+                "rationale": "explicit",
+                "origin": "recorded"
+              }
+            ],
+            "family_links": [
+              {
+                "family_key": "RUN_EASY_AEROBIC_FALLBACK",
+                "family_version": "v0.1",
+                "modality_key": "RUN",
+                "match": "primary",
+                "eligibility_evaluated": false,
+                "selected": false
+              }
+            ],
+            "family_coverage": "linked_not_evaluated"
+          }
+        ],
+        "unprofiled_event_keys": [],
+        "unmapped_goal_keys": [
+          "regular_activity"
+        ]
+      }
+    ],
+    "review_required": true,
+    "periodization_inferred": false,
+    "dose_selected": false,
+    "family_selection_authorized": false,
+    "committed": false
+  },
+  "content_hash": "8b7eb9b863e5e66d4f58baaeccd4ced2f943f547348d9c309c83d702a530c39c"
+}

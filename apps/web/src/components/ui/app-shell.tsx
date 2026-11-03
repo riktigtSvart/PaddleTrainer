@@ -7,22 +7,55 @@ import Icon from "./icon";
 import type { IconName } from "./icon";
 import ThemeControl from "./theme-control";
 import DataConnectionsControl from "./data-connections-control";
-const navigation: { href: string; label: string; icon: IconName }[] = [
-  { href: "/", label: "Napirend", icon: "calendar" },
-  { href: "/planning-cycles", label: "Felkészülés", icon: "target" },
-  { href: "/planning-goals", label: "Fejlődés", icon: "chart" },
-  { href: "/athlete-setup", label: "Sportolói profil", icon: "user" },
+const navigation: {
+  href: string;
+  label: string;
+  icon: IconName;
+  children?: { href: string; label: string }[];
+}[] = [
+  { href: "/", label: "Naptár", icon: "calendar" },
+  {
+    href: "/training-planning",
+    label: "Edzéstervezés",
+    icon: "target",
+    children: [
+      { href: "/training-planning", label: "Tervezés lépései" },
+      { href: "/planning-cycles", label: "Edzésterv és ciklusok" },
+      { href: "/planning-goals", label: "Fejlődési célok" },
+    ],
+  },
+  {
+    href: "/training-options/locations",
+    label: "Edzési lehetőségek",
+    icon: "activity",
+    children: [
+      { href: "/training-options/locations", label: "Helyszínek" },
+      { href: "/training-options/schedule", label: "Általános órarend" },
+    ],
+  },
+  { href: "/nutrition", label: "Táplálkozás", icon: "activity" },
   { href: "/shopping", label: "Bevásárlás", icon: "cart" },
+  {
+    href: "/athlete-setup",
+    label: "Személyes adatok",
+    icon: "user",
+    children: [
+      { href: "/athlete-setup", label: "Sportolói felmérés" },
+      { href: "/personal-response", label: "Személyes válaszadatok" },
+    ],
+  },
   { href: "/settings", label: "Beállítások", icon: "settings" },
 ];
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname(),
     [compact, setCompact] = useState(false);
-  const current = navigation.find((item) =>
-    item.href === "/"
+  const matches = (href: string) =>
+    href === "/"
       ? pathname === "/"
-      : pathname.startsWith(item.href) ||
-        (item.href === "/planning-goals" && pathname === "/personal-response"),
+      : pathname === href || pathname.startsWith(href + "/");
+  const current = navigation.find(
+    (item) =>
+      matches(item.href) || item.children?.some((child) => matches(child.href)),
   );
   return (
     <div className={`pt-frame${compact ? " pt-compact" : ""}`}>
@@ -36,15 +69,45 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </Link>
         <nav aria-label="Fő navigáció">
           {navigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={item.label}
-              aria-current={current?.href === item.href ? "page" : undefined}
-            >
-              <Icon name={item.icon} />
-              <span>{item.label}</span>
-            </Link>
+            <div key={item.href} className="pt-nav-group">
+              <Link
+                key={item.href}
+                href={item.href}
+                title={item.label}
+                aria-current={
+                  current?.href === item.href && !item.children
+                    ? "page"
+                    : undefined
+                }
+                aria-expanded={
+                  item.children ? current?.href === item.href : undefined
+                }
+                aria-controls={
+                  item.children ? `pt-subnav-${item.icon}` : undefined
+                }
+              >
+                <Icon name={item.icon} />
+                <span>{item.label}</span>
+              </Link>
+              {item.children && current?.href === item.href && (
+                <div
+                  className="pt-subnav"
+                  id={`pt-subnav-${item.icon}`}
+                  role="group"
+                  aria-label={`${item.label} részei`}
+                >
+                  {item.children.map((child) => (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      aria-current={matches(child.href) ? "page" : undefined}
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
         <div className="pt-nav-bottom pt-nav-tools">

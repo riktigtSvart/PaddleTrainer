@@ -6,6 +6,9 @@ import { gateLabels, reasonLabels } from "@/lib/athlete-setup/contracts";
 import type { Context } from "@/lib/athlete-setup/contracts";
 import type { AthleteContext } from "@/lib/planning-cycles/contracts";
 import { Message, secondaryClass } from "@/components/planning-goals/fields";
+import { loadConstraints } from "@/lib/calendar/constraint-client";
+import { setupSteps } from "@/lib/athlete-setup/journey";
+import type { ScheduleContext } from "@/lib/calendar/constraints";
 export default function AthleteContextBanner({
   onChange,
 }: {
@@ -14,12 +17,19 @@ export default function AthleteContextBanner({
   const [context, setContext] = useState<Context | null>(null),
     [failure, setFailure] = useState(""),
     [reload, setReload] = useState(0);
+  const [schedule, setSchedule] = useState<ScheduleContext | null>(null);
   useEffect(() => {
     const abort = new AbortController();
-    loadContext(abort.signal)
-      .then((c) => {
+    Promise.all([
+      loadContext(abort.signal),
+      loadConstraints(null, abort.signal),
+    ])
+      .then(([c, s]) => {
         if (!abort.signal.aborted) {
+          if (s.athlete_id !== c.athlete_id)
+            throw Error("A naptár és a felmérés tulajdonosa eltér.");
           setContext(c);
+          setSchedule(s);
           setFailure("");
           onChange?.(c.references.profile_reference ? c.references : undefined);
         }
@@ -59,13 +69,32 @@ export default function AthleteContextBanner({
               ))}
             </ul>
           )}
-          <p>
-            Naptár:{" "}
-            {context.availability
-              ? `${context.availability.artifact.proposal.data && "start_date" in context.availability.artifact.proposal.data ? context.availability.artifact.proposal.data.start_date : ""} – ${context.availability.artifact.proposal.data && "end_date" in context.availability.artifact.proposal.data ? context.availability.artifact.proposal.data.end_date : ""}`
-              : "még nincs kitöltve"}
-            . A heti átlag nem tölti ki a hiányzó napokat.
-          </p>
+          <ol className="grid gap-3 sm:grid-cols-3">
+            {setupSteps(context, schedule).map((step, i) => (
+              <li
+                key={step.key}
+                className="rounded-lg border border-zinc-700 p-3"
+              >
+                <p className="text-xs text-teal-400">
+                  {i + 1}. lépés ·{" "}
+                  {step.state === "ready"
+                    ? "Mentett adat"
+                    : step.state === "optional"
+                      ? "Pontosítható"
+                      : "Még szükséges"}
+                </p>
+                <Link
+                  className="font-medium underline"
+                  href={`/athlete-setup#${step.key}`}
+                >
+                  {step.title}
+                </Link>
+                <p className="mt-2 text-xs leading-5 text-zinc-400">
+                  {step.detail}
+                </p>
+              </li>
+            ))}
+          </ol>
         </>
       )}
       <div className="flex flex-wrap gap-3">

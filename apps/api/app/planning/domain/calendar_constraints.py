@@ -138,12 +138,14 @@ def opportunities(availability, occurrences, first, last, zone):
         for w in day["windows"]:
             windows.append({"key": "legacy:" + day["date"] + ":" + w["key"], "source_date": day["date"],
                 "start_at": w["start_at"], "end_at": w["end_at"], "max_minutes": w["max_minutes"],
-                "source": "athlete_availability", "daily_max_minutes": day["max_total_minutes"]})
+                "source": "athlete_availability", "daily_max_minutes": day["max_total_minutes"],
+                "constraints": {key: deepcopy(w[key]) for key in ("sport_scope", "sports", "effort_cap", "resources", "location")}})
     for item in occurrences:
         if item["details"]["kind"] == "available":
             windows.append({"key": item["key"], "source_date": item["source_date"], "start_at": item["start_at"],
                 "end_at": item["end_at"], "max_minutes": item["details"]["max_minutes"],
-                "source": "calendar_rule", "daily_max_minutes": days.get(item["source_date"], {}).get("max_total_minutes")})
+                "source": "training_options" if item["key"].startswith("options:") else "calendar_rule", "daily_max_minutes": days.get(item["source_date"], {}).get("max_total_minutes"),
+                "constraints": {key: deepcopy(item["details"][key]) for key in ("sport_scope", "sports", "effort_cap", "resources", "location", "location_id", "resources_scope", "alternative_group_key", "combine_allowed", "location_issues") if key in item["details"]}})
     hard = [o for o in occurrences if o["details"]["kind"] == "busy" and o["details"]["firmness"] == "fixed"]
     blocked = [(datetime.fromisoformat(o["start_at"]), datetime.fromisoformat(o["end_at"])) for o in hard if o["start_at"]]
     if availability:
@@ -227,15 +229,17 @@ def opportunity_conflicts(plans, groups, availability, already_blocked):
         if day and day["status"] == "unavailable":
             code = "TRAINING_DAY_UNAVAILABLE"
         elif candidates:
-            if start is None:
+            if plan.get("sport") and all(group.get("constraints", {}).get("resources_scope") == "location" and plan["sport"] not in group["constraints"].get("sports", []) for group in candidates):
+                code = "SPORT_NOT_AVAILABLE_AT_LOCATION"
+            elif start is None:
                 code, severity = "PLAN_TIME_UNKNOWN", "review"
             elif duration_bounds(plan)[1] is None:
                 code, severity = "OPPORTUNITY_FIT_UNKNOWN", "review"
             else:
                 lower, upper, estimated = duration_bounds(plan)
-                def fits(seconds):
+                def fits(seconds, start=start, plan=plan, candidates=candidates):
                     end = start + timedelta(seconds=seconds)
-                    return any(g["known"] and seconds / 60 <= g["max_minutes"]
+                    return any(g["known"] and (g.get("constraints", {}).get("resources_scope") != "location" or not plan.get("sport") or plan["sport"] in g["constraints"].get("sports", [])) and seconds / 60 <= g["max_minutes"]
                         and (g["daily_max_minutes"] is None or seconds / 60 <= g["daily_max_minutes"])
                         and any(datetime.fromisoformat(i["start_at"]) <= start < datetime.fromisoformat(i["end_at"])
                             and end <= datetime.fromisoformat(i["end_at"]) for i in g["intervals"]) for g in candidates)

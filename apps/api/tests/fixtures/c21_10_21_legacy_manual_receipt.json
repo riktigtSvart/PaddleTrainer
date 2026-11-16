@@ -1,0 +1,70 @@
+{
+  "request": {
+    "request_id": "00000000-0000-0000-0000-000001424401",
+    "operation": "create",
+    "timezone_name": "Europe/Budapest",
+    "draft": {
+      "date": "2026-11-20",
+      "start_time": "18:30",
+      "sport": "STRENGTH",
+      "title": "Saját erősítés",
+      "duration_sec": 3600,
+      "description": "Saját edzéstervem",
+      "location": "Csónakház",
+      "primary_goal": "MAX_STRENGTH",
+      "phases": [
+        {
+          "block_type": "WARMUP",
+          "name": "Bemelegítés",
+          "duration_sec": 600
+        },
+        {
+          "block_type": "WORK",
+          "name": "Erősítés",
+          "duration_sec": 2400
+        },
+        {
+          "block_type": "COOLDOWN",
+          "name": "Levezetés",
+          "duration_sec": 600
+        }
+      ],
+      "exercises": [
+        {
+          "name": "Saját fekvenyomás",
+          "sets": 4,
+          "reps": 8,
+          "load_mode": "kg",
+          "weight_kg": "72.125",
+          "rest_seconds": 180,
+          "reserve_reps": 2
+        },
+        {
+          "exercise_id": "pullup",
+          "name": "Húzódzkodás",
+          "sets": 3,
+          "reps": 6,
+          "load_mode": "bodyweight",
+          "rest_seconds": 120
+        }
+      ]
+    }
+  },
+  "receipt": {
+    "schema_version": "manual-workout-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "committed": true,
+    "reused": false,
+    "request_id": "00000000-0000-0000-0000-000001424401",
+    "artifact_id": "pt-manual-workout:9c168cad5b59137b32b033b04a11e8de41a8bccf3c512807e7ad24148807a470:00000000000000000000000001424401",
+    "content_hash": "8a0c492146b8723c0a762b3334cc3ee55c51501bfa2d2450379e7eaca2f27302",
+    "operation": "create",
+    "workout_ids": [
+      "a096dbd9-7a85-5cbd-b877-6dda8c66f17b"
+    ],
+    "warnings": [],
+    "provider_writeback": false,
+    "actual_training_changed": false
+  },
+  "contract_json": "{\"actual_training_changed\":false,\"after\":[{\"raw_data_hash\":\"9dec8724b2fc41464439650fa6a9f64280f0f820549b59d02cadfce67f66f2ec\",\"updated_at\":\"2026-11-16T07:32:27.122148+00:00\",\"workout\":{\"blocks\":[{\"block_type\":\"WARMUP\",\"distance_m\":null,\"duration_sec\":600,\"id\":\"90aafe13-7380-578b-aeef-97a910102284\",\"intensity_max\":null,\"intensity_min\":null,\"intensity_type\":null,\"name\":\"Bemelegítés\",\"parent_block_id\":null,\"position\":0,\"repeat_count\":1},{\"block_type\":\"WORK\",\"distance_m\":null,\"duration_sec\":2400,\"id\":\"3e4fbf52-023d-54d3-99dd-569d9e635928\",\"intensity_max\":null,\"intensity_min\":null,\"intensity_type\":null,\"name\":\"Erősítés\",\"parent_block_id\":null,\"position\":1,\"repeat_count\":1},{\"block_type\":\"COOLDOWN\",\"distance_m\":null,\"duration_sec\":600,\"id\":\"a34064f1-eb95-5218-bf43-50716fb19b42\",\"intensity_max\":null,\"intensity_min\":null,\"intensity_type\":null,\"name\":\"Levezetés\",\"parent_block_id\":null,\"position\":2,\"repeat_count\":1}],\"date\":\"2026-11-20\",\"description\":\"Saját edzéstervem\",\"distance_m\":null,\"duration_sec\":3600,\"id\":\"a096dbd9-7a85-5cbd-b877-6dda8c66f17b\",\"intensity_type\":null,\"planned_start_time\":\"2026-11-20T17:30:00+00:00\",\"polar_target_id\":null,\"source\":\"MANUAL\",\"sport\":\"STRENGTH\",\"status\":\"PLANNED\",\"title\":\"Saját erősítés\",\"training_period_id\":null}}],\"artifact_id\":\"pt-manual-workout:9c168cad5b59137b32b033b04a11e8de41a8bccf3c512807e7ad24148807a470:00000000000000000000000001424401\",\"athlete_id\":\"11111111-1111-4111-8111-111111111111\",\"before\":null,\"content_hash\":\"8a0c492146b8723c0a762b3334cc3ee55c51501bfa2d2450379e7eaca2f27302\",\"created_at\":\"2026-11-16T07:32:27.126466+00:00\",\"proposal\":{\"copy_from\":null,\"copy_source_hash\":null,\"draft\":{\"date\":\"2026-11-20\",\"description\":\"Saját edzéstervem\",\"distance_m\":null,\"duration_sec\":3600,\"exercises\":[{\"exercise_id\":null,\"hold_seconds\":null,\"load_basis\":\"total\",\"load_mode\":\"kg\",\"name\":\"Saját fekvenyomás\",\"notes\":\"\",\"reps\":8,\"reserve_reps\":2,\"rest_seconds\":180,\"sets\":4,\"weight_kg\":\"72.125\"},{\"exercise_id\":\"pullup\",\"hold_seconds\":null,\"load_basis\":\"total\",\"load_mode\":\"bodyweight\",\"name\":\"Húzódzkodás\",\"notes\":\"\",\"reps\":6,\"reserve_reps\":null,\"rest_seconds\":120,\"sets\":3,\"weight_kg\":null}],\"intensity_type\":null,\"location\":\"Csónakház\",\"mesocycle_id\":null,\"phases\":[{\"block_type\":\"WARMUP\",\"distance_m\":null,\"duration_sec\":600,\"intensity_max\":null,\"intensity_min\":null,\"intensity_type\":null,\"name\":\"Bemelegítés\",\"notes\":\"\",\"repeat_count\":1},{\"block_type\":\"WORK\",\"distance_m\":null,\"duration_sec\":2400,\"intensity_max\":null,\"intensity_min\":null,\"intensity_type\":null,\"name\":\"Erősítés\",\"notes\":\"\",\"repeat_count\":1},{\"block_type\":\"COOLDOWN\",\"distance_m\":null,\"duration_sec\":600,\"intensity_max\":null,\"intensity_min\":null,\"intensity_type\":null,\"name\":\"Levezetés\",\"notes\":\"\",\"repeat_count\":1}],\"primary_goal\":\"MAX_STRENGTH\",\"sport\":\"STRENGTH\",\"start_fold\":null,\"start_time\":\"18:30\",\"title\":\"Saját erősítés\"},\"expected_goal_reference\":null,\"expected_source_hash\":null,\"operation\":\"create\",\"repeat_dates\":[],\"request_id\":\"00000000-0000-0000-0000-000001424401\",\"timezone_name\":\"Europe/Budapest\",\"workout_id\":null},\"provider_writeback\":false,\"schema_version\":\"manual-workout-v0.1\",\"warnings\":[],\"workout_ids\":[\"a096dbd9-7a85-5cbd-b877-6dda8c66f17b\"]}"
+}

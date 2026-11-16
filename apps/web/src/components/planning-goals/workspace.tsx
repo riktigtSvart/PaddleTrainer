@@ -19,7 +19,7 @@ import {
   readPending,
 } from "@/lib/planning-goals/contracts";
 import type { PendingRequest } from "@/lib/planning-goals/contracts";
-import { dateLabel, resourceLabels } from "@/lib/planning-goals/labels";
+import { capabilityLabels, dateLabel, resourceLabels, roleLabels } from "@/lib/planning-goals/labels";
 import { RESOURCES } from "@/lib/planning-goals/types";
 import type {
   ArtifactPage,
@@ -61,9 +61,11 @@ function savedLabel(receipt: Receipt) {
 export default function GoalWorkspace({
   initialPeriod,
   initialCycle = "",
+  strategyOnly = false,
 }: {
   initialPeriod: string;
   initialCycle?: string;
+  strategyOnly?: boolean;
 }) {
   const [cycleContext, setCycleContext] = useState<CycleDetail | null>(null);
   const [cycleError, setCycleError] = useState("");
@@ -367,6 +369,29 @@ export default function GoalWorkspace({
   const suggestedCapabilities = [
     ...new Set(relevantEvents.flatMap((c) => c.profile?.capability_keys ?? [])),
   ];
+  if (strategyOnly) {
+    const matching = macroItems?.filter((v) => v.artifact.proposal.macrocycle_period_id === periodId) ?? [];
+    const latest = matching.toSorted((a, b) => a.artifact.proposal.revision - b.artifact.proposal.revision).at(-1);
+    return <div className="pt-goal-strategy space-y-4">
+      <div ref={statusArea} tabIndex={-1} className="outline-none">
+        {(failure || cycleError || loadError) && <Message error>{failure || cycleError || loadError}</Message>}
+        {success && <Message>{success}</Message>}
+        {pending && <div className="pt-data-actions"><p>A korábbi célmentés még ellenőrzésre vár.</p><button className={secondaryClass} type="button" disabled={busy} onClick={() => void send(pending)}>Mentés ellenőrzése és folytatása</button>{rejected && <button className={secondaryClass} type="button" disabled={busy} onClick={() => { sessionStorage.removeItem(PENDING_KEY); setPending(null); setFailure(""); setRejected(false); }}>Vissza a szerkesztéshez</button>}</div>}
+      </div>
+      {!loaded && !loadError && <p role="status">Fejlesztési célok betöltése…</p>}
+      {loaded && period?.period_type === "MACROCYCLE" && <>
+        {!creating && <>
+          {latest ? <ul className="pt-strategy-list">{latest.artifact.proposal.goals.map((goal) => <li key={goal.capability_key}><strong>{capabilityLabels[goal.capability_key] ?? goal.capability_key}</strong> · {roleLabels[goal.role]}</li>)}</ul> : <p>A ciklusonkénti fejlesztési célok még nincsenek megadva.</p>}
+          <button className={secondaryClass} type="button" disabled={locked || (loaded.pages["macrocycle-plans"].has_more && !latest)} onClick={() => { setResource("macrocycle-plans"); setBase(latest); setCreating(true); }}>Ciklusonkénti fejlesztési célok {latest ? "szerkesztése" : "megadása"}</button>
+          {loaded.pages["macrocycle-plans"].has_more && <button className={secondaryClass} type="button" disabled={paging} onClick={() => void more()}>További célváltozatok betöltése</button>}
+        </>}
+        {creating && <MacroForm key={periodId + (base?.artifact.artifact_id ?? "new")} catalog={loaded.catalog} period={period} periods={loaded.periods} base={base as Receipt<MacroArtifact> | undefined} locked={locked} suggestedCapabilities={suggestedCapabilities}
+          cycle={cycleContext ? { owner: cycleContext.program.artifact.athlete_id, reference: cycleContext.program.artifact, zone: cycleContext.program.artifact.timezone_name, today: new Intl.DateTimeFormat("en-CA", { timeZone: cycleContext.program.artifact.timezone_name, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()) } : undefined}
+          submit={submit} invalid={report} />}
+      </>}
+      {loaded && (!period || period.period_type !== "MACROCYCLE") && <p role="alert">A kiválasztott makrociklus nem tölthető be.</p>}
+    </div>;
+  }
   return (
     <div className="space-y-7">
       {cycleError && <Message error>{cycleError}</Message>}

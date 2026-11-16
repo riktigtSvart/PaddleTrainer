@@ -6,8 +6,9 @@ import { readEditorPending, readProposal, readScheduleReceipt } from "./constrai
 import type { Details, EditorPending, Receipt, Schedule, ScheduleContext } from "./constraints";
 
 export const EDITOR_UNDO = "paddletrainer.calendar-editor.undo.v1";
+export const EDITOR_REDO = "paddletrainer.calendar-editor.redo.v1";
 type Saved = Receipt | AvailabilityReceipt;
-export type Recovery = EditorPending & { history?: { before: Saved | null; isUndo: boolean } };
+export type Recovery = EditorPending & { history?: { before: Saved | null; isUndo: boolean; isRedo?: boolean } };
 export type UndoRecord = { version: "calendar-undo-v0.1"; owner: string; operation: EditorPending["operation"]; before: Saved | null; after: Saved };
 async function verified(value: unknown, operation: EditorPending["operation"], owner: string, body?: string): Promise<Saved> {
   if (operation === "constraints") return readScheduleReceipt(value, owner, body);
@@ -15,28 +16,38 @@ async function verified(value: unknown, operation: EditorPending["operation"], o
   requireValue(r.artifact.kind === "availability" && r.artifact.athlete_id === owner, "Másik sportolóhoz vagy művelethez tartozó visszavonás.");
   return r;
 }
-export function withHistory(pending: EditorPending, context: ScheduleContext, isUndo: boolean): Recovery {
+export function withHistory(pending: EditorPending, context: ScheduleContext, isUndo: boolean, isRedo = false): Recovery {
   requireValue(pending.owner === context.athlete_id);
-  return { ...pending, history: { before: pending.operation === "constraints" ? context.saved : context.availability, isUndo } };
+  requireValue(!isUndo || !isRedo);
+  return { ...pending, history: { before: pending.operation === "constraints" ? context.saved : context.availability, isUndo, ...(isRedo ? { isRedo: true } : {}) } };
 }
 export async function readRecovery(raw: string): Promise<Recovery> {
   const p = readEditorPending(raw) as Recovery;
   if (p.history !== undefined) {
     const h = object(p.history);
     requireValue(typeof h.isUndo === "boolean");
+    requireValue(h.isRedo === undefined || typeof h.isRedo === "boolean");
+    requireValue(!h.isUndo || !h.isRedo);
     const before = h.before === null ? null : await verified(h.before, p.operation, p.owner);
     requireValue(p.operation === "constraints" || before !== null);
     requireValue(canonical(object(JSON.parse(p.body)).previous_reference) === canonical(before ? ref(before.artifact) : null),
       "A mentés előzménye nem egyezik a visszavonási adatokkal.");
-    p.history = { before, isUndo: h.isUndo };
+    p.history = { before, isUndo: h.isUndo, ...(h.isRedo !== undefined ? { isRedo: h.isRedo as boolean } : {}) };
   }
   return p;
 }
 export async function makeUndo(pending: Recovery, receipt: Saved): Promise<UndoRecord | null> {
   if (!pending.history || pending.history.isUndo) return null;
+  return historyRecord(pending, receipt);
+}
+export async function makeRedo(pending: Recovery, receipt: Saved): Promise<UndoRecord | null> {
+  if (!pending.history?.isUndo) return null;
+  return historyRecord(pending, receipt);
+}
+async function historyRecord(pending: Recovery, receipt: Saved): Promise<UndoRecord> {
   const after = await verified(receipt, pending.operation, pending.owner, pending.body);
   return readUndo(JSON.stringify({ version: "calendar-undo-v0.1", owner: pending.owner, operation: pending.operation,
-    before: pending.history.before, after }));
+    before: pending.history!.before, after }));
 }
 export async function readUndo(raw: string): Promise<UndoRecord> {
   const u = object(JSON.parse(raw));

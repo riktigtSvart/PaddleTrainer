@@ -48,6 +48,10 @@ async def review(identity: Identity, payload: ReviewInput, db: DB, owner: Owner)
             program_id=identity,
             first=payload.start_date,
             last=payload.end_date,
+            coordinate_mesocycles=payload.coordinate_mesocycles,
+            reset_calibration=payload.coordinate_mesocycles is True,
+            same_day_replacement=payload.same_day_replacement.model_dump(mode="json") if payload.same_day_replacement else None,
+            alternatives_for=payload.alternatives_for.model_dump(mode='json') if payload.alternatives_for else None,
         )
     )
 

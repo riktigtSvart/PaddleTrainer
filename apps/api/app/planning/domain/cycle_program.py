@@ -95,6 +95,8 @@ def period_id(athlete_id, program_id, key):
 
 
 def registration_slot(athlete_id, proposal):
+    if proposal.get('replacement'):
+        return replacement_slot(athlete_id, proposal['replacement']['program_reference']['artifact_id'])
     previous = proposal["continued_from"]
     if previous is None:
         return slot(athlete_id, proposal["program_id"])
@@ -106,6 +108,11 @@ def registration_slot(athlete_id, proposal):
             "previous_artifact_id": previous["artifact_id"],
         }
     )
+
+
+def replacement_slot(athlete_id, previous_artifact_id):
+    return 'pt-cycle:' + compute_content_hash({'scope': 'cycle-program-replacement',
+        'athlete_id': athlete_id, 'previous_artifact_id': previous_artifact_id})
 
 
 def _interval(node):
@@ -277,6 +284,7 @@ def build_registration(
     calendar_snapshot=None,
     continuation=None,
     athlete_snapshot=None,
+    replaced=None,
 ):
     periods, calendar = build_structure(
         proposal,
@@ -297,6 +305,17 @@ def build_registration(
         )
         reject(proposal["sport"] != continuation["proposal"]["sport"], "CYCLE_CONTINUATION_SPORT")
         family = continuation["program_family_id"]
+    replacement = proposal.get('replacement')
+    reject(bool(replacement) != (replaced is not None), 'CYCLE_REPLACEMENT_REQUIRED')
+    if replaced is not None:
+        reject(replacement['program_reference'] != reference(replaced), 'CYCLE_REFERENCE_DIFFERS')
+        reject(replacement['revision'] != replaced['proposal'].get('replacement', {}).get('revision', 0) + 1,
+               'CYCLE_REVISION_CHAIN')
+        reject(proposal['program_id'] == replaced['proposal']['program_id'], 'CYCLE_REQUEST_IDENTITY_CONFLICT')
+        reject(proposal['mode'] != replaced['proposal']['mode'] or 'athlete_context' not in proposal,
+               'CYCLE_REPLACEMENT_CONTEXT_REQUIRED')
+        reject(proposal['continued_from'] != replaced['proposal']['continued_from'], 'CYCLE_REFERENCE_DIFFERS')
+        family = replaced['program_family_id']
     artifact = {
         "artifact_id": registration_slot(athlete_id, proposal),
         "schema_version": context.INTAKE_SCHEMA

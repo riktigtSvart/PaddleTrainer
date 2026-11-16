@@ -7,6 +7,19 @@
 .pt-development-nav a:focus-visible { outline: 2px solid var(--pt-accent); outline-offset: 3px; }
 .pt-calendar { padding: 12px 20px 16px; }
 .pt-calendar-toolbar { gap: 10px; margin: 0 0 10px; }
+.pt-calendar-week-start { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--pt-muted); font-size: 13px; }
+.pt-calendar-week-start select { max-width: 100%; min-height: 36px; padding: 7px 10px; border: 1px solid var(--pt-line); border-radius: 7px; background: var(--pt-panel); color: var(--pt-text); }
+.pt-calendar-week-start select:focus-visible { outline: 2px solid var(--pt-accent); outline-offset: 2px; }
+.pt-workout-instructions { margin-top: 18px; }
+.pt-workout-instructions > h3 { margin-bottom: 8px; font-size: 18px; font-weight: 650; }
+.pt-workout-instructions h4 { margin-bottom: 8px; font-weight: 650; }
+.pt-workout-instructions .pt-data-panel { margin-top: 12px; }
+.pt-workout-instructions ol, .pt-workout-instructions ul { padding-left: 22px; }
+.pt-workout-instructions ol { list-style: decimal; }
+.pt-workout-instructions ul { list-style: disc; }
+.pt-workout-instructions li + li { margin-top: 10px; }
+.pt-workout-instructions summary { cursor: pointer; }
+.pt-workout-instructions a { color: var(--pt-accent); text-decoration: underline; }
 .pt-calendar .pt-date-controls { gap: 5px; }
 .pt-calendar .pt-zoom { width: auto; min-width: 0; }
 .pt-calendar .pt-zoom-labels { display: flex; gap: 4px; }
@@ -65,3 +78,53 @@
   .pt-compact .pt-nav-tools span { display: inline; }
   .pt-overview-chunk .pt-month-cell { min-height: 84px; }
 }
+
+.pt-cycle-progress { display: flex; flex-wrap: wrap; gap: 5px 18px; padding: 5px 9px; margin: 0 0 6px; border-left: 3px solid var(--pt-accent); background: var(--pt-soft); font-size: 12px; }
+.pt-cycle-progress a { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--pt-text); }
+.pt-cycle-progress a span + span { color: var(--pt-muted); }
+.pt-cycle-markers { display: flex; gap: 2px 5px; flex-wrap: wrap; margin: 2px 0; font-size: 10px; line-height: 1.25; }
+.pt-cycle-markers > span { color: var(--pt-accent); border-inline-start: 2px solid currentColor; padding-inline-start: 3px; }
+.pt-cycle-markers [data-cycle-kind="micro"] { color: var(--pt-muted); border-inline-start-style: dashed; }
+.pt-cycle-markers [data-cycle-edge="end"] { border-inline-start: 0; border-inline-end: 2px solid currentColor; padding-inline: 0 3px; }
+.pt-calendar [data-cycle-start~="meso"] { box-shadow: inset 3px 0 var(--pt-accent); }
+.pt-calendar [data-cycle-end~="meso"] { border-inline-end: 3px solid var(--pt-accent); }
+.pt-calendar [data-cycle-start~="micro"]:not([data-cycle-start~="meso"]) { border-inline-start: 2px dashed var(--pt-line); }
+.pt-calendar [data-cycle-end~="micro"]:not([data-cycle-end~="meso"]) { border-inline-end: 2px dashed var(--pt-line); }
+.pt-goal-coverage-warning { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--pt-warning); border-radius: 8px; background: var(--pt-soft); font-size: 13px; }
+.pt-goal-coverage-warning ul { display: grid; gap: 8px; margin-top: 6px; padding-left: 18px; list-style: disc; }
+.pt-goal-coverage-warning li > span { display: block; }
+.pt-goal-coverage-warning a { text-decoration: underline; }
+.pt-calendar .pt-goal-coverage-warning { flex-basis: 100%; order: 3; }
+.pt-goal-coverage-warning summary { cursor: pointer; }
+.pt-cycle-progress > button { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--pt-text); text-align: left; background: transparent; border: 0; cursor: pointer; }
+.pt-cycle-progress > button span + span { color: var(--pt-muted); }
+.pt-cycle-markers > button { color: var(--pt-accent); border: 0; border-inline-start: 2px solid currentColor; padding: 0 0 0 3px; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.pt-cycle-markers > button:hover, .pt-cycle-progress > button:hover { text-decoration: underline; }
+.pt-cycle-markers > button:focus-visible, .pt-cycle-progress > button:focus-visible { outline: 2px solid var(--pt-accent); outline-offset: 2px; }
+.pt-period-strip > button { display: block; text-align: left; background: transparent; border: 0; color: var(--pt-text); padding: 8px; cursor: pointer; }
+.pt-period-strip > button:hover { background: var(--pt-soft); }
+.pt-calendar [data-cycle-load="green"] { --pt-cycle-color: #39b66c; }
+.pt-calendar [data-cycle-load="yellow"] { --pt-cycle-color: #e3bb30; }
+.pt-calendar [data-cycle-load="red"] { --pt-cycle-color: #e56c67; }
+.pt-calendar [data-cycle-load="blue"] { --pt-cycle-color: #5c9ee6; }
+.pt-calendar :is(.pt-month-cell, .pt-grid-day-head, .pt-day-column, .pt-overview-day)[data-cycle-load], .pt-cycle-table tr[data-cycle-load] { background-color: color-mix(in srgb, var(--pt-panel) 81%, var(--pt-cycle-color)); }
+.pt-cycle-load-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 6px 0; font-size: 12px; }
+.pt-cycle-load-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.pt-cycle-load-legend b { display: inline-block; width: 13px; height: 13px; border-radius: 3px; background: var(--pt-cycle-color); }
+.pt-cycle-load-legend small { flex-basis: 100%; color: var(--pt-muted); }
+.pt-cycle-dialog { width: min(1120px, calc(100vw - 28px)); }
+.pt-cycle-dialog > header { position: sticky; top: 0; z-index: 2; background: var(--pt-bg); padding-bottom: 10px; border-bottom: 1px solid var(--pt-line); }
+.pt-cycle-dialog > section { margin-top: 14px; }
+.pt-cycle-dialog h3 { margin-bottom: 8px; font-weight: 650; }
+.pt-cycle-dialog h4 { color: var(--pt-muted); margin-bottom: 8px; }
+.pt-cycle-dialog a { color: var(--pt-accent); text-decoration: underline; }
+.pt-cycle-totals { display: flex; flex-wrap: wrap; gap: 12px 36px; }
+.pt-cycle-goal-group { margin-top: 16px; }
+.pt-cycle-goal-group article { margin-top: 8px; padding: 12px; border: 1px solid var(--pt-line); border-radius: 8px; }
+.pt-cycle-goal-group dl { display: grid; grid-template-columns: minmax(160px, 1fr) minmax(140px, 1fr); gap: 4px 16px; margin-top: 8px; font-size: 13px; }
+.pt-cycle-table-scroll { overflow-x: auto; }
+.pt-cycle-table { width: 100%; min-width: 650px; border-collapse: collapse; font-size: 13px; text-align: left; }
+.pt-cycle-table th, .pt-cycle-table td { padding: 10px 8px; border-bottom: 1px solid var(--pt-line); vertical-align: top; }
+.pt-cycle-table th small { display: block; font-weight: normal; color: var(--pt-muted); }
+.pt-cycle-table tr[aria-current], .pt-cycle-table tr.is-focused { outline: 2px solid var(--pt-accent); outline-offset: -2px; }
+@media (max-width: 520px) { .pt-cycle-goal-group dl { grid-template-columns: 1fr; } .pt-cycle-goal-group dd { margin-bottom: 6px; } }

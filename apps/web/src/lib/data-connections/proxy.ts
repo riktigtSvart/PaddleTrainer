@@ -1,3 +1,4 @@
+import { withConnectionDeadline } from "./deadline";
 /** Closed configured-owner routes. Secrets and incoming cookies stay outside the proxy. */
 export async function forwardConnections(
   request: Request,
@@ -89,27 +90,34 @@ export async function forwardConnections(
     }
   }
   try {
-    const response = await send(
-      new URL("api/v1/data-connections/" + path.join("/"), root),
-      {
-        method: request.method,
-        body,
-        redirect: "error",
-        cache: "no-store",
-        signal: AbortSignal.timeout(sync ? 210000 : 30000),
-        headers: {
-          Accept: "application/json",
-          ...(sync ? { "Content-Type": "application/json" } : {}),
+    return await withConnectionDeadline(async signal => {
+      const response = await send(
+        new URL("api/v1/data-connections/" + path.join("/"), root),
+        {
+          method: request.method,
+          body,
+          redirect: "error",
+          cache: "no-store",
+          signal,
+          headers: {
+            Accept: "application/json",
+            ...(sync ? { "Content-Type": "application/json" } : {}),
+          },
         },
-      },
-    );
-    if (!response.headers.get("content-type")?.includes("application/json"))
-      return fail(502, "DATA_SYNC_API_RESPONSE_INVALID");
-    return new Response(response.body, {
-      status: response.status,
-      headers: { ...headers, "Content-Type": "application/json" },
-    });
-  } catch {
-    return fail(502, "DATA_SYNC_API_UNAVAILABLE");
+      );
+      if (!response.headers.get("content-type")?.includes("application/json"))
+        return fail(502, "DATA_SYNC_API_RESPONSE_INVALID");
+      // Include consumption of the JSON body in the same deadline. Receiving
+      // headers alone must not leave the browser waiting indefinitely.
+      const bytes = await response.arrayBuffer();
+      return new Response(bytes, {
+        status: response.status,
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
+    }, sync ? 210000 : 30000);
+  } catch (error) {
+    return error instanceof Error && error.name === "TimeoutError"
+      ? fail(504, "DATA_SYNC_API_TIMEOUT")
+      : fail(502, "DATA_SYNC_API_UNAVAILABLE");
   }
 }

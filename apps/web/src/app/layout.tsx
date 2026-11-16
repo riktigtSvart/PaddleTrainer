@@ -4,6 +4,12 @@ import { themeBootstrap } from "@/lib/ui/theme";
 import "./globals.css";
 import "@/styles/compact-workspace.css";
 import "@/styles/training-planning.css";
+import "@/styles/strength-inventory.css";
+import "@/styles/initial-assessment.css";
+import "@/styles/assessed-strength.css";
+import "@/styles/guided-strength.css";
+import "@/styles/session-analysis.css";
+import "@/styles/application-shell.css";
 
 export const metadata: Metadata = {
   title: { default: "PaddleTrainer", template: "%s · PaddleTrainer" },

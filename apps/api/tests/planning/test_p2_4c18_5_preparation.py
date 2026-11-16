@@ -151,7 +151,9 @@ def test_data_gaps_have_specific_codes_without_turning_other_sport_plans_into_st
         for w in day["windows"]: w["resources"] = []
     setup_post(planner, "availability", c)
     v = review(planner)
-    assert not v["result"]["create"]
+    # An unloaded introductory default needs neither a boat nor borrowed weights.
+    assert v['result']['create'] and all(c['sport'] == 'STRENGTH' and c['template_version'] == 'v0.4' and
+        not c.get('strength_prescription') for c in v['result']['create'])
     prep = v["result"]["preparation"]
     assert not prep["equipment_declared"]
     assert all("EQUIPMENT_NOT_DECLARED" in d["codes"] for d in prep["selection_issues"])

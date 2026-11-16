@@ -79,6 +79,7 @@ async def revise(*, owner, proposal, repository, session):
             await programs.transactions._rollback(session)
             return programs.receipt(artifact, record, reused=True)
         rows = await lock_periods(session, owner, program)
+        await programs.ensure_current(repository, owner, program)
         changes = await head(repository, owner, program)
         previous = changes[-1]["artifact"] if changes else None
         if proposal["revision"] != len(changes) + 1 or proposal["previous_reference"] != (

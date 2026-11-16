@@ -1,6 +1,8 @@
+import { useId } from "react";
 import { Field, Select } from "@/components/planning-goals/fields";
 import { sportLabels } from "@/lib/training-options/contracts";
 import type { Location, SlotDetails } from "@/lib/training-options/contracts";
+import { slotProblem, slotWindowMinutes } from "@/lib/training-options/slot-validation";
 
 export default function SlotFields({
   value,
@@ -13,6 +15,9 @@ export default function SlotFields({
   locations: Location[];
   disabled?: boolean;
 }) {
+  const problemId = useId(), span = slotWindowMinutes(value);
+  const problem = slotProblem(value, locations);
+  const excessive = span !== null && value.max_minutes > span;
   return (
     <fieldset className="pt-options-form" disabled={disabled}>
       <div className="pt-options-columns">
@@ -34,11 +39,14 @@ export default function SlotFields({
           label="Legfeljebb ennyi perc fordítható edzésre"
           type="number"
           min={1}
-          max={1440}
+          max={span ?? 1440}
           required
           value={value.max_minutes}
+          aria-invalid={excessive || !Number.isInteger(value.max_minutes) || value.max_minutes < 1}
+          aria-describedby={problem ? problemId : undefined}
+          hint={span !== null ? `Az időablak hossza ${span} perc; ennél kisebb edzéskeretet is megadhatsz.` : undefined}
           onChange={(e) =>
-            onChange({ ...value, max_minutes: Number(e.target.value) })
+            onChange({ ...value, max_minutes: Number.isFinite(Number(e.target.value)) ? Number(e.target.value) : 0 })
           }
         />
         <Select
@@ -56,6 +64,8 @@ export default function SlotFields({
           <option value="moderate">Legfeljebb mérsékelt</option>
         </Select>
       </div>
+      {problem && <p id={problemId} role="alert">{problem}</p>}
+      {excessive && <button type="button" className="pt-button" onClick={() => onChange({ ...value, max_minutes: span! })}>Edzéskeret igazítása {span} percre</button>}
       <fieldset className="pt-options-checks">
         <legend>Választható helyszínek · ezek egymás alternatívái</legend>
         {locations

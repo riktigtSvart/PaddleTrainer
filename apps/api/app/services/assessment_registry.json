@@ -1,0 +1,380 @@
+{
+  "schema_version": "assessment-registry-v0.1",
+  "version": "2026-11-06.2",
+  "history_days": 56,
+  "planning_authorized": false,
+  "clinical_clearance": false,
+  "sports": [
+    {
+      "key": "KAYAK",
+      "label": "Kajak",
+      "disciplines": [
+        "Síkvízi sprint",
+        "Maraton / hosszútáv",
+        "Túra"
+      ],
+      "focus": [
+        "Húzómunka és erőkifejtés",
+        "Vállövi kontroll",
+        "Törzsrotáció, stabilitás és lábtámaszmunka"
+      ],
+      "reference_help": "Hajótípus vagy ergométer; táv, idő, vízi körülmények.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "sample_family"
+    },
+    {
+      "key": "CANOE",
+      "label": "Kenu",
+      "disciplines": [
+        "Sprint",
+        "Maraton / hosszútáv",
+        "Túra"
+      ],
+      "focus": [
+        "Oldalhoz kötött húzómunka",
+        "Törzs és vállöv",
+        "Láb- és térdelőtámasz"
+      ],
+      "reference_help": "Hajó, oldal, táv, idő és körülmények.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "ROWING",
+      "label": "Evezés",
+      "disciplines": [
+        "Vízi evezés",
+        "Ergométer"
+      ],
+      "focus": [
+        "Láb- és csípőmunka",
+        "Húzómunka és törzstartás"
+      ],
+      "reference_help": "Hajó vagy ergométer típusa és beállítása, táv és idő.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "RUNNING",
+      "label": "Futás",
+      "disciplines": [
+        "Országút",
+        "Terep",
+        "Pálya",
+        "Futópad"
+      ],
+      "focus": [
+        "Láb- és csípőmunka",
+        "Egylábas kontroll",
+        "Törzsstabilitás"
+      ],
+      "reference_help": "Táv, idő, terep, szintemelkedés és körülmények.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "sample_family"
+    },
+    {
+      "key": "CYCLING",
+      "label": "Kerékpározás",
+      "disciplines": [
+        "Országút",
+        "MTB",
+        "Gravel",
+        "Pálya",
+        "Görgő / terem"
+      ],
+      "focus": [
+        "Láb- és csípőmunka",
+        "Törzstartás",
+        "Szakághoz igazított erőreferenciák"
+      ],
+      "reference_help": "Kerékpár vagy görgő, táv, idő, szint; mért watt, ha ismert.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "SWIMMING",
+      "label": "Úszás",
+      "disciplines": [
+        "Gyors",
+        "Hát",
+        "Mell",
+        "Pillangó",
+        "Vegyes",
+        "Nyílt víz"
+      ],
+      "focus": [
+        "Vállövi kontroll és húzómunka",
+        "Törzstartás",
+        "Rajt és forduló lábmunkája"
+      ],
+      "reference_help": "Úszásnem, medencehossz, rajtmód, táv és idő.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "WALKING",
+      "label": "Gyaloglás",
+      "disciplines": [
+        "Séta",
+        "Sportos gyaloglás",
+        "Nordic walking"
+      ],
+      "focus": [
+        "Láb- és csípőmunka",
+        "Egyensúly és törzstartás"
+      ],
+      "reference_help": "Útvonal, táv, idő, terep és körülmények.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "HIKING",
+      "label": "Túrázás",
+      "disciplines": [
+        "Gyalogtúra",
+        "Hegyi túra"
+      ],
+      "focus": [
+        "Láb- és csípőmunka",
+        "Egylábas kontroll",
+        "Hordott teher"
+      ],
+      "reference_help": "Táv, idő, emelkedés, terep és felszerelés.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "XC_SKIING",
+      "label": "Sífutás",
+      "disciplines": [
+        "Klasszikus",
+        "Szabad / korcsolyázó"
+      ],
+      "focus": [
+        "Láb- és felsőtesti munka",
+        "Törzsstabilitás"
+      ],
+      "reference_help": "Technika, pálya, hóviszonyok, táv és idő.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "FOOTBALL",
+      "label": "Foci",
+      "disciplines": [
+        "Szervezett edzés",
+        "Mérkőzés",
+        "Szabad játék"
+      ],
+      "focus": [
+        "Láb- és csípőmunka",
+        "Egylábas kontroll",
+        "Változó terhelés és visszajelzés"
+      ],
+      "reference_help": "Alkalom jellege, időtartam és körülmények; nem egyenletes futóreferencia.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "STRENGTH",
+      "label": "Erősítés / kondi",
+      "disciplines": [
+        "Általános erőnlét",
+        "Sportági kiegészítés"
+      ],
+      "focus": [
+        "Gyakorlatonkénti jártasság",
+        "Ismert terhelés és kivitelezés"
+      ],
+      "reference_help": "A sorozatokat az erőgyakorlat-kártyákon rögzítsd.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "sample_family"
+    },
+    {
+      "key": "GYMNASTICS",
+      "label": "Gimnasztika",
+      "disciplines": [
+        "Általános",
+        "Saját testsúly"
+      ],
+      "focus": [
+        "Kontroll és saját testsúlyos mozgások"
+      ],
+      "reference_help": "Gyakorlatváltozat és körülmények.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "STRETCHING",
+      "label": "Nyújtás / mobilitás",
+      "disciplines": [
+        "Általános",
+        "Sportági kiegészítés"
+      ],
+      "focus": [
+        "Mozgástartomány és komfort"
+      ],
+      "reference_help": "Ismert mozgás és panaszok; diagnózis nélkül.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    },
+    {
+      "key": "OTHER",
+      "label": "Egyéb sportág",
+      "disciplines": [],
+      "focus": [
+        "Általános kiindulópont"
+      ],
+      "reference_help": "A sportág és a mérés pontos leírása. Egyedi tesztértékelés még nincs.",
+      "assessment_support": "declarations_and_references",
+      "planning_support": "not_implemented"
+    }
+  ],
+  "patterns": [
+    {
+      "key": "pull",
+      "label": "Felsőtest húzás",
+      "exercise_ids": [
+        "seal_row_barbell",
+        "seal_row_dumbbell",
+        "dumbbell_row",
+        "barbell_row",
+        "seated_row",
+        "chest_supported_row",
+        "plate_loaded_row",
+        "band_row",
+        "suspension_row",
+        "pullup",
+        "assisted_pullup",
+        "lat_pulldown",
+        "straight_arm_pulldown",
+        "face_pull",
+        "band_external_rotation",
+        "scapular_pullup",
+        "lateral_raise",
+        "y_raise",
+        "biceps_curl",
+        "hammer_curl",
+        "reverse_curl",
+        "ring_row",
+        "preacher_curl",
+        "high_row_machine",
+        "pullover_machine",
+        "reverse_pec_deck",
+        "lateral_raise_machine",
+        "biceps_machine",
+        "tbar_row",
+        "plate_loaded_lat",
+        "plate_loaded_pullover",
+        "plate_loaded_high_row",
+        "plate_loaded_lateral_raise",
+        "plate_loaded_biceps"
+      ]
+    },
+    {
+      "key": "push",
+      "label": "Felsőtest nyomás",
+      "exercise_ids": [
+        "pushup",
+        "incline_pushup",
+        "db_benchpress",
+        "db_incline_press",
+        "chest_press",
+        "barbell_benchpress",
+        "db_overhead_press",
+        "machine_shoulder_press",
+        "plate_loaded_chest_press",
+        "triceps_pushdown",
+        "dip",
+        "overhead_triceps",
+        "landmine_press",
+        "triceps_extension_machine",
+        "triceps_press_machine",
+        "plate_loaded_incline_press",
+        "plate_loaded_shoulder_press",
+        "plate_loaded_decline_press",
+        "forward_throw",
+        "pec_deck"
+      ]
+    },
+    {
+      "key": "knee",
+      "label": "Térddomináns lábmunka",
+      "exercise_ids": [
+        "squat",
+        "goblet_squat",
+        "wall_bars_supported_squat",
+        "leg_press",
+        "plate_loaded_leg_press",
+        "lunge",
+        "step_up",
+        "front_squat",
+        "bulgarian_split_squat",
+        "leg_curl",
+        "leg_extension",
+        "calf_raise",
+        "jump_squat",
+        "knee_drive_stepup",
+        "walking_lunge",
+        "seated_leg_curl",
+        "lying_leg_curl",
+        "standing_calf_machine",
+        "seated_calf_machine",
+        "hack_squat",
+        "belt_squat",
+        "plate_loaded_leg_extension",
+        "plate_loaded_leg_curl",
+        "swiss_ball_curl"
+      ]
+    },
+    {
+      "key": "hip",
+      "label": "Csípődomináns lábmunka",
+      "exercise_ids": [
+        "glute_bridge",
+        "db_rdl",
+        "romanian_deadlift",
+        "hip_thrust",
+        "glute_drive_machine",
+        "single_leg_rdl",
+        "hip_abduction",
+        "hip_adduction",
+        "kettlebell_swing",
+        "trap_deadlift",
+        "back_extension",
+        "back_extension_machine",
+        "glute_kickback_machine",
+        "mini_band_walk"
+      ]
+    },
+    {
+      "key": "core",
+      "label": "Törzsstabilitás",
+      "exercise_ids": [
+        "dead_bug",
+        "plank",
+        "side_plank",
+        "bird_dog",
+        "pallof_press",
+        "kneeling_pallof",
+        "hanging_knee_raise",
+        "hanging_leg_raise",
+        "farmers_carry",
+        "hollow_hold",
+        "ball_crunch",
+        "russian_twist",
+        "cable_rotation",
+        "woodchop_high",
+        "woodchop_low",
+        "rotational_throw",
+        "slam",
+        "landmine_rotation",
+        "suitcase_carry",
+        "sandbag_carry",
+        "bench_crunch",
+        "abdominal_machine",
+        "torso_rotation_machine"
+      ]
+    }
+  ]
+}

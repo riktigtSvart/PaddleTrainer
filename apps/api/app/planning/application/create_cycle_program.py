@@ -102,6 +102,8 @@ async def _load(repository, owner, kind, identity, *, cache=None, visiting=None)
             created_at=artifact["created_at"],
             calendar_snapshot=artifact["calendar_snapshot"],
             continuation=continuation,
+            replaced=await replacement_source(repository, owner, proposal, created_at=created,
+                cache=cache, visiting=visiting),
             athlete_snapshot=await athlete_snapshot(
                 repository,
                 session=None,
@@ -254,6 +256,46 @@ async def _commit(session):
         raise CycleStorageError("Cycle commit did not close its transaction.")
 
 
+async def ensure_current(repository, owner, program):
+    identity = domain.replacement_slot(owner, program['artifact_id'])
+    if await repository.get(artifact_kind=PROGRAM, artifact_id=identity) is not None:
+        raise domain.CycleRuleError('CYCLE_PROGRAM_SUPERSEDED')
+
+
+async def replacement_source(repository, owner, proposal, *, created_at=None,
+                             validate_latest=False, cache=None, visiting=None):
+    change = proposal.get('replacement')
+    if not change:
+        return None
+    program, stored = await _load(repository, owner, PROGRAM,
+        change['program_reference']['artifact_id'], cache=cache, visiting=visiting)
+    _same_reference(program, change['program_reference'])
+    parents = [stored]
+    if change['competition_reference'] != domain.reference(program):
+        events, record = await _load(repository, owner, EVENTS,
+            change['competition_reference']['artifact_id'], cache=cache, visiting=visiting)
+        _same_reference(events, change['competition_reference'])
+        _same_reference(program, events['proposal']['program_reference'])
+        parents.append(record)
+    if change['boundary_reference'] is not None:
+        boundary, record = await _load(repository, owner, AuditArtifactKind.CYCLE_MESOCYCLE_BOUNDARY_REVISION,
+            change['boundary_reference']['artifact_id'], cache=cache, visiting=visiting)
+        _same_reference(boundary, change['boundary_reference'])
+        _same_reference(program, boundary['proposal']['program_reference'])
+        parents.append(record)
+    if created_at is not None and any(parent.persisted_at > created_at for parent in parents):
+        raise CycleStorageError('Replacement predates its durable sources.')
+    if validate_latest:
+        from .revise_cycle_boundary import head
+        await ensure_current(repository, owner, program)
+        events = await head(repository, owner, program, kind=EVENTS)
+        boundaries = await head(repository, owner, program)
+        if (change['competition_reference'] != domain.reference(events[-1]['artifact'] if events else program)
+                or change['boundary_reference'] != (domain.reference(boundaries[-1]['artifact']) if boundaries else None)):
+            raise domain.CycleRuleError('CYCLE_REPLACEMENT_SOURCE_CHANGED')
+    return program
+
+
 async def create_program(*, owner, proposal, repository, session):
     transactions._require_session(repository, session)
     identity = domain.registration_slot(owner, proposal)
@@ -287,6 +329,11 @@ async def create_program(*, owner, proposal, repository, session):
                 await transactions._rollback(session)
                 return receipt(artifact, record, reused=True)
         created_at = _now().isoformat()
+        if proposal.get('replacement'):
+            from .revise_cycle_boundary import lock_periods
+            base, _ = await _load(repository, owner, PROGRAM, proposal['replacement']['program_reference']['artifact_id'])
+            await lock_periods(session, owner, base)
+        replaced = await replacement_source(repository, owner, proposal, validate_latest=True)
         timezone_name = await timezone_for(session, owner)
         snapshot = await athlete_snapshot(
             repository,
@@ -304,6 +351,7 @@ async def create_program(*, owner, proposal, repository, session):
             created_at=created_at,
             continuation=continuation,
             athlete_snapshot=snapshot,
+            replaced=replaced,
         )
         for period in artifact["periods"]:
             # UUIDs are derived from owner + program + explicit node key. Flush in
@@ -383,6 +431,7 @@ async def revise_competitions(*, owner, proposal, repository, session):
             await transactions._rollback(session)
             return receipt(artifact, record, reused=True)
         previous = None
+        await ensure_current(repository, owner, program)
         if proposal["previous_reference"] is not None:
             previous, _ = await _load(
                 repository, owner, EVENTS, proposal["previous_reference"]["artifact_id"]
@@ -417,10 +466,17 @@ async def load_program(*, owner, identity, repository, session):
         from .revise_cycle_boundary import head
 
         boundaries = await head(repository, owner, artifact)
+        successor_id = domain.replacement_slot(owner, identity)
+        successor = await repository.get(artifact_kind=PROGRAM, artifact_id=successor_id)
+        replaced_by = None
+        if successor is not None:
+            updated, _ = await _load(repository, owner, PROGRAM, successor_id, cache=cache)
+            replaced_by = domain.reference(updated)
         return {
             "program": receipt(artifact, record, reused=True),
             "competition_revisions": revisions,
             "boundary_revisions": boundaries,
+            "replaced_by": replaced_by,
         }
     finally:
         await transactions._rollback(session)

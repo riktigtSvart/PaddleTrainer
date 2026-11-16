@@ -1,0 +1,150 @@
+.pt-guided {
+  display: grid;
+  gap: 1.4rem;
+}
+.pt-guided fieldset {
+  min-width: 0;
+  border-color: var(--pt-line);
+}
+.pt-guided-links,
+.pt-guided-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+.pt-guided-links a {
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+.pt-guided-choices {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 1rem;
+}
+.pt-guided-choice,
+.pt-guided-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  line-height: 1.6;
+}
+.pt-guided-choice {
+  padding: 1rem;
+  border: 1px solid var(--pt-line);
+  border-radius: 0.8rem;
+}
+.pt-guided-choice input,
+.pt-guided-check input {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+  accent-color: var(--pt-accent);
+}
+.pt-guided-choice span span {
+  display: block;
+}
+.pt-guided-choice:has(input:checked) {
+  border-color: var(--pt-accent);
+  background: var(--pt-accent-bg);
+}
+.pt-guided-choice:has(input:disabled) {
+  opacity: 0.7;
+}
+.pt-guided-observation {
+  padding: 1.2rem;
+  border: 1px solid var(--pt-line);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 1rem;
+}
+.pt-guided-set {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+}
+.pt-guided-step {
+  color: var(--pt-accent);
+  font-weight: 650;
+}
+.pt-guided-rest {
+  border-left: 3px solid var(--pt-accent);
+  padding-left: 1rem;
+  margin-block: 1rem;
+}
+.pt-guided-check {
+  margin-block: 1rem;
+}
+.pt-guided ul {
+  padding-left: 1.4rem;
+}
+.pt-guided li {
+  margin-block: 0.8rem;
+}
+.pt-guided li p {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+.pt-guided :focus-visible {
+  outline: 2px solid var(--pt-accent);
+  outline-offset: 4px;
+}
+
+.pt-guided-blockers {
+  padding: 1rem;
+  border: 1px solid var(--pt-line);
+  border-left: 4px solid var(--pt-accent);
+  border-radius: 0.6rem;
+  background: var(--pt-accent-bg);
+}
+.pt-guided-blockers li {
+  margin-block: 1rem;
+}
+.pt-guided-blockers a,
+.pt-guided-entry-action {
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+.pt-guided-choice-reasons {
+  display: block;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+.pt-guided-recommendation {
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--pt-line);
+  border-left: 4px solid var(--pt-accent);
+  border-radius: 0.75rem;
+  background: var(--pt-accent-bg);
+  line-height: 1.6;
+}
+.pt-calibration-instructions,
+.pt-calibration-results,
+.pt-calibration-preview {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+}
+.pt-calibration-instructions ol {
+  padding-left: 1.5rem;
+  line-height: 1.7;
+}
+.pt-calibration-summary {
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.pt-calibration-preview details {
+  padding: 1rem;
+  border: 1px solid var(--pt-line);
+  border-radius: 0.75rem;
+}
+.pt-calibration-preview summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.pt-guided-entry-action {
+  display: inline-block;
+  margin: 0.45rem 1rem 0.1rem;
+  font-size: 0.9rem;
+}

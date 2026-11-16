@@ -97,6 +97,10 @@ def decode(record, owner):
             require(item["state"] in ("succeeded", "failed", "not_attempted"), "DATA_SYNC_STORAGE_INVALID")
             require(all(item[key] is None or type(item[key]) is int and item[key] >= 0 for key in ("imported", "updated", "skipped")), "DATA_SYNC_STORAGE_INVALID")
             validate_details(item, "DATA_SYNC_STORAGE_INVALID")
+    if proposal.get("history_range") and record.artifact_kind == Kind.DATA_SYNC_STARTED:
+        require(artifact["window"]["from_date"] == proposal["history_range"]["from_date"]
+            and artifact["window"]["sessions_to_exclusive"] == proposal["history_range"]["to_exclusive"]
+            and artifact["window"].get("historical") is True, "DATA_SYNC_STORAGE_INVALID")
     return artifact
 
 
@@ -280,6 +284,10 @@ async def reserve(session, owner, proposal, *, configured):
             require(run_state(previous, previous_end, _now()) != "running", "DATA_SYNC_ALREADY_RUNNING")
         now = _now()
         today = now.astimezone(ZoneInfo(user.timezone)).date()
+        history_range = proposal.get("history_range")
+        if history_range:
+            from datetime import date
+            require(date.fromisoformat(history_range["to_exclusive"]) <= today + timedelta(days=1), "DATA_SYNC_HISTORY_FUTURE_RANGE")
         if previous:
             now = max(now, datetime.fromisoformat(previous["created_at"]) + timedelta(microseconds=1))
         start = {
@@ -293,6 +301,9 @@ async def reserve(session, owner, proposal, *, configured):
                        "timezone_name": user.timezone},
             "planning_authorized": False,
         }
+        if history_range:
+            start["window"].update(from_date=history_range["from_date"],
+                sessions_to_exclusive=history_range["to_exclusive"], historical=True)
         await write(session, repository, owner, start, Kind.DATA_SYNC_STARTED)
         return True
     except BaseException:
@@ -323,7 +334,7 @@ async def import_dataset(session, user, dataset, window, report):
     if dataset == "sessions":
         await sync_recent_sessions(session, user, first=first,
             last=date.fromisoformat(window["sessions_to_exclusive"]),
-            include_enrichment=False, report=report)
+            include_enrichment=False, report=report, **({"strict_range": True} if window.get("historical") else {}))
     elif dataset == "session_details":
         from app.services.polar_session_details import synchronize_details
         await synchronize_details(session, user, first=first,

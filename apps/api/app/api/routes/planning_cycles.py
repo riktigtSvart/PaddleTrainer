@@ -131,6 +131,7 @@ async def preview(payload: CycleProgramInput, db: DB, owner: Owner):
             )
         )
         try:
+            replaced = await call(service.replacement_source(repository, owner, proposal, validate_latest=True))
             artifact = domain.build_registration(
                 proposal,
                 athlete_id=owner,
@@ -138,6 +139,7 @@ async def preview(payload: CycleProgramInput, db: DB, owner: Owner):
                 created_at=created_at,
                 continuation=continuation,
                 athlete_snapshot=snapshot,
+                replaced=replaced,
             )
         except domain.CycleRuleError as exc:
             raise error(409, exc.code) from None

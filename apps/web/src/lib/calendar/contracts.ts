@@ -1,7 +1,11 @@
 import { addDays, day, object, sha } from "@/lib/planning-cycles/contracts";
 import { capabilityLabels } from "@/lib/planning-goals/labels";
 import { readDurationEstimate } from "./duration-estimate";
+import {readProjectedInstructions} from "@/lib/planning-cycles/workout-instructions";
 import type { DurationEstimate } from "./duration-estimate";
+import { readManualProjection } from "./manual-workouts";
+import type { ManualProjection } from "./manual-workouts";
+import { durationHMS } from "@/lib/duration";
 export { addDays };
 
 export const goalLabels: Record<string, string> = {
@@ -56,7 +60,29 @@ export function goalFamily(goal: string | null | undefined): Family {
 }
 export type Reference = { artifact_id: string; content_hash: string };
 export type GoalTag = Reference & { primary_goal: string | null };
+/** Read-only provenance. Choosing/accepting still requires a validated review. */
+export type PlanningContext = {
+  instructions?:import("@/lib/planning-cycles/workout-instructions").WorkoutInstructions;
+  instructions_issue?: "not_verified";
+  schema_version: "calendar-training-plan-v0.1";
+  source_kind: "accepted_training_plan";
+  program_reference: Reference;
+  accepted_review_reference: Reference;
+  candidate_key: string;
+  primary_goal: string;
+  role: string;
+  mesocycle_id: string;
+  date: string;
+  workout_hash: string;
+  replaceable: boolean;
+  same_day_confirmation_required?: boolean;
+  alternative_kinds?:import("./alternative-variants").AlternativeKinds;
+  alternatives_count: number | null;
+  alternatives_checked_at: string | null;
+};
 export type Planned = {
+  manual_context?: ManualProjection;
+  planning_context?: PlanningContext;
   reschedule?: {
     allowed: boolean;
     blocked_reason: string | null;
@@ -186,6 +212,23 @@ function tag(value: unknown): GoalTag | null {
   );
   return t as GoalTag;
 }
+function planningContext(value: unknown, row: Record<string, unknown>) {
+  const p = object(value), program = object(p.program_reference), review = object(p.accepted_review_reference);
+  const hash = (v: unknown) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
+  requireValue(p.schema_version === "calendar-training-plan-v0.1" && p.source_kind === "accepted_training_plan" &&
+    typeof program.artifact_id === "string" && /^pt-cycle:[a-f0-9]{64}$/.test(program.artifact_id) && hash(program.content_hash) &&
+    typeof review.artifact_id === "string" && /^pt-training-plan:[a-f0-9]{64}$/.test(review.artifact_id) && hash(review.content_hash) &&
+    hash(p.candidate_key) && hash(p.workout_hash) && typeof p.primary_goal === "string" && Object.hasOwn(capabilityLabels, p.primary_goal) &&
+    ["primary_development", "secondary_development", "maintenance"].includes(String(p.role)) &&
+    typeof p.mesocycle_id === "string" && uuid.test(p.mesocycle_id) && p.mesocycle_id === row.training_period_id &&
+    p.date === row.date && typeof p.replaceable === "boolean" &&
+    (p.alternatives_count === null ? p.alternatives_checked_at === null :
+      Number.isInteger(p.alternatives_count) && Number(p.alternatives_count) >= 0 && validInstant(p.alternatives_checked_at)) &&
+    (p.replaceable || p.alternatives_count === null));
+  if(p.same_day_confirmation_required!==undefined)requireValue(typeof p.same_day_confirmation_required==='boolean'&&(!p.same_day_confirmation_required||p.replaceable));
+  if(p.alternative_kinds!==undefined){const k=object(p.alternative_kinds),v=object(k.workout_variant);requireValue(k.schema_version==='training-alternative-kinds-v0.1'&&v.schema_version==='training-workout-variant-v0.1'&&v.sport===row.sport&&v.primary_goal===p.primary_goal&&v.duration_sec===row.duration_sec&&typeof v.template_key==='string'&&Array.isArray(v.blocks)&&typeof k.original_schedule==='string');for(const name of ['different_workouts_count','same_workout_schedule_count'])requireValue(p.alternatives_count===null?k[name]===null:Number.isInteger(k[name])&&Number(k[name])>=0&&Number(k[name])<=Number(p.alternatives_count));}
+
+}
 export function readFeed(value: unknown): Feed {
   const x = object(value);
   requireValue(
@@ -239,6 +282,12 @@ export function readFeed(value: unknown): Feed {
       );
       tag(r.goal_tag);
       if (kind === "planned") {
+        if (r.manual_context !== undefined) {
+          const manual = readManualProjection(r.manual_context);
+          if (manual && r.source === 'MANUAL' && !r.polar_target_id && (!manual.recipe || manual.recipe.title === r.title && manual.recipe.sport === r.sport && manual.recipe.duration_sec === r.duration_sec && manual.recipe.description === (r.description ?? ''))) r.manual_context = manual;
+          else delete r.manual_context;
+        }
+        if (r.planning_context !== undefined) planningContext(r.planning_context, r);
         if (r.reschedule !== undefined) {
           const m = object(r.reschedule);
           requireValue(
@@ -345,7 +394,23 @@ export function readFeed(value: unknown): Feed {
     requireDay(p.start_date);
     requireDay(p.end_date);
   }
-  return x as Feed;
+  // The instruction panel is an optional read-only enrichment. Its rejection
+  // must not discard valid events, dates or the accepted original description.
+  // All core owner, goal, source and calendar checks above remain fatal.
+  const planned=(x.planned as Record<string,unknown>[]).map(row=>{
+    if(row.planning_context===undefined)return row;
+    const context={...object(row.planning_context)};
+    delete context.instructions_issue;
+    if(context.instructions!==undefined){
+      try{context.instructions=readProjectedInstructions(context.instructions,row);}
+      catch{
+        delete context.instructions;
+        context.instructions_issue="not_verified";
+      }
+    }
+    return {...row,planning_context:context};
+  });
+  return {...x,planned} as Feed;
 }
 export type Span = 1 | 7 | 28 | 144 | 168;
 export function dateDistance(first: string, last: string) {
@@ -361,12 +426,13 @@ export function dayList(first: string, last: string): string[] {
   requireValue(n >= 0 && n < 366, "Legfeljebb 366 napot válassz.");
   return Array.from({ length: n + 1 }, (_, i) => addDays(first, i));
 }
-export function viewRange(anchor: string, span: Span) {
+export function viewRange(anchor: string, span: Span, firstWeekday=1) {
   day(anchor);
+  requireValue(Number.isInteger(firstWeekday)&&firstWeekday>=0&&firstWeekday<=6,"Hibás hétkezdő nap.");
   const weekday = new Date(anchor + "T12:00:00Z").getUTCDay();
   const start =
     span === 7 || span === 28 || span === 168
-      ? addDays(anchor, -((weekday + 6) % 7))
+      ? addDays(anchor, -((weekday-firstWeekday+7) % 7))
       : anchor;
   return { start, end: addDays(start, span - 1) };
 }
@@ -378,10 +444,11 @@ export function formatDay(value: string, weekday = false) {
     ...(weekday ? { weekday: "short" as const } : {}),
   }).format(new Date(value + "T12:00:00Z"));
 }
-export function localParts(instant: string, zone: string) {
-  requireValue(validInstant(instant));
-  const values: Record<string, string> = {};
-  new Intl.DateTimeFormat("en-GB", {
+const clockFormatters=new Map<string,Intl.DateTimeFormat>();
+function clockFormatter(zone:string){
+  const known=clockFormatters.get(zone);
+  if(known)return known;
+  const formatter=new Intl.DateTimeFormat("en-GB", {
     timeZone: zone,
     year: "numeric",
     month: "2-digit",
@@ -390,7 +457,15 @@ export function localParts(instant: string, zone: string) {
     minute: "2-digit",
     second: "2-digit",
     hourCycle: "h23",
-  })
+  });
+  if(clockFormatters.size>=32)clockFormatters.delete(clockFormatters.keys().next().value!);
+  clockFormatters.set(zone,formatter);
+  return formatter;
+}
+export function localParts(instant: string, zone: string) {
+  requireValue(validInstant(instant));
+  const values: Record<string, string> = {};
+  clockFormatter(zone)
     .formatToParts(new Date(instant))
     .forEach((p) => {
       values[p.type] = p.value;
@@ -405,6 +480,7 @@ export function localParts(instant: string, zone: string) {
   };
 }
 export type CalendarEvent = {
+  planningContext?: PlanningContext;
   reschedule?: Planned["reschedule"];
   durationEstimate?: DurationEstimate;
   key: string;
@@ -427,7 +503,7 @@ export type CalendarEvent = {
   conflict?: "fixed" | "flexible" | "review";
 };
 export function eventsFrom(feed: Feed): CalendarEvent[] {
-  const events: CalendarEvent[] = feed.planned.map((p) => ({
+  const events: CalendarEvent[] = feed.planned.filter((p) => p.status !== "CANCELLED").map((p) => ({
     reschedule: p.reschedule,
     key: "planned:" + p.id,
     kind: "planned",
@@ -450,8 +526,9 @@ export function eventsFrom(feed: Feed): CalendarEvent[] {
     durationEstimate:
       p.duration_sec === null ? (p.duration_estimate ?? undefined) : undefined,
     endEstimated: p.duration_sec === null && !!p.duration_estimate,
-    goal: p.goal_tag?.primary_goal ?? null,
+    goal: p.goal_tag?.primary_goal ?? p.planning_context?.primary_goal ?? null,
     goalTag: p.goal_tag,
+    planningContext: p.planning_context,
   }));
   for (const s of feed.sessions)
     events.push({
@@ -616,11 +693,7 @@ export function formatNumber(
       ) + (unit ? " " + unit : "");
 }
 export function formatDuration(value: number | null | undefined) {
-  if (value === null || value === undefined) return "Nincs adat";
-  const seconds = Math.round(value);
-  return seconds >= 3600
-    ? `${Math.floor(seconds / 3600)} ó ${Math.floor((seconds % 3600) / 60)} p`
-    : `${Math.floor(seconds / 60)} p${seconds % 60 ? " " + (seconds % 60) + " mp" : ""}`;
+  return durationHMS(value);
 }
 export type GoalBody = {
   request_id: string;

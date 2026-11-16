@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { daylightReasons } from "@/lib/training-options/daylight-rules";
+import { strengthReasons } from "@/lib/planning-cycles/strength-assessment";
 import { gateLabels, reasonLabels } from "@/lib/athlete-setup/contracts";
 import { addDays } from "@/lib/planning-cycles/contracts";
 import {
@@ -26,6 +28,8 @@ const profileSteps: Record<string, string> = {
 };
 
 const selectionLabels: Record<string, string> = {
+  ...daylightReasons,
+  ...strengthReasons,
   OPPORTUNITY_NOT_KNOWN: "Az időablak pontos időpontja még nem tisztázott.",
   SPORT_SCOPE_UNKNOWN:
     "Egy korábbi időablaknál még nincs sportági beállítás. Általános lehetőség vagy konkrét sportág választható.",
@@ -35,14 +39,20 @@ const selectionLabels: Record<string, string> = {
   EFFORT_NOT_ALLOWED:
     "A minta meghaladná az időablak megadott terhelési korlátját.",
   EQUIPMENT_NOT_DECLARED:
-    "A mintához szükséges eszköz nincs megadva. A kajakmintákhoz kajak vagy kajakergométer, az erőmintához kézisúlyzó szükséges.",
+    "A kajakmintához kajak vagy kajakergométer szükséges. Az erőgyakorlatok eszközeit a mentett felmérés és a konkrét helyszín alapján külön ellenőrizzük.",
   PERSONAL_DURATION_REFERENCE_MISSING:
-    "A kéthetes előzményablakban a hosszabb kajakmintához legalább 60 perces rögzített kajakteljesítést, az erőmintához legalább 30 perces, erőedzésként azonosított teljesítést keres a jelenlegi tervező. Ez a könnyű technikai kezdőmintához nem szükséges.",
+    "Az elmúlt 56 napból saját, befejezett, ismert időtartamú teljesítés szükséges: hosszabb kajakhoz legalább 60 perc kajak, futáshoz legalább 20 perc futás. Más sportág ideje ezt nem helyettesíti. A könnyű kajak kezdőváltozat saját referencia nélkül is használható.",
+  PERSONAL_DURATION_REFERENCE_TOO_SHORT:
+    "A legutóbbi saját előzmény rövidebb a támogatott változat minimális idejénél. A tervező nem növeli meg automatikusan ezt a terhelést.",
+  CAPABILITY_NOT_SUPPORTED_BY_AVAILABLE_SPORT:
+    "A helyszínen elérhető mozgásformához még nincs a kijelölt fejlesztési célt szolgáló edzésváltozat.",
   OPPORTUNITY_OR_DAILY_MINUTE_CAP: "A minta nem fér a megadott időkeretbe.",
   INTERVAL_TOO_SHORT_OR_START_PASSED:
     "A még rendelkezésre álló időablak rövid, vagy a kezdés már elmúlt.",
   ROLLING_BUDGET_REVIEW:
     "A meglévő és új edzések együtt nem férnek a gördülő hétnapos keretbe, vagy egy meglévő időtartam még ismeretlen.",
+  MICROCYCLE_BUDGET_RESERVED:
+    "Az adott ciklusszakasz időkeretét már lefoglalják az ismert teljesítések és a megőrzött vagy javasolt edzések.",
   MINIMUM_SPACING:
     "A jelenlegi mintaválasztó által megkövetelt időköz nem tartható a meglévő edzések mellett.",
 };
@@ -57,6 +67,15 @@ export function PreparationChecklist({ review }: { review: TrainingReview }) {
       </p>
     );
   const complete = !review.result.blockers.includes("PROFILE_REVIEW_REQUIRED");
+  const budget = review.result.prescription_context?.starting_budget;
+  const locationReady =
+    prep.version === "training-preparation-v0.2"
+      ? prep.available_day_count > 0 &&
+        ![
+          ...prep.selection_issues,
+          ...(review.result.unavailable_alternatives ?? []),
+        ].some((issue) => issue.codes.includes("EQUIPMENT_NOT_DECLARED"))
+      : prep.equipment_declared;
   const steps = [
     {
       title: "Sportolói keret",
@@ -70,15 +89,15 @@ export function PreparationChecklist({ review }: { review: TrainingReview }) {
       title: "Mikor érsz rá?",
       ready: prep.available_day_count > 0,
       text: `${prep.available_day_count} naphoz ismert időlehetőség a kijelölt időszakban.`,
-      href: "/athlete-setup#calendar",
+      href: "/training-options/schedule",
     },
     {
-      title: "Eszközök",
-      ready: prep.equipment_declared,
-      text: prep.equipment_declared
-        ? "Van mentett eszközlista; a mintához való illeszkedést külön ellenőrizzük."
-        : "Add meg az általában vagy az adott időablakban elérhető eszközöket.",
-      href: "/athlete-setup#profile",
+      title: "Helyszíni feltételek",
+      ready: locationReady,
+      text: locationReady
+        ? "A használható változatok eszközfeltételeit helyszínenként ellenőrizzük. A futáshoz nem kérünk külön eszközlistát."
+        : "A helyszínnél ellenőrizd az elérhető sportágakat és a szükséges eszközöket.",
+      href: "/training-options/locations",
     },
     {
       title: "Edzések időigénye",
@@ -139,11 +158,30 @@ export function PreparationChecklist({ review }: { review: TrainingReview }) {
         <p>
           A jelenlegi kezdőminták kiválasztási kerete: legfeljebb{" "}
           {prep.max_sessions_per_7_days} alkalom / {prep.max_minutes_per_7_days}{" "}
-          perc gördülő 7 napban, a meglévő edzésekkel együtt. Ez a tervező
-          általános kezdőszabálya; az elérhető időből önmagában nem következik
-          az előírandó terhelés. A kezdési időpontok között legalább 36 órát
-          hagy a mintaválasztó.
+          perc gördülő 7 napban, a meglévő edzésekkel együtt.{" "}
+          {budget?.mode === "declared_current_training"
+            ? "A keret az általad most megadott szokásos heti edzésmennyiségre épül, a rendelkezésre állás felső korlátjával."
+            : budget?.mode === "observed_covered_weeks"
+              ? budget.schema_version === "training-starting-budget-v0.2"
+                ? "A keret a legutóbbi legfeljebb négy, folyamatosan lefedett teljes hét edzésszámának és idejének mediánja; minden sportág teljesítése számít."
+                : "A keret két közelmúltbeli, szinkronnal ellenőrzött teljes hét kisebb edzésszámán és idején alapul."
+              : "Ez általános kezdőbeállítás; nem állapotminősítés. Az elérhető szabad idő önmagában nem előírandó terhelés. A jelenlegi szokásos edzésmennyiség a Sportelőéletben adható meg."}{" "}
+          {budget?.schema_version === "training-starting-budget-v0.2" ? "A könnyű minták között sportágfüggően 12–48 órát hagyunk; ismeretlen intenzitású teljesítés után legalább 36 órát. Ezek kezdő elhelyezési szabályok, nem személyre mért regenerációs idők." : "A kezdési időpontok között legalább 36 órát hagy a mintaválasztó."}
         </p>
+        {budget?.mode === "observed_covered_weeks" && (
+          <ul>
+            {budget.weeks
+              .filter((week) =>
+                budget.used_week_starts.includes(week.start_date),
+              )
+              .map((week) => (
+                <li key={week.start_date}>
+                  {week.start_date} – {week.end_date}: {week.sessions} edzés,{" "}
+                  {Math.floor(Number(week.duration_sec) / 60)} perc.
+                </li>
+              ))}
+          </ul>
+        )}
       </div>
       {!!prep.estimated_duration_workout_ids.length && (
         <div className="text-sm">
@@ -406,6 +444,24 @@ export function TrainingEvents({
                       </Link>
                     ) : (
                       <span>{identity.title}</span>
+                    )}
+                    {event.kind === "not_recorded_after_sync" &&
+                      event.checked_through && (
+                        <span className="basis-full text-sm text-zinc-400">
+                          A {time.format(new Date(event.checked_through))}{" "}
+                          időpontban megkezdett teljesítésimport után sem
+                          találtunk hozzá rögzített teljesítést. A tervező
+                          kihagyásként veszi figyelembe; később beérkező
+                          teljesítésnél újraértékeli.
+                        </span>
+                      )}
+                    {event.reconciliation_issue ===
+                      "AMBIGUOUS_PROVIDER_TARGET" && (
+                      <span className="basis-full text-sm text-zinc-400">
+                        A szolgáltatói célazonosító több tervhez vagy eltérő
+                        kapcsolathoz tartozik. A teljesítést külön számoljuk el;
+                        a kapcsolat pontosítandó.
+                      </span>
                     )}
                     {event.can_confirm_missed &&
                       event.workout_id &&

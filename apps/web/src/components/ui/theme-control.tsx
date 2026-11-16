@@ -12,7 +12,7 @@ const modes: {
   { value: "light", label: "Világos", icon: "sun" },
   { value: "dark", label: "Sötét", icon: "moon" },
 ];
-export default function ThemeControl() {
+export default function ThemeControl({ compact = false }: { compact?: boolean }) {
   const selected = useSyncExternalStore(
     subscribeTheme,
     readTheme,
@@ -20,7 +20,7 @@ export default function ThemeControl() {
   );
   return (
     <div
-      className="pt-theme-switch"
+      className={`pt-theme-switch${compact ? " is-compact" : ""}`}
       role="group"
       aria-label="Megjelenítési téma"
     >
@@ -31,6 +31,7 @@ export default function ThemeControl() {
           aria-pressed={mode.value === selected}
           onClick={() => setTheme(mode.value)}
           title={mode.label}
+          aria-label={mode.label}
         >
           <Icon name={mode.icon} />
           <span>{mode.label}</span>

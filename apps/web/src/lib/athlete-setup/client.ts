@@ -1,4 +1,4 @@
-import { object } from "@/lib/planning-cycles/contracts";
+import { object, sha } from "@/lib/planning-cycles/contracts";
 import { readContext, readReceipt } from "./contracts";
 import type { Candidate, Pending } from "./contracts";
 const root = "/api/goal-workflow/athlete/";
@@ -103,6 +103,21 @@ export async function send(pending: Pending) {
     await request(pending.operation, { method: "POST", body: pending.body }),
     pending,
   );
+}
+export async function recoverPending(pending: Pending, owner: string) {
+  if (pending.operation === "polar-imports") return send(pending);
+  const proposal = object(JSON.parse(pending.body));
+  const kind = pending.operation === "profiles" ? "profile" : "availability";
+  const id = "pt-athlete:" + await sha({ owner, kind, request_id: proposal.request_id });
+  try {
+    const receipt = await readReceipt(await request(`${pending.operation}/${id}`), pending);
+    if (receipt.artifact.athlete_id !== owner || receipt.artifact.artifact_id !== id)
+      throw Error("Másik sportoló mentési visszaigazolása érkezett.");
+    return receipt;
+  } catch (error) {
+    if (error instanceof SetupHTTPError && error.status === 404) return send(pending);
+    throw error;
+  }
 }
 export async function previewCalendar(body: string) {
   return request("availability/preview", { method: "POST", body });

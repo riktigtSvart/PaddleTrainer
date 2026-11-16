@@ -9,8 +9,8 @@ export function overviewRange(start: string): OverviewRange {
     throw new Error("Elérted a támogatott naptári időszak szélét.");
   return { start, end };
 }
-export function initialOverview(anchor: string): OverviewRange[] {
-  const { start } = viewRange(anchor, 168);
+export function initialOverview(anchor: string,firstWeekday=1): OverviewRange[] {
+  const { start } = viewRange(anchor, 168,firstWeekday);
   return Array.from({ length: OVERVIEW_INITIAL_CHUNKS }, (_, i) =>
     overviewRange(addDays(start, i * OVERVIEW_CHUNK_DAYS)),
   );

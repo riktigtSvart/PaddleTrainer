@@ -278,7 +278,7 @@ for (const kind of ["planned", "session"]) {
       assert.match(html, /top:12\.5%;height:max\(32px,/);
       assert.match(html, /is-enlarged/);
       assert.match(html, /pt-event-true-end/);
-      assert(html.includes(`${minutes} p`));
+      assert(html.includes(`00:${String(minutes).padStart(2, "0")}:00`));
       assert.equal(row.duration, minutes * 60);
     });
 }
@@ -294,7 +294,7 @@ test("zero duration remains zero inside a readable marker", () => {
   const html = renderedEvents([event({ end: "2026-10-23T15:30:00Z", duration: 0 })]);
   assert.match(html, /height:32px/);
   assert.match(html, /is-point/);
-  assert.match(html, /0 p/);
+  assert.match(html, /00:00:00/);
 });
 test("long events retain proportional heights", () => {
   const html = renderedEvents([

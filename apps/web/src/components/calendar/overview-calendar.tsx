@@ -3,7 +3,6 @@ import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { loadFeed } from "@/lib/calendar/client";
 import { loadConstraints } from "@/lib/calendar/constraint-client";
 import {
-  calendarEntries,
   dayList,
   eventsFrom,
   formatDay,
@@ -21,21 +20,38 @@ import type { OverviewRange } from "@/lib/calendar/overview";
 import PeriodGrid from "./period-grid";
 import EventPreview from "./event-preview";
 import { eventHref } from "@/lib/calendar/event-preview";
+import { calendarLayerEntries } from "@/lib/calendar/layers";
+import type { CalendarLayers } from "@/lib/calendar/layers";
+import {loadCycleContext} from "@/lib/calendar/cycle-context";
+import type {CycleContext} from "@/lib/calendar/cycle-context";
+import type {CalendarCycle} from "@/lib/calendar/cycles";
 
-type Chunk = OverviewRange & { feed: Feed; context: ScheduleContext | null };
+type Chunk = OverviewRange & { feed: Feed; context: ScheduleContext | null; cycleContext?: CycleContext | null; cycleError?: boolean };
 export default function OverviewCalendar({
   feed,
   context,
   layers,
   selectDay,
+  onOpen,
+  showCycles = false,
+  showCycleLoad = false,
+  cycleContext = null,
+  onOpenCycle,
+  firstWeekday=1,
 }: {
   feed: Feed;
   context: ScheduleContext | null;
-  layers: { availability: boolean; commitments: boolean; training: boolean };
+  layers: CalendarLayers;
   selectDay: (date: string) => void;
+  onOpen?: (event: CalendarEvent, feed: Feed) => void;
+  showCycles?: boolean;
+  showCycleLoad?: boolean;
+  cycleContext?: CycleContext | null;
+  onOpenCycle?: (cycle: CalendarCycle, feed: Feed) => void;
+  firstWeekday?:number;
 }) {
   const [chunks, setChunks] = useState<Chunk[]>(() =>
-    initialOverview(feed.start_date).map((range) => ({
+    initialOverview(feed.start_date,firstWeekday).map((range) => ({
       ...range,
       feed,
       context,
@@ -71,9 +87,10 @@ export default function OverviewCalendar({
     setError("");
     try {
       const range = adjacentOverview(chunks, direction);
-      const [next, schedule] = await Promise.all([
+      const [next, schedule, cycleData] = await Promise.all([
         loadFeed(range, abort.signal),
         loadConstraints(range, abort.signal),
+        loadCycleContext({athlete_id:feed.athlete_id,timezone_name:feed.timezone_name,start_date:range.start,end_date:range.end},abort.signal).catch(e=>{if(abort.signal.aborted)throw e;return null;}),
       ]);
       if (abort.signal.aborted) return;
       if (
@@ -108,7 +125,7 @@ export default function OverviewCalendar({
       setChunks((old) =>
         retainOverview(
           old,
-          { ...range, feed: next, context: schedule },
+          { ...range, feed: next, context: schedule, cycleContext:cycleData, cycleError:cycleData===null },
           direction,
         ),
       );
@@ -176,16 +193,10 @@ export default function OverviewCalendar({
               return { ...event, conflict };
             },
           );
-          const events = calendarEntries([
+          const events = calendarLayerEntries([
             ...training,
             ...(schedule ? constraintEvents(schedule) : []),
-          ]).filter((event) =>
-            event.kind === "availability"
-              ? layers.availability
-              : event.kind === "constraint"
-                ? layers.commitments
-                : layers.training,
-          );
+          ], layers);
           return (
             <section
               key={chunk.start}
@@ -207,17 +218,23 @@ export default function OverviewCalendar({
                 editDisabled
                 onEditGoal={(event) => selectDay(event.date)}
                 onMove={(event) => selectDay(event.date)}
+                onOpen={onOpen ? (event) => onOpen(event, chunk.feed) : undefined}
               >
                 <PeriodGrid
+                  showCycles={showCycles}
+                  showCycleLoad={showCycleLoad}
+                  cycleContext={chunk.feed===feed?cycleContext:chunk.cycleContext}
+                  onOpenCycle={onOpenCycle?cycle=>onOpenCycle(cycle,chunk.feed):undefined}
                   feed={chunk.feed}
                   events={events}
                   days={dayList(chunk.start, chunk.end)}
                   selected={feed.local_today}
                   overview={false}
-                  open={open}
+                  open={(event) => onOpen && (event.kind === "planned" || event.kind === "session") ? onOpen(event, chunk.feed) : open(event)}
                   selectDay={selectDay}
                 />
               </EventPreview>
+              {showCycleLoad&&chunk.cycleError&&<p role="status">Ehhez a naptári részlethez a szakaszolás nem tölthető be. A Frissítés gombbal újrapróbálható.</p>}
             </section>
           );
         })}

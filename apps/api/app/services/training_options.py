@@ -22,6 +22,8 @@ from app.planning.infrastructure.repositories.postgres_planning_audit import (
     SqlAlchemyPlanningAuditRepository,
 )
 from app.schemas.training_options import OptionsInput
+from app.services import strength_catalog
+from app.planning.domain.area_daylight import day_preview as area_day_preview
 
 SCHEMA = "training-options-v0.1"
 KIND = AuditArtifactKind.TRAINING_OPTIONS
@@ -78,6 +80,63 @@ async def latest(repo, session, owner):
     return await load(repo, owner, key) if key else None
 
 
+def assessment_content(data):
+    """Exercise observations belong to venues/equipment, not their time slots.
+
+    The current planner independently enforces the latest timetable, closures,
+    daylight and duration limits. Historical assessment receipts stay intact.
+    """
+    return {"timezone_name": data["timezone_name"], "locations": [
+        {key: value for key, value in location.items() if key not in
+         {"coordinates", "area", "kind", "pool_length_m", "daylight_overrides"}}
+        for location in data["locations"]]}
+
+
+async def assessment_options(repo, session, owner, preferred_reference=None):
+    current = await latest(repo, session, owner)
+    if not current:
+        return None
+    content = assessment_content(current[0]["proposal"]["data"])
+    if preferred_reference == reference(current[0]):
+        return current
+    # Walk only verified direct parents, never an arbitrary historical match.
+    for _ in range(1024):
+        parent = current[0]["proposal"]["previous_reference"]
+        if not parent:
+            return current
+        previous = await load(repo, owner, parent["artifact_id"])
+        if assessment_content(previous[0]["proposal"]["data"]) != content:
+            return current
+        current = previous
+        # Reuse the exact receipt that an existing assessment actually cites.
+        # Selecting an even older equivalent ancestor would change its source
+        # hash needlessly. Only verified direct parents can supply this anchor.
+        if preferred_reference == reference(current[0]):
+            return current
+    require(False, "TRAINING_OPTIONS_HISTORY_LIMIT")
+
+
+def daylight_context(current):
+    if not current:
+        return None
+    data = current[0]["proposal"]["data"]
+    if not data.get("daylight_rules") and not data.get("prescription_settings") and not any(l.get("daylight_overrides") for l in data["locations"]):
+        return None
+    from app.planning.domain.daylight import METHOD
+    return {"method": METHOD, "options_receipt": receipt(*current, True)}
+
+
+def preview_daylight(owner, proposal):
+    from app.planning.domain.daylight import day_preview
+    value = {"schema_version": "daylight-preview-v0.1", "athlete_id": owner,
+        "request": proposal, "request_hash": digest(proposal),
+        "result": (area_day_preview(proposal["date"], proposal["area"])
+            if "area" in proposal else day_preview(proposal["date"], proposal["coordinates"])),
+        "workouts_changed": False, "planning_authorized": False}
+    value["content_hash"] = digest(value)
+    return value
+
+
 def receipt(artifact, record, reused):
     return {"identity_scope": "APPLICATION_DEMO_USER", "artifact": artifact, "committed": True, "reused": reused,
         "durable_available_at": record.persisted_at.isoformat(), "planning_authorized": False, "workouts_changed": False}
@@ -109,6 +168,10 @@ async def save(*, session, owner, proposal):
                 b = local_instant((day + timedelta(days=int(details["ends_next_day"]))).isoformat(), details["end_time"], user.timezone, details["end_fold"])
                 require(0 < (b - a).total_seconds() / 60 <= 1500 and details["max_minutes"] <= (b - a).total_seconds() / 60, "TRAINING_OPTIONS_TIME_WINDOW_INVALID")
         created = _now()
+        settings = proposal["data"].get("prescription_settings") or {}
+        today = created.astimezone(ZoneInfo(user.timezone)).date().isoformat()
+        require(not settings.get("current_baseline") or settings["current_baseline"]["to_date"] <= today, "TRAINING_OPTIONS_FUTURE_BASELINE")
+        require(not settings.get("swimming") or settings["swimming"]["reported_on"] <= today, "TRAINING_OPTIONS_FUTURE_SWIMMING")
         if parent:
             created = max(created, datetime.fromisoformat(parent["created_at"]) + timedelta(microseconds=1))
         value = {"schema_version": SCHEMA, "artifact_id": key, "athlete_id": owner, "created_at": created.isoformat(),
@@ -141,6 +204,8 @@ async def context(*, session, owner, first=None, last=None):
             "start_date": first, "end_date": last, "data": data, "saved": receipt(*current, True) if current else None,
             "reference": reference(current[0]) if current else None, "groups": projection["groups"],
             "override_days": projection["override_days"],
+            "strength_catalog": strength_catalog.catalog(),
+            "strength_options": strength_catalog.location_options(data["locations"]),
             "timezone_review_required": data["timezone_name"] != user.timezone, "workouts_changed": False, "planning_authorized": False}
     finally:
         await transactions.rollback(session)

@@ -70,8 +70,8 @@ test("a combined entry keeps actual geometry and both original durations", () =>
   assert.equal(row.duration, 1980);
   assert.equal(row.pairedPlan.duration, 1800);
   assert.equal(row.pairedPlan.start, "2026-10-26T05:00:00Z");
-  assert.match(eventLabel(row, "Europe/Budapest"), /06:55–07:28.*tervhez párosított teljesítés.*33 p/);
-  assert.match(eventLabel(row, "Europe/Budapest"), /Terv: Reggeli terv.*06:00.*30 p/);
+  assert.match(eventLabel(row, "Europe/Budapest"), /06:55–07:28.*tervhez párosított teljesítés.*00:33:00/);
+  assert.match(eventLabel(row, "Europe/Budapest"), /Terv: Reggeli terv.*06:00.*00:30:00/);
 });
 for (const span of [1, 7])
   test(`${span}-day clock view draws one readable paired card, at the actual start`, () => {
@@ -85,7 +85,7 @@ for (const span of [1, 7])
 test("the 28-day view renders one paired entry with both values in its accessible label", () => {
   const html = render(feed(), 28);
   assert.equal((html.match(/class="pt-month-event /g) ?? []).length, 1);
-  assert.match(html, /tervhez párosított teljesítés.*33 p.*Terv: Reggeli terv.*30 p/);
+  assert.match(html, /tervhez párosított teljesítés.*00:33:00.*Terv: Reggeli terv.*00:30:00/);
   assert.match(html, /pt-event-status/);
 });
 test("the 144-day view counts a linked pair once", () => {
@@ -151,14 +151,14 @@ test("a linked plan with an unknown start is represented once without an extra u
   const html = render(x);
   assert.equal(entries(x).length, 1);
   assert.match(eventLabel(entries(x)[0], x.timezone_name), /Terv: Reggeli terv.*időpont nélkül/);
-  assert.match(html, /class="pt-unscheduled-day"><\/div>/);
+  assert.doesNotMatch(html, /pt-grid-unscheduled|pt-unscheduled-day/);
 });
 test("unknown and zero plan durations remain distinct in combined labels", () => {
   const x = feed();
   x.planned[0].duration_sec = null;
-  assert.match(eventLabel(entries(x)[0], x.timezone_name), /33 p.*Terv: Reggeli terv.*Nincs adat/);
+  assert.match(eventLabel(entries(x)[0], x.timezone_name), /00:33:00.*Terv: Reggeli terv.*Nincs adat/);
   x.planned[0].duration_sec = 0;
-  assert.match(eventLabel(entries(x)[0], x.timezone_name), /33 p.*Terv: Reggeli terv.*0 p/);
+  assert.match(eventLabel(entries(x)[0], x.timezone_name), /00:33:00.*Terv: Reggeli terv.*00:00:00/);
 });
 test("an unknown actual duration never inherits the planned duration or endpoint", () => {
   const x = feed();
@@ -168,7 +168,7 @@ test("an unknown actual duration never inherits the planned duration or endpoint
   assert.equal(row.duration, null);
   assert.equal(row.end, null);
   assert.match(render(x), /height:32px/);
-  assert.match(eventLabel(row, x.timezone_name), /végidő nélkül.*Nincs adat.*Terv: Reggeli terv.*30 p/);
+  assert.match(eventLabel(row, x.timezone_name), /végidő nélkül.*Nincs adat.*Terv: Reggeli terv.*00:30:00/);
 });
 test("a completion's explicit goal remains authoritative over the attached presentation plan", () => {
   const x = feed();

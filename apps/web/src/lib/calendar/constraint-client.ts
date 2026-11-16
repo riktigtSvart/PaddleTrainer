@@ -3,11 +3,13 @@ import { send } from "@/lib/athlete-setup/client";
 import { requireValue } from "./contracts";
 import { readScheduleContext, readScheduleReceipt } from "./constraints";
 import type { EditorPending, Proposal } from "./constraints";
+import { calendarRead, calendarTransportMessages } from "./read-request";
 
 export class ConstraintHTTPError extends Error {
   constructor(message: string, public status: number) { super(message); }
 }
 const labels: Record<string, string> = {
+  ...calendarTransportMessages,
   ATHLETE_WINDOW_DURATION_INVALID: "Az edzéspercek nem férnek az időablakba. Növeld az ablak hosszát, vagy csökkentsd az edzéskeretet.",
   ATHLETE_DAILY_BUDGET_INVALID: "A napi edzéskeret nagyobb a megmaradó ablakok kereténél. Pontosítsd a napi keretet.",
   ATHLETE_WINDOWS_OVERLAP: "A megadott edzésablakok átfedik egymást. Pontosítsd az időpontokat.",
@@ -19,9 +21,10 @@ const labels: Record<string, string> = {
   CALENDAR_CONSTRAINT_RANGE_TOO_DENSE: "Túl sok esemény érinti ezt az időszakot. Válassz rövidebb nézetet.",
 };
 async function request(path: string, init?: RequestInit) {
-  const response = await fetch("/api/calendar/constraints" + path, {
+  const url = "/api/calendar/constraints" + path;
+  const response = init?.method === "POST" ? await fetch(url, {
     ...init, cache: "no-store", headers: { Accept: "application/json", ...(init?.body ? { "Content-Type": "application/json" } : {}) },
-  });
+  }) : await calendarRead(url, init?.signal ?? undefined);
   let value: unknown;
   try { value = await response.json(); }
   catch { throw new Error("A válasz nem olvasható. Mentés esetén az eredmény még nem ismert."); }

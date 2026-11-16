@@ -1,0 +1,81 @@
+{
+  "schema_version": "training-routines-v0.1",
+  "source_urls": [
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC13423734/"
+  ],
+  "sports": {
+    "RUNNING": {
+      "easy": "Kényelmes séta, majd nagyon könnyű kocogás",
+      "gym": "Bokabillentés és helyben lépkedés",
+      "gym_instruction": "Támasz mellett 6–8 kényelmes bokabillentés oldalanként, majd 6–8 lassú térdemelés oldalanként. Csak ismert, panaszmentes mozgástartományban.",
+      "specific": "Lassan térj át könnyű, beszélgetős futásra; ne gyorsíts erőből.",
+      "stretches": [
+        [
+          "calf",
+          "Vádli",
+          "Stabil támasznál, sarok a talajon, enyhe húzódásig. Oldalanként legfeljebb 20 másodperc."
+        ],
+        [
+          "hip",
+          "Csípő elülső része",
+          "Stabil támasznál kis lépésállás, kényelmes medencehelyzet; ne homoríts. Oldalanként legfeljebb 20 másodperc."
+        ]
+      ]
+    },
+    "KAYAK": {
+      "easy": "Lépkedés vagy nagyon könnyű evezés",
+      "gym": "Vállövi és törzsgimnasztika",
+      "gym_instruction": "Stabil talajon 6–8 kis vállkörzés mindkét irányba, majd 6–8 lassú, kis törzsfordítás oldalanként. Ne lendíts és ne erőltesd a véghelyzetet.",
+      "specific": "Nagyon könnyű evezés egy biztosan ismert technikai fókusz mellett. Az erőkifejtést fokozatosan vezesd fel.",
+      "stretches": [
+        [
+          "chest",
+          "Mellkas és váll elülső része",
+          "Stabil támasznál kis nyitás, a vállat ne húzd hátra erővel. Oldalanként legfeljebb 20 másodperc."
+        ],
+        [
+          "side",
+          "Oldalsó törzs",
+          "Stabil állásban kis oldalra hajlás, csavarás és rugóztatás nélkül. Oldalanként legfeljebb 20 másodperc."
+        ]
+      ]
+    },
+    "STRENGTH": {
+      "easy": "Könnyű séta vagy helyben lépkedés",
+      "gym": "Váll-, boka- és csípőátmozgatás",
+      "gym_instruction": "6–8 kis vállkörzés mindkét irányba, majd 6–8 kényelmes bokabillentés oldalanként. Csak ismert, könnyű mozdulatokat végezz.",
+      "specific": "A főgyakorlatok ismert mozgásmintáját külső súly nélkül járd végig 3–5 könnyű ismétléssel. Ez előkészítés; a táblázatban rögzített munkasúlyt ne emeld.",
+      "stretches": [
+        [
+          "calf",
+          "Vádli",
+          "Stabil támasznál, sarok a talajon, enyhe húzódásig. Oldalanként legfeljebb 20 másodperc."
+        ],
+        [
+          "chest",
+          "Mellkas",
+          "Stabil támasznál kis mellkasnyitás, a vállat ne feszítsd. Oldalanként legfeljebb 20 másodperc."
+        ]
+      ]
+    },
+    "SWIMMING": {
+      "easy": "Nagyon könnyű úszás",
+      "gym": "Laza, kontrollált mozgás a vízben",
+      "gym_instruction": "A biztosan ismert úszásnemedben figyelj a laza vállra, nyakra és nyugodt kifújásra. Ne tanulj új úszásnemet vagy technikai gyakorlatot ezen az alkalmon.",
+      "specific": "Folytasd egyenletes, kényelmes úszással. A tempót a légzéshez és a mozgás kontrolljához igazítsd.",
+      "stretches": [
+        [
+          "chest",
+          "Mellkas",
+          "Csak a vízből kiszállva, száraz és stabil talajon: kis mellkasnyitás, a váll erőltetése nélkül. Oldalanként legfeljebb 20 másodperc."
+        ],
+        [
+          "calf",
+          "Vádli",
+          "Csak száraz, stabil talajon, biztos támasznál: enyhe húzódásig. Oldalanként legfeljebb 20 másodperc."
+        ]
+      ]
+    }
+  }
+}

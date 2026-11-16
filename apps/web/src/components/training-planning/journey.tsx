@@ -19,6 +19,8 @@ import {
 } from "@/components/planning-goals/fields";
 import AthleteWorkspace from "@/components/athlete-setup/workspace";
 import OptionsWorkspace from "@/components/training-options/workspace";
+import AssessmentWorkspace from "@/components/initial-assessment/workspace";
+import { loadAssessment } from "@/lib/initial-assessment/client";
 import CycleWorkspace from "@/components/planning-cycles/workspace";
 import GoalWorkspace from "@/components/planning-goals/workspace";
 import { TrainingPlanPanel } from "@/components/planning-cycles/training-plan";
@@ -47,6 +49,12 @@ const steps = [
     title: "Edzési helyszínek és lehetőségek",
     expectation:
       "Add meg egyszer az elérhető mozgásformákat és felszerelést minden saját helyszínhez.",
+  },
+  {
+    key: "assessment",
+    title: "Kezdeti sportági és erőfelmérés",
+    expectation:
+      "Közös kiindulópont, fő- és kiegészítő sportágak, jártasság és ismert terhelések. Részlegesen is menthető; a hiányzó referencia később pótolható.",
   },
   {
     key: "schedule",
@@ -81,6 +89,9 @@ type Loaded = {
 };
 
 export default function PlanningJourney() {
+  const [assessmentSaved, setAssessmentSaved] = useState(false);
+  const [assessmentOwner, setAssessmentOwner] = useState<string | null>(null);
+
   const [loaded, setLoaded] = useState<Loaded | null>(null),
     [selected, setSelected] = useState<Detail | null>(null),
     [open, setOpen] = useState<Step | null>(null),
@@ -105,6 +116,20 @@ export default function PlanningJourney() {
     }
     setReload((n) => n + 1);
   }, []);
+  useEffect(() => {
+    const abort = new AbortController();
+    void loadAssessment(abort.signal)
+      .then((c) => {
+        if (!abort.signal.aborted) {
+          setAssessmentSaved(!!c.summary?.form_complete && !c.sources_changed);
+          setAssessmentOwner(c.athlete_id);
+        }
+      })
+      .catch(() => {
+        if (!abort.signal.aborted) setAssessmentSaved(false);
+      });
+    return () => abort.abort();
+  }, [reload]);
   useEffect(() => {
     const refresh = () => setReload((n) => n + 1);
     window.addEventListener(LOCAL_REFRESH_EVENT, refresh);
@@ -260,13 +285,16 @@ export default function PlanningJourney() {
     profile: loaded?.athlete.current_review?.global_entry_gate === "OPEN",
     history: !!loaded?.athlete.profile?.artifact.imported_observations?.length,
     locations: !!loaded?.options.data.locations.some((l) => !l.archived),
+    assessment:
+      assessmentSaved && assessmentOwner === loaded?.athlete.athlete_id,
     schedule: !!loaded?.options.data.schedule_start_date,
     week: !!weekKey && weekReviewed === weekKey,
     strategy: strategyReady,
     plan: planReady,
   };
   const done = steps.filter(
-    (step) => step.key !== "history" && ready[step.key],
+    (step) =>
+      step.key !== "history" && step.key !== "assessment" && ready[step.key],
   ).length;
   function continueFrom(index: number) {
     setReload((n) => n + 1);
@@ -287,7 +315,7 @@ export default function PlanningJourney() {
       <div className="pt-journey-progress">
         <p>
           {done} / 7 szükséges lépéshez van ellenőrzött mentett adat vagy
-          áttekintés · az előzmények opcionálisan pontosíthatók
+          áttekintés · az előzmények és a sportági felmérés külön pontosíthatók
         </p>
         <progress value={done} max={7} aria-label="Tervezés előrehaladása" />
       </div>
@@ -341,7 +369,7 @@ export default function PlanningJourney() {
               <span className="pt-journey-state">
                 {ready[step.key]
                   ? "Rögzítve"
-                  : step.key === "history"
+                  : step.key === "history" || step.key === "assessment"
                     ? "Pontosítható"
                     : open === step.key
                       ? "Most következik"
@@ -362,6 +390,9 @@ export default function PlanningJourney() {
                 )}
                 {step.key === "locations" && (
                   <OptionsWorkspace mode="locations" />
+                )}
+                {step.key === "assessment" && (
+                  <AssessmentWorkspace onSaved={setAssessmentSaved} />
                 )}
                 {step.key === "schedule" && (
                   <OptionsWorkspace mode="schedule" />
@@ -420,7 +451,11 @@ export default function PlanningJourney() {
                     <button
                       type="button"
                       className={buttonClass}
-                      disabled={step.key !== "history" && !ready[step.key]}
+                      disabled={
+                        step.key !== "history" &&
+                        step.key !== "assessment" &&
+                        !ready[step.key]
+                      }
                       onClick={() => continueFrom(index)}
                     >
                       Tovább

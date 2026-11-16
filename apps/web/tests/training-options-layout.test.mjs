@@ -93,7 +93,7 @@ test("planning profile separates venues and availability while keeping personal 
   assert(planning.includes("Hetente legfeljebb hány napon szeretnél edzeni"));
   assert(planning.includes('href="/training-options/locations"'));
   assert(planning.includes('href="/training-options/schedule"'));
-  assert(planning.includes("Becslés és további személyes adatok"));
+  assert(planning.includes("További sportolási beállítások"));
   assert(!planning.includes('<details class="pt-profile-extras" open=""'));
   const complete = renderToStaticMarkup(
     React.createElement(Profile, {

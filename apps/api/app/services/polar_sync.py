@@ -412,6 +412,7 @@ async def sync_recent_sessions(
     last=None,
     include_enrichment: bool = True,
     report: dict | None = None,
+    strict_range: bool = False,
 ) -> int:
     connection = await db.scalar(
         select(ExternalConnection).where(
@@ -469,6 +470,11 @@ async def sync_recent_sessions(
         if not start:
             skip_reasons["missing_start"] = skip_reasons.get("missing_start", 0) + 1
             continue
+
+        # The V4 query uses provider civil dates; preserve a midnight session's
+        # original date even when its explicit offset puts it on the prior UTC day.
+        if strict_range and not start_date <= datetime.fromisoformat(item["startTime"].replace("Z", "+00:00")).date() < end_date:
+            raise ValueError("POLAR_SESSION_OUTSIDE_REQUESTED_RANGE")
 
         stop = polar_session_time(item, "stopTime")
         duration_ms = item.get("durationMillis")

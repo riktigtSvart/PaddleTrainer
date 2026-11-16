@@ -1,4 +1,5 @@
 "use client";
+import { SaveActionButton } from "@/components/planning-data/save-actions";
 import { useState } from "react";
 import { protocolProposal } from "@/lib/planning-goals/forms";
 import { toUtcField } from "@/lib/planning-goals/contracts";
@@ -393,9 +394,9 @@ export default function ProtocolForm({
             defaultValue={base?.artifact.proposal.rationale}
             required
           />
-          <button type="submit" className={buttonClass} disabled={!rows.length}>
+          <SaveActionButton saveLabel="Mérési protokoll mentése"  type="submit" className={buttonClass} disabled={locked || !rows.length}>
             Mérési protokoll mentése
-          </button>
+          </SaveActionButton>
         </fieldset>
       </form>
     </Card>

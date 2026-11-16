@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @import "../styles/workspace.css";
 
+.pt-body-workspace .pt-panel { padding: 1.25rem; }
+.pt-body-workspace h2 { margin-bottom: 1rem; font-size: 1.2rem; font-weight: 650; }
+.pt-body-workspace form { margin-top: 1.5rem; }
+.pt-body-workspace legend { font-weight: 650; margin-bottom: .75rem; }
+.pt-body-workspace .pt-nutrition-goal { border-top: 1px solid var(--pt-line); padding-top: 1.5rem; }
+.pt-body-pending, .pt-legacy-weight-goal { padding: 1rem; border: 1px solid var(--pt-line); border-radius: .75rem; }
+.pt-body-history-scroll { overflow-x: auto; margin-top: 1rem; }
+.pt-body-history-scroll table { width: 100%; border-collapse: collapse; text-align: left; }
+.pt-body-history-scroll th, .pt-body-history-scroll td { border-bottom: 1px solid var(--pt-line); padding: .75rem; vertical-align: top; }
+.pt-body-workspace [role="alert"] { color: var(--pt-warning); }
+
 :root {
   --background: var(--pt-bg);
   --foreground: var(--pt-text);

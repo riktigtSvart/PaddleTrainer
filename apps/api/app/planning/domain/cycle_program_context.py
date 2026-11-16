@@ -74,6 +74,11 @@ def validate_profile(profile):
         raise ValueError("An unassessed event must not claim a capability profile.")
     if profile["capability_basis"] == "icf_sprint_v0_1" and sprint_keys(profile) != keys:
         raise ValueError("The source-based suggestion differs from the declared event.")
+    weights = profile.get('capability_weights')
+    if weights is not None and (set(weights) != set(keys) or profile['capability_basis'] == 'unassessed'):
+        raise ValueError('Demand priorities must cover exactly the declared capabilities.')
+    if profile['capability_basis'] == 'paddling_demands_v0_1' and weights is None:
+        raise ValueError('The weighted profile needs demand priorities.')
 
 
 def is_intake(proposal):
@@ -90,9 +95,16 @@ def is_context(proposal):
 
 
 def validate_context(proposal, *, event_revision=False):
+    from .cycle_program import reject
+    for event in proposal['competitions']:
+        profile = event.get('profile') or {}
+        if profile.get('capability_basis') == 'paddling_demands_v0_1':
+            from .event_demands import suggest
+            expected = suggest(profile, proposal.get('sport', ''))
+            reject(expected is None or profile.get('capability_weights') != expected['weights']
+                or profile.get('capability_keys') != list(expected['weights']), 'CYCLE_EVENT_DEMAND_PROFILE_DIFFERS')
     if "planning_basis" not in proposal and not is_intake(proposal):
         return
-    from .cycle_program import reject
 
     new_goals = any("details" in g for g in proposal["goals"])
     reject(

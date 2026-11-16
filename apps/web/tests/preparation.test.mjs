@@ -155,7 +155,7 @@ test("real Python review shows exact remaining inputs and separates availability
   assert.match(html, /3 alkalom \/ 180 perc/);
   assert.match(html, /Becsléssel figyelembe vett edzések/);
   assert.match(html, /Pontosítandó edzés/);
-  assert.match(html, /href="\/athlete-setup#calendar"/);
+  assert.match(html, /href="\/training-options\/schedule"/);
   assert.match(html, /felsoroltak különböző mintákat/);
   assert.ok(review.result.preparation.estimated_duration_workout_ids.length);
   assert.ok(review.result.preparation.unknown_duration_workout_ids.length);
@@ -190,7 +190,8 @@ for (const [name, change] of [
   test("rejects malformed preparation metadata: " + name, async () => {
     const review = structuredClone(fixture.review);
     change(review.result.preparation);
-    const { content_hash, ...body } = review;
+    const body = { ...review };
+    delete body.content_hash;
     review.content_hash = await sha(body);
     await assert.rejects(() => readTrainingReview(review, expected));
   });

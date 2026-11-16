@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { canonical } from "@/lib/planning-cycles/contracts";
+import { firstFormProblem } from "@/lib/forms/validation";
+import { slotProblem } from "@/lib/training-options/slot-validation";
 import {
   Field,
   Select,
@@ -130,10 +132,12 @@ export default function CurrentWeek({
       };
     }
     try {
+      const problem = editing.available ? slotProblem(editing.details, data.locations) : null;
+      if (problem) throw Error(problem);
       readOptionsData(next);
       if (await save(next)) setEditing(null);
-    } catch {
-      setError("Ellenőrizd az időablakot és jelölj legalább egy helyszínt.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Ellenőrizd az időablakot és jelölj legalább egy helyszínt.");
     }
   }
   async function saveRestriction() {
@@ -168,6 +172,7 @@ export default function CurrentWeek({
   const dayEditor = editing && (
     <form
       className="pt-options-form pt-day-editor"
+      onInvalidCapture={event => setError(slotProblem(editing.details, data.locations) ?? firstFormProblem(event.currentTarget)?.text ?? "Ellenőrizd a megjelölt mezőt.")}
       onSubmit={(e) => {
         e.preventDefault();
         void saveDay();

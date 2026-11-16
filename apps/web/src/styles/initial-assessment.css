@@ -1,0 +1,118 @@
+.pt-initial-assessment,
+.pt-assessment-steps,
+.pt-assessment-fields {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.pt-assessment-progress {
+  position: sticky;
+  top: 8px;
+  z-index: 8;
+  padding: 12px 16px;
+  border: 1px solid var(--pt-line);
+  border-radius: 10px;
+  background: var(--pt-panel);
+  color: var(--pt-accent);
+  font-size: 14px;
+}
+.pt-assessment-step-title {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  background: transparent;
+  color: var(--pt-text);
+  border: 0;
+  padding: 5px 0;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pt-assessment-step-title small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--pt-muted);
+}
+.pt-assessment-step-title:focus-visible {
+  outline: 2px solid var(--pt-accent);
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+.pt-assessment-step-title[aria-expanded="true"] {
+  color: var(--pt-accent);
+}
+.pt-assessment-step > div {
+  margin-top: 18px;
+}
+.pt-assessment-step fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.pt-assessment-step fieldset:disabled {
+  opacity: 0.65;
+}
+.pt-assessment-sports {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+.pt-assessment-sports label {
+  padding: 11px;
+  border: 1px solid var(--pt-line);
+  border-radius: 8px;
+  background: var(--pt-bg);
+}
+.pt-assessment-sports input,
+.pt-initial-assessment .pt-options-check input {
+  margin-right: 9px;
+  accent-color: var(--pt-accent);
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+.pt-assessment-sports small {
+  color: var(--pt-muted);
+}
+.pt-assessment-fields .pt-assessment-set {
+  border: 1px solid var(--pt-line);
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  background: var(--pt-bg);
+}
+.pt-assessment-set legend {
+  padding: 0 8px;
+  font-weight: 600;
+  color: var(--pt-accent);
+}
+.pt-assessment-fields ul {
+  list-style: disc;
+  padding-left: 22px;
+  color: var(--pt-muted);
+}
+.pt-assessment-fields li {
+  margin: 6px 0;
+}
+.pt-assessment-fields p {
+  line-height: 1.65;
+}
+@media (max-width: 600px) {
+  .pt-assessment-step-title {
+    align-items: flex-start;
+    font-size: 15px;
+  }
+  .pt-assessment-progress {
+    position: static;
+  }
+  .pt-assessment-sports {
+    grid-template-columns: 1fr;
+  }
+  .pt-assessment-fields .pt-assessment-set {
+    padding: 12px;
+  }
+}

@@ -1,6 +1,7 @@
 import { object } from "@/lib/planning-cycles/contracts";
 import { continuationOnly, datasetLabels, preservedPlanResult, preservedPlansOnly, readReceipt, readStatus } from "./contracts";
 import type { DatasetResult, Pending, Run } from "./contracts";
+import { withConnectionDeadline } from "./deadline";
 
 const messages: Record<string, string> = {
   DATA_SYNC_DETAILS_PENDING: "A részletes edzésadatok egy része megérkezett. Újabb szinkronizálással folytatható az átvétel; először a legutóbbi edzések kerülnek sorra.",
@@ -22,6 +23,8 @@ const messages: Record<string, string> = {
   DATA_SYNC_RATE_LIMITED:
     "A szolgáltató túl sok lekérést jelzett. Később próbáld újra.",
   DATA_SYNC_TIMEOUT: "A frissítés nem fejeződött be az időkereten belül.",
+  DATA_SYNC_API_TIMEOUT: "A szerver válasza nem érkezett meg időben. A művelet eredményét a mentett kérés alapján lehet ellenőrizni.",
+  DATA_SYNC_API_UNAVAILABLE: "Az adatkapcsolati szerver most nem érhető el. A mentett állapot újra ellenőrizhető.",
   DATA_SYNC_SOURCE_RECORDS_SKIPPED:
     "Néhány forrásrekord kimaradt az adatátvételből.",
   DATA_SYNC_PROTECTED_PLANS_SKIPPED:
@@ -126,38 +129,36 @@ async function json(response: Response) {
   }
   return value;
 }
-export async function loadStatus(signal?: AbortSignal) {
-  return readStatus(
-    await json(
-      await fetch("/api/data-connections/status", {
-        cache: "no-store",
-        signal,
-      }),
-    ),
-  );
+async function requestJson(path: string, init: RequestInit = {}, signal?: AbortSignal) {
+  try {
+    return await withConnectionDeadline(
+      async bounded => json(await fetch(path, { ...init, cache: "no-store", signal: bounded })),
+      init.method === "POST" ? 220000 : 35000,
+      signal,
+    );
+  } catch (error) {
+    if (error instanceof Error && error.name === "TimeoutError")
+      throw new ConnectionError(504, "DATA_SYNC_API_TIMEOUT");
+    throw error;
+  }
 }
-export async function sendSync(pending: Pending) {
+export async function loadStatus(signal?: AbortSignal) {
+  return readStatus(await requestJson("/api/data-connections/status", {}, signal));
+}
+export async function sendSync(pending: Pending, signal?: AbortSignal) {
   return readReceipt(
-    await json(
-      await fetch("/api/data-connections/sync", {
+    await requestJson("/api/data-connections/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: pending.body,
-        cache: "no-store",
-      }),
-    ),
+      }, signal),
     pending,
   );
 }
 export async function findSync(pending: Pending, signal?: AbortSignal) {
   const request = JSON.parse(pending.body);
   return readReceipt(
-    await json(
-      await fetch("/api/data-connections/runs/" + request.request_id, {
-        cache: "no-store",
-        signal,
-      }),
-    ),
+    await requestJson("/api/data-connections/runs/" + request.request_id, {}, signal),
     pending,
   );
 }

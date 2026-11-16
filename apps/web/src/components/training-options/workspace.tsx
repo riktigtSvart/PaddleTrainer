@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { canonical, addDays } from "@/lib/planning-cycles/contracts";
 import { loadConstraints } from "@/lib/calendar/constraint-client";
@@ -26,14 +26,18 @@ import {
   secondaryClass,
 } from "@/components/planning-goals/fields";
 import LocationEditor from "./location-editor";
+import DaylightSettings from "./daylight-settings";
 import ScheduleEditor from "./schedule-editor";
 import CurrentWeek from "./current-week";
+import PrescriptionSettingsEditor from "./prescription-settings";
+import { optionsHead, receiptHead, requireFreshOptions } from "@/lib/training-options/synchronization";
+import type { OptionsHead } from "@/lib/training-options/synchronization";
 
 export default function OptionsWorkspace({
   mode = "locations",
   onContinue,
 }: {
-  mode?: "locations" | "schedule" | "week";
+  mode?: "locations" | "schedule" | "week" | "prescriptions";
   onContinue?: () => void;
 }) {
   const [context, setContext] = useState<OptionsContext | null>(null),
@@ -48,6 +52,19 @@ export default function OptionsWorkspace({
     [ready, setReady] = useState(false),
     [rejected, setRejected] = useState(false);
   const writing = useRef(false);
+  const loadGeneration = useRef(0), knownHead = useRef<OptionsHead | null>(null);
+  const applyContext = useCallback((value: OptionsContext) => {
+    const head = optionsHead(value);
+    requireFreshOptions(head, knownHead.current);
+    knownHead.current = head;
+    setContext(value);
+  }, []);
+  useEffect(() => {
+    const refresh = () => { if (!writing.current) setReload(n => n + 1); };
+    window.addEventListener(OPTIONS_UPDATED, refresh);
+    window.addEventListener("focus", refresh);
+    return () => { window.removeEventListener(OPTIONS_UPDATED, refresh); window.removeEventListener("focus", refresh); };
+  }, []);
   useEffect(() => {
     let active = true;
     queueMicrotask(() => {
@@ -69,6 +86,7 @@ export default function OptionsWorkspace({
   }, []);
   useEffect(() => {
     const controller = new AbortController();
+    const generation = ++loadGeneration.current;
     void loadOptions(
       first ? { start: first, end: addDays(first, 6) } : undefined,
       controller.signal,
@@ -81,14 +99,14 @@ export default function OptionsWorkspace({
                 controller.signal,
               )
             : null;
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted || generation !== loadGeneration.current || writing.current) return;
         if (constraints && constraints.athlete_id !== c.athlete_id)
           throw Error("Az órarend és a felmérés tulajdonosa eltér.");
-        setContext(c);
+        applyContext(c);
         setSchedule(constraints);
       })
       .catch((e) => {
-        if (!controller.signal.aborted)
+        if (!controller.signal.aborted && generation === loadGeneration.current)
           setFailure(
             e instanceof Error
               ? e.message
@@ -96,7 +114,7 @@ export default function OptionsWorkspace({
           );
       });
     return () => controller.abort();
-  }, [first, reload, mode]);
+  }, [first, reload, mode, applyContext]);
   const locked = busy || !!pending || blocked || !ready || !context;
   async function perform(value: OptionsPending): Promise<boolean> {
     if (
@@ -107,13 +125,17 @@ export default function OptionsWorkspace({
     )
       return false;
     writing.current = true;
+    loadGeneration.current++;
     setBusy(true);
     setFailure("");
+    setMessage("");
     setRejected(false);
     try {
       const receipt = await sendOptions(value);
       if (receipt.artifact.athlete_id !== context.athlete_id)
         throw Error("Másik sportoló mentési válasza érkezett.");
+      const head = receiptHead(receipt);
+      if (!knownHead.current || knownHead.current.owner !== head.owner || head.revision > knownHead.current.revision) knownHead.current = head;
       sessionStorage.removeItem(PENDING_KEY);
       setPending(null);
       setMessage(
@@ -133,8 +155,10 @@ export default function OptionsWorkspace({
           (nextSchedule && nextSchedule.athlete_id !== context.athlete_id)
         )
           throw Error("A frissítés másik sportolóhoz tartozik.");
-        setContext(c);
+        applyContext(c);
         setSchedule(nextSchedule);
+        if ((c.saved?.artifact.revision ?? 0) > receipt.artifact.revision)
+          setMessage("A mentési kérést a szerver igazolta. Azóta újabb beállítás is készült; a legfrissebb mentett állapot látható.");
       } catch {
         setContext(null);
         setFailure(
@@ -161,10 +185,15 @@ export default function OptionsWorkspace({
     if (writing.current || locked || !context) return false;
     try {
       readOptionsData(data);
+      // Editors can clear optional fields with undefined. Compare and retain
+      // the actual JSON wire shape, which omits those cleared properties.
+      data = JSON.parse(JSON.stringify(data)) as OptionsData;
       if (canonical(data) === canonical(context.data)) {
         setMessage("Nincs eltérés a mentett állapothoz képest.");
         return true;
       }
+      if (sessionStorage.getItem(PENDING_KEY))
+        throw Error("Egy másik beállítás mentése még folyamatban van vagy ellenőrzésre vár. Előbb annak eredményét rendezd; az új piszkozat megmarad.");
       const value: OptionsPending = {
         version: "training-options-pending-v0.1",
         owner: context.athlete_id,
@@ -260,15 +289,28 @@ export default function OptionsWorkspace({
             </p>
           )}
           {mode === "locations" && (
-            <LocationEditor data={context.data} disabled={locked} save={save} />
+            <>
+            <DaylightSettings key={`${context.athlete_id}:${context.timezone_name}:${canonical(context.data.daylight_rules ?? [])}`} data={context.data} disabled={locked} save={save} />
+            <LocationEditor
+              owner={context.athlete_id}
+              today={context.local_today}
+              data={context.data}
+              catalog={context.strength_catalog}
+              disabled={locked}
+              save={save}
+            />
+            </>
           )}
+          {mode === "prescriptions" && <PrescriptionSettingsEditor key={`${context.athlete_id}:${context.timezone_name}:${canonical(context.data.prescription_settings ?? null)}`} data={context.data} today={context.local_today} disabled={locked} save={save} />}
           {mode === "schedule" && (
             <ScheduleEditor
-              key={context.reference?.content_hash ?? "new"}
+              key={`${context.athlete_id}:${context.timezone_name}`}
+              owner={context.athlete_id}
               data={context.data}
               today={context.local_today}
               disabled={locked}
               save={save}
+              feedback={failure ? { tone: "error", text: failure } : message ? { tone: "success", text: message } : undefined}
             />
           )}
           {mode === "week" && (
@@ -303,7 +345,7 @@ export default function OptionsWorkspace({
                 </button>
               </div>
               <CurrentWeek
-                key={`${context.reference?.content_hash ?? "new"}:${context.start_date}`}
+                key={`${context.athlete_id}:${context.timezone_name}:${context.start_date}`}
                 context={context}
                 schedule={schedule}
                 disabled={locked}

@@ -1,0 +1,42 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { load } from "./load-goal-modules.mjs";
+const { calendarLayerEntries } = load("src/lib/calendar/layers.ts");
+const { setupStep, setupSteps } = load("src/components/planning-data/workspace.tsx");
+const Profile = load("src/components/athlete-setup/profile-form.tsx").default;
+const { normalizeProfile } = load("src/lib/athlete-setup/contracts.ts");
+const f = JSON.parse(readFileSync(new URL("./fixtures/training-options.json", import.meta.url)));
+const profile = f.review.inputs.profile.data;
+test("six setup stages follow the requested order and retain legacy fragment destinations", () => {
+  assert.deepEqual(setupSteps.map((s) => s.key), ["personal", "sports", "goals", "locations", "schedule", "assessment"]);
+  for (const [old, current] of [["profile", "personal"], ["history", "assessment"], ["week", "schedule"], ["strategy", "goals"], ["plan", "assessment"]]) assert.equal(setupStep(old), current);
+  assert.equal(setupStep("evil"), null);
+});
+test("personal and sports forms expose their own fields while the exact shared data is retained", () => {
+  const data = { ...profile, body_mass_kg: "72.500", height_cm: "178.0", body_measurements_recorded_on: f.context.local_today };
+  data.sport_history[0] = { ...data.sport_history[0], role: "primary", current_level: "recreational" };
+  const before = JSON.stringify(data);
+  const html = (section) => renderToStaticMarkup(React.createElement(Profile, { section, value: data, today: f.context.local_today, planning: true, onChange() {} }));
+  const personal = html("personal"), sports = html("sports");
+  assert(personal.includes("Testsúly (kg)")); assert(personal.includes("Magasság (cm)"));
+  assert(!personal.includes("Legmagasabb elért szint"));
+  assert(sports.includes("Legmagasabb elért szint")); assert(sports.includes("Jelenlegi szint")); assert(sports.includes("A sportág szerepe"));
+  assert(!sports.includes("Születési dátum"));
+  assert.equal(normalizeProfile(data, f.context.local_today).body_mass_kg, "72.500");
+  assert.equal(JSON.stringify(data), before);
+});
+for (const [name, patch] of [["zero mass", { body_mass_kg: "0" }], ["negative height", { height_cm: "-2" }], ["undated mass", { body_mass_kg: "72", body_measurements_recorded_on: null }], ["future measurement", { height_cm: "178", body_measurements_recorded_on: "2099-01-01" }]]) test("profile refuses " + name, () => assert.throws(() => normalizeProfile({ ...profile, ...patch }, f.context.local_today)));
+test("calendar planned and completed layers retain each side independently before linking", () => {
+  const plan = { key: "planned:p", entityId: "p", kind: "planned", title: "Terv", date: "2026-10-23", start: null, end: null, duration: 0, sport: "KAYAK", goal: null, goalTag: null };
+  const actual = { ...plan, key: "session:s", kind: "session", entityId: "s", title: "Teljesítés", linkedPlanId: "p" };
+  const layers = { training: true, availability: true, commitments: true, planned: true, sessions: true };
+  const source = [plan, actual], before = JSON.stringify(source);
+  assert.equal(calendarLayerEntries(source, layers).length, 1);
+  assert.equal(calendarLayerEntries(source, { ...layers, sessions: false })[0].kind, "planned");
+  assert.equal(calendarLayerEntries(source, { ...layers, planned: false })[0].kind, "session");
+  assert.equal(calendarLayerEntries(source, { ...layers, planned: false, sessions: false }).length, 0);
+  assert.equal(JSON.stringify(source), before);
+});

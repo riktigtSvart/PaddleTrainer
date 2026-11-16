@@ -149,7 +149,9 @@ def test_first_plan_is_hashed_durable_but_creates_no_workout_until_explicit_acce
     v = review(planner)
     assert v["content_hash"] == digest({k: x for k, x in v.items() if k != "content_hash"})
     assert v["result"]["create"] and not v["result"]["cancel"]
-    assert all(c["template_key"] == "KAYAK_EASY_TECHNICAL" for c in v["result"]["create"])
+    assert all(c['template_key'] == 'KAYAK_EASY_TECHNICAL' or
+               (c['sport'] == 'STRENGTH' and c['template_version'] == 'v0.4' and not c.get('strength_prescription'))
+               for c in v['result']['create'])
     assert not v["committed_plan"] and not v["result"]["personal_model_applied"]
     assert count(planner, PlannedWorkout) == before
     saved = accept(planner, v)
@@ -171,7 +173,7 @@ def test_same_review_and_exact_acceptance_retry_do_not_duplicate(planner):
     assert set(later["result"]["keep"]) == set(saved["artifact"]["created_workouts"])
 
 
-def test_long_and_strength_samples_need_actual_sport_references(planner):
+def test_long_duration_reference_does_not_imply_strength_exercise_familiarity(planner):
     add_session(planner)
     add_session(
         planner,
@@ -183,11 +185,14 @@ def test_long_and_strength_samples_need_actual_sport_references(planner):
     )
     v = review(planner)
     kinds = {p["template_key"] for p in v["result"]["proposals"]}
-    assert "KAYAK_LONG_AEROBIC" in kinds and "STRENGTH_REFERENCE_AND_DEVELOPMENT" in kinds
+    assert "KAYAK_LONG_AEROBIC" in kinds
+    assert not any(c.get('strength_prescription') for c in v['result']['proposals'])
+    assert all(c['template_version'] == 'v0.4' for c in v['result']['proposals'] if c['sport'] == 'STRENGTH')
+    assert v["result"]["strength_assessment"]["issues"] == ["STRENGTH_ASSESSMENT_MISSING"]
     assert all(
         p["duration_reference_session_id"]
         for p in v["result"]["proposals"]
-        if p["template_key"] != "KAYAK_EASY_TECHNICAL"
+        if p['template_key'] == 'KAYAK_LONG_AEROBIC'
     )
 
 

@@ -72,11 +72,14 @@ test("global refresh has a named main action and separate settings, initially cl
   assert.match(html, /aria-expanded="false"/);
   assert.doesNotMatch(html, /role="dialog"/);
 });
-test("calendar keeps one date toolbar, optional view layers and explicit slot action", () => {
+test("calendar keeps visible view buttons and layers, with both history directions", () => {
   const Workspace = load("src/components/calendar/workspace.tsx").default;
   const html = renderToStaticMarkup(React.createElement(Workspace));
-  assert.match(html, /\+ Idősáv/);
-  assert.match(html, /<summary[^>]*>.*Nézet/s);
+  assert.doesNotMatch(html, /\+ Idősáv|pt-view-options|pt-calendar-context/);
+  assert.match(html, /<fieldset[^>]*aria-label="Naptár látható elemei"/);
+  assert.match(html, /role="group" aria-label="Naptár időtávja"/);
+  assert.match(html, />Visszavonás<\/button>/);
+  assert.match(html, />Újra<\/button>/);
   assert.doesNotMatch(
     html,
     /Nézet frissítése|Edzések, lehetőségek és elfoglaltságok/,

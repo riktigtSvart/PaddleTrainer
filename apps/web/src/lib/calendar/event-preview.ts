@@ -6,6 +6,7 @@ import {
 } from "./contracts";
 import type { CalendarEvent, Feed } from "./contracts";
 import { estimateLabel } from "./duration-estimate";
+import { alternativeLabel } from "./training-alternatives";
 
 export function eventHref(event: CalendarEvent): string | null {
   return event.kind === "session"
@@ -39,6 +40,8 @@ export function previewLines(event: CalendarEvent, feed: Feed): string[] {
   if (distance !== null && distance !== undefined)
     lines.push(formatNumber(distance / 1000, "km"));
   if (event.goal) lines.push(`Cél: ${goalLabels[event.goal] ?? event.goal}`);
+  const alternatives = alternativeLabel(event.planningContext);
+  if (alternatives && event.kind === "planned") lines.push(alternatives);
   if (actual?.avg_hr !== null && actual?.avg_hr !== undefined)
     lines.push(formatNumber(actual.avg_hr, "bpm") + " átlagpulzus");
   if (actual?.calories !== null && actual?.calories !== undefined)

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import SavedWorkoutInstructions from "@/components/planning-cycles/saved-workout-instructions";
+import { durationHMS } from '@/lib/duration';
 
 type WorkoutBlock = {
   id: string;
@@ -131,31 +133,7 @@ function formatDistance(
 function formatDuration(
   seconds: number | null
 ): string {
-  if (seconds === null) {
-    return "—";
-  }
-
-  const hours = Math.floor(
-    seconds / 3600
-  );
-
-  const minutes = Math.floor(
-    (seconds % 3600) / 60
-  );
-
-  const secs = seconds % 60;
-
-  if (hours > 0) {
-    return `${hours} óra ${minutes} perc`;
-  }
-
-  if (secs === 0) {
-    return `${minutes} perc`;
-  }
-
-  return `${minutes}:${secs
-    .toString()
-    .padStart(2, "0")}`;
+  return seconds === null ? '—' : durationHMS(seconds);
 }
 
 function formatBlockGoal(
@@ -371,6 +349,7 @@ export default async function WorkoutDetailPage({
               {planned.description}
             </p>
           )}
+          {planned.source==="PADDLETRAINER_C18_4"&&<SavedWorkoutInstructions id={planned.id} date={planned.date} sport={planned.sport} duration={planned.duration_sec} description={planned.description}/>}
         </header>
 
         <div className="space-y-12 py-10">

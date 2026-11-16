@@ -60,6 +60,8 @@ def age_on(birth, today):
 
 
 def review_profile(data, today):
+    require(not data.get('body_mass_recorded_on') or data['body_mass_recorded_on'] <= today, 'ATHLETE_OBSERVATION_IN_FUTURE')
+    require(not data.get('body_measurements_recorded_on') or data['body_measurements_recorded_on'] <= today, 'ATHLETE_OBSERVATION_IN_FUTURE')
     age = age_on(data["birth_date"], today)
     reasons, mode = [], "NORMAL_START"
     if age is None:
@@ -71,6 +73,9 @@ def review_profile(data, today):
     if data["sport_history_status"] == "unknown":
         reasons.append("SPORT_HISTORY_UNKNOWN")
     for item in data["sport_history"]:
+        for result in item.get('performances', []):
+            require(not result['recorded_on'] or result['recorded_on'] <= today, 'ATHLETE_HISTORY_IN_FUTURE')
+            require(result['year'] is None or result['year'] <= int(today[:4]), 'ATHLETE_HISTORY_IN_FUTURE')
         require(
             item["start_year"] is None or item["start_year"] <= int(today[:4]),
             "ATHLETE_HISTORY_IN_FUTURE",

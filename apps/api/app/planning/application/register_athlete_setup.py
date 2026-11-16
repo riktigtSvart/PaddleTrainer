@@ -200,7 +200,10 @@ def receipt(artifact, record, reused):
     }
 
 
-async def persist(repository, session, artifact, kind):
+async def persist(repository, session, artifact, kind, *, sync_mass=True, previous=None):
+    if kind == 'profile' and sync_mass:
+        from app.services.body_mass import stage_profile
+        await stage_profile(repository, session, artifact, previous)
     record = AuditArtifactRecord(
         artifact_kind=KINDS[kind],
         artifact_id=artifact["artifact_id"],
@@ -315,7 +318,7 @@ async def save(*, owner, kind, proposal, repository, session):
             previous=previous,
             observations=observations,
         )
-        return await persist(repository, session, artifact, kind)
+        return await persist(repository, session, artifact, kind, previous=previous)
     except BaseException:
         await rollback(session)
         raise
@@ -341,6 +344,8 @@ async def get_context(*, owner, repository, session, start=None, end=None):
             "planning_authorized": False,
             "workouts_created": False,
         }
+        from app.services.body_mass import projection
+        result['body_mass'] = await projection(repository, session, owner)
         if start is not None:
             result["calendar_context"] = domain.calendar_context(
                 calendar[0] if calendar else None, start=start, end=end

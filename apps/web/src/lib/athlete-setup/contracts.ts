@@ -1,4 +1,9 @@
 import { addDays, day, object, sha } from "@/lib/planning-cycles/contracts";
+import { profileWireData, profileWireProposal } from "./profile-wire";
+import { normalizePerformance } from "./sport-history";
+import type { SportPerformance, SportPlanning } from "./sport-history";
+import { readMassProjection } from "./body-mass";
+import type { MassProjection } from "./body-mass";
 
 export type Reference = { artifact_id: string; content_hash: string };
 export type SportHistory = {
@@ -15,6 +20,10 @@ export type SportHistory = {
     | "professional";
   usual_sessions_per_week: number | null;
   notes: string;
+  role?: "unknown" | "primary" | "secondary" | "recreation" | "paused";
+  current_level?: SportHistory["level"];
+  planning?: SportPlanning;
+  performances?: SportPerformance[];
 };
 export type Constraint = {
   key: string;
@@ -80,6 +89,10 @@ export type Manual = {
   supersedes_candidate_id: string | null;
 };
 export type Profile = {
+  body_mass_kg?: string | null;
+  height_cm?: string | null;
+  body_measurements_recorded_on?: string | null;
+  body_mass_recorded_on?: string | null;
   birth_date: string | null;
   sex_reference:
     | "unknown"
@@ -200,6 +213,7 @@ export type Receipt = {
   workouts_created: false;
 };
 export type Context = {
+  body_mass?: MassProjection;
   athlete_id: string;
   schema_version: "athlete-setup-v0.1";
   timezone_name: string;
@@ -342,6 +356,20 @@ export function decimal(value: string): string {
   return result;
 }
 export function normalizeProfile(value: Profile, today: string): Profile {
+  const body: Partial<Profile> = {};
+  for (const metric of ["body_mass_kg", "height_cm"] as const) {
+    if (value[metric] != null && value[metric] !== "") {
+      body[metric] = decimal(value[metric]!);
+      if (Number(body[metric]) <= 0) throw Error("A testsúly és magasság pozitív érték legyen.");
+    }
+  }
+  if (value.body_measurements_recorded_on) {
+    day(value.body_measurements_recorded_on);
+    if (value.body_measurements_recorded_on > today) throw Error("A testadatok dátuma nem lehet jövőbeli.");
+    body.body_measurements_recorded_on = value.body_measurements_recorded_on;
+  }
+  if (value.body_mass_recorded_on) { day(value.body_mass_recorded_on); if (value.body_mass_recorded_on > today) throw Error("A testtömeg mérési napja nem lehet jövőbeli."); body.body_mass_recorded_on = value.body_mass_recorded_on; }
+  if ((body.body_mass_kg && !(body.body_mass_recorded_on || body.body_measurements_recorded_on)) || (body.height_cm && !body.body_measurements_recorded_on)) throw Error("Add meg a testadatok dátumát.");
   const slowdown = value.duration_doubling_slowdown_pct;
   if (
     slowdown != null &&
@@ -385,14 +413,24 @@ export function normalizeProfile(value: Profile, today: string): Profile {
       conditions: o.conditions.trim(),
     };
   });
-  return {
+  const normalized: Profile = {
     ...value,
+    sport_history: value.sport_history.map((sport) => ({ ...sport,
+      ...(sport.performances ? { performances: sport.performances.map((result) => normalizePerformance(result, today)) } : {}),
+    })),
     target_sport: value.target_sport.trim(),
     competition_category: value.competition_category.trim(),
     recovery_notes: value.recovery_notes.trim(),
     accessibility_needs: value.accessibility_needs.trim(),
     manual_observations: manual,
   };
+  const mass = manual.filter((v) => v.metric === "body_mass_kg" && v.start_date === v.end_date && v.aggregation === "single").sort((a, b) => a.end_date.localeCompare(b.end_date)).at(-1);
+  if (mass && (!body.body_mass_kg || mass.end_date > (body.body_mass_recorded_on ?? body.body_measurements_recorded_on ?? ""))) { body.body_mass_kg = mass.value; body.body_mass_recorded_on = mass.end_date; }
+  delete normalized.body_mass_kg;
+  delete normalized.height_cm;
+  delete normalized.body_measurements_recorded_on;
+  delete normalized.body_mass_recorded_on;
+  return profileWireData({ ...normalized, ...body }) as Profile;
 }
 export function validateCalendar(value: Calendar): void {
   const wanted = dates(value.start_date, value.end_date);
@@ -461,12 +499,14 @@ export async function readReceipt(
   const { content_hash, ...body } = a;
   if ((await sha(body)) !== content_hash)
     throw new Error("A sportolói bizonylat tartalma eltér.");
-  if (
-    pending &&
-    (a.kind !== expected ||
-      (await sha(a.proposal)) !== (await sha(JSON.parse(pending.body))))
-  )
-    throw new Error("A sportolói bizonylat másik kéréshez tartozik.");
+  if (pending) {
+    const original = JSON.parse(pending.body);
+    const same = (await sha(a.proposal)) === (await sha(original));
+    const normalized = pending.operation === "profiles" && !same &&
+      (await sha(a.proposal)) === (await sha(profileWireProposal(original)));
+    if (a.kind !== expected || (!same && !normalized))
+      throw new Error("A sportolói bizonylat másik kéréshez tartozik.");
+  }
   return r as Receipt;
 }
 export async function readContext(value: unknown): Promise<Context> {
@@ -506,6 +546,7 @@ export async function readContext(value: unknown): Promise<Context> {
     } else if (c[field] !== null || references[field + "_reference"] !== null)
       throw new Error("A sportolói hivatkozás hiányos.");
   }
+  if (c.body_mass !== undefined) await readMassProjection(c.body_mass, c.athlete_id as string);
   return c as Context;
 }
 export const reasonLabels: Record<string, string> = {

@@ -1,0 +1,223 @@
+.pt-strength-inventory {
+  display: grid;
+  gap: 16px;
+  margin: 12px 0;
+  padding: 18px;
+  border: 1px solid var(--pt-line);
+  border-radius: 14px;
+  background: var(--pt-panel);
+  color: var(--pt-text);
+}
+.pt-strength-inventory h4 {
+  font-size: 17px;
+  font-weight: 600;
+}
+.pt-equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(166px, 1fr));
+  gap: 12px;
+}
+.pt-equipment-groups,
+.pt-equipment-filter-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.pt-equipment-groups button {
+  color: var(--pt-text);
+  border-color: var(--pt-line);
+  background: var(--pt-bg);
+  font-size: 12px;
+}
+.pt-equipment-groups button[aria-pressed="true"] {
+  color: var(--pt-accent);
+  border-color: var(--pt-accent);
+  background: var(--pt-accent-bg);
+}
+.pt-equipment-groups button:focus-visible {
+  outline: 2px solid var(--pt-accent);
+  outline-offset: 3px;
+}
+.pt-equipment-filter-status {
+  justify-content: space-between;
+}
+.pt-equipment-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--pt-line);
+  border-radius: 12px;
+  background: var(--pt-bg);
+  cursor: pointer;
+  min-width: 0;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.pt-equipment-card:hover {
+  border-color: var(--pt-accent);
+}
+.pt-equipment-card[data-selected="true"] {
+  border-color: var(--pt-accent);
+  background: var(--pt-accent-bg);
+  box-shadow: inset 0 0 0 1px var(--pt-accent);
+}
+.pt-equipment-card:focus-within {
+  outline: 2px solid var(--pt-accent);
+  outline-offset: 3px;
+}
+.pt-equipment-card > input {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--pt-accent);
+}
+.pt-equipment-illustration {
+  display: block;
+  width: 100%;
+  height: 104px;
+  color: var(--pt-accent);
+  margin-top: 8px;
+}
+.pt-equipment-card strong {
+  line-height: 1.4;
+  font-size: 14px;
+}
+.pt-equipment-card small {
+  color: var(--pt-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.pt-strength-exercises,
+.pt-strength-guides {
+  border-top: 1px solid var(--pt-line);
+  padding-top: 14px;
+}
+.pt-strength-exercises > summary,
+.pt-strength-guides > summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 5px 0;
+}
+.pt-strength-exercises[open],
+.pt-strength-guides[open] {
+  display: block;
+}
+.pt-strength-exercises > *:not(summary),
+.pt-strength-guides > *:not(summary) {
+  margin-top: 14px;
+}
+.pt-strength-exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.pt-strength-exercise-card {
+  padding: 14px;
+  border: 1px solid var(--pt-line);
+  border-radius: 10px;
+  background: var(--pt-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 10px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.pt-strength-exercise-card header {
+  display: grid;
+  gap: 8px;
+}
+.pt-strength-exercise-card h5 {
+  font-weight: 600;
+  font-size: 15px;
+}
+.pt-strength-exercise-card .pt-plan-badge {
+  width: fit-content;
+}
+.pt-strength-guide-dialog {
+  width: min(950px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid var(--pt-line);
+  background: var(--pt-panel);
+  color: var(--pt-text);
+  overflow: auto;
+}
+.pt-strength-guide-dialog::backdrop {
+  background: rgb(0 0 0 / 0.72);
+}
+.pt-strength-guide-dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.pt-strength-guide-dialog h4 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.pt-strength-guide-dialog img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: white;
+  border-radius: 8px;
+}
+.pt-strength-guide-dialog > p {
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .pt-strength-inventory {
+    padding: 12px;
+  }
+  .pt-equipment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .pt-equipment-card {
+    padding: 11px;
+  }
+  .pt-equipment-illustration {
+    height: 90px;
+  }
+  .pt-strength-exercise-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pt-exercise-confirmations {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--pt-line);
+  border-left: 4px solid var(--pt-accent);
+  border-radius: 0.7rem;
+  background: var(--pt-panel);
+}
+.pt-exercise-confirmations ul {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+}
+.pt-exercise-confirmations li {
+  display: grid;
+  gap: 0.6rem;
+  border: 1px solid var(--pt-line);
+  padding: 1rem;
+  border-radius: 0.6rem;
+}
+.pt-exercise-confirmations .pt-plan-badge {
+  width: fit-content;
+}

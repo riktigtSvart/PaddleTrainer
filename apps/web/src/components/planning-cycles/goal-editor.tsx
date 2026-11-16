@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Area, Field, Select } from "@/components/planning-goals/fields";
 import type {
   Goal,
@@ -37,6 +38,7 @@ export default function GoalEditor({
   onChange: (v: Goal) => void;
   events?: Competition[];
 }) {
+  if (value.body_mass) return <div className="pt-legacy-weight-goal"><p>Korábban edzéscélként megadott testsúlyszándék: {value.key === "weight_loss" ? "testsúlycsökkentés" : "testsúlytartás"}.</p><p>A rögzítéskor megadott tömeg: {value.body_mass.current_kg} kg{value.body_mass.target_kg ? ` · akkori cél: ${value.body_mass.target_kg} kg` : ""}.</p><Link className="underline" href="/nutrition#body-goals">Testsúlycél kezelése a táplálkozásnál</Link></div>;
   const details: GoalDetails = value.details ?? newGoal(value.key).details!;
   const edit = (change: Partial<GoalDetails>) =>
     onChange({ ...value, details: { ...details, ...change } });
@@ -47,44 +49,6 @@ export default function GoalEditor({
           Korábban megadott cél: {value.target_description}. Új irány
           választásáig ezt őrizzük meg.
         </p>
-      )}
-      {value.body_mass && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Jelenlegi testsúly (kg)"
-            name={`goal.${value.key}.current_kg`}
-            inputMode="decimal"
-            required
-            maxLength={13}
-            value={value.body_mass.current_kg}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                body_mass: { ...value.body_mass!, current_kg: e.target.value },
-              })
-            }
-          />
-          {value.key === "weight_loss" ? (
-            <Field
-              label="Céltestsúly (kg)"
-              name={`goal.${value.key}.target_kg`}
-              inputMode="decimal"
-              required
-              maxLength={13}
-              value={value.body_mass.target_kg ?? ""}
-              onChange={(e) =>
-                onChange({
-                  ...value,
-                  body_mass: { ...value.body_mass!, target_kg: e.target.value },
-                })
-              }
-            />
-          ) : (
-            <p className="self-center text-sm text-zinc-300">
-              A megadott jelenlegi testsúly megtartása a cél.
-            </p>
-          )}
-        </div>
       )}
       {["aerobic_fitness", "strength", "mobility"].includes(value.key) && (
         <Select

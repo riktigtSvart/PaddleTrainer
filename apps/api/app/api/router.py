@@ -2,12 +2,15 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     assessments,
+    automatic_planning,
     athlete_setup,
     capacities,
     coach,
     data_connections,
     executed_workouts,
+    guided_strength,
     health,
+    initial_assessment,
     pft,
     phase_clarification_storage,
     phase_reconciliations,
@@ -46,7 +49,10 @@ api_router.include_router(planning_adoption.router)
 api_router.include_router(planning_goals.router)
 api_router.include_router(planning_cycles.router)
 api_router.include_router(training_plans.router)
+api_router.include_router(automatic_planning.router)
 api_router.include_router(training_options.router)
+api_router.include_router(initial_assessment.router)
+api_router.include_router(guided_strength.router)
 api_router.include_router(planning_calendar.router)
 api_router.include_router(athlete_setup.router)
 

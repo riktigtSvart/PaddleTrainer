@@ -7,7 +7,7 @@ import type { SlotChange } from "@/lib/calendar/slot-transform";
 import { MOVE_PENDING, MOVE_UNDO, loadMove, moveMessages, moveRef, previewMove, readMovePending, readMoveProposal, readMoveReceipt, sendMove, MoveHTTPError } from "@/lib/calendar/moves";
 import type { MoveContext, MovePending, MoveReview, MoveUndo, MoveUndoState } from "@/lib/calendar/moves";
 import ConflictSummary from "./conflict-summary";
-export type MoveRequest = { serial: number; planId: string; change?: SlotChange; expectedSourceHash?: string; undo?: boolean };
+export type MoveRequest = { serial: number; planId: string; change?: SlotChange; expectedSourceHash?: string; undo?: boolean; redo?: boolean };
 const message = (e: unknown) => e instanceof Error ? e.message : "Az áthelyezés nem sikerült.";
 export default function MoveEditor({ owner, request, disabled, onSaved, onLockedChange, onUndoChange }: {
   owner: string | null; request: MoveRequest | null; disabled: boolean; onSaved: () => void;
@@ -31,6 +31,8 @@ export default function MoveEditor({ owner, request, disabled, onSaved, onLocked
   useEffect(()=>{onLockedChange(!ready||busy||!!base||!!pending||blocked);},[ready,busy,base,pending,blocked,onLockedChange]);
   useEffect(()=>{onUndoChange(undo ? {createdAt:undo.receipt.artifact.created_at,planId:undo.receipt.artifact.proposal.plan_id,owner:undo.receipt.artifact.athlete_id,
     disabled:undo.consumed||!ready||busy||!!base||!!pending||blocked||undo.receipt.artifact.athlete_id!==owner,
+    redoDisabled:!undo.consumed||!ready||busy||!!base||!!pending||blocked||undo.receipt.artifact.athlete_id!==owner,
+    redoExplanation:undo.consumed?"A visszavont edzésáthelyezés újbóli alkalmazása, előnézettel.":"Nincs visszavont edzésáthelyezés.",
     explanation:undo.consumed?"Az edzésáthelyezés visszavonása már megtörtént.":`Edzés időpontjának visszaállítása: ${undo.receipt.artifact.after.date} → ${undo.receipt.artifact.before.date}. Kattintás után ellenőrizhető.`}:null);
   },[undo,ready,busy,base,pending,blocked,owner,onUndoChange]);
   useEffect(()=>{
@@ -41,11 +43,11 @@ export default function MoveEditor({ owner, request, disabled, onSaved, onLocked
       if(abort.signal.aborted)return;
       if(request.expectedSourceHash)requireValue(value.source_hash===request.expectedSourceHash,"Az edzés közben megváltozott. Olvasd újra a naptárt és húzd újra.");
       let target=value.current;
-      if(request.undo){requireValue(undo && undo.receipt.artifact.proposal.timezone_name===value.timezone_name && !undo.consumed && canonical(value.previous_reference)===canonical(moveRef(undo.receipt.artifact)) && canonical(value.current)===canonical(undo.receipt.artifact.after),"Újabb időpontmódosítás történt. A régi állapot már nem vonható vissza.");target=undo.receipt.artifact.before;}
+      if(request.undo || request.redo){requireValue(undo && undo.receipt.artifact.proposal.timezone_name===value.timezone_name && undo.consumed === !!request.redo && canonical(value.previous_reference)===canonical(moveRef(undo.receipt.artifact)) && canonical(value.current)===canonical(undo.receipt.artifact.after),"Újabb időpontmódosítás történt. A régi állapot már nem vonható vissza.");target=undo.receipt.artifact.before;}
       const local=target.planned_start_time?localParts(target.planned_start_time,value.timezone_name):null;
       const seconds=target.planned_start_time?new Date(target.planned_start_time).getUTCSeconds():0;
       setBase(value);setDate(request.change?.date??local?.date??target.date);setClock(request.change?.start_time ? request.change.start_time+(request.change.start_seconds?":"+String(request.change.start_seconds).padStart(2,"0"):"") : local ? local.clock+":"+String(seconds).padStart(2,"0") : "");
-      setUntimed(!!request.undo&&!target.planned_start_time);setFold(null);
+      setUntimed(!!(request.undo || request.redo)&&!target.planned_start_time);setFold(null);
     }).catch(e=>{if(!abort.signal.aborted)setError(message(e));}).finally(()=>{if(!abort.signal.aborted)setBusy(false);});
     return()=>abort.abort();
     // A request pins the context once; background refreshes do not replace it.
@@ -64,16 +66,16 @@ export default function MoveEditor({ owner, request, disabled, onSaved, onLocked
     transmitting.current=true;setBusy(true);setError("");setRejected(false);
     try{
       const receipt=await sendMove(value);let note="";
-      try{const history={receipt,consumed:value.undo};localStorage.setItem(MOVE_UNDO,JSON.stringify(history));setUndo(history);}
+      try{const history={receipt,consumed:value.undo && !value.redo};localStorage.setItem(MOVE_UNDO,JSON.stringify(history));setUndo(history);}
       catch{setUndo(null);note=" A visszavonás adata nem őrizhető meg ebben a böngészőben.";}
       localStorage.removeItem(MOVE_PENDING);setPending(null);setBase(null);setReview(null);dialog.current?.close();
-      setNotice((value.undo?"Az edzés korábbi időpontja visszaállítva.":"Az edzés új időpontja elmentve.")+note);onSaved();
+      setNotice((value.redo?"Az edzésáthelyezés újra alkalmazva.":value.undo?"Az edzés korábbi időpontja visszaállítva.":"Az edzés új időpontja elmentve.")+note);onSaved();
     }catch(e){setError(message(e));setRejected(e instanceof MoveHTTPError&&[400,404,409,422].includes(e.status));}
     finally{transmitting.current=false;setBusy(false);}
   }
   async function save(){
     if(!review||busy||pending||blocked||disabled)return;
-    const value:MovePending={version:"calendar-move-pending-v0.1",owner:review.athlete_id,body:JSON.stringify({proposal:review.proposal,review_hash:review.review_hash}),undo:!!request?.undo};
+    const value:MovePending={version:"calendar-move-pending-v0.1",owner:review.athlete_id,body:JSON.stringify({proposal:review.proposal,review_hash:review.review_hash}),undo:!!(request?.undo || request?.redo),...(request?.redo?{redo:true}:{})};
     try{if(localStorage.getItem(MOVE_PENDING))throw Error();localStorage.setItem(MOVE_PENDING,JSON.stringify(value));}
     catch{setBlocked(true);setError("A mentési kérés nem őrizhető meg. A mentés nem indult el.");return;}
     setPending(value);await transmit(value);
@@ -86,7 +88,7 @@ export default function MoveEditor({ owner, request, disabled, onSaved, onLocked
     {error&&!base&&<div role="alert" className="pt-message is-error">{error}</div>}
     {pending&&!base&&<div role="status" className="pt-message">Függő edzésáthelyezés. {pending.owner===owner?<button className="pt-button" type="button" disabled={busy} onClick={()=>transmit(pending)}>Ugyanaz az áthelyezési kérés újraküldése</button>:"A kérés másik sportolói fiókhoz tartozik."}{rejected&&<button className="pt-button" type="button" disabled={busy} onClick={discard}>Elutasított áthelyezés elvetése és újraolvasás</button>}</div>}
     <dialog ref={dialog} className="pt-quick-dialog" aria-labelledby="pt-move-title" onCancel={e=>{e.preventDefault();close();}} onClose={()=>{if(!busy){setBase(null);setReview(null);}}}>
-      {base&&<><header className="pt-quick-header"><div><h2 id="pt-move-title">{request?.undo?"Edzés időpontjának visszaállítása":"Edzés áthelyezése"}</h2><small>{base.title} · {base.timezone_name}</small></div><button type="button" className="pt-button pt-icon-button" aria-label="Áthelyezés bezárása" onClick={close} disabled={busy}><Icon name="close"/></button></header>
+      {base&&<><header className="pt-quick-header"><div><h2 id="pt-move-title">{request?.redo?"Edzésáthelyezés újbóli alkalmazása":request?.undo?"Edzés időpontjának visszaállítása":"Edzés áthelyezése"}</h2><small>{base.title} · {base.timezone_name}</small></div><button type="button" className="pt-button pt-icon-button" aria-label="Áthelyezés bezárása" onClick={close} disabled={busy}><Icon name="close"/></button></header>
         {!base.allowed?<p role="alert">{moveMessages[base.blocked_reason!]??base.blocked_reason}</p>:<form className="pt-quick-form" onSubmit={e=>{e.preventDefault();void preview();}}><fieldset disabled={busy||!!pending||blocked||disabled}>
           <p>Jelenleg: {base.current.date} · {base.current.planned_start_time?localParts(base.current.planned_start_time,base.timezone_name).clock:"időpont nélkül"}</p>
           <div className="pt-quick-columns"><label>Új nap<input type="date" required min="1900-01-01" max="2100-12-31" value={date} onChange={e=>{setDate(e.target.value);change();}}/></label>
@@ -102,7 +104,7 @@ export default function MoveEditor({ owner, request, disabled, onSaved, onLocked
           <ConflictSummary conflicts={review.conflicts} estimates={review.duration_estimate?{[base.plan_id]:review.duration_estimate}:{}} preview/>
           {!review.conflicts.length&&<p>A megadott adatok alapján nem találtunk időbeli ütközést.</p>}
           <p className="pt-notice">Az edzés távja, időtartama és intenzitása megmarad.</p>
-          <button className="pt-primary" type="button" disabled={busy||!!pending||blocked||disabled} onClick={save}>{busy?"Mentés…":request?.undo?"Visszaállítás mentése":"Áthelyezés mentése"}</button>
+          <button className="pt-primary" type="button" disabled={busy||!!pending||blocked||disabled} onClick={save}>{busy?"Mentés…":request?.redo?"Újraalkalmazás mentése":request?.undo?"Visszaállítás mentése":"Áthelyezés mentése"}</button>
         </div>}
       </>}
     </dialog>

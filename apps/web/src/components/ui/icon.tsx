@@ -24,9 +24,11 @@ export type IconName =
   | "activity"
   | "menu"
   | "alert"
+  | "language"
   | "info";
 // The warning shape remains distinguishable without relying on its color.
 const paths: Record<IconName, ReactNode> = {
+  language: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c-5 5-5 13 0 18M12 3c5 5 5 13 0 18" /></>,
   calendar: (
     <>
       <rect x="3" y="5" width="18" height="16" rx="2" />

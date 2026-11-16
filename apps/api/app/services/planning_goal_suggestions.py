@@ -2,6 +2,7 @@
 from copy import deepcopy
 from app.planning.domain.goals.catalog import CapabilityKey
 from app.planning.domain.workout_family.builtins import builtin_workout_family_registry_v0_1
+from app.planning.domain import event_demands
 
 RULES = "declared-goal-review-v0.1"
 ROLES = {"primary_development", "secondary_development", "maintenance", "permitted_decline"}
@@ -24,9 +25,16 @@ def _declared(data):
         events = [e for e in data["competitions"] if e["status"] == "planned" and ((e["start_date"] <= macro["end_date"] and e["end_date"] >= macro["start_date"]) or e["key"] == next_key)]
         for event in events:
             profile = event.get("profile") or {}
+            automatic = event_demands.suggest(profile, data.get('program_sport', ''))
+            use_automatic = profile.get('capability_basis') == 'unassessed' and automatic and automatic['template_key'] == 'paddling_long_distance'
+            weights = automatic['weights'] if use_automatic else profile.get('capability_weights', {})
+            if use_automatic:
+                for key, weight in weights.items():
+                    add(key, {'kind': 'event_demand_template', 'key': event['key'], 'basis': event_demands.VERSION, 'demand_priority': weight})
             if profile.get("capability_basis") != "unassessed":
                 for key in profile.get("capability_keys", []):
-                    add(key, {"kind": "declared_event_profile", "key": event["key"], "basis": profile["capability_basis"]})
+                    add(key, {"kind": "declared_event_profile", "key": event["key"], "basis": profile["capability_basis"],
+                        **({'demand_priority': weights[key]} if key in weights else {})})
         for goal in data["declared_goals"]:
             for key in GOAL_KEYS.get(goal["key"], ()):
                 add(key, {"kind": "declared_goal", "key": goal["key"], "direction": (goal.get("details") or {}).get("direction")})
@@ -53,13 +61,16 @@ def _declared(data):
                       "modality_key": f.modality_key.key, "match": "primary" if key in f.primary_capability_keys else "secondary",
                       "eligibility_evaluated": False, "selected": False}
                      for f in registry.families if key in f.primary_capability_keys or key in f.secondary_capability_keys]
+            priority = max((s['demand_priority'] for s in evidence if 'demand_priority' in s), default=None)
             rows.append({"capability_key": key, "role": role, "rationale": reason,
+                         **({'demand_priority': priority} if priority is not None else {}),
                          "origin": "recorded" if old else "declared_goal_mapping" if suggested else "review_required",
                          "sources": evidence, "mesocycle_directives": directives, "family_links": links,
                          "family_coverage": "linked_not_evaluated" if links else "missing"})
         result.append({"macrocycle_period_id": macro["id"], "base_reference": {"artifact_id": current["artifact_id"], "content_hash": current["content_hash"]} if current else None,
                        "base_revision": current["proposal"]["revision"] if current else 0, "rows": rows,
-                       "unprofiled_event_keys": [e["key"] for e in events if not (e.get("profile") or {}).get("capability_keys")],
+                       "unprofiled_event_keys": [e["key"] for e in events if not (e.get("profile") or {}).get("capability_keys") and not (
+                           (e.get('profile') or {}).get('capability_basis') == 'unassessed' and (event_demands.suggest(e.get('profile') or {}, data.get('program_sport', '')) or {}).get('template_key') == 'paddling_long_distance')],
                        "unmapped_goal_keys": [g["key"] for g in data["declared_goals"] if g["key"] not in GOAL_KEYS]})
     return {"schema_version": "planning-goal-suggestions-v0.1", "rules_version": RULES,
             "registry_reference": {"version": registry.registry_version, "content_hash": registry.content_hash},

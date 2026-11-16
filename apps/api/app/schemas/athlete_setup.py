@@ -1,9 +1,10 @@
 """Closed, owned intake and dated availability inputs; unknown never means zero."""
 
 from decimal import Decimal
+import re
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator, model_serializer
 
 from app.schemas.planning_cycles import Day, Digest, Key, Title, Token
 
@@ -55,6 +56,71 @@ class SourceReference(Closed):
     content_hash: Digest
 
 
+class SportPlanningContext(Closed):
+    version: Literal['sport-planning-context-v0.1']
+    supported_sports: list[Title] = Field(max_length=16)
+    purposes: list[Literal['aerobic_substitution', 'strength', 'muscular_endurance',
+        'speed_power', 'technique', 'mobility', 'general_conditioning', 'recovery', 'other']] = Field(max_length=9)
+    proficiency: Literal['unknown', 'learning', 'independent', 'experienced']
+
+    @model_validator(mode='after')
+    def unique_choices(self):
+        if len(set(self.supported_sports)) != len(self.supported_sports) or len(set(self.purposes)) != len(self.purposes):
+            raise ValueError('Use each supported sport and purpose once.')
+        return self
+
+
+class SportPerformance(Closed):
+    result_id: Token
+    kind: Literal['personal_best', 'recent']
+    distance_m: Number | None = None
+    time: Annotated[str, StringConstraints(max_length=24)] | None = None
+    recorded_on: Day | None
+    year: int | None = Field(ge=1900, le=2100)
+    conditions: Short
+    source: Literal['self_report', 'official', 'device']
+    protocol: Literal['distance_time', 'cooper_12min', 'strength_1rm', 'repetitions', 'timed_repetitions'] | None = None
+    exercise: Short | None = None
+    repetitions: int | None = Field(default=None, ge=0, le=100000)
+    load_kind: Literal['bodyweight', 'external_kg'] | None = None
+    load_kg: Number | None = None
+    load_basis: Literal['total_external', 'per_hand', 'additional_to_bodyweight', 'machine_display'] | None = None
+
+    @model_serializer(mode='wrap')
+    def preserve_older_shape(self, handler):
+        return {k: v for k, v in handler(self).items() if v is not None or k in {'recorded_on', 'year'}}
+
+    @model_validator(mode='after')
+    def meaningful(self):
+        seconds = None
+        if self.time is not None:
+            clock = re.fullmatch(r'(?:(\d{1,3}):)?(\d{1,3}):([0-5]\d(?:\.\d{1,3})?)', self.time)
+            if clock is None or (clock[1] is not None and int(clock[2]) > 59):
+                raise ValueError('Use m:ss or h:mm:ss, with up to three fractional second digits.')
+            seconds = Decimal(clock[1] or 0) * 3600 + Decimal(clock[2]) * 60 + Decimal(clock[3])
+            if not 0 < seconds <= 604800: raise ValueError('Duration must be positive and bounded to seven days.')
+        protocol = self.protocol or 'distance_time'
+        if protocol in {'distance_time', 'cooper_12min'}:
+            if seconds is None or self.distance_m is None or Decimal(self.distance_m) <= 0:
+                raise ValueError('A distance result needs positive metres and time.')
+            if protocol == 'cooper_12min' and seconds != 720: raise ValueError('Cooper duration is exactly 12 minutes.')
+            if any(v is not None for v in (self.exercise, self.repetitions, self.load_kind, self.load_kg, self.load_basis)):
+                raise ValueError('A distance result cannot claim strength fields.')
+        else:
+            if not self.exercise or not self.exercise.strip() or self.repetitions is None or self.load_kind is None or self.distance_m is not None:
+                raise ValueError('Strength results need an exercise, repetitions and a declared load kind; no distance.')
+            if (protocol == 'timed_repetitions') != (seconds is not None): raise ValueError('Only timed repetitions need a duration.')
+            if self.load_kind == 'bodyweight':
+                if self.load_kg is not None or self.load_basis is not None: raise ValueError('Bodyweight without added load has no external kilograms.')
+            elif self.load_kg is None or Decimal(self.load_kg) <= 0 or self.load_basis is None:
+                raise ValueError('External load needs positive kilograms and an explicit basis.')
+            if protocol == 'strength_1rm' and (self.repetitions != 1 or self.load_kind != 'external_kg'):
+                raise ValueError('A recorded single-repetition maximum needs one repetition with a declared load.')
+        if self.recorded_on is not None and self.year is not None:
+            raise ValueError('Use an exact day or an approximate year, not both.')
+        return self
+
+
 class SportHistory(Closed):
     sport: Title
     discipline: Short = ""
@@ -64,6 +130,22 @@ class SportHistory(Closed):
     level: Literal["unknown", "beginner", "recreational", "competitive", "professional"]
     usual_sessions_per_week: int | None = Field(default=None, ge=0, le=28)
     notes: Text = ""
+    role: Literal['unknown', 'primary', 'secondary', 'recreation', 'paused'] | None = None
+    current_level: Literal['unknown', 'beginner', 'recreational', 'competitive', 'professional'] | None = None
+    planning: SportPlanningContext | None = None
+    performances: list[SportPerformance] | None = Field(default=None, max_length=16)
+
+    @model_serializer(mode='wrap')
+    def preserve_older_shape(self, handler):
+        value = handler(self)
+        return {k: v for k, v in value.items() if k not in {'role', 'current_level', 'planning', 'performances'} or v is not None}
+
+    @model_validator(mode='after')
+    def unique_results(self):
+        values = self.performances or []
+        if len({r.result_id for r in values}) != len(values):
+            raise ValueError('Performance identities must be unique within a sport.')
+        return self
 
 
 class FunctionalConstraint(Closed):
@@ -152,9 +234,22 @@ class ProfileData(Closed):
     manual_observations: list[ManualObservation] = Field(default_factory=list, max_length=200)
     source_window: SourceWindow | None = None
     source_selections: list[SourceReference] = Field(default_factory=list, max_length=1000)
+    body_mass_kg: Number | None = None
+    height_cm: Number | None = None
+    body_measurements_recorded_on: Day | None = None
+    body_mass_recorded_on: Day | None = None
+
+    @model_serializer(mode='wrap')
+    def preserve_older_shape(self, handler):
+        value = handler(self)
+        return {k: v for k, v in value.items() if k not in {'body_mass_kg', 'height_cm', 'body_measurements_recorded_on', 'body_mass_recorded_on'} or v is not None}
 
     @model_validator(mode="after")
     def consistent(self):
+        if any(v is not None and Decimal(v) <= 0 for v in (self.body_mass_kg, self.height_cm)):
+            raise ValueError('Body measurements must be positive.')
+        if (self.body_mass_kg is not None and not (self.body_mass_recorded_on or self.body_measurements_recorded_on)) or (self.height_cm is not None and self.body_measurements_recorded_on is None):
+            raise ValueError('Body measurements need their observation date.')
         if (self.sport_history_status == "recorded") != bool(self.sport_history):
             raise ValueError(
                 "Recorded sport history needs entries; none and unknown must have none."

@@ -8,19 +8,22 @@ export async function forwardCalendar(
   const headers = { "Cache-Control": "no-store" };
   const fail = (status: number, code: string) =>
     Response.json({ detail: { code } }, { status, headers });
+  if (request.signal.aborted) return fail(499, "CALENDAR_REQUEST_CANCELLED");
   const url = new URL(request.url),
     route = path.join("/"),
     method = request.method;
-  const feedback = /^sessions\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\/(?:feedback|learning|execution-connection)$/.test(route);
+  const feedback = /^sessions\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\/(?:feedback|learning|execution-connection|strength-log)$/.test(route);
   const moveContext = /^(?:moves|sessions)\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(route);
-  if (!feedback && !moveContext && !["moves", "moves/preview", "feed", "learning-inputs", "goals", "constraints", "constraints/preview"].includes(route))
+  const savedOptions = /^workouts\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\/alternatives(?:\/choose)?$/.test(route);
+  const manual = /^(?:manual-workouts|manual-workouts\/(?:context|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))$/.test(route);
+  if (!feedback && !moveContext && !savedOptions && !manual && !["moves", "moves/preview", "feed", "cycles", "learning-inputs", "goals", "constraints", "constraints/preview"].includes(route))
     return fail(404, "CALENDAR_ROUTE_NOT_FOUND");
-  if (!((route === "constraints" || feedback) ? ["GET", "POST"].includes(method) : method === (route === "feed" || route === "learning-inputs" || moveContext ? "GET" : "POST")))
+  if (!((route === "constraints" || feedback) ? ["GET", "POST"].includes(method) : method === (["feed", "cycles", "learning-inputs"].includes(route) || moveContext || manual && route !== 'manual-workouts' || savedOptions && !route.endsWith('/choose') ? "GET" : "POST")))
     return fail(405, "CALENDAR_METHOD_NOT_ALLOWED");
   const seen = new Set<string>();
   for (const [key] of url.searchParams) {
     if (
-      method !== "GET" || moveContext || feedback ||
+      method !== "GET" || moveContext || feedback || savedOptions || manual ||
       !["start_date", "end_date"].includes(key) ||
       seen.has(key)
     )
@@ -53,7 +56,7 @@ export async function forwardCalendar(
           const part = await reader.read();
           if (part.done) break;
           total += part.value.byteLength;
-          if (total > (route.startsWith("constraints") ? 1048576 : 16384)) {
+          if (total > (route.startsWith("constraints") || route.endsWith("/strength-log") ? 1048576 : manual ? 262144 : 16384)) {
             await reader.cancel();
             return fail(413, "CALENDAR_BODY_TOO_LARGE");
           }
@@ -70,6 +73,7 @@ export async function forwardCalendar(
       return fail(422, "CALENDAR_BODY_INVALID");
     }
   }
+  const deadline = AbortSignal.timeout(30000);
   try {
     const root = new URL(backend.endsWith("/") ? backend : backend + "/");
     if (
@@ -87,7 +91,7 @@ export async function forwardCalendar(
       body,
       redirect: "error",
       cache: "no-store",
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.any([request.signal, deadline]),
       headers: {
         Accept: "application/json",
         ...(method === "POST" ? { "Content-Type": "application/json" } : {}),
@@ -95,11 +99,20 @@ export async function forwardCalendar(
     });
     if (!response.headers.get("content-type")?.includes("application/json"))
       return fail(502, "CALENDAR_API_RESPONSE_INVALID");
-    return new Response(response.body, {
+    // Consume inside the deadline boundary: a broken body must not escape as a
+    // successful HTTP response whose JSON stream later fails in the browser.
+    const bytes = await response.arrayBuffer();
+    return new Response(bytes, {
       status: response.status,
-      headers: { ...headers, "Content-Type": "application/json" },
+      headers: {
+        ...headers, "Content-Type": "application/json",
+        ...(response.headers.has("Server-Timing") ? { "Server-Timing": response.headers.get("Server-Timing")! } : {}),
+      },
     });
-  } catch {
+  } catch (error) {
+    if (request.signal.aborted) return fail(499, "CALENDAR_REQUEST_CANCELLED");
+    if (deadline.aborted || (error instanceof DOMException && error.name === "TimeoutError"))
+      return fail(504, "CALENDAR_API_TIMEOUT");
     return fail(502, "CALENDAR_API_UNAVAILABLE");
   }
 }

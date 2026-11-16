@@ -12,9 +12,9 @@ export type MoveProposal = { request_id: string; plan_id: string; expected_sourc
 export type MoveContext = { schema_version: string; athlete_id: string; plan_id: string; title: string; timezone_name: string; current: Timing; source_hash: string; previous_reference: MoveRef | null; restore: Timing | null; allowed: boolean; blocked_reason: string | null };
 export type MoveReview = { schema_version: string; athlete_id: string; plan_id: string; title: string; proposal: MoveProposal; proposal_hash: string; before: Timing; after: Timing; review_hash: string; conflicts: Conflict[]; duration_estimate: DurationEstimate | null; timezone_review_required: boolean; period_warning: string | null };
 export type MoveReceipt = { identity_scope: string; artifact: { schema_version: string; artifact_id: string; athlete_id: string; proposal: MoveProposal; revision: number; created_at: string; before: Timing; after: Timing; source_before: unknown; review_hash: string; content_hash: string }; committed: boolean; reused: boolean; durable_available_at: string };
-export type MovePending = { version: "calendar-move-pending-v0.1"; owner: string; body: string; undo: boolean };
+export type MovePending = { version: "calendar-move-pending-v0.1"; owner: string; body: string; undo: boolean; redo?: boolean };
 export type MoveUndo = { receipt: MoveReceipt; consumed: boolean };
-export type MoveUndoState = { createdAt: string; planId: string; owner: string; disabled: boolean; explanation: string };
+export type MoveUndoState = { createdAt: string; planId: string; owner: string; disabled: boolean; explanation: string; redoDisabled?: boolean; redoExplanation?: string };
 export const moveRef = (a: MoveReceipt["artifact"]) => ({ artifact_id: a.artifact_id, content_hash: a.content_hash });
 function flags(x: Record<string, unknown>) { requireValue(x.planning_authorized === false && x.training_dose_changed === false && x.provider_writeback === false); }
 function timing(v: unknown) { const x = object(v); requireDay(x.date); requireValue(x.planned_start_time === null || validInstant(x.planned_start_time)); return x as Timing; }
@@ -63,9 +63,13 @@ export async function readMoveReceipt(v: unknown, owner: string, body?: string):
 }
 export function readMovePending(raw: string): MovePending {
   const x = object(JSON.parse(raw)); requireValue(x.version === "calendar-move-pending-v0.1" && typeof x.owner === "string" && uuid.test(x.owner) && typeof x.body === "string" && typeof x.undo === "boolean");
+  requireValue(x.redo === undefined || typeof x.redo === "boolean"); requireValue(!x.redo || x.undo);
   const b=object(JSON.parse(x.body as string)); readMoveProposal(b.proposal); requireValue(typeof b.review_hash === "string" && hash.test(b.review_hash) && Object.keys(b).sort().join() === "proposal,review_hash"); return x as MovePending;
 }
 export const moveMessages: Record<string,string> = {
+  CALENDAR_MOVE_DAYLIGHT_EXCLUDED:"A teljes edzés nem fér a helyszín napfénykorlátjába. Válassz világosabb időpontot, vagy ellenőrizd a helyszín koordinátáit és sportági szabályát.",
+  CALENDAR_MOVE_DAYLIGHT_TIME_REQUIRED:"A napfénykorlát ellenőrzéséhez ismert kezdés és teljes edzésidő szükséges.",
+  CALENDAR_MOVE_DAYLIGHT_LOCATION_REQUIRED:"Az edzés helyszíne nem azonosítható a napfénykorlát ellenőrzéséhez.",
   CALENDAR_MOVE_ALREADY_EXECUTED:"Ehhez az edzéshez már teljesítés tartozik. A korábbi időpont megmarad.",
   CALENDAR_MOVE_STATUS_BLOCKED:"Ez az edzésállapot már nem helyezhető át.",
   CALENDAR_MOVE_APPROVED_PLAN_REVIEW_REQUIRED:"Ez az edzés véglegesített terv része. Áthelyezéséhez a terv felülvizsgálata szükséges.",

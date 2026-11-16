@@ -4,7 +4,7 @@ from datetime import date
 from typing import Annotated, Literal
 
 import httpx
-from fastapi import APIRouter, HTTPException, Path, Query, Response
+from fastapi import APIRouter, HTTPException, Path, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -20,6 +20,7 @@ from app.planning.infrastructure.repositories.postgres_planning_audit import (
     SqlAlchemyPlanningAuditRepository,
 )
 from app.schemas.athlete_setup import AvailabilityInput, PolarImportInput, ProfileInput
+from app.schemas.body_mass import BodyMassInput, NutritionGoalInput
 
 
 class SetupRoute(GoalRoute):
@@ -82,6 +83,37 @@ def valid_range(start, end):
             raise ValueError()
     except (ValueError, TypeError):
         raise error(422, "ATHLETE_DATE_RANGE_INVALID") from None
+
+
+@router.get('/body-mass')
+async def body_mass(request: Request, db: DB, owner: Owner,
+    limit: Annotated[int, Query(ge=1, le=200)] = 100, offset: Annotated[int, Query(ge=0, le=10000)] = 0):
+    from app.services import body_mass as service
+    fields = list(request.query_params.keys())
+    if any(key not in {'limit', 'offset'} or len(request.query_params.getlist(key)) != 1 for key in fields):
+        raise error(422, 'BODY_QUERY_INVALID')
+    _fresh(db)
+    return await call(service.read_state(repository=SqlAlchemyPlanningAuditRepository(db), session=db, owner=owner, limit=limit, offset=offset))
+
+
+@router.post('/body-mass', status_code=201)
+async def save_body_mass(payload: BodyMassInput, request: Request, response: Response, db: DB, owner: Owner):
+    from app.services import body_mass as service
+    if request.url.query: raise error(422, 'BODY_QUERY_INVALID')
+    _fresh(db)
+    value = await call(service.save_measurement(repository=SqlAlchemyPlanningAuditRepository(db), session=db, owner=owner, proposal=payload.model_dump()))
+    response.status_code = 200 if value['reused'] else 201
+    return value
+
+
+@router.post('/nutrition-goal', status_code=201)
+async def nutrition_goal(payload: NutritionGoalInput, request: Request, response: Response, db: DB, owner: Owner):
+    from app.services import body_mass as service
+    if request.url.query: raise error(422, 'BODY_QUERY_INVALID')
+    _fresh(db)
+    value = await call(service.save_goal(repository=SqlAlchemyPlanningAuditRepository(db), session=db, owner=owner, proposal=payload.model_dump()))
+    response.status_code = 200 if value['reused'] else 201
+    return value
 
 
 @router.get("/context")

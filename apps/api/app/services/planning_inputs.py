@@ -123,13 +123,14 @@ def daily_inputs(first, last, periods, schedule, versions):
             'daily_max_minutes':declaration['max_total_minutes'] if declaration else None})
     return result
 
-async def capture(*, owner, identity, session, first=None, last=None, close_transaction=True, max_days=28):
+async def capture(*, owner, identity, session, first=None, last=None, close_transaction=True, max_days=28, history_days=14):
     repo = SqlAlchemyPlanningAuditRepository(session)
     if close_transaction:
         setup._require_session(repo, session)
     try:
         cutoff = _now()
         require(cutoff.tzinfo is not None, 'PLANNING_INPUT_CLOCK_INVALID')
+        require(type(history_days) is int and 14 <= history_days <= 89, 'PLANNING_HISTORY_RANGE_INVALID')
         user = (await session.execute(select(User).where(User.id==UUID(owner)))).scalar_one()
         today = cutoff.astimezone(ZoneInfo(user.timezone)).date()
         try:
@@ -166,7 +167,7 @@ async def capture(*, owner, identity, session, first=None, last=None, close_tran
         existing_plans = [{'timing':p,'workout':WorkoutOut.model_validate(plans[p['id']]).model_dump(mode='json'),
             'authority_status':'current_application_projection_not_authoritative_revision'} for p in schedule['_plan_timings']]
         versions = await goal_versions(repo,session,owner,periods,cutoff)
-        low = datetime.combine(today-timedelta(days=14),time.min,ZoneInfo(user.timezone)).astimezone(UTC)
+        low = datetime.combine(today-timedelta(days=history_days),time.min,ZoneInfo(user.timezone)).astimezone(UTC)
         sessions = (await session.execute(select(WorkoutSession).where(WorkoutSession.user_id==UUID(owner),
             WorkoutSession.started_at>=low,WorkoutSession.started_at<=cutoff, WorkoutSession.created_at<=cutoff)
             .order_by(WorkoutSession.started_at,WorkoutSession.id).limit(LIMIT+1))).scalars().all()
@@ -218,6 +219,17 @@ async def capture(*, owner, identity, session, first=None, last=None, close_tran
             'planner_connection':{'inputs_assembled':True,'workout_generator_connected':False,'dose_policy_connected':False,'personal_model_applied':False},
             'capture_finished_at':_now().isoformat(),'mutable_source_semantics':'current_read_span','historical_replay_supported':False,'windows_share_budgets_across_days':True,'revalidate_before_planning':True,'durable':False,'has_more':False,
             'planning_authorized':False,'workouts_created':False,'workouts_changed':False}
+        from app.services.body_mass import projection as body_projection
+        from app.services import training_options
+        current_options = await training_options.latest(repo, session, owner)
+        if current_options:
+            known(current_options[1], cutoff)
+            require(training_options.reference(current_options[0]) == schedule.get('training_options_reference'),
+                    'PLANNING_INPUT_SOURCE_CHANGED_RETRY')
+        light = training_options.daylight_context(current_options)
+        if light is not None:
+            data['daylight_context'] = light
+        data['body_mass'] = await body_projection(repo, session, owner, cutoff)
         from app.services.planning_goal_suggestions import build as suggest_goals
         data['goal_suggestions'] = suggest_goals(data)
         data = wire(data)

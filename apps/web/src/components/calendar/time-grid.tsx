@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { clockSlot, interactionHint } from "@/lib/calendar/interactions";
+import type { CalendarTarget } from "@/lib/calendar/interactions";
 import {
   allocateLanes,
   formatDay,
@@ -17,8 +19,15 @@ import { constraintDescription } from "@/lib/calendar/constraint-forms";
 import type { Opportunity } from "@/lib/calendar/constraints";
 import { estimateLabel, estimateRange } from "@/lib/calendar/duration-estimate";
 import EditableSlot from "./editable-slot";
+import AlternativeBadge from "./alternative-badge";
+import { alternativeLabel } from "@/lib/calendar/training-alternatives";
 import { canTransform, canMoveTraining } from "@/lib/calendar/slot-transform";
 import type { SlotChange } from "@/lib/calendar/slot-transform";
+import { calendarCycles, cycleBoundaries } from "@/lib/calendar/cycles";
+import { CycleDayMarkers } from "./cycle-markers";
+import {cycleLoad as loadBand} from "@/lib/calendar/cycle-context";
+import type {CycleContext} from "@/lib/calendar/cycle-context";
+import type {CalendarCycle} from "@/lib/calendar/cycles";
 export function eventDuration(e: CalendarEvent) {
   return e.durationEstimate
     ? estimateLabel(e.durationEstimate)
@@ -57,6 +66,8 @@ export function eventLabel(event: CalendarEvent, zone: string) {
       ? [event.goal ? goalLabels[event.goal] : "fő cél nincs megadva"]
       : []),
   ];
+  const alternatives = alternativeLabel(event.planningContext);
+  if (alternatives && event.kind === "planned") parts.push(alternatives);
   if (event.conflict)
     parts.push(
       event.conflict === "review" ? "időpont tisztázandó" : "időpont ütközik",
@@ -92,6 +103,11 @@ export default function TimeGrid({
   opportunities,
   onTransform,
   editDisabled = false,
+  onContext,
+  showCycles = false,
+  showCycleLoad = false,
+  cycleContext = null,
+  onOpenCycle,
 }: {
   feed: Feed;
   events: CalendarEvent[];
@@ -100,11 +116,17 @@ export default function TimeGrid({
   open: (event: CalendarEvent) => void;
   selectDay: (day: string) => void;
   expandHours: () => void;
-  addSlot?: (day: string) => void;
+  addSlot?: (day: string, change?: SlotChange) => void;
+  onContext?: (target: CalendarTarget) => void;
   opportunities?: Opportunity[];
   onTransform?: (event: CalendarEvent, change: SlotChange) => void;
   editDisabled?: boolean;
+  showCycles?: boolean;
+  showCycleLoad?: boolean;
+  cycleContext?: CycleContext | null;
+  onOpenCycle?: (cycle: CalendarCycle) => void;
 }) {
+  const cycles = showCycles ? calendarCycles(feed.periods) : [];
   const from = fullDay ? 0 : 6,
     to = fullDay ? 24 : 22;
   const body = useRef<HTMLDivElement>(null);
@@ -187,6 +209,7 @@ export default function TimeGrid({
           {busy && <Icon name="calendar" />}
           {s.event.conflict && <Icon name="alert" />}
           <span>{shortTitle(s.event)}</span>
+          <AlternativeBadge event={s.event} />
           {!background && (
             <span className="pt-event-duration">{eventDuration(s.event)}</span>
           )}
@@ -265,6 +288,7 @@ export default function TimeGrid({
               "--pt-days": days.length,
               "--pt-hours": to - from,
               "--pt-min-event-height": `${MIN_ACTIVITY_HEIGHT}px`,
+              "--pt-hour": `${hour}px`,
             } as CSSProperties
           }
         >
@@ -288,6 +312,10 @@ export default function TimeGrid({
                   className={`pt-grid-day-head${date === feed.local_today ? " is-today" : ""}`}
                   key={date}
                   data-date={date}
+                  data-cycle-load={showCycleLoad ? loadBand(cycleContext,feed,date)?.tone : undefined}
+                  title={showCycleLoad ? loadBand(cycleContext,feed,date)?.label : undefined}
+                  data-cycle-start={cycleBoundaries(cycles, date).filter(b => b.edge === "start").map(b => b.cycle.kind).join(" ") || undefined}
+                  data-cycle-end={cycleBoundaries(cycles, date).filter(b => b.edge === "end").map(b => b.cycle.kind).join(" ") || undefined}
                 >
                   <button type="button" onClick={() => selectDay(date)}>
                     {formatDay(date, true)}
@@ -307,22 +335,12 @@ export default function TimeGrid({
                       `Napi keret: ${a.max_total_minutes} p`
                     )}
                   </small>
-                  {addSlot && (
-                    <button
-                      className="pt-add-slot"
-                      type="button"
-                      aria-label={`${formatDay(date)} · új idősáv`}
-                      title="Edzéslehetőség vagy elfoglaltság hozzáadása"
-                      onClick={() => addSlot(date)}
-                    >
-                      + Idősáv
-                    </button>
-                  )}
+                  <CycleDayMarkers cycles={cycles} date={date} onOpenCycle={onOpenCycle} />
                 </div>
               );
             })}
           </div>
-          <div className="pt-grid-unscheduled">
+          {events.some((event) => !event.start) && <div className="pt-grid-unscheduled">
             <div className="pt-grid-label">
               Időpont
               <br />
@@ -347,9 +365,10 @@ export default function TimeGrid({
               </div>
             ))}
           </div>
+          }
           <div className="pt-grid-body" ref={body}>
             <div className="pt-hour-axis">
-              {hours.map((h) => (
+              {hours.filter((h) => hour >= 18 || h === from || h === to || h % 2 === 0).map((h) => (
                 <span
                   key={h}
                   style={{ top: `${((h - from) / (to - from)) * 100}%` }}
@@ -381,6 +400,28 @@ export default function TimeGrid({
                   key={date}
                   className={`pt-day-column${feed.availability.days.find((d) => d.date === date)?.status === "unavailable" ? " unavailable" : ""}`}
                   data-date={date}
+                  data-cycle-load={showCycleLoad ? loadBand(cycleContext,feed,date)?.tone : undefined}
+                  tabIndex={onContext || addSlot ? 0 : undefined}
+                  role="group"
+                  aria-label={interactionHint(date)}
+                  onDoubleClick={(e) => {
+                    if (!addSlot || (e.target as Element).closest("button, .pt-slot-shell")) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    if (rect.height > 0) addSlot(date, clockSlot(date, e.clientY, rect.top, rect.height, from, to));
+                  }}
+                  onContextMenu={(e) => {
+                    if (!onContext) return;
+                    e.preventDefault();
+                    const element = (e.target as Element).closest("[data-calendar-event]") ?? (e.target as Element).closest(".pt-slot-shell")?.querySelector("[data-calendar-event]");
+                    const event = events.find((v) => v.key === (element as HTMLElement | null)?.dataset.calendarEvent) ?? null;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    onContext({ date, event, x: e.clientX || rect.left + 16, y: e.clientY || rect.top + 16, ...(rect.height > 0 ? { change: clockSlot(date, e.clientY || rect.top, rect.top, rect.height, from, to) } : {}) });
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget || !onContext || !["Enter", " ", "ContextMenu"].includes(e.key)) return;
+                    e.preventDefault(); const rect = e.currentTarget.getBoundingClientRect();
+                    onContext({ date, event: null, x: rect.left + 12, y: rect.top + 12 });
+                  }}
                 >
                   {available.map(draw)}
                   {busy.map(draw)}

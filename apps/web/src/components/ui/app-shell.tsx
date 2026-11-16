@@ -1,146 +1,64 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
+import { loadContext } from "@/lib/athlete-setup/client";
 import Icon from "./icon";
-import type { IconName } from "./icon";
+import { navigation, activeSection, activeSubmenu, NAVIGATION_EVENT } from "@/lib/ui/navigation";
 import ThemeControl from "./theme-control";
 import DataConnectionsControl from "./data-connections-control";
-const navigation: {
-  href: string;
-  label: string;
-  icon: IconName;
-  children?: { href: string; label: string }[];
-}[] = [
-  { href: "/", label: "Naptár", icon: "calendar" },
-  {
-    href: "/training-planning",
-    label: "Edzéstervezés",
-    icon: "target",
-    children: [
-      { href: "/training-planning", label: "Tervezés lépései" },
-      { href: "/planning-cycles", label: "Edzésterv és ciklusok" },
-      { href: "/planning-goals", label: "Fejlődési célok" },
-    ],
-  },
-  {
-    href: "/training-options/locations",
-    label: "Edzési lehetőségek",
-    icon: "activity",
-    children: [
-      { href: "/training-options/locations", label: "Helyszínek" },
-      { href: "/training-options/schedule", label: "Általános órarend" },
-    ],
-  },
-  { href: "/nutrition", label: "Táplálkozás", icon: "activity" },
-  { href: "/shopping", label: "Bevásárlás", icon: "cart" },
-  {
-    href: "/athlete-setup",
-    label: "Személyes adatok",
-    icon: "user",
-    children: [
-      { href: "/athlete-setup", label: "Sportolói felmérés" },
-      { href: "/personal-response", label: "Személyes válaszadatok" },
-    ],
-  },
-  { href: "/settings", label: "Beállítások", icon: "settings" },
-];
+
+const subscribeLanguage = () => () => {};
+const subscribeNarrow = (callback: () => void) => { const media = window.matchMedia("(max-width: 700px)"); media.addEventListener("change", callback); return () => media.removeEventListener("change", callback); };
+const subscribeNavigation = (callback: () => void) => { window.addEventListener("hashchange", callback); window.addEventListener(NAVIGATION_EVENT, callback); return () => { window.removeEventListener("hashchange", callback); window.removeEventListener(NAVIGATION_EVENT, callback); }; };
 export default function AppShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname(),
-    [compact, setCompact] = useState(false);
-  const matches = (href: string) =>
-    href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(href + "/");
-  const current = navigation.find(
-    (item) =>
-      matches(item.href) || item.children?.some((child) => matches(child.href)),
-  );
-  return (
-    <div className={`pt-frame${compact ? " pt-compact" : ""}`}>
-      <a className="pt-skip" href="#pt-main">
-        Ugrás a tartalomhoz
-      </a>
-      <aside className="pt-sidebar">
-        <Link href="/" className="pt-brand" aria-label="PaddleTrainer napirend">
-          <Icon name="wave" />
-          <span>PaddleTrainer</span>
+  const pathname = usePathname(), router = useRouter();
+  const [compact, setCompact] = useState(false), [mobileOpen, setMobileOpen] = useState(false);
+  const narrow = useSyncExternalStore(subscribeNarrow, () => window.matchMedia("(max-width: 700px)").matches, () => false);
+  const expanded = narrow ? mobileOpen : !compact;
+  const main = useRef<HTMLDivElement>(null);
+  const language = useSyncExternalStore(subscribeLanguage, () => navigator.language, () => "");
+  const hash = useSyncExternalStore(subscribeNavigation, () => window.location.hash, () => "");
+  const current = activeSection(pathname), activeChild = activeSubmenu(pathname, hash);
+  useEffect(() => {
+    if (!window.location.hash) main.current?.scrollTo?.({ top: 0 });
+  }, [pathname]);
+  useEffect(() => {
+    if (pathname !== "/") return;
+    const abort = new AbortController();
+    loadContext(abort.signal).then((context) => {
+      if (!abort.signal.aborted && context.profile === null) router.replace("/training-planning?onboarding=1");
+    }).catch(() => { /* The calendar keeps its own visible loading/error state. */ });
+    return () => abort.abort();
+  }, [pathname, router]);
+  return <div className={`pt-frame pt-app-shell${compact ? " pt-compact" : ""}${narrow && mobileOpen ? " pt-mobile-open" : ""}`}>
+    <a className="pt-skip" href="#pt-main">Ugrás a tartalomhoz</a>
+    <aside className="pt-sidebar">
+      <Link href="/" className="pt-brand" aria-label="PaddleTrainer naptár"><Icon name="wave" /><span>PaddleTrainer</span></Link>
+      <nav aria-label="Fő navigáció">{navigation.map((item) => <div className="pt-navigation-section" key={item.href}>
+        <Link href={item.href} aria-label={item.label} title={`${item.label}${item.future ? " · későbbi modul" : ""}`} aria-current={current === item.href ? "page" : undefined} onClick={() => setMobileOpen(false)}>
+          <Icon name={item.icon} /><span>{item.label}{item.future && <small>Későbbi modul</small>}</span>
         </Link>
-        <nav aria-label="Fő navigáció">
-          {navigation.map((item) => (
-            <div key={item.href} className="pt-nav-group">
-              <Link
-                key={item.href}
-                href={item.href}
-                title={item.label}
-                aria-current={
-                  current?.href === item.href && !item.children
-                    ? "page"
-                    : undefined
-                }
-                aria-expanded={
-                  item.children ? current?.href === item.href : undefined
-                }
-                aria-controls={
-                  item.children ? `pt-subnav-${item.icon}` : undefined
-                }
-              >
-                <Icon name={item.icon} />
-                <span>{item.label}</span>
-              </Link>
-              {item.children && current?.href === item.href && (
-                <div
-                  className="pt-subnav"
-                  id={`pt-subnav-${item.icon}`}
-                  role="group"
-                  aria-label={`${item.label} részei`}
-                >
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      aria-current={matches(child.href) ? "page" : undefined}
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
-        <div className="pt-nav-bottom pt-nav-tools">
-          <Link href="/coach" prefetch={false} title="Részletes edzéslista">
-            <Icon name="activity" />
-            <span>Edzéslista</span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => setCompact((x) => !x)}
-            aria-label={compact ? "Menü kinyitása" : "Menü összecsukása"}
-            title={compact ? "Menü kinyitása" : "Menü összecsukása"}
-            aria-expanded={!compact}
-          >
-            <Icon name="menu" />
-            <span>Menü mérete</span>
-          </button>
+        {current === item.href && <div className="pt-sidebar-subnav" aria-label={`${item.label} almenü`}>{item.children.map((child) => <Link key={child.href} href={child.href} aria-current={activeChild === child.href ? "page" : undefined} onClick={(e) => {
+          setMobileOpen(false);
+          const url = new URL(child.href, window.location.href);
+          if (url.pathname === pathname && url.hash) { e.preventDefault(); if (window.location.hash !== url.hash) window.location.hash = url.hash; }
+        }}>{child.label}</Link>)}</div>}
+      </div>)}</nav>
+      <div className="pt-nav-bottom pt-nav-tools"><button type="button" onClick={() => narrow ? setMobileOpen((v) => !v) : setCompact((v) => !v)} title={expanded ? "Menü összecsukása" : "Menü kinyitása"} aria-label={expanded ? "Menü összecsukása" : "Menü kinyitása"} aria-expanded={expanded}><Icon name="menu" /><span>Menü mérete</span></button></div>
+    </aside>
+    <div className="pt-main-column">
+      <header className="pt-appbar" aria-label="Állandó fejléc">
+        <span className="pt-location">{navigation.find((v) => v.href === current)?.label}</span>
+        <div className="pt-appbar-actions">
+          <ThemeControl compact />
+          <DataConnectionsControl />
+          <span title="Bevásárlólista lekérése · a bevásárlási modul elkészülése után"><button type="button" className="pt-header-future" disabled aria-label="Bevásárlólista lekérése · későbbi modul"><Icon name="cart" /></button></span>
+          <span title={`Nyelv: rendszer${language ? ` (${language})` : ""}. A többnyelvű felület későbbi lehetőség.`}><button type="button" className="pt-header-future" disabled aria-label="Nyelv · rendszer alapértelmezése · későbbi lehetőség"><Icon name="language" /></button></span>
         </div>
-      </aside>
-      <div className="pt-main-column">
-        <header className="pt-appbar">
-          <span className="pt-location">
-            {current?.label ?? "Edzésrészletek"}
-          </span>
-          <div className="pt-appbar-actions">
-            <ThemeControl />
-            <DataConnectionsControl />
-          </div>
-        </header>
-        <div id="pt-main" className="pt-page-content">
-          {children}
-        </div>
-      </div>
+      </header>
+      <div id="pt-main" ref={main} tabIndex={-1} className="pt-page-content">{children}</div>
     </div>
-  );
+  </div>;
 }

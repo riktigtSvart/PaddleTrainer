@@ -143,6 +143,27 @@ async def review(*, owner, proposal, repository, session, p, user):
     from app.planning.domain.calendar_constraints import duration_bounds
     own_timing = next(t for t in preview["_plan_timings"] if t["id"] == str(p.id))
     _, upper, estimated = duration_bounds(own_timing)
+    # Light is a hard constraint, not a dismissible collision warning. The
+    # owner-locked commit recomputes this same check against current settings.
+    from app.services import training_options, training_plans
+    from app.planning.domain import daylight
+    options = await training_options.latest(repository, session, owner)
+    light = training_options.daylight_context(options)
+    if light:
+        data = options[0]["proposal"]["data"]
+        marker = (p.raw_data or {}).get(training_plans.policy.MARKER) or {}
+        location_id = None
+        if marker.get("review_id"):
+            record = await repository.get(artifact_kind=AuditArtifactKind.TRAINING_PLAN_REVIEW, artifact_id=marker["review_id"])
+            require(record is not None, "CALENDAR_MOVE_DAYLIGHT_LOCATION_REQUIRED")
+            reviewed = training_plans.decode(record, owner)
+            candidate = next((c for c in reviewed["result"]["proposals"] if c["candidate_key"] == marker.get("candidate_key")), None)
+            location_id = candidate.get("location_id") if candidate else None
+        rule, _ = daylight.effective_rule(data, location_id, p.sport.value)
+        if rule and rule["mode"] != "none":
+            require(instant is not None and upper is not None and upper > 0, "CALENDAR_MOVE_DAYLIGHT_TIME_REQUIRED")
+            require(daylight.permits(data, location_id, p.sport.value, instant, instant + timedelta(seconds=upper)),
+                    "CALENDAR_MOVE_DAYLIGHT_EXCLUDED")
     if instant is None or upper is None:
         impacts.append({"plan_id":str(p.id),"plan_title":p.title,"occurrence_key":"move:unknown-time",
             "constraint_title":"Edzés időadatai","date":day.isoformat(),"severity":"review",
@@ -184,6 +205,8 @@ async def review(*, owner, proposal, repository, session, p, user):
         "period_warning": "Az új nap az edzéshez rendelt felkészülési időszakon kívülre esik." if period and not period.start_date <= day <= period.end_date else None,
         "timezone_review_required": preview["timezone_review_required"],
         "planning_authorized": False, "training_dose_changed": False, "provider_writeback": False}
+    if light:
+        result["daylight_reference"] = training_options.reference(options[0])
     require(not preview["timezone_review_required"], "CALENDAR_MOVE_TIMEZONE_CHANGED")
     result["review_hash"] = review_digest(result)
     return result, captured, current

@@ -1,6 +1,9 @@
 """Bounded owned calendar reads and explicit immutable presentation-goal writes."""
 
 from typing import Annotated
+from uuid import UUID
+import logging
+from time import perf_counter
 
 from fastapi import APIRouter, HTTPException, Query, Response
 from fastapi.exceptions import RequestValidationError
@@ -15,6 +18,11 @@ from app.planning.domain.persistence.audit import AuditArtifactConflictError
 from app.planning.infrastructure.repositories.postgres_planning_audit import SqlAlchemyPlanningAuditRepository
 from app.schemas.planning_calendar import WorkoutGoalInput
 from app.schemas.calendar_constraints import ScheduleInput, SchedulePreview
+from app.services.training_plans import TrainingPlanError
+from app.schemas.training_plans import SavedChoiceInput
+from app.schemas.manual_workouts import ManualSave
+
+logger = logging.getLogger(__name__)
 
 
 class CalendarRoute(GoalRoute):
@@ -22,16 +30,52 @@ class CalendarRoute(GoalRoute):
         original = super().get_route_handler()
 
         async def handler(request):
+            started = perf_counter()
             try:
-                return await original(request)
-            except RequestValidationError:
-                return JSONResponse({"detail": {"code": "CALENDAR_INPUT_INVALID"}}, status_code=422, headers={"Cache-Control": "no-store"})
+                response = await original(request)
+            except RequestValidationError as exc:
+                detail = {"code": "CALENDAR_INPUT_INVALID"}
+                if self.path.endswith('/manual-workouts'):
+                    detail = {"code": "MANUAL_INPUT_INVALID", "issues": [
+                        {"path": list(e['loc'][1:]), "message": e['msg'], "type": e['type']}
+                        for e in exc.errors()[:30]]}
+                response = JSONResponse({"detail": detail}, status_code=422, headers={"Cache-Control": "no-store"})
+            if request.method == 'GET' and self.path.endswith(('/feed', '/cycles', '/constraints')):
+                elapsed = (perf_counter() - started) * 1000
+                response.headers['Server-Timing'] = f'calendar;dur={elapsed:.1f}'
+                if elapsed >= 5000:
+                    logger.warning('Slow calendar read: endpoint=%s duration_ms=%.1f status=%s',
+                                   self.path, elapsed, response.status_code)
+            return response
 
         return handler
 
 
 router = APIRouter(prefix="/planning/calendar", tags=["planning-calendar"], route_class=CalendarRoute)
 Day = Annotated[str, Query(pattern=r"^\d{4}-\d{2}-\d{2}$")]
+
+
+@router.get('/manual-workouts/context')
+async def manual_workout_context(db: DB, owner: Owner):
+    from app.services import manual_workouts
+    _fresh(db)
+    return await call(manual_workouts.context(owner=owner, repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+
+
+@router.get('/manual-workouts/{workout_id}')
+async def manual_workout_source(workout_id: UUID, db: DB, owner: Owner):
+    from app.services import manual_workouts
+    _fresh(db)
+    return await call(manual_workouts.context(owner=owner, workout_id=str(workout_id),
+        repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+
+
+@router.post('/manual-workouts')
+async def manual_workout_save(body: ManualSave, db: DB, owner: Owner):
+    from app.services import manual_workouts
+    _fresh(db)
+    return await call(manual_workouts.save(owner=owner, proposal=body.model_dump(mode='json'),
+        repository=SqlAlchemyPlanningAuditRepository(db), session=db))
 
 
 def error(status, code):
@@ -41,7 +85,7 @@ def error(status, code):
 async def call(operation):
     try:
         return await operation
-    except (service.CalendarRuleError, calendar_constraints.CalendarConstraintError, athlete_setup.SetupRuleError) as exc:
+    except (service.CalendarRuleError, calendar_constraints.CalendarConstraintError, athlete_setup.SetupRuleError, TrainingPlanError) as exc:
         code = str(exc)
         status = 404 if code.endswith("NOT_FOUND") else 503 if "STORAGE" in code else 409
         raise error(status, code) from None
@@ -60,6 +104,30 @@ async def calendar_feed(db: DB, owner: Owner, start_date: Day | None = None, end
         from app.api.routes.athlete_setup import valid_range
         valid_range(start_date, end_date)
     return await call(service.feed(owner=owner, start=start_date, end=end_date, repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+
+
+@router.get("/cycles")
+async def cycle_context(db: DB, owner: Owner, start_date: Day, end_date: Day):
+    from app.services import calendar_cycles
+    from app.api.routes.athlete_setup import valid_range
+    _fresh(db)
+    valid_range(start_date, end_date)
+    return await call(calendar_cycles.context(owner=owner, start=start_date, end=end_date,
+        repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+
+
+@router.get('/workouts/{workout_id}/alternatives')
+async def saved_alternatives(workout_id: UUID, db: DB, owner: Owner):
+    from app.services import calendar_saved_options
+    _fresh(db)
+    return await call(calendar_saved_options.read(session=db, owner=owner, workout_id=str(workout_id)))
+
+
+@router.post('/workouts/{workout_id}/alternatives/choose')
+async def choose_saved_alternative(workout_id: UUID, payload: SavedChoiceInput, db: DB, owner: Owner):
+    from app.services import calendar_saved_options
+    _fresh(db)
+    return await call(calendar_saved_options.choose(session=db, owner=owner, workout_id=str(workout_id), proposal=payload.model_dump(mode='json')))
 
 
 @router.post("/goals", status_code=201)
@@ -97,7 +165,6 @@ async def constraint_save(payload: ScheduleInput, response: Response, db: DB, ow
     return result
 
 
-from uuid import UUID
 from app.planning.application import calendar_moves as moves
 from app.schemas.calendar_moves import MoveProposal, MoveSave
 from app.services import session_analysis
@@ -223,4 +290,23 @@ async def execution_connection_save(session_id: UUID, payload: ExecutionConnecti
     except (SQLAlchemyError, ValueError, KeyError, TypeError, RuntimeError, LookupError):
         await db.rollback()
         result["learning"] = {"state":"retry_required"}
+    return result
+
+
+from app.schemas.strength_workout import StrengthWorkoutInput
+from app.services import strength_workout_log
+
+@router.get("/sessions/{session_id}/strength-log")
+async def strength_log_context(session_id: UUID, db: DB, owner: Owner):
+    _fresh(db)
+    return await call(strength_workout_log.context(owner=owner, session_id=str(session_id),
+        repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+
+@router.post("/sessions/{session_id}/strength-log", status_code=201)
+async def strength_log_save(session_id: UUID, payload: StrengthWorkoutInput, response: Response, db: DB, owner: Owner):
+    _fresh(db)
+    result = await call(strength_workout_log.save(owner=owner, session_id=str(session_id),
+        proposal=payload.model_dump(mode="json"), repository=SqlAlchemyPlanningAuditRepository(db), session=db))
+    if result['reused']:
+        response.status_code = 200
     return result

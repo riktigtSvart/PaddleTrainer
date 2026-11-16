@@ -7,7 +7,7 @@ from app.api.routes.athlete_setup import DayQuery, SetupRoute, error
 from app.api.routes.planning_goals import DB, Owner, _fresh
 from app.planning.application.register_athlete_setup import SetupNotFound, SetupStorageError
 from app.planning.domain.calendar_constraints import CalendarConstraintError
-from app.schemas.training_options import OptionsInput
+from app.schemas.training_options import DaylightPreviewInput, OptionsInput
 from app.services import training_options as service
 
 router = APIRouter(prefix="/planning/training-options", tags=["training-options"], route_class=SetupRoute)
@@ -40,3 +40,8 @@ async def save(payload: OptionsInput, response: Response, db: DB, owner: Owner):
     value = await call(service.save(session=db, owner=owner, proposal=payload.model_dump(mode="json")))
     response.status_code = 200 if value["reused"] else 201
     return value
+
+
+@router.post("/daylight/preview")
+async def daylight_preview(payload: DaylightPreviewInput, owner: Owner):
+    return service.preview_daylight(owner, payload.model_dump(mode="json"))

@@ -14,24 +14,24 @@ import { draftFor, prepareEdit } from "@/lib/calendar/constraint-forms";
 import type { Draft } from "@/lib/calendar/constraint-forms";
 import { categoryLabels, defaultDetails, EDITOR_PENDING, issueLabels, weekLabels } from "@/lib/calendar/constraints";
 import type { Details, EditorPending, ScheduleContext } from "@/lib/calendar/constraints";
-import { EDITOR_UNDO, makeUndo, prepareUndo, readRecovery, readUndo, undoAvailable, undoChanges, withHistory } from "@/lib/calendar/editor-history";
+import { EDITOR_UNDO, EDITOR_REDO, makeUndo, makeRedo, prepareUndo, readRecovery, readUndo, undoAvailable, undoChanges, withHistory } from "@/lib/calendar/editor-history";
 import type { Recovery, UndoRecord } from "@/lib/calendar/editor-history";
 import type { SlotChange } from "@/lib/calendar/slot-transform";
 
 import ConflictSummary from "./conflict-summary";
 
-export type EditRequest = { serial: number; date: string; event: CalendarEvent | null; change?: SlotChange };
+export type EditRequest = { serial: number; date: string; event: CalendarEvent | null; change?: SlotChange; reminder?: { title: string; notes: string }; remove?: boolean };
 const errorText = (e: unknown) => e instanceof Error ? e.message : "A művelet nem sikerült.";
 const separated = (s: string) => [...new Set(s.split(",").map((s) => s.trim()).filter(Boolean))];
-export function UndoControl({ disabled = true, explanation = "Korábbi napirendi mentések ellenőrzése…", onClick }: {
-  disabled?: boolean; explanation?: string; onClick?: () => void;
+export function UndoControl({ disabled = true, explanation = "Korábbi napirendi mentések ellenőrzése…", onClick, redo = false }: {
+  disabled?: boolean; explanation?: string; onClick?: () => void; redo?: boolean;
 }) {
   const hintId = useId();
   return <span className="pt-calendar-undo" title={explanation} tabIndex={disabled ? 0 : undefined}
-    role={disabled ? "group" : undefined} aria-label={disabled ? "Visszavonás" : undefined} aria-describedby={disabled ? hintId : undefined}>
+    role={disabled ? "group" : undefined} aria-label={disabled ? redo ? "Újra" : "Visszavonás" : undefined} aria-describedby={disabled ? hintId : undefined}>
     <button type="button" className="pt-button" disabled={disabled} onClick={onClick} aria-describedby={hintId}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="m9 4-5 5 5 5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></svg>
-      Visszavonás
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={redo ? { transform: "scaleX(-1)" } : undefined} aria-hidden="true" focusable="false"><path d="m9 4-5 5 5 5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></svg>
+      {redo ? "Újra" : "Visszavonás"}
     </button>
     <span id={hintId} className="pt-sr-only">{explanation}</span>
   </span>;
@@ -40,14 +40,15 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
   context: ScheduleContext | null; request: EditRequest | null; disabled: boolean; onSaved: () => void;
   onLockedChange?: (locked: boolean) => void;
   toolbarTarget?: HTMLElement | null;
-  workoutUndo?: { createdAt: string; disabled: boolean; explanation: string; run: () => void } | null;
+  workoutUndo?: { createdAt: string; disabled: boolean; explanation: string; run: () => void; redo?: { disabled: boolean; explanation: string; run: () => void } } | null;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null), transmitting = useRef(false);
+  const dialog = useRef<HTMLDialogElement>(null), transmitting = useRef(false), removalRequest = useRef<number | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null), [base, setBase] = useState<ScheduleContext | null>(null);
   const [source, setSource] = useState<CalendarEvent | null>(null);
   const [review, setReview] = useState<{ pending: EditorPending; context: ScheduleContext; remove: boolean } | null>(null);
   const [pending, setPending] = useState<Recovery | null>(null), [ready, setReady] = useState(false);
-  const [undo, setUndo] = useState<UndoRecord | null>(null), [undoMode, setUndoMode] = useState(false);
+  const [undo, setUndo] = useState<UndoRecord | null>(null), [redo, setRedo] = useState<UndoRecord | null>(null), [historyMode, setHistoryMode] = useState<"undo" | "redo" | null>(null);
+  const undoMode = historyMode !== null;
   const [error, setError] = useState(""), [notice, setNotice] = useState(""), [blocked, setBlocked] = useState(false);
   const [busy, setBusy] = useState(false), [rejected, setRejected] = useState(false);
   useEffect(() => {
@@ -58,6 +59,8 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
       catch { if (active) { setBlocked(true); setError("Az előző napirendi mentés vagy a böngésző tárhelye nem olvasható. Ellenőrizni kell a korábbi mentés eredményét."); } }
       try { const raw = localStorage.getItem(EDITOR_UNDO); const value = raw ? await readUndo(raw) : null; if (active) setUndo(value); }
       catch { if (active) setError("A korábbi visszavonási adat nem olvasható; abból nem indítható módosítás."); }
+      try { const raw = localStorage.getItem(EDITOR_REDO); const value = raw ? await readUndo(raw) : null; if (active) setRedo(value); }
+      catch { if (active) setError("A korábbi újraalkalmazási adat nem olvasható."); }
       if (active) setReady(true);
     });
     return () => { active = false; };
@@ -69,6 +72,7 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
     queueMicrotask(() => {
       if (!active) return;
       const value = draftFor(request.date, request.event);
+      if (!request.event && request.reminder) value.details = { ...defaultDetails("busy"), title: request.reminder.title, notes: request.reminder.notes, category: "personal" };
       if (request.event?.window && !request.event.occurrence) {
         const old = (context.availability?.artifact.proposal.data as Calendar | undefined)?.days.find((d) => d.date === request.event!.date)?.windows.find((w) => w.key === request.event!.window!.key);
         if (old) value.details = { ...defaultDetails("available"), ...structuredClone(old) };
@@ -85,7 +89,7 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
       const daily = day?.days?.find((d) => d.date === request.date)?.max_total_minutes;
       value.daily = daily === null || daily === undefined ? "" : String(daily);
       setDraft(value); setBase(structuredClone(context)); setSource(request.event);
-      setUndoMode(false); setReview(null); setError(""); setNotice("");
+      setHistoryMode(null); setReview(null); setError(""); setNotice("");
     });
     return () => { active = false; };
     // A request pins the snapshot the user opened; later refreshes must not replace a draft.
@@ -123,6 +127,13 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
     } catch (e) { setError(errorText(e)); }
     finally { setBusy(false); }
   }
+  useEffect(() => {
+    if (!request?.remove || !draft || !base || busy || pending || stale || disabled || removalRequest.current === request.serial) return;
+    removalRequest.current = request.serial;
+    queueMicrotask(() => void preview(true));
+    // The opened request pins this one deletion preview, not subsequent edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request, draft, base, busy, pending, stale, disabled]);
   async function transmit(value: Recovery) {
     if (!context || value.owner !== context.athlete_id || transmitting.current) return;
     transmitting.current = true; setBusy(true); setError(""); setRejected(false);
@@ -130,13 +141,14 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
       const receipt = await sendEditor(value);
       let historyNotice = "";
       try {
-        const history = await makeUndo(value, receipt);
+        const history = await makeUndo(value, receipt), forward = await makeRedo(value, receipt);
         if (history) localStorage.setItem(EDITOR_UNDO, JSON.stringify(history)); else localStorage.removeItem(EDITOR_UNDO);
-        setUndo(history);
-      } catch { setUndo(null); historyNotice = " A mentés sikeres, de a visszavonási adatot a böngésző nem tudta megőrizni."; }
+        if (forward) localStorage.setItem(EDITOR_REDO, JSON.stringify(forward)); else localStorage.removeItem(EDITOR_REDO);
+        setUndo(history); setRedo(forward);
+      } catch { setUndo(null); setRedo(null); historyNotice = " A mentés sikeres, de a visszavonási adatot a böngésző nem tudta megőrizni."; }
       localStorage.removeItem(EDITOR_PENDING); setPending(null); setReview(null);
-      dialog.current?.close(); setDraft(null); setUndoMode(false);
-      setNotice((value.history?.isUndo ? "A módosítás visszavonása új revízióként elmentve." : "A napirend módosítása elmentve.") + historyNotice); onSaved();
+      dialog.current?.close(); setDraft(null); setHistoryMode(null);
+      setNotice((value.history?.isUndo ? "A módosítás visszavonása új revízióként elmentve." : value.history?.isRedo ? "A napirendi módosítás újra alkalmazva." : "A napirend módosítása elmentve.") + historyNotice); onSaved();
     } catch (e) {
       setError(errorText(e));
       setRejected((e instanceof ConstraintHTTPError || e instanceof SetupHTTPError) && [400, 404, 409, 422].includes(e.status));
@@ -144,7 +156,7 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
   }
   async function save() {
     if (!review || !base || busy || pending || stale || disabled || review.context.occurrences.some((o) => o.issue)) return;
-    const value = withHistory(review.pending, base, undoMode);
+    const value = withHistory(review.pending, base, historyMode === "undo", historyMode === "redo");
     try {
       if (localStorage.getItem(EDITOR_PENDING)) throw new Error("Egy másik napirendi kérés eredményét előbb ellenőrizni kell.");
       localStorage.setItem(EDITOR_PENDING, JSON.stringify(value));
@@ -152,15 +164,16 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
     catch { setBlocked(true); setError("A mentési kérés nem őrizhető meg. A mentés nem indult el."); return; }
     setPending(value); await transmit(value);
   }
-  async function previewUndo() {
-    if (!undo || !context || disabled || busy || pending || blocked || draft || !ready) return;
-    setBusy(true); setError(""); setUndoMode(true); setBase(structuredClone(context)); setSource(null);
+  async function previewUndo(direction: "undo" | "redo" = "undo") {
+    const record = direction === "undo" ? undo : redo;
+    if (!record || !context || disabled || busy || pending || blocked || draft || !ready) return;
+    setBusy(true); setError(""); setHistoryMode(direction); setBase(structuredClone(context)); setSource(null);
     setDraft(draftFor(context.local_today, null)); setReview(null);
     try {
       const other = sessionStorage.getItem(PENDING_KEY);
-      if (undo.operation === "availability" && other && JSON.parse(other).operation === "availability")
+      if (record.operation === "availability" && other && JSON.parse(other).operation === "availability")
         throw new Error("A sportolói profilnál függő edzésablak-mentés van. Előbb ott ellenőrizd az eredményét.");
-      const prepared = prepareUndo(context, undo);
+      const prepared = prepareUndo(context, record);
       const result = await previewConstraints(prepared.proposal, context.athlete_id, prepared.first, prepared.last, prepared.availability);
       setReview({ pending: prepared.pending, context: result, remove: false });
     } catch (e) { setError(errorText(e)); }
@@ -172,8 +185,10 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
     catch { setError("A korábbi kérés nem törölhető a böngésző tárhelyéről."); }
   }
   const d = draft?.details;
+  const canRedo = !!redo && !!context && undoAvailable(redo, context);
   const canUndo = !!undo && !!context && undoAvailable(undo, context);
   const undoDisabled = disabled || busy || !!draft || !!pending || blocked || !ready || !canUndo;
+  const historyRecord = historyMode === "redo" ? redo : undo;
   const changes = canUndo && undo ? undoChanges(undo) : [];
   const short = (text: string) => text.length > 180 ? text.slice(0, 177) + "…" : text;
   const undoExplanation = !ready ? "Korábbi napirendi mentések ellenőrzése…"
@@ -187,12 +202,15 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
     : ["A legutóbbi mentett napirendi módosítás visszavonása.",
       ...changes.slice(0, 2).map((change) => `${change.title}\nMost: ${short(change.current)}\nVisszaállítás: ${short(change.restored)}`),
       ...(changes.length > 2 ? [`További ${changes.length - 2} változás az előnézetben.`] : [])].join("\n");
-  const slotTime = Math.max(...[undo?.after.artifact.created_at, context?.saved?.artifact.created_at, context?.availability?.artifact.created_at].map(value => value ? Date.parse(value) : 0));
+  const slotTime = Math.max(...[undo?.after.artifact.created_at, redo?.after.artifact.created_at, context?.saved?.artifact.created_at, context?.availability?.artifact.created_at].map(value => value ? Date.parse(value) : 0));
   const external = !!workoutUndo && Date.parse(workoutUndo.createdAt) > slotTime;
   const undoControl = external ? <UndoControl disabled={disabled || busy || !!draft || !!pending || blocked || !ready || workoutUndo.disabled} explanation={workoutUndo.explanation} onClick={workoutUndo.run} />
-    : <UndoControl disabled={undoDisabled} explanation={undoExplanation} onClick={previewUndo} />;
+    : <UndoControl disabled={undoDisabled} explanation={undoExplanation} onClick={() => void previewUndo()} />;
+  const redoDisabled = disabled || busy || !!draft || !!pending || blocked || !ready || !canRedo;
+  const redoControl = external && workoutUndo.redo ? <UndoControl redo disabled={disabled || busy || !!draft || !!pending || blocked || !ready || workoutUndo.redo.disabled} explanation={workoutUndo.redo.explanation} onClick={workoutUndo.redo.run} /> : <UndoControl redo disabled={redoDisabled} explanation={canRedo ? "A legutóbb visszavont napirendi módosítás újbóli alkalmazása, előnézettel." : "Nincs újra alkalmazható visszavonás a jelenlegi mentett állapothoz."} onClick={() => void previewUndo("redo")} />;
+  const controls = <div className="pt-history-controls">{undoControl}{redoControl}</div>;
   return <section className="pt-quick-control" aria-label="Napirend szerkesztése">
-    {toolbarTarget ? createPortal(undoControl, toolbarTarget) : toolbarTarget === undefined ? <div className="pt-editor-tools">{undoControl}</div> : null}
+    {toolbarTarget ? createPortal(controls, toolbarTarget) : toolbarTarget === undefined ? <div className="pt-editor-tools">{controls}</div> : null}
     {!ready && <span className="pt-notice">Korábbi napirendi mentések ellenőrzése…</span>}
     {notice && <div role="status" className="pt-message">{notice}</div>}
     {error && !draft && <div role="alert" className="pt-message is-error">{error}</div>}
@@ -204,7 +222,7 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
     </div>}
     <dialog ref={dialog} className="pt-quick-dialog" aria-labelledby="pt-quick-title" onCancel={(e) => { e.preventDefault(); close(); }} onClose={() => { if (!busy) { setDraft(null); setReview(null); } }}>
       {draft && d && <>
-        <header className="pt-quick-header"><div><h2 id="pt-quick-title">{undoMode ? "Legutóbbi módosítás visszavonása" : source ? "Idősáv szerkesztése" : "Új idősáv"}</h2><small>{base?.timezone_name} · helyi időpontok</small></div>
+        <header className="pt-quick-header"><div><h2 id="pt-quick-title">{undoMode ? historyMode === "redo" ? "Módosítás újbóli alkalmazása" : "Legutóbbi módosítás visszavonása" : source ? "Idősáv szerkesztése" : "Új idősáv"}</h2><small>{base?.timezone_name} · helyi időpontok</small></div>
           <button type="button" className="pt-button pt-icon-button" aria-label="Idősávszerkesztő bezárása" onClick={close} disabled={busy}><Icon name="close" /></button></header>
         {!undoMode && <form key={request?.serial} className="pt-quick-form" onSubmit={(e: FormEvent) => { e.preventDefault(); void preview(); }}>
           <fieldset disabled={busy || !!pending || blocked || stale || disabled}>
@@ -246,15 +264,15 @@ export default function QuickEditor({ context, request, disabled, onSaved, onLoc
         {error && <div role="alert" className="pt-message is-error">{error}</div>}
         {pending && <div className="pt-message" role="status">A mentés eredményét ellenőrizni kell. <button type="button" className="pt-button" disabled={busy || pending.owner !== context?.athlete_id} onClick={() => transmit(pending)}>Ugyanaz a napirendi kérés újraküldése</button>{rejected && <button type="button" className="pt-button" disabled={busy} onClick={discard}>Elutasított kérés elvetése és újraolvasás</button>}</div>}
         {review && <div className="pt-quick-review" aria-label="Napirendi módosítás áttekintése">
-          <h3>{undoMode ? "Visszavonás áttekintése" : review.remove ? "Elhagyás áttekintése" : "Módosítás áttekintése"}</h3>
-          <p>{undoMode ? "A legutóbbi mentés előtti napirendi állapot új revízióként áll vissza. A korábbi mentések megmaradnak." : review.remove ? (single ? "Csak a kijelölt alkalom marad ki." : "A kiválasztott hatókörből eltűnik az idősáv.") : `${formatDay(draft.date)} · ${d.title} · ${d.start_time}–${d.end_time}${d.ends_next_day ? " (másnap)" : ""}`}</p>
-          {undoMode && undo && <details open><summary>Visszavonás előtti és utáni idősávok</summary><ul>{undoChanges(undo).map((change, index) => <li key={index}><strong>{change.title}</strong><br />Most: {change.current}<br />Visszaállítás: {change.restored}</li>)}</ul></details>}
+          <h3>{undoMode ? historyMode === "redo" ? "Újraalkalmazás áttekintése" : "Visszavonás áttekintése" : review.remove ? "Elhagyás áttekintése" : "Módosítás áttekintése"}</h3>
+          <p>{undoMode ? historyMode === "redo" ? "A visszavont módosítás új revízióként kerül ismét mentésre." : "A legutóbbi mentés előtti napirendi állapot új revízióként áll vissza. A korábbi mentések megmaradnak." : review.remove ? (single ? "Csak a kijelölt alkalom marad ki." : "A kiválasztott hatókörből eltűnik az idősáv.") : `${formatDay(draft.date)} · ${d.title} · ${d.start_time}–${d.end_time}${d.ends_next_day ? " (másnap)" : ""}`}</p>
+          {undoMode && historyRecord && <details open><summary>Jelenlegi és visszaállítandó idősávok</summary><ul>{undoChanges(historyRecord).map((change, index) => <li key={index}><strong>{change.title}</strong><br />Most: {change.current}<br />Visszaállítás: {change.restored}</li>)}</ul></details>}
           <p className="pt-notice">Ellenőrzött időszak: {formatDay(review.context.start_date)} – {formatDay(review.context.end_date)}. Az edzések időpontja változatlan marad.</p>
           {!!review.context.occurrences.filter((o) => o.issue).length && <div className="pt-message is-error" role="alert">Pontosítandó helyi időpontok:<ul>{review.context.occurrences.filter((o) => o.issue).map((o) => <li key={o.key}>{formatDay(o.source_date)} · {o.details.title}: {issueLabels[o.issue!] ?? o.issue}</li>)}</ul></div>}
           <ConflictSummary conflicts={review.context.conflicts} estimates={review.context.duration_estimates} preview />
           <details><summary>Megmaradó edzésablakok · {review.context.opportunities.length}</summary><ul>{review.context.opportunities.map((w) => <li key={w.key}>{formatDay(w.source_date)} · {w.known ? `${w.usable_minutes} használható perc, egy közös ${w.max_minutes} perces keretből` : "A használható idő még nem dönthető el"}{w.daily_max_minutes !== null ? ` · napi felső keret: ${w.daily_max_minutes} p` : ""}</li>)}</ul><p className="pt-notice">Az átfedő ablakok és a napi felső keret nem adódnak össze.</p></details>
           {legacy && review.remove && <p className="pt-notice">Az utolsó ablak elhagyásakor a nap lehetősége ismeretlen lesz. Nem jelöljük automatikusan elérhetetlennek.</p>}
-          <button className="pt-primary" type="button" onClick={save} disabled={busy || !!pending || blocked || stale || disabled || review.context.occurrences.some((o) => o.issue)}>{busy ? "Mentés…" : undoMode ? "Visszavonás mentése" : review.remove ? "Elhagyás mentése" : "Napirendi módosítás mentése"}</button>
+          <button className="pt-primary" type="button" onClick={save} disabled={busy || !!pending || blocked || stale || disabled || review.context.occurrences.some((o) => o.issue)}>{busy ? "Mentés…" : undoMode ? historyMode === "redo" ? "Újraalkalmazás mentése" : "Visszavonás mentése" : review.remove ? "Elhagyás mentése" : "Napirendi módosítás mentése"}</button>
         </div>}
       </>}
     </dialog>

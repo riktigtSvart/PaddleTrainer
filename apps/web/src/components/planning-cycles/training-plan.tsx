@@ -1,4 +1,5 @@
 "use client";
+import { StrengthAssessmentPanel } from "./strength-assessment";
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -18,7 +19,12 @@ import {
   chooseTraining,
 } from "@/lib/planning-cycles/training-plan";
 import PlanOutput from "./plan-output";
-import { detailedEnd, reviewChanges } from "@/lib/planning-cycles/plan-view";
+import MesocycleSummary from "./mesocycle-summary";
+import {
+  detailedEnd,
+  localDay,
+  reviewChanges,
+} from "@/lib/planning-cycles/plan-view";
 import type { PlanPeriod } from "@/lib/planning-cycles/plan-view";
 import {
   DaysWithoutProposal,
@@ -77,6 +83,15 @@ export function TrainingPlanPanel({
   const expected = useRef({ owner, reference, zone });
   const storageKey = `paddletrainer.training-plan.pending.v1:${owner}:${reference.artifact_id}`;
   const report = (e: unknown) => {
+    if (
+      e instanceof CycleHTTPError &&
+      e.code === "TRAINING_PLAN_CALIBRATION_CHANGED"
+    ) {
+      setFailure(
+        "A ciklus kiindulópontjául használt edzésadat megváltozott. A „Ciklusok összehangolása” gombbal kérj friss kiindulópontot, majd nézd át az új javaslatot.",
+      );
+      return;
+    }
     if (
       e instanceof CycleHTTPError &&
       [
@@ -151,7 +166,11 @@ export function TrainingPlanPanel({
       window.removeEventListener("focus", refresh);
     };
   }, [accepted, pending, read]);
-  async function inspect() {
+  async function inspect(range?: {
+    first: string;
+    last: string;
+    coordinate?: boolean;
+  }) {
     controller.current?.abort();
     const c = new AbortController();
     controller.current = c;
@@ -165,12 +184,15 @@ export function TrainingPlanPanel({
     try {
       const value = await reviewTraining(
         expected.current,
-        first,
-        last,
+        range?.first ?? first,
+        range?.last ?? last,
         c.signal,
+        range?.coordinate,
       );
       if (!c.signal.aborted) {
         setReview(value);
+        setFirst(value.start_date);
+        setLast(value.end_date);
         shownReview.current = value.artifact_id;
         editingRange.current = false;
       }
@@ -378,11 +400,13 @@ export function TrainingPlanPanel({
             className={secondaryClass}
             disabled={busy || !!pending}
             onClick={() => {
-              change(setFirst, initialDate);
-              change(setLast, detailedEnd(periods, initialDate));
+              const start = localDay(zone);
+              const end = detailedEnd(periods, start);
+              editingRange.current = true;
+              void inspect({ first: start, last: end, coordinate: true });
             }}
           >
-            Aktuális és következő mezociklus
+            Ciklusok összehangolása
           </button>
         )}
       </form>
@@ -450,6 +474,7 @@ export function TrainingPlanPanel({
       {review && (
         <div className="space-y-4">
           <PreparationChecklist review={review} />
+          <StrengthAssessmentPanel review={review} />
           <p>
             Felülvizsgálat: {time(review.created_at)} ·{" "}
             {review.result.create.length} új edzés · {review.result.keep.length}{" "}
@@ -466,6 +491,7 @@ export function TrainingPlanPanel({
                 {trainingReasons[reason] ?? reason}
               </p>
             ))}
+          <MesocycleSummary review={review} />
           <PlanOutput
             review={review}
             disabled={busy || !!pending || recoveryBlocked}

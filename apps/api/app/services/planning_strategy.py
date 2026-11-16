@@ -100,7 +100,7 @@ def recent_signals(data, today):
             signals.append({'kind':'reported_illness','source_id':r['id'],'observed_at':r['date'],'fields':['illness']})
     return signals
 
-def rank(key, phase, beginner, event):
+def rank(key, phase, beginner, event, priority=None, sport=''):
     foundation={'PERIPHERAL_OXIDATIVE_CAPACITY':90,'MAX_STRENGTH':85,'TECHNICAL_SKILL':80,'MUSCULOSKELETAL_ROBUSTNESS':75,'VO2_CAPACITY':40}
     specific={'VO2_CAPACITY':95,'MUSCULAR_ENDURANCE':90,'POWER_RFD':85,'SPRINT_SPEED_AND_START':80,'HIGH_INTENSITY_AND_ANAEROBIC_PROFILE':75,'PACING_COMPETENCE':65,'TECHNICAL_STABILITY_UNDER_FATIGUE':60}
     if beginner:return {'TECHNICAL_SKILL':100,'MUSCULOSKELETAL_ROBUSTNESS':95,'PERIPHERAL_OXIDATIVE_CAPACITY':90}.get(key,20)
@@ -109,8 +109,14 @@ def rank(key, phase, beginner, event):
         distance=profile.get('distance_value');unit=profile.get('distance_unit')
         if distance is not None and float(distance)*(1000 if unit=='km' else 1)==200:
             specific.update(SPRINT_SPEED_AND_START=110,POWER_RFD=105)
-        return specific.get(key,30)
-    return foundation.get(key,30)
+        if priority is not None:
+            from app.planning.domain.event_demands import template
+            if template(profile, sport) == 'paddling_long_distance':
+                specific.update(MUSCULAR_ENDURANCE=115, PACING_COMPETENCE=110, PADDLING_ECONOMY=105,
+                    LONG_DURATION_DURABILITY=100, TECHNICAL_STABILITY_UNDER_FATIGUE=95, VO2_CAPACITY=90,
+                    POWER_RFD=50, SPRINT_SPEED_AND_START=55)
+        return specific.get(key,30) + (100 * priority if priority is not None else 0)
+    return foundation.get(key,30) + (100 * priority if priority is not None else 0)
 
 def enrich(data, draft):
     today=local_day(data);events=main_events(data);ctx=profile_context(data);signals=recent_signals(data,today)
@@ -122,6 +128,13 @@ def enrich(data, draft):
         'reason':'A megfigyelések és leíró összefüggések önmagukban nem igazolnak személyes fejlődési vagy terhelési modellt.'},
         'boundaries_changed':False,'race_dates_changed':False,'workouts_created':False,'dose_selected':False}
     draft['event_titles']={e['key']:e.get('title',e['key']) for e in data['competitions']}
+    weighted = any('demand_priority' in row for macro in draft['macrocycles'] for row in macro['rows'])
+    if weighted:
+        from app.planning.domain.event_demands import VERSION, SOURCES as DEMAND_SOURCES
+        draft['schema_version'] = 'planning-goal-suggestions-v0.3'
+        draft['rules_version'] = 'mesocycle-strategy-v0.2'
+        draft['strategy']['demand_priorities'] = {'version': VERSION, 'applied': True, 'training_percentages': False,
+            'score_kind': 'qualitative_product_priority', 'sources': DEMAND_SOURCES}
     for macro in draft['macrocycles']:
         children=sorted([p for p in data['periods'] if p.get('parent_id')==macro['macrocycle_period_id'] and p['period_type']=='MESOCYCLE'],key=lambda p:p['start_date'])
         rows=macro['rows'];keys=[r['capability_key'] for r in rows];plan=[]
@@ -131,7 +144,17 @@ def enrich(data, draft):
             counts=Counter()
             for s in future or spans:counts[s['phase']]+=s['days']
             phase=max(counts,key=counts.get);anchor=next((e for e in events if e['key']==next((s['event_key'] for s in (future or spans) if s['phase']==phase),None)),None)
-            ranked=sorted(keys,key=lambda k:(-rank(k,phase,ctx['beginner_or_returning'],anchor),k))
+            priorities = {r['capability_key']: r.get('demand_priority') for r in rows}
+            if weighted and anchor:
+                from app.planning.domain.event_demands import suggest
+                profile = anchor.get('profile') or {}
+                automatic = suggest(profile, data.get('program_sport', ''))
+                anchor_weights = (automatic['weights'] if profile.get('capability_basis') == 'unassessed'
+                    and automatic and automatic['template_key'] == 'paddling_long_distance'
+                    else profile.get('capability_weights') or {})
+                # A later marathon must not borrow a preceding sprint's peak weights.
+                priorities = {key: anchor_weights.get(key) for key in keys}
+            ranked=sorted(keys,key=lambda k:(-rank(k,phase,ctx['beginner_or_returning'],anchor,priorities[k],data.get('program_sport','')),k))
             primary=set(ranked[:POLICY['max_primary_capabilities']]) if phase not in {'race_readiness','transition','historical'} and not ctx['restricted'] else set()
             plan.append({'mesocycle_period_id':child['id'],'title':child['title'],'phase':phase,'label':LABELS[phase],
                          'segments':spans,'confidence':'limited' if not ctx['profile_available'] or not anchor or anchor.get('precision')!='exact' else 'theoretical_starter',

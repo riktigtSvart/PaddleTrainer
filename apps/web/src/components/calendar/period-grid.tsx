@@ -1,3 +1,5 @@
+"use client";
+import { useEffect, useRef, useState } from "react";
 import {
   formatDay,
   goalFamily,
@@ -7,6 +9,14 @@ import {
 import type { CalendarEvent, Feed } from "@/lib/calendar/contracts";
 import Icon, { sportIcon } from "@/components/ui/icon";
 import { eventLabel } from "./time-grid";
+import AlternativeBadge from "./alternative-badge";
+import { interactionHint } from "@/lib/calendar/interactions";
+import type { CalendarTarget } from "@/lib/calendar/interactions";
+import { calendarCycles, cycleBoundaries } from "@/lib/calendar/cycles";
+import { CycleDayMarkers } from "./cycle-markers";
+import {cycleLoad as loadBand} from "@/lib/calendar/cycle-context";
+import type {CycleContext} from "@/lib/calendar/cycle-context";
+import type {CalendarCycle} from "@/lib/calendar/cycles";
 export default function PeriodGrid({
   feed,
   events,
@@ -16,6 +26,12 @@ export default function PeriodGrid({
   open,
   selectDay,
   addSlot,
+  onContext,
+  fitted = false,
+  showCycles = false,
+  showCycleLoad = false,
+  cycleContext = null,
+  onOpenCycle,
 }: {
   feed: Feed;
   events: CalendarEvent[];
@@ -25,7 +41,24 @@ export default function PeriodGrid({
   open: (event: CalendarEvent) => void;
   selectDay: (day: string) => void;
   addSlot?: (day: string) => void;
+  onContext?: (target: CalendarTarget) => void;
+  fitted?: boolean;
+  showCycles?: boolean;
+  showCycleLoad?: boolean;
+  cycleContext?: CycleContext | null;
+  onOpenCycle?: (cycle: CalendarCycle) => void;
 }) {
+  const cycles = showCycles ? calendarCycles(feed.periods) : [];
+  const grid = useRef<HTMLDivElement>(null);
+  const [capacity, setCapacity] = useState(3);
+  useEffect(() => {
+    if (!fitted || !grid.current || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      const rows = Math.ceil(days.length / 7), rowHeight = (entry.contentRect.height - 20 - rows * 4) / rows;
+      setCapacity(Math.max(1, Math.floor((rowHeight - (showCycles ? 62 : 32)) / 22)));
+    });
+    observer.observe(grid.current); return () => observer.disconnect();
+  }, [fitted, days.length, showCycles]);
   const all = segments(
     events,
     days[0],
@@ -51,6 +84,7 @@ export default function PeriodGrid({
             <button
               type="button"
               className={`pt-overview-day${d === selected ? " is-selected" : ""}`}
+              data-cycle-load={showCycleLoad ? loadBand(cycleContext,feed,d)?.tone : undefined}
               key={d}
               title={`${formatDay(d, true)} · ${activities.length} edzés/terv · ${(byDay.get(d) ?? []).filter((e) => e.kind === "constraint").length} elfoglaltság`}
               aria-label={`${formatDay(d, true)} napi nézet · ${activities.length} edzés/terv`}
@@ -70,8 +104,8 @@ export default function PeriodGrid({
       </div>
     );
   return (
-    <div className="pt-month-grid">
-      {["H", "K", "Sze", "Cs", "P", "Szo", "V"].map((d) => (
+    <div ref={grid} className="pt-month-grid" style={{ gridTemplateRows: `20px repeat(${Math.ceil(days.length / 7)}, minmax(0, 1fr))` }}>
+      {Array.from({length:7},(_,i)=>["V","H","K","Sze","Cs","P","Szo"][(new Date(days[0]+"T12:00:00Z").getUTCDay()+i)%7]).map((d) => (
         <div className="pt-month-heading" key={d}>
           {d}
         </div>
@@ -81,31 +115,45 @@ export default function PeriodGrid({
             (e) => e.kind === "planned" || e.kind === "session",
           ),
           a = feed.availability.days.find((a) => a.date === d);
+        const ordered = [...activities, ...(byDay.get(d) ?? []).filter((e) => e.kind === "constraint" || e.kind === "availability")];
+        const shown = ordered.slice(0, ordered.length > capacity ? Math.max(0, capacity - 1) : capacity);
         return (
           <div
             className={`pt-month-cell${d === selected ? " is-selected" : ""}`}
             key={d}
+            data-date={d}
+            data-cycle-load={showCycleLoad ? loadBand(cycleContext,feed,d)?.tone : undefined}
+            title={showCycleLoad ? loadBand(cycleContext,feed,d)?.label : undefined}
+            data-cycle-start={cycleBoundaries(cycles, d).filter(b => b.edge === "start").map(b => b.cycle.kind).join(" ") || undefined}
+            data-cycle-end={cycleBoundaries(cycles, d).filter(b => b.edge === "end").map(b => b.cycle.kind).join(" ") || undefined}
+            tabIndex={onContext || addSlot ? 0 : undefined}
+            role="group"
+            aria-label={interactionHint(d)}
+            onDoubleClick={(e) => { if (addSlot && !(e.target as Element).closest("button")) addSlot(d); }}
+            onContextMenu={(e) => {
+              if (!onContext) return;
+              e.preventDefault(); const target = (e.target as Element).closest<HTMLElement>("[data-calendar-event]");
+              const rect = e.currentTarget.getBoundingClientRect();
+              onContext({ date: d, event: events.find((v) => v.key === target?.dataset.calendarEvent) ?? null, x: e.clientX || rect.left + 12, y: e.clientY || rect.top + 12 });
+            }}
+            onKeyDown={(e) => { if (onContext && e.target === e.currentTarget && ["Enter", " ", "ContextMenu"].includes(e.key)) { e.preventDefault(); const rect = e.currentTarget.getBoundingClientRect(); onContext({ date: d, event: null, x: rect.left + 12, y: rect.top + 12 }); } }}
           >
             <button
               className="pt-day-number"
               type="button"
               onClick={() => selectDay(d)}
-              title={formatDay(d, true)}
+              title={`${formatDay(d, true)} · ${(byDay.get(d) ?? []).length} esemény`}
+              aria-label={`${formatDay(d, true)} napi nézet · ${(byDay.get(d) ?? []).length} esemény`}
             >
               {d.slice(8)}
               <small>{d.endsWith("-01") ? d.slice(5, 7) + "." : ""}</small>
             </button>
-            {addSlot && (
-              <button
-                type="button"
-                className="pt-add-slot"
-                aria-label={`${formatDay(d)} · új idősáv`}
-                title="Edzéslehetőség vagy elfoglaltság hozzáadása"
-                onClick={() => addSlot(d)}
-              >
-                + Idősáv
-              </button>
-            )}
+            <CycleDayMarkers cycles={cycles} date={d} onOpenCycle={onOpenCycle} />
+            {fitted ? <>
+              {shown.map((e) => <button type="button" key={e.key} data-calendar-event={e.key} className={e.kind === "planned" || e.kind === "session" ? `pt-month-event pt-goal-${goalFamily(e.goal)}` : "pt-month-commitment"} onClick={() => open(e)} aria-label={eventLabel(e, feed.timezone_name)} title={eventLabel(e, feed.timezone_name)}><Icon name={e.kind === "availability" ? "clock" : e.kind === "constraint" ? "calendar" : sportIcon(e.sport)} /><span>{e.start ? localParts(e.start, feed.timezone_name).clock + " " : ""}{e.kind === "availability" ? "Edzéslehetőség" : e.title}</span><AlternativeBadge event={e} />{e.kind === "session" && <Icon name="check" />}</button>)}
+              {ordered.length > shown.length && <button type="button" className="pt-more" onClick={() => selectDay(d)}>+{ordered.length - shown.length} esemény</button>}
+              {a?.status === "unavailable" && ordered.length === 0 && <small className="pt-notice">Nem elérhető</small>}
+            </> : <>
             {activities.slice(0, 3).map((e) => (
               <button
                 type="button"
@@ -124,6 +172,7 @@ export default function PeriodGrid({
                     : ""}
                   {e.title}
                 </span>
+                <AlternativeBadge event={e} />
                 {e.kind === "session" && (
                   <span className="pt-event-status" aria-hidden="true">
                     {e.linkedPlanId && <Icon name="calendar" />}
@@ -149,6 +198,7 @@ export default function PeriodGrid({
                   type="button"
                   key={e.key}
                   className="pt-month-commitment"
+                  data-calendar-event={e.key}
                   onClick={() => open(e)}
                   title={eventLabel(e, feed.timezone_name)}
                 >
@@ -177,6 +227,7 @@ export default function PeriodGrid({
                   key={e.key}
                   type="button"
                   className="pt-more"
+                  data-calendar-event={e.key}
                   onClick={() => open(e)}
                 >
                   Edzéslehetőség
@@ -187,7 +238,8 @@ export default function PeriodGrid({
             )}
             {a?.status === "unavailable" && (
               <small className="pt-notice">Nem elérhető</small>
-            )}
+            )}            </>}
+
           </div>
         );
       })}

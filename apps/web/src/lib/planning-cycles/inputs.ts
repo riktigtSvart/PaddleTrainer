@@ -1,7 +1,9 @@
 import type { Suggestions } from "./goal-suggestions";
+import { readDaylightContext } from "@/lib/training-options/daylight";
 import type { Period } from "@/lib/planning-goals/types";
 import { addDays, sha } from "./contracts";
-import type { Reference } from "./contracts";
+import type { Competition, Reference } from "./contracts";
+import { readMassProjection, type MassProjection } from "@/lib/athlete-setup/body-mass";
 export type InputDay = {
   date: string;
   availability_state:
@@ -11,6 +13,9 @@ export type InputDay = {
   opportunities: unknown[];
 };
 export type PlanningInputs = {
+  competitions?: Competition[];
+  program_sport?: string;
+  body_mass?: MassProjection;
   goal_suggestions?: Suggestions;
   periods: Period[];
   schema_version: "planning-inputs-v0.1";
@@ -46,6 +51,8 @@ export async function readPlanningInputs(
   const v = object(value),
     p = object(v.program_reference),
     connection = object(v.planner_connection);
+  await readDaylightContext(v, expected.owner);
+  if (v.body_mass !== undefined) await readMassProjection(v.body_mass, expected.owner);
   const validDay = (s: unknown) =>
     typeof s === "string" &&
     /^\d{4}-\d{2}-\d{2}$/.test(s) &&

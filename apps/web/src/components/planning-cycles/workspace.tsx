@@ -1,4 +1,6 @@
 "use client";
+import { SaveActionButton } from "@/components/planning-data/save-actions";
+import { withEventDemands } from "@/lib/planning-cycles/event-demands";
 import { PlanningInputPanel } from "./planning-inputs";
 import { TrainingPlanPanel } from "./training-plan";
 import Link from "next/link";
@@ -362,7 +364,7 @@ export default function CycleWorkspace({
     setBusy(true);
     setFailure("");
     try {
-      const normalized = normalizeProgram(program);
+      const normalized = normalizeProgram(withEventDemands({ ...program, goals: program.goals.filter((goal) => !["weight_loss", "weight_maintenance"].includes(goal.key)) }));
       const view = await preview(normalized);
       setProgram(normalized);
       setReview({ body: JSON.stringify(normalized), view });
@@ -849,7 +851,7 @@ export default function CycleWorkspace({
                     )}
                     <div className="space-y-4">
                       <p className="font-semibold">Célok</p>
-                      {Object.entries(catalog.goals).map(([key, label]) => {
+                      {Object.entries(catalog.goals).filter(([key]) => !["weight_loss", "weight_maintenance"].includes(key)).map(([key, label]) => {
                         const goal = program.goals.find((g) => g.key === key);
                         return (
                           <div
@@ -990,7 +992,7 @@ export default function CycleWorkspace({
                       >
                         Vissza a ciklusbontáshoz
                       </button>
-                      <button
+                      <SaveActionButton saveLabel="Felkészülés és ciklusok mentése" disabled={locked} saveHint="Az áttekintett felkészülést és ciklusokat menti."
                         type="button"
                         className={buttonClass}
                         onClick={() =>
@@ -1002,7 +1004,7 @@ export default function CycleWorkspace({
                         }
                       >
                         Felkészülés és ciklusok létrehozása
-                      </button>
+                      </SaveActionButton>
                     </div>
                   </div>
                 )}

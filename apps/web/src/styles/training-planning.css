@@ -217,12 +217,14 @@
 }
 .pt-schedule-days {
   display: grid;
-  gap: 14px;
+  gap: 24px;
   min-width: 0;
 }
 .pt-schedule-day {
   min-width: 0;
   overflow-wrap: anywhere;
+  border: 1px solid color-mix(in srgb, var(--pt-accent) 48%, var(--pt-line));
+  border-left: 4px solid var(--pt-accent);
 }
 .pt-schedule-day[data-editing="true"] {
   border-color: var(--pt-accent);
@@ -239,17 +241,22 @@
 }
 .pt-schedule-day-header h3 {
   margin: 0;
+  color: var(--pt-accent);
+  font-weight: 600;
 }
 .pt-schedule-windows {
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 20px;
+  align-items: start;
 }
 .pt-schedule-windows > .pt-schedule-window {
   margin: 0;
-}
-.pt-schedule-windows > .pt-schedule-window + .pt-schedule-window {
-  border-top: 1px solid var(--pt-line);
-  padding-top: 14px;
+  padding: 16px;
+  min-width: 0;
+  border: 1px solid var(--pt-line);
+  border-radius: 10px;
+  background: var(--pt-bg);
 }
 .pt-schedule-locations {
   display: flex;

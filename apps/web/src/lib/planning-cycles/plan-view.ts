@@ -141,11 +141,12 @@ export function dayReason(
     review.result.preparation?.selection_issues.find((day) => day.date === date)
       ?.codes ?? [];
   if (
-    code === "NO_SUPPORTED_SAMPLE_FITS" &&
-    issues.length > 0 &&
-    issues.every((issue) =>
-      ["MINIMUM_SPACING", "ROLLING_BUDGET_REVIEW"].includes(issue),
-    )
+    code === "PLANNED_RECOVERY_DAY" ||
+    (code === "NO_SUPPORTED_SAMPLE_FITS" &&
+      issues.length > 0 &&
+      issues.every((issue) =>
+        ["MINIMUM_SPACING", "ROLLING_BUDGET_REVIEW"].includes(issue),
+      ))
   )
     return {
       label: "Pihenőnap",

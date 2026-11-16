@@ -12,6 +12,7 @@ export default function EventPreview({
   events,
   onEditGoal,
   onMove,
+  onOpen,
   editDisabled,
   children,
 }: {
@@ -20,6 +21,7 @@ export default function EventPreview({
   children: ReactNode;
   onEditGoal: (event: CalendarEvent) => void;
   onMove: (event: CalendarEvent) => void;
+  onOpen?: (event: CalendarEvent) => void;
   editDisabled: boolean;
 }) {
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -118,7 +120,7 @@ export default function EventPreview({
                 <li key={i}>{line}</li>
               ))}
             </ul>
-            <Link href={eventHref(current)!}>Edzés részletei →</Link>
+            {onOpen ? <button type="button" onClick={() => { setPreview(null); onOpen(current); }}>Edzés részletei →</button> : <Link href={eventHref(current)!}>Edzés részletei →</Link>}
             {!editDisabled && (
               <div className="pt-preview-actions">
                 <button

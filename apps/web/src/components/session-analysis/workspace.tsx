@@ -11,6 +11,7 @@ import { LearningStatus } from "./learning-status";
 import { LOCAL_REFRESH_EVENT } from "@/lib/data-connections/preferences";
 import { useSpeedUnit } from "./speed-unit-control";
 import { speedValue } from "@/lib/session-analysis/presentation";
+import {StrengthWorkoutLog} from "./strength-log";
 import { SessionSections } from "./sections";
 
 const number = (value: number | null | undefined, unit = "") =>
@@ -361,6 +362,7 @@ export function SessionDetails({ data }: { data: Analysis }) {
           </details>
         </details>
       </div>
+      {s.sport === "STRENGTH" && <StrengthWorkoutLog key={s.id} owner={data.athlete_id} session={s.id}/>}
       <LearningStatus
         owner={data.athlete_id}
         session={s.id}

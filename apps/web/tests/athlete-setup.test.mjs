@@ -74,7 +74,7 @@ async function receipt(p = pending(), extra = {}) {
   };
 }
 
-test("maintenance needs only current weight, keeps decimal digits and no target input", () => {
+test("legacy maintenance keeps its exact historical mass and links to the nutrition goal", () => {
   const g = newGoal("weight_maintenance");
   g.body_mass.current_kg = "72,500";
   const p = program(g),
@@ -84,7 +84,9 @@ test("maintenance needs only current weight, keeps decimal digits and no target 
   const html = renderToStaticMarkup(
     React.createElement(GoalEditor, { value: g, onChange() {} }),
   );
-  assert.match(html, /Jelenlegi testsúly/);
+  assert.match(html, /rögzítéskor megadott tömeg: 72,500/);
+  assert.match(html, /nutrition#body-goals/);
+  assert.doesNotMatch(html, /<input/);
   assert(!html.includes("Céltestsúly (kg)"));
 });
 test("weight loss still needs a lower target and cannot be combined with maintenance", () => {

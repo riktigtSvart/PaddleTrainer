@@ -1,66 +1,14 @@
 import Link from "next/link";
 import ThemeControl from "@/components/ui/theme-control";
-export const metadata = { title: "Beállítások" };
+import DataConnectionsControl from "@/components/ui/data-connections-control";
+import PolarHistoryControl from "@/components/ui/polar-history-control";
+export const metadata = { title: "Általános beállítások" };
 export default function SettingsPage() {
-  return (
-    <main className="pt-settings">
-      <h1>Személyes beállítások</h1>
-      <section className="pt-panel">
-        <h2>Megjelenés</h2>
-        <p>
-          Válassz témát, vagy kövesd a rendszer beállítását. A választást ez a
-          böngésző megjegyzi.
-        </p>
-        <ThemeControl />
-      </section>
-      <section className="pt-panel">
-        <h2>Sportolói háttér és adatátvétel</h2>
-        <p>
-          A sportmúlt, a korlátozások, az edzéslehetőségek és az órás előzmények
-          a profilban kezelhetők.
-        </p>
-        <Link className="pt-button" href="/athlete-setup">
-          Sportolói profil és előzmények
-        </Link>
-      </section>
-      <section className="pt-panel" id="data-connections">
-        <h2>Órás adatkapcsolatok</h2>
-        <p>
-          A fejléc adatkapcsolati ikonjával minden oldalon megnézheted az
-          állapotot, és elindíthatod a Polar-edzések és edzéstervek frissítését.
-        </p>
-        <p>
-          A mai napot is tartalmazó gyors frissítés az alapadatokat veszi át. Az
-          alvás, aktivitás és egyéb állapotadatok átvétele a profil Előzmények
-          lapján érhető el.
-        </p>
-        <p>
-          Garmin és Suunto: előkészített bővítési lehetőség; ezekhez még nincs
-          bekötött kapcsolat.
-        </p>
-      </section>
-      <section className="pt-panel">
-        <h2>Naptárkapcsolatok</h2>
-        <p>
-          Google Calendar, Microsoft 365 és iCloud kapcsolatok: tervezett
-          integráció. Jelenleg nincs külső naptár összekapcsolva ezen a
-          felületen.
-        </p>
-      </section>
-      <details className="pt-panel">
-        <summary>Táplálkozási feltételek · későbbi modul</summary>
-        <p>
-          Az étrendi kizárások, preferenciák, étkezési idősávok és főzési
-          lehetőségek itt lesznek megadhatók.
-        </p>
-      </details>
-      <details className="pt-panel">
-        <summary>Boltok és márkák · későbbi modul</summary>
-        <p>
-          Kijelölt boltok, kerülendő márkák, helyettesítések és beszerzési
-          szempontok.
-        </p>
-      </details>
-    </main>
-  );
+  return <main className="pt-settings"><h1>Általános beállítások</h1>
+    <section className="pt-panel" id="appearance"><h2>Megjelenés / téma</h2><p>Kövesd a rendszer témáját, vagy válassz világos vagy sötét megjelenést. A választást ez a böngésző megjegyzi.</p><ThemeControl /></section>
+    <section className="pt-panel" id="data-connections"><h2>Sportórák és adatkapcsolatok</h2><p>A frissítés gomb az alapértelmezett eszközről tölt. A mellette nyíló menüben ellenőrizheted a kapcsolatot, a lekért adatokat és az időszakot.</p><DataConnectionsControl /><p>Jelenleg a Polar-kapcsolat működik. A Garmin és a Suunto későbbi bekötésre előkészített lehetőség.</p><div className="pt-context-links"><Link href="/training-planning#assessment">Órás előzmények és mérések átvétele</Link></div></section>
+    <PolarHistoryControl />
+    <section className="pt-panel" id="calendar-connections"><h2>Naptárkapcsolatok</h2><p>Google Calendar, Microsoft 365 és iCloud: későbbi integráció. Az elfoglaltságokat jelenleg a naptárban, kézzel adhatod meg.</p></section>
+    <section className="pt-panel" id="language"><h2>Nyelv</h2><p>A nyelvválasztás és a rendszer nyelvének követése későbbi lehetőség. A jelenlegi felület magyarul érhető el.</p></section>
+  </main>;
 }

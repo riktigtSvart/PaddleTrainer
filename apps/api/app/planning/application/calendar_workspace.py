@@ -10,7 +10,7 @@ from uuid import UUID
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import and_, extract, func, or_, select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, defer
 
 from app.models.entities import PlannedWorkout, TrainingPeriod, User, WorkoutSession
 from app.planning.application import register_athlete_setup as setup
@@ -198,6 +198,7 @@ async def save_goal(*, owner, proposal, repository, session):
 
 
 async def feed(*, owner, start, end, repository, session):
+    from app.models.entities import WorkoutStatus
     setup._require_session(repository, session)
     try:
         user = (await session.execute(select(User).where(User.id == UUID(owner)))).scalar_one()
@@ -215,7 +216,7 @@ async def feed(*, owner, start, end, repository, session):
         planned_end = extract("epoch", PlannedWorkout.planned_start_time) + func.coalesce(PlannedWorkout.duration_sec, 0)
         plans = list((await session.execute(
             select(PlannedWorkout).options(selectinload(PlannedWorkout.blocks))
-            .where(PlannedWorkout.user_id == UUID(owner), or_(
+            .where(PlannedWorkout.user_id == UUID(owner), PlannedWorkout.status != WorkoutStatus.CANCELLED, or_(
                 and_(PlannedWorkout.date >= first, PlannedWorkout.date <= last),
                 and_(PlannedWorkout.planned_start_time >= low, PlannedWorkout.planned_start_time < high),
                 and_(PlannedWorkout.planned_start_time < high, planned_end > low.timestamp()),
@@ -226,7 +227,7 @@ async def feed(*, owner, start, end, repository, session):
         # SQLAlchemy compiles epoch extraction for both PostgreSQL and contract-test SQLite.
         duration_end = extract("epoch", WorkoutSession.started_at) + func.coalesce(WorkoutSession.duration_sec, 0)
         sessions = list((await session.execute(
-            select(WorkoutSession).where(WorkoutSession.user_id == UUID(owner), WorkoutSession.started_at < high,
+            select(WorkoutSession).options(defer(WorkoutSession.raw_data)).where(WorkoutSession.user_id == UUID(owner), WorkoutSession.started_at < high,
                 or_(WorkoutSession.started_at >= low, WorkoutSession.ended_at > low,
                     and_(WorkoutSession.ended_at.is_(None), duration_end > low.timestamp())))
             .order_by(WorkoutSession.started_at, WorkoutSession.id).limit(ROW_LIMIT + 1)
@@ -247,18 +248,23 @@ async def feed(*, owner, start, end, repository, session):
             artifact = goals.get((kind, str(entity_id)))
             return None if artifact is None else {**reference(artifact), "primary_goal": artifact["proposal"]["primary_goal"]}
 
-        from app.models.entities import WorkoutStatus
         from app.planning.infrastructure.persistence.sqlalchemy_models import PlanningLogicalPlanRow
         plan_ids = [p.id for p in plans]
         executed = set((await session.execute(select(WorkoutSession.planned_workout_id).where(WorkoutSession.planned_workout_id.in_(plan_ids)))).scalars()) if plan_ids else set()
         approved = set((await session.execute(select(PlanningLogicalPlanRow.source_workout_id).where(PlanningLogicalPlanRow.source_workout_id.in_(plan_ids)))).scalars()) if plan_ids else set()
+        from app.services.calendar_training_projection import project as training_projection
+        planning = await training_projection(owner=owner, workouts=plans, repository=repository, session=session,
+            now=now, executed=executed, approved=approved, local_today=today.isoformat())
         from app.planning.application import calendar_moves
         def movement(p):
             reason = "CALENDAR_MOVE_ALREADY_EXECUTED" if p.id in executed else "CALENDAR_MOVE_APPROVED_PLAN_REVIEW_REQUIRED" if p.id in approved else "CALENDAR_MOVE_STATUS_BLOCKED" if p.status not in (WorkoutStatus.DRAFT, WorkoutStatus.PLANNED, WorkoutStatus.SCHEDULED) else None
             return {"allowed": reason is None, "blocked_reason": reason, "source_hash": digest(calendar_moves.source(p))}
+        from app.services.manual_workouts import projection as manual_projection
         planned = [{**WorkoutOut.model_validate(p).model_dump(mode="json"),
             "planned_start_time": aware(p.planned_start_time).isoformat() if p.planned_start_time else None,
-            "reschedule": movement(p), "goal_tag": tag("planned", p.id), "duration_estimate": estimates.get(str(p.id))} for p in plans]
+            "reschedule": movement(p), "goal_tag": tag("planned", p.id), "duration_estimate": estimates.get(str(p.id)),
+            **({'planning_context': planning[str(p.id)]} if str(p.id) in planning else {}),
+            **({'manual_context': manual_projection(p, p.id in executed, p.id in approved)} if p.source == 'MANUAL' and not p.polar_target_id else {})} for p in plans]
         actual = []
         for s in sessions:
             item = {"id": str(s.id), "sport": s.sport.value, "name": s.name,

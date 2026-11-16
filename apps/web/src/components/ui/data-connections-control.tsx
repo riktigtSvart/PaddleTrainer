@@ -68,7 +68,15 @@ export default function DataConnectionsControl() {
     pendingRef = useRef<Pending | null>(null),
     announced = useRef(new Set<string>());
   const observed = useRef(new Map<string, string>());
+  const activeSend = useRef<{ body: string; controller: AbortController; verified: boolean } | null>(null);
   const panelId = useId();
+
+  useEffect(() => () => {
+    const attempt = activeSend.current;
+    activeSend.current = null;
+    sendingRef.current = false;
+    attempt?.controller.abort();
+  }, []);
 
   function announce(receipt: Receipt) {
     if (
@@ -97,6 +105,21 @@ export default function DataConnectionsControl() {
       sessionStorage.removeItem(PENDING_KEY);
       pendingRef.current = null;
       setPending(null);
+      const attempt = activeSend.current;
+      if (attempt?.body === envelope.body) {
+        // A verified GET can finish before the original POST response arrives.
+        // Release that wait without resending or cancelling the server import.
+        attempt.verified = true;
+        attempt.controller.abort();
+        sendingRef.current = false;
+        setSending(false);
+      }
+      setData(current => current?.athlete_id === envelope.owner ? {
+        ...current,
+        providers: current.providers.map(provider => provider.key === receipt.run.provider &&
+          (!provider.last_run || Date.parse(provider.last_run.started_at) <= Date.parse(receipt.run.started_at))
+          ? { ...provider, last_run: receipt.run } : provider),
+      } : current);
       setRetryAllowed(false);
       setRejected(false);
       setNotice(
@@ -241,6 +264,8 @@ export default function DataConnectionsControl() {
 
   async function submit(envelope: Pending) {
     if (sendingRef.current) return;
+    const attempt = { body: envelope.body, controller: new AbortController(), verified: false };
+    activeSend.current = attempt;
     sendingRef.current = true;
     setSending(true);
     setError("");
@@ -248,17 +273,23 @@ export default function DataConnectionsControl() {
     setRetryAllowed(false);
     setRejected(false);
     try {
-      resolve(await sendSync(envelope), envelope);
+      const receipt = await sendSync(envelope, attempt.controller.signal);
+      if (activeSend.current === attempt) resolve(receipt, envelope);
     } catch (e) {
+      if (attempt.verified || activeSend.current !== attempt) return;
       setError(
         message(e) + " Az eredményt ellenőrizzük; új kérés még nem indul.",
       );
+      setOpen(true);
       if (e instanceof ConnectionError && e.status >= 400 && e.status < 500)
         setRejected(true);
     } finally {
-      sendingRef.current = false;
-      setSending(false);
-      setRevision((n) => n + 1);
+      if (activeSend.current === attempt) {
+        activeSend.current = null;
+        sendingRef.current = false;
+        setSending(false);
+        setRevision((n) => n + 1);
+      }
     }
   }
   async function start(provider: Provider, chosen?: RefreshChoice) {
@@ -359,6 +390,7 @@ export default function DataConnectionsControl() {
     sending ||
     !!pending ||
     visible.some((p) => p.last_run?.state === "running");
+  const checking = busy && !sending && (!!pending || !!error);
   const warning = !!error || storageBlocked || visible.some(attention);
   const short = error
     ? "Állapot ellenőrzendő"
@@ -369,7 +401,7 @@ export default function DataConnectionsControl() {
       : visible.some((p) => continuationOnly(p.last_run))
         ? "Átvétel folytatható"
         : "";
-  const title = !data
+  const title = error ? `${error} Nyisd meg az adatkapcsolatok állapotát.` : !data
     ? "Adatkapcsolatok · állapot betöltése"
     : visible
         .map(
@@ -388,18 +420,21 @@ export default function DataConnectionsControl() {
             !ready ||
             !data ||
             choiceState?.owner !== data.athlete_id ||
-            busy ||
+            (busy && !checking) ||
             storageBlocked
           }
-          onClick={() => void repeat()}
+          onClick={() => {
+            if (checking) { setOpen(true); setRevision(n => n + 1); }
+            else void repeat();
+          }}
           title={
-            choice.mode === "local"
+            checking ? "A mentett frissítési kérés eredményének ellenőrzése" : choice.mode === "local"
               ? "Tárolt adatok újraolvasása · nincs szolgáltatói szinkronizálás"
               : `${choice.provider} · legutóbb választott adatfajták és időszak`
           }
         >
-          <Icon name="refresh" className={busy ? "pt-spinning" : undefined} />
-          <span>{busy ? "Frissítés…" : "Frissítés"}</span>
+          <Icon name="refresh" className={busy && !checking ? "pt-spinning" : undefined} />
+          <span>{checking ? "Állapot ellenőrzése" : busy ? "Frissítés…" : "Frissítés"}</span>
         </button>
         <button
           type="button"
@@ -439,7 +474,7 @@ export default function DataConnectionsControl() {
             choice.provider)}
       </span>
       <span className="pt-sr-only" role="status">
-        {busy ? "Adatfrissítés vagy eredményellenőrzés folyamatban" : short}
+        {checking ? "A korábbi kérés eredménye ellenőrzésre vár; az állapot újra lekérhető." : busy ? "Adatfrissítés folyamatban" : short}
       </span>
       {open && (
         <div
@@ -474,7 +509,7 @@ export default function DataConnectionsControl() {
             </p>
           )}
           {!data && (
-            <p className="pt-notice">A tárolt kapcsolati állapot betöltése…</p>
+            <p className="pt-notice">{error ? "A kapcsolati állapot most nem tölthető be. Az állapot újraolvasásával ismét ellenőrizheted." : "A tárolt kapcsolati állapot betöltése…"}</p>
           )}
           {data && (
             <fieldset className="pt-refresh-choice" disabled={busy}>
@@ -733,7 +768,7 @@ export default function DataConnectionsControl() {
             ))}
           {pending && (
             <div className="pt-notice" role="status">
-              Egy korábbi kérés eredményét ellenőrizzük.{" "}
+              Egy korábbi kérés eredményét ellenőrizzük. A válaszra várás megszakadása nem jelenti, hogy a szerveroldali átvétel is leállt. Új frissítés az eredmény tisztázása után indítható.{" "}
               {retryAllowed && (
                 <button
                   type="button"

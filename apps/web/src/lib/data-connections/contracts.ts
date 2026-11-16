@@ -7,6 +7,7 @@ export type Body = {
   datasets: Dataset[];
   past_days: number;
   future_days: number;
+  history_range?: { from_date: string; to_exclusive: string };
 };
 export type PairingResult = {
   linked: number;
@@ -120,8 +121,8 @@ function datasets(value: unknown): asserts value is Dataset[] {
 export function readBody(value: unknown): Body {
   const b = object(value);
   requireValue(
-    Object.keys(b).sort().join() ===
-      "datasets,future_days,past_days,provider,request_id",
+    Object.keys(b).sort().join() === (b.history_range === undefined ?
+      "datasets,future_days,past_days,provider,request_id" : "datasets,future_days,history_range,past_days,provider,request_id"),
   );
   requireValue(
     typeof b.request_id === "string" &&
@@ -138,6 +139,15 @@ export function readBody(value: unknown): Body {
       Number(b.future_days) >= 0 &&
       Number(b.future_days) <= 30,
   );
+  if (b.history_range !== undefined) {
+    const r = object(b.history_range);
+    const first = String(r.from_date), last = String(r.to_exclusive);
+    const day = (d: string) => /^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isFinite(Date.parse(d + "T00:00:00Z")) && new Date(d + "T00:00:00Z").toISOString().slice(0, 10) === d;
+    const days = (Date.parse(last) - Date.parse(first)) / 86400000;
+    requireValue(Object.keys(r).sort().join() === "from_date,to_exclusive" && day(first) && day(last) &&
+      first >= "1900-01-01" && days >= 1 && days <= 90 && b.provider === "POLAR" &&
+      b.future_days === 0 && canonical(b.datasets) === canonical(["sessions"]));
+  }
   return b as Body;
 }
 export function readPending(raw: string): Pending {
@@ -301,6 +311,8 @@ export async function readReceipt(
   );
   const start = await verifyArtifact(r.start, body, pending.owner),
     run = readRun(r.run);
+  if (body.history_range) requireValue(run.window.from_date === body.history_range.from_date &&
+    run.window.sessions_to_exclusive === body.history_range.to_exclusive && object(start.window).historical === true);
   requireValue(
     start.stage === "started" &&
       run.request_id === body.request_id &&

@@ -28,8 +28,9 @@ export type EventProfile = {
   distance_unit: "m" | "km" | null;
   expected_duration_minutes: string | null;
   course_description: string;
-  capability_basis: "unassessed" | "coach_declared" | "icf_sprint_v0_1";
+  capability_basis: "unassessed" | "coach_declared" | "icf_sprint_v0_1" | "paddling_demands_v0_1";
   capability_keys: string[];
+  capability_weights?: Record<string, number>;
 };
 export type Competition = {
   key: string;
@@ -65,6 +66,13 @@ export type Program = {
   goals: Goal[];
   continued_from: Reference | null;
   athlete_context?: AthleteContext;
+  replacement?: {
+    version: "cycle-program-replacement-v0.1";
+    revision: number;
+    program_reference: Reference;
+    competition_reference: Reference;
+    boundary_reference: Reference | null;
+  };
   planning_basis?: {
     version: "cycle-planning-basis-v0.1";
     mesocycle_dates: "provisional";
@@ -204,6 +212,7 @@ export type Detail = {
   program: Receipt;
   competition_revisions: Receipt<RevisionArtifact>[];
   boundary_revisions: Receipt<BoundaryArtifact>[];
+  replaced_by?: Reference | null;
 };
 export type Page = {
   items: Receipt[];
@@ -576,6 +585,13 @@ export async function readReceipt<T = Registration>(
   const { content_hash, ...content } = a;
   if ((await sha(content)) !== content_hash)
     throw new Error("A mentési bizonylat tartalma eltér.");
+  if (String(schema).startsWith("cycle-program-registration-") && object(a.proposal).replacement !== undefined) {
+    const change = object(object(a.proposal).replacement);
+    const valid = (value: unknown) => { const v = object(value); return /^pt-cycle:[0-9a-f]{64}$/.test(String(v.artifact_id)) && /^[0-9a-f]{64}$/.test(String(v.content_hash)); };
+    if (change.version !== "cycle-program-replacement-v0.1" || !Number.isInteger(change.revision) || Number(change.revision) < 1 || Number(change.revision) > 64 ||
+      !valid(change.program_reference) || !valid(change.competition_reference) || (change.boundary_reference !== null && !valid(change.boundary_reference)) ||
+      a.artifact_id !== "pt-cycle:" + await sha({ scope: "cycle-program-replacement", athlete_id: a.athlete_id, previous_artifact_id: object(change.program_reference).artifact_id })) throw Error("A célkitűzés módosításának hivatkozásai eltérnek.");
+  }
   if (pending) {
     const expected =
       pending.operation === "programs"

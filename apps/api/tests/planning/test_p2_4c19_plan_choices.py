@@ -1,11 +1,14 @@
 """Choosing a real supported alternative recalculates the whole reviewed horizon."""
 from datetime import UTC, datetime
 from itertools import pairwise
+from uuid import uuid4
 
 import pytest
 
+from app.api.routes import initial_assessment as intake_routes
 from app.models.entities import PlannedWorkout, Sport
 from app.planning.domain.athlete_setup import reference
+from app.services import initial_assessment as intake_service
 from tests.planning.test_p2_4c3_goal_workflow_api import count
 from tests.planning.test_p2_4c18_4_training_plan import (
     accept,
@@ -16,6 +19,9 @@ from tests.planning.test_p2_4c18_4_training_plan import (
 )
 from tests.planning.test_p2_4c19_training_options import POOL, WATER, body, save
 from tests.planning.test_p2_4c19_training_options import opportunities as opportunities_fixture
+from tests.planning.test_p2_4c20_4_initial_assessment import body as assessment_body
+from tests.planning.test_p2_4c20_4_initial_assessment import context as assessment_context
+from tests.planning.test_p2_4c20_4_initial_assessment import save as save_assessment
 
 
 @pytest.fixture
@@ -27,11 +33,25 @@ def strength_history(env):
     add_session(env, token=194001, sport=Sport.STRENGTH, started_at=datetime(2026, 10, 17, 6, tzinfo=UTC), ended_at=datetime(2026, 10, 17, 6, 30, tzinfo=UTC), duration_sec=1800)
 
 
+def assessed_strength(env):
+    """The alternatives/coordination tests now declare actual exercise references."""
+    if not any(getattr(route, 'path', '') == '/api/v1/planning/initial-assessment' for route in env.app.routes):
+        env.app.include_router(intake_routes.router, prefix='/api/v1')
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(intake_service, '_now', env.clock.tick)
+        proposal = assessment_body(assessment_context(env), token=uuid4().int, complete=True)
+        proposal['data']['sports'].append({'sport_key': 'STRENGTH', 'role': 'secondary', 'discipline': '', 'goal': '', 'notes': ''})
+        for entry in proposal['data']['exercises']:
+            entry['side'] = 'both'
+        return save_assessment(env, proposal)
+
+
 def configure(env):
     value = body()
     value["data"]["locations"][0].update(sports=["KAYAK", "STRENGTH"], resources=["Kajak", "Kézisúlyzó"], combine_allowed=True)
     save(env, value)
     strength_history(env)
+    assessed_strength(env)
 
 
 def choice(env, viewed, day, candidate, expected=200):
@@ -93,7 +113,7 @@ def test_two_mesocycles_are_real_bounded_reviews_and_every_rolling_week_obeys_ca
     for first in dates:
         window = [candidate for candidate in proposals if 0 <= (datetime.fromisoformat(candidate["date"]).date() - first).days <= 6]
         assert len(window) <= 3 and sum(candidate["duration_sec"] for candidate in window) <= 180 * 60
-    assert all((datetime.fromisoformat(b["start_at"]) - datetime.fromisoformat(a["start_at"])).total_seconds() >= 36 * 3600 for a, b in pairwise(proposals))
+    assert all((datetime.fromisoformat(b["start_at"]) - datetime.fromisoformat(a["start_at"])).total_seconds() >= (48 if a["sport"] == b["sport"] == "STRENGTH" else 24 if "STRENGTH" in [a["sport"], b["sport"]] or a["sport"] == b["sport"] else 12) * 3600 for a, b in pairwise(proposals))
 
 
 def test_closed_location_cannot_borrow_own_equipment_or_offer_a_fake_alternative(opportunities):
@@ -103,7 +123,7 @@ def test_closed_location_cannot_borrow_own_equipment_or_offer_a_fake_alternative
     result = review(opportunities)
     assert result["result"]["proposals"] == []
     assert result["result"]["alternatives"] == []
-    assert all("SPORT_NOT_ALLOWED" in day["codes"] for day in result["result"]["preparation"]["selection_issues"])
+    assert all({"SPORT_NOT_ALLOWED", "SWIMMING_ABILITY_REQUIRED"} & set(day["codes"]) for day in result["result"]["preparation"]["selection_issues"])
     assert result["result"]["unavailable_alternatives"]
 
 
@@ -113,7 +133,9 @@ def test_location_cannot_borrow_strength_equipment_from_global_profile(opportuni
     save(opportunities, value)
     strength_history(opportunities)
     result = review(opportunities)
-    assert all(candidate["sport"] != "STRENGTH" for group in result["result"]["alternatives"] for candidate in group["candidates"])
+    strength = [c for group in result['result']['alternatives'] for c in group['candidates'] if c['sport'] == 'STRENGTH']
+    assert strength and all(c['template_version'] == 'v0.4' and not c.get('strength_prescription') for c in strength)
+    assert all(result['result']['prescription_context']['by_candidate'][c['candidate_key']]['introductory_strength']['external_load_prescribed'] is False for c in strength)
 
 
 def test_changed_resources_make_a_selected_variant_reviewable_not_silently_replaced(opportunities):

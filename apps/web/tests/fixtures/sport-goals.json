@@ -1,0 +1,1045 @@
+{
+  "profile": {
+    "identity_scope": "APPLICATION_DEMO_USER",
+    "artifact": {
+      "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0",
+      "created_at": "2026-10-22T09:00:00.000001+00:00",
+      "imported_observations": [],
+      "kind": "profile",
+      "planning_authorized": false,
+      "proposal": {
+        "data": {
+          "accessibility_needs": "",
+          "birth_date": "1982-05-30",
+          "competition_category": "",
+          "constraint_status": "none_known",
+          "constraints": [],
+          "duration_doubling_slowdown_pct": null,
+          "interruption": "none",
+          "last_training_date": null,
+          "manual_observations": [],
+          "participation": "unrestricted",
+          "recovery_notes": "",
+          "resources": [],
+          "sex_reference": "female",
+          "source_selections": [],
+          "source_window": null,
+          "sport_history": [
+            {
+              "current": true,
+              "discipline": "Síkvíz",
+              "last_active_date": null,
+              "level": "professional",
+              "notes": "",
+              "performances": [
+                {
+                  "conditions": "K1, állóvíz",
+                  "distance_m": "500.000",
+                  "kind": "personal_best",
+                  "recorded_on": null,
+                  "result_id": "00000000-0000-0000-0000-000000034bc1",
+                  "source": "self_report",
+                  "time": "1:42.500",
+                  "year": 2001
+                }
+              ],
+              "role": "primary",
+              "sport": "Kajak",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            },
+            {
+              "current": true,
+              "discipline": "",
+              "last_active_date": null,
+              "level": "unknown",
+              "notes": "",
+              "performances": [],
+              "planning": {
+                "proficiency": "independent",
+                "purposes": [
+                  "aerobic_substitution",
+                  "general_conditioning"
+                ],
+                "supported_sports": [
+                  "Kajak"
+                ],
+                "version": "sport-planning-context-v0.1"
+              },
+              "role": "secondary",
+              "sport": "Futás",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            }
+          ],
+          "sport_history_status": "recorded",
+          "target_sport": "Futás",
+          "typical_days_per_week": 3,
+          "typical_minutes_per_week": null
+        },
+        "previous_reference": null,
+        "request_id": "00000000-0000-0000-0000-000000034bc2"
+      },
+      "review": {
+        "accessibility_needs": "",
+        "age_path": "adult",
+        "age_years": 44,
+        "clinical_clearance": false,
+        "constraints": [],
+        "entry_mode": "NORMAL_START",
+        "evaluated_on": "2026-10-22",
+        "global_entry_gate": "OPEN",
+        "participation_status": "READY",
+        "policy_version": "athlete-intake-review-policy-v0.1",
+        "reasons": [],
+        "weight_change_requires_review": false
+      },
+      "revision": 1,
+      "schema_version": "athlete-setup-v0.1",
+      "timezone_name": "Europe/Budapest",
+      "workouts_created": false
+    },
+    "durable_available_at": "2026-10-22T09:00:00.000002+00:00",
+    "committed": true,
+    "reused": false,
+    "planning_authorized": false,
+    "workouts_created": false
+  },
+  "first": {
+    "identity_scope": "APPLICATION_DEMO_USER",
+    "artifact": {
+      "artifact_id": "pt-cycle:66bd6a6cf87432e80690640268129ad0181798068335a28b1470f8aac22d09c6",
+      "schema_version": "cycle-program-registration-v0.3",
+      "rules_version": "cycle-creation-rules-v0.3",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "timezone_name": "Europe/Budapest",
+      "proposal": {
+        "program_id": "00000000-0000-0000-0000-000000034bc3",
+        "mode": "recreation",
+        "title": "Teszt felkészülés",
+        "sport": "Kajak",
+        "start_date": "2030-01-01",
+        "end_date": null,
+        "olympic_key": null,
+        "seasons": [],
+        "macrocycles": [
+          {
+            "key": "macro-1",
+            "title": "Első makrociklus",
+            "start_date": "2030-01-01",
+            "end_date": "2030-03-25",
+            "season_key": null,
+            "mesocycles": [
+              {
+                "key": "m0",
+                "title": "Felülvizsgálandó blokk",
+                "start_date": "2030-01-01",
+                "end_date": "2030-01-28"
+              },
+              {
+                "key": "m1",
+                "title": "Felülvizsgálandó blokk",
+                "start_date": "2030-01-29",
+                "end_date": "2030-02-25"
+              },
+              {
+                "key": "m2",
+                "title": "Felülvizsgálandó blokk",
+                "start_date": "2030-02-26",
+                "end_date": "2030-03-25"
+              }
+            ]
+          }
+        ],
+        "competitions": [],
+        "goals": [
+          {
+            "key": "regular_activity",
+            "target_description": "Heti három alkalom"
+          }
+        ],
+        "continued_from": null,
+        "athlete_context": {
+          "profile_reference": {
+            "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+            "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0"
+          },
+          "availability_reference": null
+        }
+      },
+      "periods": [
+        {
+          "id": "8f2fee5b-9319-5acf-a405-ba002f41fc43",
+          "key": "macro-1",
+          "parent_id": null,
+          "period_type": "MACROCYCLE",
+          "title": "Első makrociklus",
+          "start_date": "2030-01-01",
+          "end_date": "2030-03-25"
+        },
+        {
+          "id": "c00acc44-ce02-58f2-8831-324d4a287306",
+          "key": "m0",
+          "parent_id": "8f2fee5b-9319-5acf-a405-ba002f41fc43",
+          "period_type": "MESOCYCLE",
+          "title": "Felülvizsgálandó blokk",
+          "start_date": "2030-01-01",
+          "end_date": "2030-01-28"
+        },
+        {
+          "id": "c2baa0fa-b541-5dd4-94ad-e8f68cd83a88",
+          "key": "m1",
+          "parent_id": "8f2fee5b-9319-5acf-a405-ba002f41fc43",
+          "period_type": "MESOCYCLE",
+          "title": "Felülvizsgálandó blokk",
+          "start_date": "2030-01-29",
+          "end_date": "2030-02-25"
+        },
+        {
+          "id": "b518519d-ef79-5794-94f2-bb0c4b785755",
+          "key": "m2",
+          "parent_id": "8f2fee5b-9319-5acf-a405-ba002f41fc43",
+          "period_type": "MESOCYCLE",
+          "title": "Felülvizsgálandó blokk",
+          "start_date": "2030-02-26",
+          "end_date": "2030-03-25"
+        }
+      ],
+      "calendar_snapshot": null,
+      "program_family_id": "00000000-0000-0000-0000-000000034bc3",
+      "created_at": "2026-10-22T09:00:00.000003+00:00",
+      "planning_authorized": false,
+      "workouts_created": false,
+      "capability_goals_preregistered": false,
+      "content_hash": "43d869d73fb3f86c9b6881568047b5ac5eec7047b0db13e29b766b498793647c",
+      "athlete_context_snapshot": {
+        "schema_version": "athlete-setup-v0.1",
+        "references": {
+          "profile_reference": {
+            "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+            "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0"
+          },
+          "availability_reference": null
+        },
+        "review": {
+          "policy_version": "athlete-intake-review-policy-v0.1",
+          "evaluated_on": "2026-10-22",
+          "age_years": 44,
+          "age_path": "adult",
+          "global_entry_gate": "OPEN",
+          "participation_status": "READY",
+          "entry_mode": "NORMAL_START",
+          "reasons": [],
+          "clinical_clearance": false,
+          "weight_change_requires_review": false,
+          "constraints": [],
+          "accessibility_needs": ""
+        },
+        "athlete_background": {
+          "birth_date": "1982-05-30",
+          "sex_reference": "female",
+          "competition_category": "",
+          "target_sport": "Futás",
+          "sport_history_status": "recorded",
+          "sport_history": [
+            {
+              "current": true,
+              "discipline": "Síkvíz",
+              "last_active_date": null,
+              "level": "professional",
+              "notes": "",
+              "performances": [
+                {
+                  "conditions": "K1, állóvíz",
+                  "distance_m": "500.000",
+                  "kind": "personal_best",
+                  "recorded_on": null,
+                  "result_id": "00000000-0000-0000-0000-000000034bc1",
+                  "source": "self_report",
+                  "time": "1:42.500",
+                  "year": 2001
+                }
+              ],
+              "role": "primary",
+              "sport": "Kajak",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            },
+            {
+              "current": true,
+              "discipline": "",
+              "last_active_date": null,
+              "level": "unknown",
+              "notes": "",
+              "performances": [],
+              "planning": {
+                "proficiency": "independent",
+                "purposes": [
+                  "aerobic_substitution",
+                  "general_conditioning"
+                ],
+                "supported_sports": [
+                  "Kajak"
+                ],
+                "version": "sport-planning-context-v0.1"
+              },
+              "role": "secondary",
+              "sport": "Futás",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            }
+          ],
+          "interruption": "none",
+          "last_training_date": null,
+          "recovery_notes": ""
+        },
+        "typical_availability": {
+          "typical_days_per_week": 3,
+          "typical_minutes_per_week": null,
+          "resources": []
+        },
+        "first_mesocycle_availability": {
+          "status": "UNKNOWN",
+          "missing_days": null,
+          "available_days": 0,
+          "windows": []
+        },
+        "manual_observation_count": 0,
+        "imported_observation_count": 0,
+        "planning_authorized": false,
+        "workouts_created": false
+      }
+    },
+    "durable_available_at": "2026-10-22T09:00:00.000004+00:00",
+    "reused": false,
+    "committed": true,
+    "planning_authorized": false,
+    "workouts_created": false
+  },
+  "replacement_request": {
+    "program_id": "00000000-0000-0000-0000-000000034bc4",
+    "mode": "recreation",
+    "title": "Módosított saját felkészülés",
+    "sport": "Kajak",
+    "start_date": "2030-01-01",
+    "end_date": null,
+    "olympic_key": null,
+    "seasons": [],
+    "macrocycles": [
+      {
+        "key": "macro-1",
+        "title": "Első makrociklus",
+        "start_date": "2030-01-01",
+        "end_date": "2030-03-25",
+        "season_key": null,
+        "mesocycles": [
+          {
+            "key": "m0",
+            "title": "Felülvizsgálandó blokk",
+            "start_date": "2030-01-01",
+            "end_date": "2030-01-28"
+          },
+          {
+            "key": "m1",
+            "title": "Felülvizsgálandó blokk",
+            "start_date": "2030-01-29",
+            "end_date": "2030-02-25"
+          },
+          {
+            "key": "m2",
+            "title": "Felülvizsgálandó blokk",
+            "start_date": "2030-02-26",
+            "end_date": "2030-03-25"
+          }
+        ]
+      }
+    ],
+    "competitions": [],
+    "goals": [
+      {
+        "key": "strength",
+        "target_description": "Erő fejlesztése"
+      }
+    ],
+    "continued_from": null,
+    "athlete_context": {
+      "profile_reference": {
+        "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+        "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0"
+      },
+      "availability_reference": null
+    },
+    "replacement": {
+      "version": "cycle-program-replacement-v0.1",
+      "revision": 1,
+      "program_reference": {
+        "artifact_id": "pt-cycle:66bd6a6cf87432e80690640268129ad0181798068335a28b1470f8aac22d09c6",
+        "content_hash": "43d869d73fb3f86c9b6881568047b5ac5eec7047b0db13e29b766b498793647c"
+      },
+      "competition_reference": {
+        "artifact_id": "pt-cycle:66bd6a6cf87432e80690640268129ad0181798068335a28b1470f8aac22d09c6",
+        "content_hash": "43d869d73fb3f86c9b6881568047b5ac5eec7047b0db13e29b766b498793647c"
+      },
+      "boundary_reference": null
+    }
+  },
+  "replacement": {
+    "identity_scope": "APPLICATION_DEMO_USER",
+    "artifact": {
+      "artifact_id": "pt-cycle:94736eb2f021ad0d1676486f7fecbb39fcb27d20d531994b3531a06880370c2f",
+      "schema_version": "cycle-program-registration-v0.3",
+      "rules_version": "cycle-creation-rules-v0.3",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "timezone_name": "Europe/Budapest",
+      "proposal": {
+        "program_id": "00000000-0000-0000-0000-000000034bc4",
+        "mode": "recreation",
+        "title": "Módosított saját felkészülés",
+        "sport": "Kajak",
+        "start_date": "2030-01-01",
+        "end_date": null,
+        "olympic_key": null,
+        "seasons": [],
+        "macrocycles": [
+          {
+            "key": "macro-1",
+            "title": "Első makrociklus",
+            "start_date": "2030-01-01",
+            "end_date": "2030-03-25",
+            "season_key": null,
+            "mesocycles": [
+              {
+                "key": "m0",
+                "title": "Felülvizsgálandó blokk",
+                "start_date": "2030-01-01",
+                "end_date": "2030-01-28"
+              },
+              {
+                "key": "m1",
+                "title": "Felülvizsgálandó blokk",
+                "start_date": "2030-01-29",
+                "end_date": "2030-02-25"
+              },
+              {
+                "key": "m2",
+                "title": "Felülvizsgálandó blokk",
+                "start_date": "2030-02-26",
+                "end_date": "2030-03-25"
+              }
+            ]
+          }
+        ],
+        "competitions": [],
+        "goals": [
+          {
+            "key": "strength",
+            "target_description": "Erő fejlesztése"
+          }
+        ],
+        "continued_from": null,
+        "athlete_context": {
+          "profile_reference": {
+            "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+            "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0"
+          },
+          "availability_reference": null
+        },
+        "replacement": {
+          "version": "cycle-program-replacement-v0.1",
+          "revision": 1,
+          "program_reference": {
+            "artifact_id": "pt-cycle:66bd6a6cf87432e80690640268129ad0181798068335a28b1470f8aac22d09c6",
+            "content_hash": "43d869d73fb3f86c9b6881568047b5ac5eec7047b0db13e29b766b498793647c"
+          },
+          "competition_reference": {
+            "artifact_id": "pt-cycle:66bd6a6cf87432e80690640268129ad0181798068335a28b1470f8aac22d09c6",
+            "content_hash": "43d869d73fb3f86c9b6881568047b5ac5eec7047b0db13e29b766b498793647c"
+          },
+          "boundary_reference": null
+        }
+      },
+      "periods": [
+        {
+          "id": "6cd9849d-19c0-5ce7-8c1a-d5a175a3865b",
+          "key": "macro-1",
+          "parent_id": null,
+          "period_type": "MACROCYCLE",
+          "title": "Első makrociklus",
+          "start_date": "2030-01-01",
+          "end_date": "2030-03-25"
+        },
+        {
+          "id": "362728b3-716d-5bc0-bb76-269c5f55da69",
+          "key": "m0",
+          "parent_id": "6cd9849d-19c0-5ce7-8c1a-d5a175a3865b",
+          "period_type": "MESOCYCLE",
+          "title": "Felülvizsgálandó blokk",
+          "start_date": "2030-01-01",
+          "end_date": "2030-01-28"
+        },
+        {
+          "id": "5ea3c2f3-1004-5578-9a8a-2ec329806a24",
+          "key": "m1",
+          "parent_id": "6cd9849d-19c0-5ce7-8c1a-d5a175a3865b",
+          "period_type": "MESOCYCLE",
+          "title": "Felülvizsgálandó blokk",
+          "start_date": "2030-01-29",
+          "end_date": "2030-02-25"
+        },
+        {
+          "id": "2326f8ce-acef-5093-b459-ae1f34e4bf42",
+          "key": "m2",
+          "parent_id": "6cd9849d-19c0-5ce7-8c1a-d5a175a3865b",
+          "period_type": "MESOCYCLE",
+          "title": "Felülvizsgálandó blokk",
+          "start_date": "2030-02-26",
+          "end_date": "2030-03-25"
+        }
+      ],
+      "calendar_snapshot": null,
+      "program_family_id": "00000000-0000-0000-0000-000000034bc3",
+      "created_at": "2026-10-22T09:00:00.000005+00:00",
+      "planning_authorized": false,
+      "workouts_created": false,
+      "capability_goals_preregistered": false,
+      "content_hash": "195b684f29d691ddf09e0ba6cfa40b5720a010a1fadfb947909026928c919e54",
+      "athlete_context_snapshot": {
+        "schema_version": "athlete-setup-v0.1",
+        "references": {
+          "profile_reference": {
+            "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+            "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0"
+          },
+          "availability_reference": null
+        },
+        "review": {
+          "policy_version": "athlete-intake-review-policy-v0.1",
+          "evaluated_on": "2026-10-22",
+          "age_years": 44,
+          "age_path": "adult",
+          "global_entry_gate": "OPEN",
+          "participation_status": "READY",
+          "entry_mode": "NORMAL_START",
+          "reasons": [],
+          "clinical_clearance": false,
+          "weight_change_requires_review": false,
+          "constraints": [],
+          "accessibility_needs": ""
+        },
+        "athlete_background": {
+          "birth_date": "1982-05-30",
+          "sex_reference": "female",
+          "competition_category": "",
+          "target_sport": "Futás",
+          "sport_history_status": "recorded",
+          "sport_history": [
+            {
+              "current": true,
+              "discipline": "Síkvíz",
+              "last_active_date": null,
+              "level": "professional",
+              "notes": "",
+              "performances": [
+                {
+                  "conditions": "K1, állóvíz",
+                  "distance_m": "500.000",
+                  "kind": "personal_best",
+                  "recorded_on": null,
+                  "result_id": "00000000-0000-0000-0000-000000034bc1",
+                  "source": "self_report",
+                  "time": "1:42.500",
+                  "year": 2001
+                }
+              ],
+              "role": "primary",
+              "sport": "Kajak",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            },
+            {
+              "current": true,
+              "discipline": "",
+              "last_active_date": null,
+              "level": "unknown",
+              "notes": "",
+              "performances": [],
+              "planning": {
+                "proficiency": "independent",
+                "purposes": [
+                  "aerobic_substitution",
+                  "general_conditioning"
+                ],
+                "supported_sports": [
+                  "Kajak"
+                ],
+                "version": "sport-planning-context-v0.1"
+              },
+              "role": "secondary",
+              "sport": "Futás",
+              "start_year": 1995,
+              "usual_sessions_per_week": 5
+            }
+          ],
+          "interruption": "none",
+          "last_training_date": null,
+          "recovery_notes": ""
+        },
+        "typical_availability": {
+          "typical_days_per_week": 3,
+          "typical_minutes_per_week": null,
+          "resources": []
+        },
+        "first_mesocycle_availability": {
+          "status": "UNKNOWN",
+          "missing_days": null,
+          "available_days": 0,
+          "windows": []
+        },
+        "manual_observation_count": 0,
+        "imported_observation_count": 0,
+        "planning_authorized": false,
+        "workouts_created": false
+      }
+    },
+    "durable_available_at": "2026-10-22T09:00:00.000006+00:00",
+    "reused": false,
+    "committed": true,
+    "planning_authorized": false,
+    "workouts_created": false
+  },
+  "detail": {
+    "program": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-cycle:94736eb2f021ad0d1676486f7fecbb39fcb27d20d531994b3531a06880370c2f",
+        "athlete_context_snapshot": {
+          "athlete_background": {
+            "birth_date": "1982-05-30",
+            "competition_category": "",
+            "interruption": "none",
+            "last_training_date": null,
+            "recovery_notes": "",
+            "sex_reference": "female",
+            "sport_history": [
+              {
+                "current": true,
+                "discipline": "Síkvíz",
+                "last_active_date": null,
+                "level": "professional",
+                "notes": "",
+                "performances": [
+                  {
+                    "conditions": "K1, állóvíz",
+                    "distance_m": "500.000",
+                    "kind": "personal_best",
+                    "recorded_on": null,
+                    "result_id": "00000000-0000-0000-0000-000000034bc1",
+                    "source": "self_report",
+                    "time": "1:42.500",
+                    "year": 2001
+                  }
+                ],
+                "role": "primary",
+                "sport": "Kajak",
+                "start_year": 1995,
+                "usual_sessions_per_week": 5
+              },
+              {
+                "current": true,
+                "discipline": "",
+                "last_active_date": null,
+                "level": "unknown",
+                "notes": "",
+                "performances": [],
+                "planning": {
+                  "proficiency": "independent",
+                  "purposes": [
+                    "aerobic_substitution",
+                    "general_conditioning"
+                  ],
+                  "supported_sports": [
+                    "Kajak"
+                  ],
+                  "version": "sport-planning-context-v0.1"
+                },
+                "role": "secondary",
+                "sport": "Futás",
+                "start_year": 1995,
+                "usual_sessions_per_week": 5
+              }
+            ],
+            "sport_history_status": "recorded",
+            "target_sport": "Futás"
+          },
+          "first_mesocycle_availability": {
+            "available_days": 0,
+            "missing_days": null,
+            "status": "UNKNOWN",
+            "windows": []
+          },
+          "imported_observation_count": 0,
+          "manual_observation_count": 0,
+          "planning_authorized": false,
+          "references": {
+            "availability_reference": null,
+            "profile_reference": {
+              "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+              "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0"
+            }
+          },
+          "review": {
+            "accessibility_needs": "",
+            "age_path": "adult",
+            "age_years": 44,
+            "clinical_clearance": false,
+            "constraints": [],
+            "entry_mode": "NORMAL_START",
+            "evaluated_on": "2026-10-22",
+            "global_entry_gate": "OPEN",
+            "participation_status": "READY",
+            "policy_version": "athlete-intake-review-policy-v0.1",
+            "reasons": [],
+            "weight_change_requires_review": false
+          },
+          "schema_version": "athlete-setup-v0.1",
+          "typical_availability": {
+            "resources": [],
+            "typical_days_per_week": 3,
+            "typical_minutes_per_week": null
+          },
+          "workouts_created": false
+        },
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "calendar_snapshot": null,
+        "capability_goals_preregistered": false,
+        "content_hash": "195b684f29d691ddf09e0ba6cfa40b5720a010a1fadfb947909026928c919e54",
+        "created_at": "2026-10-22T09:00:00.000005+00:00",
+        "periods": [
+          {
+            "end_date": "2030-03-25",
+            "id": "6cd9849d-19c0-5ce7-8c1a-d5a175a3865b",
+            "key": "macro-1",
+            "parent_id": null,
+            "period_type": "MACROCYCLE",
+            "start_date": "2030-01-01",
+            "title": "Első makrociklus"
+          },
+          {
+            "end_date": "2030-01-28",
+            "id": "362728b3-716d-5bc0-bb76-269c5f55da69",
+            "key": "m0",
+            "parent_id": "6cd9849d-19c0-5ce7-8c1a-d5a175a3865b",
+            "period_type": "MESOCYCLE",
+            "start_date": "2030-01-01",
+            "title": "Felülvizsgálandó blokk"
+          },
+          {
+            "end_date": "2030-02-25",
+            "id": "5ea3c2f3-1004-5578-9a8a-2ec329806a24",
+            "key": "m1",
+            "parent_id": "6cd9849d-19c0-5ce7-8c1a-d5a175a3865b",
+            "period_type": "MESOCYCLE",
+            "start_date": "2030-01-29",
+            "title": "Felülvizsgálandó blokk"
+          },
+          {
+            "end_date": "2030-03-25",
+            "id": "2326f8ce-acef-5093-b459-ae1f34e4bf42",
+            "key": "m2",
+            "parent_id": "6cd9849d-19c0-5ce7-8c1a-d5a175a3865b",
+            "period_type": "MESOCYCLE",
+            "start_date": "2030-02-26",
+            "title": "Felülvizsgálandó blokk"
+          }
+        ],
+        "planning_authorized": false,
+        "program_family_id": "00000000-0000-0000-0000-000000034bc3",
+        "proposal": {
+          "athlete_context": {
+            "availability_reference": null,
+            "profile_reference": {
+              "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+              "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0"
+            }
+          },
+          "competitions": [],
+          "continued_from": null,
+          "end_date": null,
+          "goals": [
+            {
+              "key": "strength",
+              "target_description": "Erő fejlesztése"
+            }
+          ],
+          "macrocycles": [
+            {
+              "end_date": "2030-03-25",
+              "key": "macro-1",
+              "mesocycles": [
+                {
+                  "end_date": "2030-01-28",
+                  "key": "m0",
+                  "start_date": "2030-01-01",
+                  "title": "Felülvizsgálandó blokk"
+                },
+                {
+                  "end_date": "2030-02-25",
+                  "key": "m1",
+                  "start_date": "2030-01-29",
+                  "title": "Felülvizsgálandó blokk"
+                },
+                {
+                  "end_date": "2030-03-25",
+                  "key": "m2",
+                  "start_date": "2030-02-26",
+                  "title": "Felülvizsgálandó blokk"
+                }
+              ],
+              "season_key": null,
+              "start_date": "2030-01-01",
+              "title": "Első makrociklus"
+            }
+          ],
+          "mode": "recreation",
+          "olympic_key": null,
+          "program_id": "00000000-0000-0000-0000-000000034bc4",
+          "replacement": {
+            "boundary_reference": null,
+            "competition_reference": {
+              "artifact_id": "pt-cycle:66bd6a6cf87432e80690640268129ad0181798068335a28b1470f8aac22d09c6",
+              "content_hash": "43d869d73fb3f86c9b6881568047b5ac5eec7047b0db13e29b766b498793647c"
+            },
+            "program_reference": {
+              "artifact_id": "pt-cycle:66bd6a6cf87432e80690640268129ad0181798068335a28b1470f8aac22d09c6",
+              "content_hash": "43d869d73fb3f86c9b6881568047b5ac5eec7047b0db13e29b766b498793647c"
+            },
+            "revision": 1,
+            "version": "cycle-program-replacement-v0.1"
+          },
+          "seasons": [],
+          "sport": "Kajak",
+          "start_date": "2030-01-01",
+          "title": "Módosított saját felkészülés"
+        },
+        "rules_version": "cycle-creation-rules-v0.3",
+        "schema_version": "cycle-program-registration-v0.3",
+        "timezone_name": "Europe/Budapest",
+        "workouts_created": false
+      },
+      "durable_available_at": "2026-10-22T09:00:00.000006+00:00",
+      "reused": true,
+      "committed": true,
+      "planning_authorized": false,
+      "workouts_created": false
+    },
+    "competition_revisions": [],
+    "boundary_revisions": []
+  },
+  "context": {
+    "schema_version": "athlete-setup-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-22",
+    "profile": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0",
+        "created_at": "2026-10-22T09:00:00.000001+00:00",
+        "imported_observations": [],
+        "kind": "profile",
+        "planning_authorized": false,
+        "proposal": {
+          "data": {
+            "accessibility_needs": "",
+            "birth_date": "1982-05-30",
+            "competition_category": "",
+            "constraint_status": "none_known",
+            "constraints": [],
+            "duration_doubling_slowdown_pct": null,
+            "interruption": "none",
+            "last_training_date": null,
+            "manual_observations": [],
+            "participation": "unrestricted",
+            "recovery_notes": "",
+            "resources": [],
+            "sex_reference": "female",
+            "source_selections": [],
+            "source_window": null,
+            "sport_history": [
+              {
+                "current": true,
+                "discipline": "Síkvíz",
+                "last_active_date": null,
+                "level": "professional",
+                "notes": "",
+                "performances": [
+                  {
+                    "conditions": "K1, állóvíz",
+                    "distance_m": "500.000",
+                    "kind": "personal_best",
+                    "recorded_on": null,
+                    "result_id": "00000000-0000-0000-0000-000000034bc1",
+                    "source": "self_report",
+                    "time": "1:42.500",
+                    "year": 2001
+                  }
+                ],
+                "role": "primary",
+                "sport": "Kajak",
+                "start_year": 1995,
+                "usual_sessions_per_week": 5
+              },
+              {
+                "current": true,
+                "discipline": "",
+                "last_active_date": null,
+                "level": "unknown",
+                "notes": "",
+                "performances": [],
+                "planning": {
+                  "proficiency": "independent",
+                  "purposes": [
+                    "aerobic_substitution",
+                    "general_conditioning"
+                  ],
+                  "supported_sports": [
+                    "Kajak"
+                  ],
+                  "version": "sport-planning-context-v0.1"
+                },
+                "role": "secondary",
+                "sport": "Futás",
+                "start_year": 1995,
+                "usual_sessions_per_week": 5
+              }
+            ],
+            "sport_history_status": "recorded",
+            "target_sport": "Futás",
+            "typical_days_per_week": 3,
+            "typical_minutes_per_week": null
+          },
+          "previous_reference": null,
+          "request_id": "00000000-0000-0000-0000-000000034bc2"
+        },
+        "review": {
+          "accessibility_needs": "",
+          "age_path": "adult",
+          "age_years": 44,
+          "clinical_clearance": false,
+          "constraints": [],
+          "entry_mode": "NORMAL_START",
+          "evaluated_on": "2026-10-22",
+          "global_entry_gate": "OPEN",
+          "participation_status": "READY",
+          "policy_version": "athlete-intake-review-policy-v0.1",
+          "reasons": [],
+          "weight_change_requires_review": false
+        },
+        "revision": 1,
+        "schema_version": "athlete-setup-v0.1",
+        "timezone_name": "Europe/Budapest",
+        "workouts_created": false
+      },
+      "durable_available_at": "2026-10-22T09:00:00.000002+00:00",
+      "committed": true,
+      "reused": true,
+      "planning_authorized": false,
+      "workouts_created": false
+    },
+    "availability": null,
+    "current_review": {
+      "policy_version": "athlete-intake-review-policy-v0.1",
+      "evaluated_on": "2026-10-22",
+      "age_years": 44,
+      "age_path": "adult",
+      "global_entry_gate": "OPEN",
+      "participation_status": "READY",
+      "entry_mode": "NORMAL_START",
+      "reasons": [],
+      "clinical_clearance": false,
+      "weight_change_requires_review": false,
+      "constraints": [],
+      "accessibility_needs": ""
+    },
+    "planning_authorized": false,
+    "workouts_created": false,
+    "references": {
+      "profile_reference": {
+        "artifact_id": "pt-athlete:4c47dd4de0de8c864a74e4deaa30dad0fa42ca4b7072033ccd40939fec424cd1",
+        "content_hash": "19339732b788158b64afe5007fe2a183fb940fb521b81ae803fc2688c4fe20c0"
+      },
+      "availability_reference": null
+    },
+    "polar": {
+      "connected": false,
+      "domains": {
+        "sessions": false,
+        "sleep": false,
+        "nightly_recharge": false,
+        "continuous_hr": false,
+        "activity": false,
+        "tests": false
+      },
+      "source_documentation": "https://www.polar.com/polar-api-v4/"
+    }
+  },
+  "catalog": {
+    "schema_version": "cycle-creation-catalog-v0.1",
+    "rules_version": "cycle-creation-rules-v0.1",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-11-09",
+    "olympics": [
+      {
+        "key": "la-2028",
+        "kind": "summer",
+        "title": "Los Angeles 2028",
+        "start_date": "2028-07-14",
+        "end_date": "2028-07-30"
+      },
+      {
+        "key": "alpes-2030",
+        "kind": "winter",
+        "title": "Francia-Alpok 2030",
+        "start_date": "2030-02-01",
+        "end_date": "2030-02-17"
+      },
+      {
+        "key": "brisbane-2032",
+        "kind": "summer",
+        "title": "Brisbane 2032",
+        "start_date": "2032-07-23",
+        "end_date": "2032-08-08"
+      },
+      {
+        "key": "utah-2034",
+        "kind": "winter",
+        "title": "Salt Lake City–Utah 2034",
+        "start_date": "2034-02-10",
+        "end_date": "2034-02-26"
+      }
+    ],
+    "calendar_version": "ioc-games-calendar-2026-10-22",
+    "calendar_source": "https://www.olympics.com/ioc/faq/sports-programme-and-results/where-will-the-next-olympic-games-be-held",
+    "goals": {
+      "performance": "Versenycél / sportteljesítmény",
+      "aerobic_fitness": "Állóképesség javítása vagy fenntartása",
+      "strength": "Erő és mindennapi terhelhetőség",
+      "regular_activity": "Rendszeres mozgás kialakítása",
+      "weight_loss": "Testsúlycsökkentés",
+      "weight_maintenance": "Testsúly megtartása",
+      "wellbeing": "Közérzet és élvezhető mozgás",
+      "mobility": "Mozgékonyság"
+    },
+    "planning_context_version": "cycle-planning-basis-v0.1",
+    "boundary_revision_schema": "cycle-mesocycle-boundary-revision-v0.1",
+    "race_min_days": 28,
+    "race_max_calendar_months": 12,
+    "default_recreation_weeks": 12,
+    "default_mesocycle_days": 28,
+    "limits_are_product_policy": true
+  }
+}

@@ -12,16 +12,23 @@ import type {
 } from "@/lib/athlete-setup/contracts";
 import { useState } from "react";
 import Link from "next/link";
+import SportContext from "./sport-context";
+import OptionsWorkspace from "@/components/training-options/workspace";
+import type { MassItem } from "@/lib/athlete-setup/body-mass";
 export default function ProfileForm({
   value,
   onChange,
   today,
   planning = false,
+  section = "all",
+  lastMass = null,
 }: {
   value: Profile;
   onChange: (v: Profile) => void;
   today: string;
   planning?: boolean;
+  section?: "all" | "personal" | "sports";
+  lastMass?: MassItem | null;
 }) {
   const [resourceText, setResourceText] = useState(value.resources.join(", "));
   const edit = (p: Partial<Profile>) => onChange({ ...value, ...p });
@@ -31,6 +38,14 @@ export default function ProfileForm({
         k === i ? { ...s, ...p } : s,
       ),
     });
+  const addSport = (role: SportHistory["role"] = "unknown") => edit({
+    sport_history_status: "recorded",
+    sport_history: [...value.sport_history, {
+      sport: "", discipline: "", start_year: null, current: true,
+      last_active_date: null, level: "unknown", current_level: "unknown",
+      role, usual_sessions_per_week: null, notes: "",
+    }],
+  });
   const constraint = (i: number, p: Partial<Constraint>) =>
     edit({
       constraints: value.constraints.map((s, k) =>
@@ -38,12 +53,15 @@ export default function ProfileForm({
       ),
     });
   return (
-    <div className={`space-y-7${planning ? " pt-profile-planning" : ""}`}>
+    <div className={`space-y-7${planning ? " pt-profile-planning" : ""}`} onInvalidCapture={(event) => {
+      let details = (event.target as HTMLElement).closest("details");
+      while (details) { details.open = true; details = details.parentElement?.closest("details") ?? null; }
+    }}>
       {planning ? (
         <p className="pt-options-meta">
-          Itt a személyes alapadatokat, sporttapasztalatot és a mozgást érintő
-          kereteket add meg. A helyszíneket és az időbeosztást a következő
-          lépésekben állíthatod be.
+          {section === "sports"
+            ? "Először a sportolási kereteidet add meg, majd vedd fel a fő sportodat, a kiegészítő sportokat és a számodra fontos szabadidős mozgásokat is. Új sportot később is hozzáadhatsz, például egy síelés előtt. A sport nevét szabadon is beírhatod."
+            : "A születési időt, biológiai nemet, magasságot és testtömeget itt később is módosíthatod. A testméretekhez a mérés dátuma is megmarad."}
         </p>
       ) : (
         <div className="rounded-xl bg-teal-500/10 p-4 text-sm leading-6">
@@ -56,7 +74,8 @@ export default function ProfileForm({
           </p>
         </div>
       )}
-      <fieldset className="grid gap-4 sm:grid-cols-2">
+      {planning && section === "sports" && <details className="pt-panel"><summary>Jelenlegi edzésmennyiség és úszási kiindulópont</summary><OptionsWorkspace mode="prescriptions" /></details>}
+      {section !== "sports" && <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className="mb-3 font-semibold">Alapadatok</legend>
         <Field
           label="Születési dátum · a kezdőtervhez szükséges"
@@ -67,7 +86,7 @@ export default function ProfileForm({
           onChange={(e) => edit({ birth_date: e.target.value || null })}
         />
         <Select
-          label="Élettani referencia szerinti nem"
+          label="Biológiai nem"
           name="sex_reference"
           value={value.sex_reference}
           onChange={(e) =>
@@ -86,13 +105,20 @@ export default function ProfileForm({
             </option>
           ))}
         </Select>
-        <Field
+        {section === "all" && <Field
           label="Célsportág / szakág"
           name="target_sport"
           maxLength={200}
           value={value.target_sport}
           onChange={(e) => edit({ target_sport: e.target.value })}
-        />
+        />}
+        <Field label="Testsúly (kg) · ha ismert" inputMode="decimal" hint={lastMass ? `Legutóbbi rögzített mérés: ${lastMass.value_kg} kg · ${lastMass.recorded_on}` : undefined} value={Object.hasOwn(value, "body_mass_kg") ? value.body_mass_kg ?? "" : value.manual_observations.filter((v) => v.metric === "body_mass_kg").at(-1)?.value ?? ""} onChange={(e) => edit({ body_mass_kg: e.target.value || null, body_mass_recorded_on: today })} />
+        <Field label="Magasság (cm) · ha ismert" inputMode="decimal" value={value.height_cm ?? ""} onChange={(e) => edit({ height_cm: e.target.value || null, body_measurements_recorded_on: today })} />
+        {(value.body_mass_kg || value.height_cm) && <details className="pt-measurement-date sm:col-span-2"><summary>Mért adatok dátuma · {value.body_mass_recorded_on ?? value.body_measurements_recorded_on ?? today}</summary>
+          {value.body_mass_kg && <Field label="Testtömeg mérésének napja" type="date" max={today} value={value.body_mass_recorded_on ?? value.body_measurements_recorded_on ?? today} onChange={(e) => edit({ body_mass_recorded_on: e.target.value || null })} />}
+          {value.height_cm && <Field label="Testadatok dátuma · magasság" type="date" max={today} value={value.body_measurements_recorded_on ?? today} onChange={(e) => edit({ body_measurements_recorded_on: e.target.value || null })} />}
+          <Link href="/nutrition#body-goals" className="underline">Testtömeg-előzmények és testsúlycél</Link>
+        </details>}
         {!planning && (
           <Field
             label="Versenykategória (opcionális)"
@@ -102,157 +128,8 @@ export default function ProfileForm({
             onChange={(e) => edit({ competition_category: e.target.value })}
           />
         )}
-      </fieldset>
-      <fieldset className="space-y-4">
-        <legend className="mb-3 font-semibold">Sportmúlt, sportáganként</legend>
-        <p className="text-sm text-zinc-400">
-          A más sportágban szerzett tapasztalat megmarad; ebből önmagában nem
-          következik a célsport technikája vagy mozgásszervi terhelhetősége.
-        </p>
-        <Select
-          label="Korábbi sporttapasztalat"
-          value={value.sport_history_status}
-          onChange={(e) =>
-            edit({
-              sport_history_status: e.target
-                .value as Profile["sport_history_status"],
-              sport_history:
-                e.target.value === "recorded" ? value.sport_history : [],
-            })
-          }
-        >
-          <option value="unknown">Még nincs felmérve</option>
-          <option value="none">Még nincs sportmúltam</option>
-          <option value="recorded">Van korábbi sporttapasztalatom</option>
-        </Select>
-        {value.sport_history.map((s, i) => (
-          <div
-            key={i}
-            className="space-y-4 rounded-xl border border-zinc-700 p-4"
-          >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                label={`${i + 1}. sportág`}
-                required
-                maxLength={200}
-                value={s.sport}
-                onChange={(e) => sport(i, { sport: e.target.value })}
-              />
-              <Field
-                label="Szakág (opcionális)"
-                maxLength={200}
-                value={s.discipline}
-                onChange={(e) => sport(i, { discipline: e.target.value })}
-              />
-              <Field
-                label="Kezdés éve (ha ismert)"
-                type="number"
-                min={1900}
-                max={Number(today.slice(0, 4))}
-                value={s.start_year ?? ""}
-                onChange={(e) =>
-                  sport(i, {
-                    start_year:
-                      e.target.value === "" ? null : Number(e.target.value),
-                  })
-                }
-              />
-              <Select
-                label="Ebben a sportágban elért szint"
-                value={s.level}
-                onChange={(e) =>
-                  sport(i, { level: e.target.value as SportHistory["level"] })
-                }
-              >
-                {Object.entries({
-                  unknown: "Még nincs megadva",
-                  beginner: "Kezdő",
-                  recreational: "Szabadidős",
-                  competitive: "Versenyző",
-                  professional: "Hivatásos / élversenyző",
-                }).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
-                ))}
-              </Select>
-              <Field
-                label="Szokásos edzésszám hetente ebben a sportágban (ha ismert)"
-                type="number"
-                min={0}
-                max={28}
-                value={s.usual_sessions_per_week ?? ""}
-                onChange={(e) =>
-                  sport(i, {
-                    usual_sessions_per_week:
-                      e.target.value === "" ? null : Number(e.target.value),
-                  })
-                }
-              />
-              <Field
-                label="Legutóbbi aktív nap (opcionális)"
-                type="date"
-                max={today}
-                value={s.last_active_date ?? ""}
-                onChange={(e) =>
-                  sport(i, { last_active_date: e.target.value || null })
-                }
-              />
-            </div>
-            <label className="flex gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={s.current}
-                onChange={(e) => sport(i, { current: e.target.checked })}
-              />
-              Jelenleg is végzem ezt a sportágat
-            </label>
-            <Area
-              label="Kihagyások, fontos tapasztalatok (opcionális)"
-              maxLength={2000}
-              value={s.notes}
-              onChange={(e) => sport(i, { notes: e.target.value })}
-            />
-            <button
-              type="button"
-              className={secondaryClass}
-              onClick={() =>
-                edit({
-                  sport_history: value.sport_history.filter((_, k) => i !== k),
-                })
-              }
-            >
-              Sportmúlt bejegyzés törlése
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          className={secondaryClass}
-          disabled={value.sport_history.length >= 32}
-          onClick={() =>
-            edit({
-              sport_history_status: "recorded",
-              sport_history: [
-                ...value.sport_history,
-                {
-                  sport: "",
-                  discipline: "",
-                  start_year: null,
-                  current: true,
-                  last_active_date: null,
-                  level: "unknown",
-                  usual_sessions_per_week: null,
-                  notes: "",
-                },
-              ],
-            })
-          }
-        >
-          Sportág hozzáadása
-        </button>
-      </fieldset>
-      <fieldset className="space-y-4">
+      </fieldset>}
+      {section !== "personal" && <><fieldset className="space-y-4">
         <legend className="mb-3 font-semibold">
           Korlátozások és alkalmazkodás
         </legend>
@@ -559,7 +436,7 @@ export default function ProfileForm({
         )}
       </fieldset>
       <details className="pt-profile-extras" open={planning ? undefined : true}>
-        <summary>Becslés és további személyes adatok · opcionális</summary>
+        <summary>További sportolási beállítások · opcionális</summary>
         <div className="grid gap-4 sm:grid-cols-2 mt-4">
           {planning && (
             <>
@@ -610,8 +487,8 @@ export default function ProfileForm({
       </details>
       {planning ? (
         <p className="pt-options-meta">
-          A méréseket és a testsúlyadatokat az Előzmények és kiindulópont
-          lépésben adhatod meg. A felszerelést a{" "}
+          A korábbi órás és kézi méréseket az állapotfelmérés előzményeinél
+          veheted át. A felszerelést a{" "}
           <Link className="underline" href="/training-options/locations">
             helyszíneknél
           </Link>
@@ -628,6 +505,153 @@ export default function ProfileForm({
           felmérés önbevallott tervezési keret, nem orvosi engedély.
         </p>
       )}
+      </>}
+      {section !== "personal" && <fieldset className="space-y-4">
+        <legend className="mb-3 font-semibold">Sportmúlt, sportáganként</legend>
+        <p className="text-sm text-zinc-400">
+          A más sportágban szerzett tapasztalat megmarad; ebből önmagában nem
+          következik a célsport technikája vagy mozgásszervi terhelhetősége.
+        </p>
+        {section === "sports" && <Field label="A tervezés elsődleges célsportja" maxLength={200} value={value.target_sport} onChange={(e) => edit({ target_sport: e.target.value })} />}
+        <datalist id="pt-sport-history-choices">{["Kajak", "Kenu", "Evezés", "Futás", "Úszás", "Kerékpározás", "Erősítés / kondi", "Sífutás", "Alpesi síelés / lesiklás", "Snowboard", "Korcsolyázás", "Foci", "Gyaloglás", "Túrázás", "Gimnasztika", "Nyújtás / mobilitás"].map((label) => <option key={label} value={label} />)}</datalist>
+        <Select
+          label="Korábbi sporttapasztalat"
+          value={value.sport_history_status}
+          onChange={(e) =>
+            edit({
+              sport_history_status: e.target
+                .value as Profile["sport_history_status"],
+              sport_history:
+                e.target.value === "recorded" ? value.sport_history : [],
+            })
+          }
+        >
+          <option value="unknown">Még nincs felmérve</option>
+          <option value="none">Még nincs sportmúltam</option>
+          <option value="recorded">Van sporttapasztalatom / végzek sportot</option>
+        </Select>
+        {value.sport_history.map((s, i) => (
+          <div
+            key={i}
+            className="space-y-4 rounded-xl border border-zinc-700 p-4"
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label={`${i + 1}. sportág`}
+                list="pt-sport-history-choices"
+                required
+                maxLength={200}
+                value={s.sport}
+                onChange={(e) => sport(i, { sport: e.target.value })}
+              />
+              <Field
+                label="Szakág (opcionális)"
+                maxLength={200}
+                value={s.discipline}
+                onChange={(e) => sport(i, { discipline: e.target.value })}
+              />
+              <Field
+                label="Kezdés éve (ha ismert)"
+                type="number"
+                min={1900}
+                max={Number(today.slice(0, 4))}
+                value={s.start_year ?? ""}
+                onChange={(e) =>
+                  sport(i, {
+                    start_year:
+                      e.target.value === "" ? null : Number(e.target.value),
+                  })
+                }
+              />
+              <div className="sm:col-span-2"><Select label="A sportág szerepe" value={s.role ?? "unknown"} onChange={(e) => sport(i, { role: e.target.value as SportHistory["role"] })}>
+                {Object.entries({ unknown: "Még nincs megadva", primary: "Fő sportág", secondary: "Kiegészítő sportág", recreation: "Szabadidős tevékenység", paused: "Korábban végeztem, most szünetel" }).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+              </Select></div>
+              <details className="sm:col-span-2 pt-sport-competition-level" open={["primary", "unknown"].includes(s.role ?? "unknown") ? true : undefined}><summary>Versenyzési előélet és szint · opcionális</summary><div className="grid gap-4 sm:grid-cols-2 mt-4"><Select
+                label="Legmagasabb elért szint ebben a sportágban"
+                value={s.level}
+                onChange={(e) =>
+                  sport(i, { level: e.target.value as SportHistory["level"] })
+                }
+              >
+                {Object.entries({
+                  unknown: "Még nincs megadva",
+                  beginner: "Kezdő",
+                  recreational: "Szabadidős",
+                  competitive: "Versenyző",
+                  professional: "Hivatásos / élversenyző",
+                }).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </Select>
+              <Select label="Jelenlegi szint ebben a sportágban" value={s.current_level ?? "unknown"} onChange={(e) => sport(i, { current_level: e.target.value as SportHistory["level"] })}>
+                {Object.entries({ unknown: "Még nincs megadva", beginner: "Kezdő", recreational: "Szabadidős", competitive: "Versenyző", professional: "Hivatásos / élversenyző" }).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+              </Select>
+              </div></details>
+              <Field
+                label="Szokásos edzésszám hetente ebben a sportágban (ha ismert)"
+                type="number"
+                min={0}
+                max={28}
+                value={s.usual_sessions_per_week ?? ""}
+                onChange={(e) =>
+                  sport(i, {
+                    usual_sessions_per_week:
+                      e.target.value === "" ? null : Number(e.target.value),
+                  })
+                }
+              />
+              <Field
+                label="Legutóbbi aktív nap (opcionális)"
+                type="date"
+                max={today}
+                value={s.last_active_date ?? ""}
+                onChange={(e) =>
+                  sport(i, { last_active_date: e.target.value || null })
+                }
+              />
+            </div>
+            <SportContext value={s} today={today} primarySports={[...new Set([value.target_sport.trim(), ...value.sport_history.filter((v) => v.role === "primary").map((v) => [v.sport, v.discipline].filter(Boolean).join(" / "))].filter(Boolean))]} change={(patch) => sport(i, patch)} />
+            <label className="flex gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={s.current}
+                onChange={(e) => sport(i, { current: e.target.checked })}
+              />
+              Jelenleg is végzem ezt a sportágat
+            </label>
+            <Area
+              label="Kihagyások, fontos tapasztalatok (opcionális)"
+              maxLength={2000}
+              value={s.notes}
+              onChange={(e) => sport(i, { notes: e.target.value })}
+            />
+            <button
+              type="button"
+              className={secondaryClass}
+              onClick={() =>
+                edit({
+                  sport_history: value.sport_history.filter((_, k) => i !== k),
+                })
+              }
+            >
+              Sportmúlt bejegyzés törlése
+            </button>
+          </div>
+        ))}
+        <div className="pt-sport-add-actions"><button
+          type="button"
+          className={secondaryClass}
+          disabled={value.sport_history.length >= 32}
+          onClick={() => addSport()}
+        >
+          Sportág hozzáadása
+        </button>
+        <button type="button" className={secondaryClass} disabled={value.sport_history.length >= 32} onClick={() => addSport("secondary")}>Kiegészítő sport hozzáadása</button>
+        <button type="button" className={secondaryClass} disabled={value.sport_history.length >= 32} onClick={() => addSport("recreation")}>Szabadidős sport hozzáadása</button></div>
+      </fieldset>}
+
     </div>
   );
 }

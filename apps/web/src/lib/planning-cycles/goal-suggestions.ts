@@ -1,4 +1,5 @@
 import { addDays } from "./contracts";
+import { demandSuggestion, demandVersion } from "./event-demands";
 import type { PlanningInputs } from "./inputs";
 import type { GoalRole, Period, Reference } from "@/lib/planning-goals/types";
 export type SuggestedRow = {
@@ -6,11 +7,13 @@ export type SuggestedRow = {
   role: GoalRole | null;
   rationale: string;
   origin: string;
+  demand_priority?: number;
   sources: {
     kind: string;
     key?: string;
     direction?: string | null;
     basis?: string;
+    demand_priority?: number;
   }[];
   mesocycle_directives: {
     mesocycle_period_id: string;
@@ -57,8 +60,8 @@ export type GoalSuggestion = {
 };
 export type Suggestions = {
   schema_version:
-    "planning-goal-suggestions-v0.1" | "planning-goal-suggestions-v0.2";
-  rules_version: "declared-goal-review-v0.1" | "mesocycle-strategy-v0.1";
+    "planning-goal-suggestions-v0.1" | "planning-goal-suggestions-v0.2" | "planning-goal-suggestions-v0.3";
+  rules_version: "declared-goal-review-v0.1" | "mesocycle-strategy-v0.1" | "mesocycle-strategy-v0.2";
   event_titles?: Record<string, string>;
   strategy?: {
     source_basis: string;
@@ -70,6 +73,7 @@ export type Suggestions = {
     race_dates_changed: false;
     workouts_created: false;
     dose_selected: false;
+    demand_priorities?: { version: string; applied: true; training_percentages: false; score_kind: string; sources: { key: string; url: string }[] };
   };
   macrocycles: GoalSuggestion[];
   registry_reference: { version: string; content_hash: string };
@@ -98,12 +102,13 @@ export function checkedSuggestion(
       "A céljavaslat vagy a forrásverzió eltér. Töltsd újra a célok oldalát.",
     );
   };
-  const strategic = v?.schema_version === "planning-goal-suggestions-v0.2";
+  const weighted = v?.schema_version === "planning-goal-suggestions-v0.3";
+  const strategic = weighted || v?.schema_version === "planning-goal-suggestions-v0.2";
   if (
     !v ||
     (!strategic && v.schema_version !== "planning-goal-suggestions-v0.1") ||
     v.rules_version !==
-      (strategic ? "mesocycle-strategy-v0.1" : "declared-goal-review-v0.1") ||
+      (weighted ? "mesocycle-strategy-v0.2" : strategic ? "mesocycle-strategy-v0.1" : "declared-goal-review-v0.1") ||
     v.review_required !== true ||
     v.periodization_inferred !== strategic ||
     v.dose_selected !== false ||
@@ -129,6 +134,7 @@ export function checkedSuggestion(
   );
   if (rows.length !== 1) return fail();
   const m = rows[0];
+  if (weighted && (!v.strategy?.demand_priorities || v.strategy.demand_priorities.version !== demandVersion || v.strategy.demand_priorities.applied !== true || v.strategy.demand_priorities.training_percentages !== false)) return fail();
   if (
     m.base_revision !== (base?.revision ?? 0) ||
     (base
@@ -204,6 +210,20 @@ export function checkedSuggestion(
       }
     }
   for (const r of m.rows) {
+    if (weighted) {
+      if (!Array.isArray(inputs.competitions) || typeof inputs.program_sport !== "string") return fail();
+      const events = inputs.competitions.filter((event) => event.status === "planned");
+      const next = events.filter((event) => event.priority === "main" && event.end_date >= period.start_date).sort((a, b) => a.start_date.localeCompare(b.start_date) || a.key.localeCompare(b.key))[0];
+      const relevant = events.filter((event) => (event.start_date <= period.end_date && event.end_date >= period.start_date) || event.key === next?.key);
+      const weights = relevant.flatMap((event) => {
+        const p = event.profile; if (!p) return [];
+        const auto = demandSuggestion(p, inputs.program_sport);
+        const value = p.capability_basis === "unassessed" && auto?.template_key === "paddling_long_distance" ? auto.weights[r.capability_key] : p.capability_weights?.[r.capability_key];
+        return value === undefined ? [] : [value];
+      });
+      const expected = weights.length ? Math.max(...weights) : undefined;
+      if (r.demand_priority !== expected) return fail();
+    }
     if (
       !capabilities.includes(r.capability_key) ||
       !(strategic

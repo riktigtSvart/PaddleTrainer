@@ -19,7 +19,14 @@ export async function forwardGoals(
   const url = new URL(request.url),
     method = request.method;
   const resource = path[0];
+  const automaticPlanning = path.length === 1 && resource === "automation";
+  const automaticRun = path.length === 2 && resource === "automation" && path[1] === "run";
   const trainingOptions = path.length === 1 && resource === "training-options";
+  const daylightPreview = path.length === 3 && resource === "training-options" && path[1] === "daylight" && path[2] === "preview";
+  const guidedRevision = ["initial-assessment", "guided-strength"].includes(resource) && path[1] === "revisions" && path.length === 3 && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(path[2]);
+  const initialAssessment =
+    path.length === 1 &&
+    ["initial-assessment", "guided-strength"].includes(resource);
   const cyclePrograms =
     path.length === 2 && resource === "cycles" && path[1] === "programs";
   const cycleRevision =
@@ -55,10 +62,11 @@ export async function forwardGoals(
     path.length === 2 &&
     resource === "athlete" &&
     ["context", "history"].includes(path[1]);
+  const bodyMass = path.length === 2 && resource === "athlete" && path[1] === "body-mass";
   const athleteWrite =
     path.length === 2 &&
     resource === "athlete" &&
-    ["profiles", "availability", "polar-imports"].includes(path[1]);
+    ["profiles", "availability", "polar-imports", "nutrition-goal"].includes(path[1]);
   const athletePreview =
     path.length === 3 &&
     resource === "athlete" &&
@@ -79,7 +87,10 @@ export async function forwardGoals(
   const periods = path.length === 1 && resource === "periods";
   if (
     !(
-      trainingOptions ||
+      trainingOptions || daylightPreview ||
+      automaticPlanning || automaticRun ||
+      initialAssessment ||
+      guidedRevision ||
       collection ||
       detail ||
       vocabulary ||
@@ -92,6 +103,7 @@ export async function forwardGoals(
       trainingPlanRead ||
       trainingPlanWrite ||
       athleteRead ||
+      bodyMass ||
       athleteWrite ||
       athletePreview ||
       athleteDetail
@@ -100,7 +112,8 @@ export async function forwardGoals(
     return failure(404, "GOAL_ROUTE_NOT_FOUND");
   if (
     (method === "GET" &&
-      (cycleRevision ||
+      (daylightPreview || cycleRevision ||
+        automaticRun ||
         cyclePreview ||
         athleteWrite ||
         athletePreview ||
@@ -108,17 +121,21 @@ export async function forwardGoals(
     (method !== "GET" &&
       !(
         method === "POST" &&
-        (trainingOptions ||
+        (trainingOptions || daylightPreview ||
+          automaticPlanning || automaticRun ||
+          initialAssessment ||
           collection ||
           cycleRevision ||
           cyclePreview ||
           trainingPlanWrite ||
           athleteWrite ||
+          bodyMass ||
           athletePreview)
       ))
   )
     return failure(405, "GOAL_METHOD_NOT_ALLOWED");
   const allowedQuery =
+    method === "GET" && bodyMass ? ["limit", "offset"] :
     method === "GET" && (athleteRead || planningInputs || trainingOptions)
       ? ["start_date", "end_date"]
       : method === "GET" && collection
@@ -188,17 +205,20 @@ export async function forwardGoals(
       root.hash
     )
       return failure(503, "GOAL_API_CONFIGURATION_INVALID");
-    const relative = trainingOptions
-      ? "api/v1/planning/training-options"
-      : resource === "athlete"
-        ? "api/v1/planning/athlete/" +
-          path.slice(1).map(encodeURIComponent).join("/")
-        : resource === "cycles"
-          ? "api/v1/planning/cycles/" +
+    const relative = initialAssessment || guidedRevision || automaticPlanning || automaticRun || daylightPreview
+      ? "api/v1/planning/" + path.map(encodeURIComponent).join("/")
+      : trainingOptions
+        ? "api/v1/planning/training-options"
+        : resource === "athlete"
+          ? "api/v1/planning/athlete/" +
             path.slice(1).map(encodeURIComponent).join("/")
-          : periods
-            ? "api/v1/training-periods"
-            : "api/v1/planning/goals/" + path.map(encodeURIComponent).join("/");
+          : resource === "cycles"
+            ? "api/v1/planning/cycles/" +
+              path.slice(1).map(encodeURIComponent).join("/")
+            : periods
+              ? "api/v1/training-periods"
+              : "api/v1/planning/goals/" +
+                path.map(encodeURIComponent).join("/");
     const target = new URL(relative, root);
     target.search = url.search;
     const result = await send(target, {
@@ -206,7 +226,7 @@ export async function forwardGoals(
       body,
       cache: "no-store",
       redirect: "error",
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(automaticRun ? 180000 : 60000),
       headers: {
         Accept: "application/json",
         ...(method === "POST" ? { "Content-Type": "application/json" } : {}),
@@ -218,7 +238,9 @@ export async function forwardGoals(
       status: result.status,
       headers: { ...noStore, "Content-Type": "application/json" },
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && ["TimeoutError", "AbortError"].includes(error.name))
+      return failure(504, "GOAL_API_TIMEOUT");
     return failure(502, "GOAL_API_UNAVAILABLE");
   }
 }

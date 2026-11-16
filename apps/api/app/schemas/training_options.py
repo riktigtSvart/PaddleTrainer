@@ -1,10 +1,11 @@
 """Declared places, recurring opportunities and dated exceptions; no workout mutations."""
 
 from typing import Annotated, Literal
+from decimal import Decimal
 from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import Field, StringConstraints, model_validator
+from pydantic import Field, StringConstraints, model_serializer, model_validator
 
 from app.planning.domain.calendar_constraints import calendar_day
 from app.schemas.calendar_constraints import Clock, Closed, Day
@@ -13,25 +14,111 @@ Text = Annotated[str, StringConstraints(max_length=200)]
 Sport = Literal["KAYAK", "RUNNING", "SWIMMING", "STRENGTH", "CYCLING", "GYMNASTICS", "STRETCHING"]
 
 
+class ExerciseConfirmation(Closed):
+    exercise_id: str = Field(pattern=r"^[a-z][a-z0-9_-]{0,63}$")
+    source_kind: Literal["self_report"] = "self_report"
+    note: str = Field(default="", max_length=500)
+
+
+class Coordinates(Closed):
+    # Text keeps persisted proposal hashes identical in Python and the browser.
+    latitude: str = Field(pattern=r"^-?(?:0|[1-9][0-9]{0,2})(?:\.[0-9]{1,7})?$", strict=True)
+    longitude: str = Field(pattern=r"^-?(?:0|[1-9][0-9]{0,2})(?:\.[0-9]{1,7})?$", strict=True)
+    timezone_name: str = Field(min_length=1, max_length=64)
+
+    @model_validator(mode="after")
+    def coherent(self):
+        if abs(Decimal(self.latitude)) > 90 or abs(Decimal(self.longitude)) > 180:
+            raise ValueError("Coordinates are outside the Earth.")
+        try:
+            ZoneInfo(self.timezone_name)
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError("Unknown location timezone.") from None
+        return self
+
+
+class DaylightRule(Closed):
+    sport: Sport
+    mode: Literal["none", "daylight", "civil_twilight"]
+    start_buffer_minutes: int = Field(default=0, ge=0, le=120, strict=True)
+    end_buffer_minutes: int = Field(default=0, ge=0, le=120, strict=True)
+
+    @model_validator(mode="after")
+    def coherent(self):
+        if self.mode == "none" and (self.start_buffer_minutes or self.end_buffer_minutes):
+            raise ValueError("An unrestricted sport has no light buffers.")
+        return self
+
+
+class GeographicArea(Closed):
+    schema_version: Literal["training-area-v0.1"] = "training-area-v0.1"
+    south: str = Field(pattern=r"^-?(?:0|[1-9][0-9]{0,2})(?:\.[0-9]{1,7})?$", strict=True)
+    north: str = Field(pattern=r"^-?(?:0|[1-9][0-9]{0,2})(?:\.[0-9]{1,7})?$", strict=True)
+    west: str = Field(pattern=r"^-?(?:0|[1-9][0-9]{0,2})(?:\.[0-9]{1,7})?$", strict=True)
+    east: str = Field(pattern=r"^-?(?:0|[1-9][0-9]{0,2})(?:\.[0-9]{1,7})?$", strict=True)
+    timezone_name: str = Field(min_length=1, max_length=64)
+
+    @model_validator(mode="after")
+    def coherent(self):
+        south, north, west, east = map(Decimal, (self.south, self.north, self.west, self.east))
+        if not (-90 <= south < north <= 90 and -180 <= west < east <= 180):
+            raise ValueError("Use ordered latitude/longitude bounds, without crossing the date line.")
+        if north - south > 20 or east - west > 20:
+            raise ValueError("An exercise area spans at most twenty degrees on each axis.")
+        try:
+            ZoneInfo(self.timezone_name)
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError("Unknown area timezone.") from None
+        return self
+
+
 class Location(Closed):
     id: UUID
     name: str = Field(min_length=1, max_length=100)
     kind: Literal["fixed", "mobile"] = "fixed"
     sports: list[Sport] = Field(min_length=1, max_length=7)
-    resources: list[Text] = Field(default_factory=list, max_length=32)
+    resources: list[Text] = Field(default_factory=list, max_length=128)
+    exercise_confirmations: list[ExerciseConfirmation] | None = Field(default=None, max_length=128)
+    coordinates: Coordinates | None = None
+    area: GeographicArea | None = None
+    pool_length_m: str | None = Field(default=None, pattern=r"^(?:[1-9][0-9]?|100)(?:\.[0-9]{1,6})?$", strict=True)
+    daylight_overrides: list[DaylightRule] | None = Field(default=None, max_length=7)
     combine_allowed: bool = Field(default=False, strict=True)
     boat_transport: bool = Field(default=False, strict=True)
     notes: str = Field(default="", max_length=2000)
     archived: bool = Field(default=False, strict=True)
 
+    @model_serializer(mode="wrap")
+    def preserve_legacy_shape(self, handler):
+        data = handler(self)
+        for key in ("exercise_confirmations", "coordinates", "area", "pool_length_m", "daylight_overrides"):
+            if getattr(self, key) is None:
+                data.pop(key, None)
+        return data
+
     @model_validator(mode="after")
     def coherent(self):
+        if self.coordinates is not None and self.area is not None:
+            raise ValueError("Use either an exact point or a geographic area.")
+        if self.area is not None and self.kind != "mobile":
+            raise ValueError("A geographic area belongs to a variable location.")
+        if self.pool_length_m is not None and ("SWIMMING" not in self.sports or not 10 <= Decimal(self.pool_length_m) <= 100):
+            raise ValueError("Pool length belongs to swimming and is ten to one hundred metres.")
         if self.name != self.name.strip() or not self.name.strip():
             raise ValueError("Use a trimmed location name.")
         if len(set(self.sports)) != len(self.sports) or len(set(self.resources)) != len(self.resources):
             raise ValueError("Location possibilities must be unique.")
         if any(not resource.strip() or resource != resource.strip() for resource in self.resources):
             raise ValueError("Resources must be nonempty and trimmed.")
+        rules = self.daylight_overrides or []
+        if len({r.sport for r in rules}) != len(rules) or any(r.sport not in self.sports for r in rules):
+            raise ValueError("Use one daylight override per available sport.")
+        if self.exercise_confirmations is not None:
+            from app.services.strength_catalog import catalog
+            known = {e['id'] for e in catalog()['exercises']}
+            keys = [e.exercise_id for e in self.exercise_confirmations]
+            if len(keys) != len(set(keys)) or not set(keys) <= known:
+                raise ValueError("Use unique, known exercise identities for this location.")
         return self
 
 
@@ -91,6 +178,42 @@ class LocationRestriction(Closed):
     reason: str = Field(default="", max_length=1000)
 
 
+class CurrentTrainingBaseline(Closed):
+    from_date: Day
+    to_date: Day
+    weekly_sessions: int = Field(ge=1, le=28, strict=True)
+    weekly_minutes: int = Field(ge=1, le=10080, strict=True)
+
+    @model_validator(mode="after")
+    def coherent(self):
+        first, last = calendar_day(self.from_date), calendar_day(self.to_date)
+        if not 14 <= (last - first).days + 1 <= 56 or self.weekly_minutes < self.weekly_sessions:
+            raise ValueError("Describe two to eight weeks of actual training, with positive time per session.")
+        return self
+
+
+class SwimmingAbility(Closed):
+    reported_on: Day
+    independent: bool = Field(strict=True)
+    strokes: list[Literal["freestyle", "breaststroke", "backstroke", "butterfly"]] = Field(min_length=1, max_length=4)
+    preferred_stroke: Literal["freestyle", "breaststroke", "backstroke", "butterfly"]
+    continuous_distance_m: int | None = Field(default=None, ge=10, le=20000, strict=True)
+    continuous_minutes: int | None = Field(default=None, ge=1, le=240, strict=True)
+
+    @model_validator(mode="after")
+    def coherent(self):
+        calendar_day(self.reported_on)
+        if len(set(self.strokes)) != len(self.strokes) or self.preferred_stroke not in self.strokes:
+            raise ValueError("Choose a known preferred stroke, without duplicates.")
+        return self
+
+
+class PrescriptionSettings(Closed):
+    schema_version: Literal["training-prescription-settings-v0.1"] = "training-prescription-settings-v0.1"
+    current_baseline: CurrentTrainingBaseline | None = None
+    swimming: SwimmingAbility | None = None
+
+
 class OptionsData(Closed):
     timezone_name: str = Field(min_length=1, max_length=64)
     schedule_start_date: Day | None = None
@@ -99,9 +222,23 @@ class OptionsData(Closed):
     weekly_slots: list[WeeklySlot] = Field(default_factory=list, max_length=128)
     exceptions: list[SlotException] = Field(default_factory=list, max_length=1024)
     restrictions: list[LocationRestriction] = Field(default_factory=list, max_length=256)
+    daylight_rules: list[DaylightRule] | None = Field(default=None, max_length=7)
+    prescription_settings: PrescriptionSettings | None = None
+
+    @model_serializer(mode="wrap")
+    def preserve_legacy_shape(self, handler):
+        data = handler(self)
+        if self.daylight_rules is None:
+            data.pop("daylight_rules", None)
+        if self.prescription_settings is None:
+            data.pop("prescription_settings", None)
+        return data
 
     @model_validator(mode="after")
     def coherent(self):
+        rules = self.daylight_rules or []
+        if len({r.sport for r in rules}) != len(rules):
+            raise ValueError("Use one daylight rule per sport.")
         try:
             ZoneInfo(self.timezone_name)
         except (ZoneInfoNotFoundError, ValueError):
@@ -158,3 +295,20 @@ class OptionsInput(Closed):
     request_id: UUID
     previous_reference: OptionsReference | None
     data: OptionsData
+
+
+class DaylightPreviewInput(Closed):
+    date: Day
+    coordinates: Coordinates | None = None
+    area: GeographicArea | None = None
+
+    @model_serializer(mode="wrap")
+    def preserve_legacy_shape(self, handler):
+        return {k: v for k, v in handler(self).items() if v is not None}
+
+    @model_validator(mode="after")
+    def coherent(self):
+        calendar_day(self.date)
+        if (self.coordinates is None) == (self.area is None):
+            raise ValueError("Provide exactly one geographic point or area.")
+        return self

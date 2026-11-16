@@ -104,8 +104,8 @@ export function ProgramSummary({
             <strong>{labels[g.key] ?? g.key}:</strong>{" "}
             {g.body_mass
               ? g.key === "weight_maintenance" && g.details
-                ? `Megtartandó testsúly: ${g.body_mass.current_kg} kg`
-                : `Jelenlegi testsúly: ${g.body_mass.current_kg} kg · céltestsúly: ${g.body_mass.target_kg} kg`
+                ? `A rögzítéskor megtartani kívánt testsúly: ${g.body_mass.current_kg} kg`
+                : `A rögzítéskor megadott testsúly: ${g.body_mass.current_kg} kg · céltestsúly: ${g.body_mass.target_kg} kg`
               : g.target_description}
             {g.details?.event_keys.length ? (
               <p className="text-zinc-300">

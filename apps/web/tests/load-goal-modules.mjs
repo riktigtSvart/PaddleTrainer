@@ -19,6 +19,10 @@ export function load(relative) {
   if (cache.has(filename)) return cache.get(filename).exports;
   const unit = { exports: {} };
   cache.set(filename, unit);
+  if (filename.endsWith(".json")) {
+    unit.exports = { default: JSON.parse(readFileSync(filename, "utf8")) };
+    return unit.exports;
+  }
   const source = ts.transpileModule(readFileSync(filename, "utf8"), {
     compilerOptions: {
       target: ts.ScriptTarget.ES2020,

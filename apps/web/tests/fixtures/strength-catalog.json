@@ -1,0 +1,3446 @@
+{
+  "request": {
+    "request_id": "00000000-0000-0000-0000-00000003195d",
+    "previous_reference": null,
+    "data": {
+      "timezone_name": "Europe/Budapest",
+      "schedule_start_date": "2026-10-23",
+      "schedule_end_date": null,
+      "locations": [
+        {
+          "id": "00000000-0000-0000-0000-00000002e631",
+          "name": "Sirály csónakház",
+          "kind": "fixed",
+          "sports": [
+            "KAYAK",
+            "STRENGTH"
+          ],
+          "resources": [
+            "Szabad padlófelület",
+            "Tornaszőnyeg",
+            "Vízszintes edzőpad",
+            "Állítható edzőpad",
+            "Fellépő / stabil edződoboz",
+            "Húzódzkodó rúd",
+            "Tolódzkodó állvány",
+            "Függesztéses heveder (TRX)",
+            "Tornagyűrű",
+            "Gumiszalag-rögzítési pont",
+            "Kézisúlyzó",
+            "Kettlebell",
+            "Súlyzórúd",
+            "Súlytárcsák",
+            "Tárcsarögzítők",
+            "Hajlított (EZ) rúd",
+            "Trap / hex rúd",
+            "Homokzsák / súlyzsák",
+            "Súlymellény",
+            "Erőkeret / guggolókeret",
+            "Guggolóállvány",
+            "Smith-keret",
+            "Landmine rúdrögzítő",
+            "Állítható csigás állvány",
+            "Felső csiga",
+            "Alsó csiga",
+            "Kötélfogantyú",
+            "Egykezes csigafogantyú",
+            "Széles lehúzórúd",
+            "Rövid csigás rúd",
+            "Bokapánt csigához",
+            "Mellhez lehúzó gép",
+            "Ülő evezőgép",
+            "Mellnyomó gép",
+            "Tárogató / pec deck gép",
+            "Vállnyomó gép",
+            "Lábnyomó gép",
+            "Lábhajlító gép",
+            "Combfeszítő gép",
+            "Csípőtávolító gép",
+            "Csípőközelítő gép",
+            "Hátfeszítő pad",
+            "Rásegítéses húzódzkodó gép",
+            "Erősítő gumiszalag",
+            "Mini band",
+            "Medicinlabda",
+            "Slam labda",
+            "Svájci labda / fitball",
+            "Egyensúlypárna / BOSU",
+            "Masszázshenger",
+            "Kajakergométer",
+            "Evezős ergométer",
+            "Szobakerékpár",
+            "Futópad",
+            "Síergométer",
+            "Saját gép, külön fogantyúval"
+          ],
+          "combine_allowed": false,
+          "boat_transport": false,
+          "notes": "",
+          "archived": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-00000002e632",
+          "name": "Csillaghegyi uszoda",
+          "kind": "fixed",
+          "sports": [
+            "SWIMMING"
+          ],
+          "resources": [],
+          "combine_allowed": false,
+          "boat_transport": false,
+          "notes": "",
+          "archived": false
+        },
+        {
+          "id": "00000000-0000-0000-0000-00000002e633",
+          "name": "Otthon",
+          "kind": "fixed",
+          "sports": [
+            "STRENGTH"
+          ],
+          "resources": [
+            "Állítható csigás állvány",
+            "Kötélfogantyú"
+          ],
+          "combine_allowed": false,
+          "boat_transport": false,
+          "notes": "",
+          "archived": false
+        }
+      ],
+      "weekly_slots": [
+        {
+          "id": "00000000-0000-0000-0000-00000002e634",
+          "start_date": "2026-10-23",
+          "end_date": null,
+          "weekdays": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "details": {
+            "start_time": "08:00",
+            "end_time": "10:00",
+            "ends_next_day": false,
+            "start_fold": null,
+            "end_fold": null,
+            "max_minutes": 90,
+            "location_ids": [
+              "00000000-0000-0000-0000-00000002e631",
+              "00000000-0000-0000-0000-00000002e632"
+            ],
+            "effort_cap": "any",
+            "combine_allowed": false,
+            "notes": ""
+          }
+        }
+      ],
+      "exceptions": [],
+      "restrictions": []
+    }
+  },
+  "receipt": {
+    "identity_scope": "APPLICATION_DEMO_USER",
+    "artifact": {
+      "artifact_id": "pt-training-options:11111111111141118111111111111111:0000000000000000000000000003195d",
+      "athlete_id": "11111111-1111-4111-8111-111111111111",
+      "content_hash": "ce6a257adf2bcf3d9309431f17be6ac0c92cfe79859a78a89d6668a75b533322",
+      "created_at": "2026-10-23T10:00:00.000008+00:00",
+      "planning_authorized": false,
+      "proposal": {
+        "data": {
+          "exceptions": [],
+          "locations": [
+            {
+              "archived": false,
+              "boat_transport": false,
+              "combine_allowed": false,
+              "id": "00000000-0000-0000-0000-00000002e631",
+              "kind": "fixed",
+              "name": "Sirály csónakház",
+              "notes": "",
+              "resources": [
+                "Szabad padlófelület",
+                "Tornaszőnyeg",
+                "Vízszintes edzőpad",
+                "Állítható edzőpad",
+                "Fellépő / stabil edződoboz",
+                "Húzódzkodó rúd",
+                "Tolódzkodó állvány",
+                "Függesztéses heveder (TRX)",
+                "Tornagyűrű",
+                "Gumiszalag-rögzítési pont",
+                "Kézisúlyzó",
+                "Kettlebell",
+                "Súlyzórúd",
+                "Súlytárcsák",
+                "Tárcsarögzítők",
+                "Hajlított (EZ) rúd",
+                "Trap / hex rúd",
+                "Homokzsák / súlyzsák",
+                "Súlymellény",
+                "Erőkeret / guggolókeret",
+                "Guggolóállvány",
+                "Smith-keret",
+                "Landmine rúdrögzítő",
+                "Állítható csigás állvány",
+                "Felső csiga",
+                "Alsó csiga",
+                "Kötélfogantyú",
+                "Egykezes csigafogantyú",
+                "Széles lehúzórúd",
+                "Rövid csigás rúd",
+                "Bokapánt csigához",
+                "Mellhez lehúzó gép",
+                "Ülő evezőgép",
+                "Mellnyomó gép",
+                "Tárogató / pec deck gép",
+                "Vállnyomó gép",
+                "Lábnyomó gép",
+                "Lábhajlító gép",
+                "Combfeszítő gép",
+                "Csípőtávolító gép",
+                "Csípőközelítő gép",
+                "Hátfeszítő pad",
+                "Rásegítéses húzódzkodó gép",
+                "Erősítő gumiszalag",
+                "Mini band",
+                "Medicinlabda",
+                "Slam labda",
+                "Svájci labda / fitball",
+                "Egyensúlypárna / BOSU",
+                "Masszázshenger",
+                "Kajakergométer",
+                "Evezős ergométer",
+                "Szobakerékpár",
+                "Futópad",
+                "Síergométer",
+                "Saját gép, külön fogantyúval"
+              ],
+              "sports": [
+                "KAYAK",
+                "STRENGTH"
+              ]
+            },
+            {
+              "archived": false,
+              "boat_transport": false,
+              "combine_allowed": false,
+              "id": "00000000-0000-0000-0000-00000002e632",
+              "kind": "fixed",
+              "name": "Csillaghegyi uszoda",
+              "notes": "",
+              "resources": [],
+              "sports": [
+                "SWIMMING"
+              ]
+            },
+            {
+              "archived": false,
+              "boat_transport": false,
+              "combine_allowed": false,
+              "id": "00000000-0000-0000-0000-00000002e633",
+              "kind": "fixed",
+              "name": "Otthon",
+              "notes": "",
+              "resources": [
+                "Állítható csigás állvány",
+                "Kötélfogantyú"
+              ],
+              "sports": [
+                "STRENGTH"
+              ]
+            }
+          ],
+          "restrictions": [],
+          "schedule_end_date": null,
+          "schedule_start_date": "2026-10-23",
+          "timezone_name": "Europe/Budapest",
+          "weekly_slots": [
+            {
+              "details": {
+                "combine_allowed": false,
+                "effort_cap": "any",
+                "end_fold": null,
+                "end_time": "10:00",
+                "ends_next_day": false,
+                "location_ids": [
+                  "00000000-0000-0000-0000-00000002e631",
+                  "00000000-0000-0000-0000-00000002e632"
+                ],
+                "max_minutes": 90,
+                "notes": "",
+                "start_fold": null,
+                "start_time": "08:00"
+              },
+              "end_date": null,
+              "id": "00000000-0000-0000-0000-00000002e634",
+              "start_date": "2026-10-23",
+              "weekdays": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
+            }
+          ]
+        },
+        "previous_reference": null,
+        "request_id": "00000000-0000-0000-0000-00000003195d"
+      },
+      "revision": 1,
+      "schema_version": "training-options-v0.1",
+      "workouts_changed": false
+    },
+    "committed": true,
+    "reused": false,
+    "durable_available_at": "2026-10-23T10:00:00.000009+00:00",
+    "planning_authorized": false,
+    "workouts_changed": false
+  },
+  "context": {
+    "schema_version": "training-options-v0.1",
+    "athlete_id": "11111111-1111-4111-8111-111111111111",
+    "timezone_name": "Europe/Budapest",
+    "local_today": "2026-10-23",
+    "start_date": "2026-10-24",
+    "end_date": "2026-10-30",
+    "data": {
+      "exceptions": [],
+      "locations": [
+        {
+          "archived": false,
+          "boat_transport": false,
+          "combine_allowed": false,
+          "id": "00000000-0000-0000-0000-00000002e631",
+          "kind": "fixed",
+          "name": "Sirály csónakház",
+          "notes": "",
+          "resources": [
+            "Szabad padlófelület",
+            "Tornaszőnyeg",
+            "Vízszintes edzőpad",
+            "Állítható edzőpad",
+            "Fellépő / stabil edződoboz",
+            "Húzódzkodó rúd",
+            "Tolódzkodó állvány",
+            "Függesztéses heveder (TRX)",
+            "Tornagyűrű",
+            "Gumiszalag-rögzítési pont",
+            "Kézisúlyzó",
+            "Kettlebell",
+            "Súlyzórúd",
+            "Súlytárcsák",
+            "Tárcsarögzítők",
+            "Hajlított (EZ) rúd",
+            "Trap / hex rúd",
+            "Homokzsák / súlyzsák",
+            "Súlymellény",
+            "Erőkeret / guggolókeret",
+            "Guggolóállvány",
+            "Smith-keret",
+            "Landmine rúdrögzítő",
+            "Állítható csigás állvány",
+            "Felső csiga",
+            "Alsó csiga",
+            "Kötélfogantyú",
+            "Egykezes csigafogantyú",
+            "Széles lehúzórúd",
+            "Rövid csigás rúd",
+            "Bokapánt csigához",
+            "Mellhez lehúzó gép",
+            "Ülő evezőgép",
+            "Mellnyomó gép",
+            "Tárogató / pec deck gép",
+            "Vállnyomó gép",
+            "Lábnyomó gép",
+            "Lábhajlító gép",
+            "Combfeszítő gép",
+            "Csípőtávolító gép",
+            "Csípőközelítő gép",
+            "Hátfeszítő pad",
+            "Rásegítéses húzódzkodó gép",
+            "Erősítő gumiszalag",
+            "Mini band",
+            "Medicinlabda",
+            "Slam labda",
+            "Svájci labda / fitball",
+            "Egyensúlypárna / BOSU",
+            "Masszázshenger",
+            "Kajakergométer",
+            "Evezős ergométer",
+            "Szobakerékpár",
+            "Futópad",
+            "Síergométer",
+            "Saját gép, külön fogantyúval"
+          ],
+          "sports": [
+            "KAYAK",
+            "STRENGTH"
+          ]
+        },
+        {
+          "archived": false,
+          "boat_transport": false,
+          "combine_allowed": false,
+          "id": "00000000-0000-0000-0000-00000002e632",
+          "kind": "fixed",
+          "name": "Csillaghegyi uszoda",
+          "notes": "",
+          "resources": [],
+          "sports": [
+            "SWIMMING"
+          ]
+        },
+        {
+          "archived": false,
+          "boat_transport": false,
+          "combine_allowed": false,
+          "id": "00000000-0000-0000-0000-00000002e633",
+          "kind": "fixed",
+          "name": "Otthon",
+          "notes": "",
+          "resources": [
+            "Állítható csigás állvány",
+            "Kötélfogantyú"
+          ],
+          "sports": [
+            "STRENGTH"
+          ]
+        }
+      ],
+      "restrictions": [],
+      "schedule_end_date": null,
+      "schedule_start_date": "2026-10-23",
+      "timezone_name": "Europe/Budapest",
+      "weekly_slots": [
+        {
+          "details": {
+            "combine_allowed": false,
+            "effort_cap": "any",
+            "end_fold": null,
+            "end_time": "10:00",
+            "ends_next_day": false,
+            "location_ids": [
+              "00000000-0000-0000-0000-00000002e631",
+              "00000000-0000-0000-0000-00000002e632"
+            ],
+            "max_minutes": 90,
+            "notes": "",
+            "start_fold": null,
+            "start_time": "08:00"
+          },
+          "end_date": null,
+          "id": "00000000-0000-0000-0000-00000002e634",
+          "start_date": "2026-10-23",
+          "weekdays": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ]
+    },
+    "saved": {
+      "identity_scope": "APPLICATION_DEMO_USER",
+      "artifact": {
+        "artifact_id": "pt-training-options:11111111111141118111111111111111:0000000000000000000000000003195d",
+        "athlete_id": "11111111-1111-4111-8111-111111111111",
+        "content_hash": "ce6a257adf2bcf3d9309431f17be6ac0c92cfe79859a78a89d6668a75b533322",
+        "created_at": "2026-10-23T10:00:00.000008+00:00",
+        "planning_authorized": false,
+        "proposal": {
+          "data": {
+            "exceptions": [],
+            "locations": [
+              {
+                "archived": false,
+                "boat_transport": false,
+                "combine_allowed": false,
+                "id": "00000000-0000-0000-0000-00000002e631",
+                "kind": "fixed",
+                "name": "Sirály csónakház",
+                "notes": "",
+                "resources": [
+                  "Szabad padlófelület",
+                  "Tornaszőnyeg",
+                  "Vízszintes edzőpad",
+                  "Állítható edzőpad",
+                  "Fellépő / stabil edződoboz",
+                  "Húzódzkodó rúd",
+                  "Tolódzkodó állvány",
+                  "Függesztéses heveder (TRX)",
+                  "Tornagyűrű",
+                  "Gumiszalag-rögzítési pont",
+                  "Kézisúlyzó",
+                  "Kettlebell",
+                  "Súlyzórúd",
+                  "Súlytárcsák",
+                  "Tárcsarögzítők",
+                  "Hajlított (EZ) rúd",
+                  "Trap / hex rúd",
+                  "Homokzsák / súlyzsák",
+                  "Súlymellény",
+                  "Erőkeret / guggolókeret",
+                  "Guggolóállvány",
+                  "Smith-keret",
+                  "Landmine rúdrögzítő",
+                  "Állítható csigás állvány",
+                  "Felső csiga",
+                  "Alsó csiga",
+                  "Kötélfogantyú",
+                  "Egykezes csigafogantyú",
+                  "Széles lehúzórúd",
+                  "Rövid csigás rúd",
+                  "Bokapánt csigához",
+                  "Mellhez lehúzó gép",
+                  "Ülő evezőgép",
+                  "Mellnyomó gép",
+                  "Tárogató / pec deck gép",
+                  "Vállnyomó gép",
+                  "Lábnyomó gép",
+                  "Lábhajlító gép",
+                  "Combfeszítő gép",
+                  "Csípőtávolító gép",
+                  "Csípőközelítő gép",
+                  "Hátfeszítő pad",
+                  "Rásegítéses húzódzkodó gép",
+                  "Erősítő gumiszalag",
+                  "Mini band",
+                  "Medicinlabda",
+                  "Slam labda",
+                  "Svájci labda / fitball",
+                  "Egyensúlypárna / BOSU",
+                  "Masszázshenger",
+                  "Kajakergométer",
+                  "Evezős ergométer",
+                  "Szobakerékpár",
+                  "Futópad",
+                  "Síergométer",
+                  "Saját gép, külön fogantyúval"
+                ],
+                "sports": [
+                  "KAYAK",
+                  "STRENGTH"
+                ]
+              },
+              {
+                "archived": false,
+                "boat_transport": false,
+                "combine_allowed": false,
+                "id": "00000000-0000-0000-0000-00000002e632",
+                "kind": "fixed",
+                "name": "Csillaghegyi uszoda",
+                "notes": "",
+                "resources": [],
+                "sports": [
+                  "SWIMMING"
+                ]
+              },
+              {
+                "archived": false,
+                "boat_transport": false,
+                "combine_allowed": false,
+                "id": "00000000-0000-0000-0000-00000002e633",
+                "kind": "fixed",
+                "name": "Otthon",
+                "notes": "",
+                "resources": [
+                  "Állítható csigás állvány",
+                  "Kötélfogantyú"
+                ],
+                "sports": [
+                  "STRENGTH"
+                ]
+              }
+            ],
+            "restrictions": [],
+            "schedule_end_date": null,
+            "schedule_start_date": "2026-10-23",
+            "timezone_name": "Europe/Budapest",
+            "weekly_slots": [
+              {
+                "details": {
+                  "combine_allowed": false,
+                  "effort_cap": "any",
+                  "end_fold": null,
+                  "end_time": "10:00",
+                  "ends_next_day": false,
+                  "location_ids": [
+                    "00000000-0000-0000-0000-00000002e631",
+                    "00000000-0000-0000-0000-00000002e632"
+                  ],
+                  "max_minutes": 90,
+                  "notes": "",
+                  "start_fold": null,
+                  "start_time": "08:00"
+                },
+                "end_date": null,
+                "id": "00000000-0000-0000-0000-00000002e634",
+                "start_date": "2026-10-23",
+                "weekdays": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ]
+              }
+            ]
+          },
+          "previous_reference": null,
+          "request_id": "00000000-0000-0000-0000-00000003195d"
+        },
+        "revision": 1,
+        "schema_version": "training-options-v0.1",
+        "workouts_changed": false
+      },
+      "committed": true,
+      "reused": true,
+      "durable_available_at": "2026-10-23T10:00:00.000009+00:00",
+      "planning_authorized": false,
+      "workouts_changed": false
+    },
+    "reference": {
+      "artifact_id": "pt-training-options:11111111111141118111111111111111:0000000000000000000000000003195d",
+      "content_hash": "ce6a257adf2bcf3d9309431f17be6ac0c92cfe79859a78a89d6668a75b533322"
+    },
+    "groups": [
+      {
+        "key": "options:00000000-0000-0000-0000-00000002e634:2026-10-23",
+        "slot_id": "00000000-0000-0000-0000-00000002e634",
+        "date": "2026-10-23",
+        "overridden": false,
+        "details": {
+          "combine_allowed": false,
+          "effort_cap": "any",
+          "end_fold": null,
+          "end_time": "10:00",
+          "ends_next_day": false,
+          "location_ids": [
+            "00000000-0000-0000-0000-00000002e631",
+            "00000000-0000-0000-0000-00000002e632"
+          ],
+          "max_minutes": 90,
+          "notes": "",
+          "start_fold": null,
+          "start_time": "08:00"
+        },
+        "alternatives": [
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e631",
+            "name": "Sirály csónakház",
+            "sports": [
+              "KAYAK",
+              "STRENGTH"
+            ],
+            "resources": [
+              "Szabad padlófelület",
+              "Tornaszőnyeg",
+              "Vízszintes edzőpad",
+              "Állítható edzőpad",
+              "Fellépő / stabil edződoboz",
+              "Húzódzkodó rúd",
+              "Tolódzkodó állvány",
+              "Függesztéses heveder (TRX)",
+              "Tornagyűrű",
+              "Gumiszalag-rögzítési pont",
+              "Kézisúlyzó",
+              "Kettlebell",
+              "Súlyzórúd",
+              "Súlytárcsák",
+              "Tárcsarögzítők",
+              "Hajlított (EZ) rúd",
+              "Trap / hex rúd",
+              "Homokzsák / súlyzsák",
+              "Súlymellény",
+              "Erőkeret / guggolókeret",
+              "Guggolóállvány",
+              "Smith-keret",
+              "Landmine rúdrögzítő",
+              "Állítható csigás állvány",
+              "Felső csiga",
+              "Alsó csiga",
+              "Kötélfogantyú",
+              "Egykezes csigafogantyú",
+              "Széles lehúzórúd",
+              "Rövid csigás rúd",
+              "Bokapánt csigához",
+              "Mellhez lehúzó gép",
+              "Ülő evezőgép",
+              "Mellnyomó gép",
+              "Tárogató / pec deck gép",
+              "Vállnyomó gép",
+              "Lábnyomó gép",
+              "Lábhajlító gép",
+              "Combfeszítő gép",
+              "Csípőtávolító gép",
+              "Csípőközelítő gép",
+              "Hátfeszítő pad",
+              "Rásegítéses húzódzkodó gép",
+              "Erősítő gumiszalag",
+              "Mini band",
+              "Medicinlabda",
+              "Slam labda",
+              "Svájci labda / fitball",
+              "Egyensúlypárna / BOSU",
+              "Masszázshenger",
+              "Kajakergométer",
+              "Evezős ergométer",
+              "Szobakerékpár",
+              "Futópad",
+              "Síergométer",
+              "Saját gép, külön fogantyúval"
+            ],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          },
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e632",
+            "name": "Csillaghegyi uszoda",
+            "sports": [
+              "SWIMMING"
+            ],
+            "resources": [],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          }
+        ]
+      },
+      {
+        "key": "options:00000000-0000-0000-0000-00000002e634:2026-10-24",
+        "slot_id": "00000000-0000-0000-0000-00000002e634",
+        "date": "2026-10-24",
+        "overridden": false,
+        "details": {
+          "combine_allowed": false,
+          "effort_cap": "any",
+          "end_fold": null,
+          "end_time": "10:00",
+          "ends_next_day": false,
+          "location_ids": [
+            "00000000-0000-0000-0000-00000002e631",
+            "00000000-0000-0000-0000-00000002e632"
+          ],
+          "max_minutes": 90,
+          "notes": "",
+          "start_fold": null,
+          "start_time": "08:00"
+        },
+        "alternatives": [
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e631",
+            "name": "Sirály csónakház",
+            "sports": [
+              "KAYAK",
+              "STRENGTH"
+            ],
+            "resources": [
+              "Szabad padlófelület",
+              "Tornaszőnyeg",
+              "Vízszintes edzőpad",
+              "Állítható edzőpad",
+              "Fellépő / stabil edződoboz",
+              "Húzódzkodó rúd",
+              "Tolódzkodó állvány",
+              "Függesztéses heveder (TRX)",
+              "Tornagyűrű",
+              "Gumiszalag-rögzítési pont",
+              "Kézisúlyzó",
+              "Kettlebell",
+              "Súlyzórúd",
+              "Súlytárcsák",
+              "Tárcsarögzítők",
+              "Hajlított (EZ) rúd",
+              "Trap / hex rúd",
+              "Homokzsák / súlyzsák",
+              "Súlymellény",
+              "Erőkeret / guggolókeret",
+              "Guggolóállvány",
+              "Smith-keret",
+              "Landmine rúdrögzítő",
+              "Állítható csigás állvány",
+              "Felső csiga",
+              "Alsó csiga",
+              "Kötélfogantyú",
+              "Egykezes csigafogantyú",
+              "Széles lehúzórúd",
+              "Rövid csigás rúd",
+              "Bokapánt csigához",
+              "Mellhez lehúzó gép",
+              "Ülő evezőgép",
+              "Mellnyomó gép",
+              "Tárogató / pec deck gép",
+              "Vállnyomó gép",
+              "Lábnyomó gép",
+              "Lábhajlító gép",
+              "Combfeszítő gép",
+              "Csípőtávolító gép",
+              "Csípőközelítő gép",
+              "Hátfeszítő pad",
+              "Rásegítéses húzódzkodó gép",
+              "Erősítő gumiszalag",
+              "Mini band",
+              "Medicinlabda",
+              "Slam labda",
+              "Svájci labda / fitball",
+              "Egyensúlypárna / BOSU",
+              "Masszázshenger",
+              "Kajakergométer",
+              "Evezős ergométer",
+              "Szobakerékpár",
+              "Futópad",
+              "Síergométer",
+              "Saját gép, külön fogantyúval"
+            ],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          },
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e632",
+            "name": "Csillaghegyi uszoda",
+            "sports": [
+              "SWIMMING"
+            ],
+            "resources": [],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          }
+        ]
+      },
+      {
+        "key": "options:00000000-0000-0000-0000-00000002e634:2026-10-25",
+        "slot_id": "00000000-0000-0000-0000-00000002e634",
+        "date": "2026-10-25",
+        "overridden": false,
+        "details": {
+          "combine_allowed": false,
+          "effort_cap": "any",
+          "end_fold": null,
+          "end_time": "10:00",
+          "ends_next_day": false,
+          "location_ids": [
+            "00000000-0000-0000-0000-00000002e631",
+            "00000000-0000-0000-0000-00000002e632"
+          ],
+          "max_minutes": 90,
+          "notes": "",
+          "start_fold": null,
+          "start_time": "08:00"
+        },
+        "alternatives": [
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e631",
+            "name": "Sirály csónakház",
+            "sports": [
+              "KAYAK",
+              "STRENGTH"
+            ],
+            "resources": [
+              "Szabad padlófelület",
+              "Tornaszőnyeg",
+              "Vízszintes edzőpad",
+              "Állítható edzőpad",
+              "Fellépő / stabil edződoboz",
+              "Húzódzkodó rúd",
+              "Tolódzkodó állvány",
+              "Függesztéses heveder (TRX)",
+              "Tornagyűrű",
+              "Gumiszalag-rögzítési pont",
+              "Kézisúlyzó",
+              "Kettlebell",
+              "Súlyzórúd",
+              "Súlytárcsák",
+              "Tárcsarögzítők",
+              "Hajlított (EZ) rúd",
+              "Trap / hex rúd",
+              "Homokzsák / súlyzsák",
+              "Súlymellény",
+              "Erőkeret / guggolókeret",
+              "Guggolóállvány",
+              "Smith-keret",
+              "Landmine rúdrögzítő",
+              "Állítható csigás állvány",
+              "Felső csiga",
+              "Alsó csiga",
+              "Kötélfogantyú",
+              "Egykezes csigafogantyú",
+              "Széles lehúzórúd",
+              "Rövid csigás rúd",
+              "Bokapánt csigához",
+              "Mellhez lehúzó gép",
+              "Ülő evezőgép",
+              "Mellnyomó gép",
+              "Tárogató / pec deck gép",
+              "Vállnyomó gép",
+              "Lábnyomó gép",
+              "Lábhajlító gép",
+              "Combfeszítő gép",
+              "Csípőtávolító gép",
+              "Csípőközelítő gép",
+              "Hátfeszítő pad",
+              "Rásegítéses húzódzkodó gép",
+              "Erősítő gumiszalag",
+              "Mini band",
+              "Medicinlabda",
+              "Slam labda",
+              "Svájci labda / fitball",
+              "Egyensúlypárna / BOSU",
+              "Masszázshenger",
+              "Kajakergométer",
+              "Evezős ergométer",
+              "Szobakerékpár",
+              "Futópad",
+              "Síergométer",
+              "Saját gép, külön fogantyúval"
+            ],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          },
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e632",
+            "name": "Csillaghegyi uszoda",
+            "sports": [
+              "SWIMMING"
+            ],
+            "resources": [],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          }
+        ]
+      },
+      {
+        "key": "options:00000000-0000-0000-0000-00000002e634:2026-10-26",
+        "slot_id": "00000000-0000-0000-0000-00000002e634",
+        "date": "2026-10-26",
+        "overridden": false,
+        "details": {
+          "combine_allowed": false,
+          "effort_cap": "any",
+          "end_fold": null,
+          "end_time": "10:00",
+          "ends_next_day": false,
+          "location_ids": [
+            "00000000-0000-0000-0000-00000002e631",
+            "00000000-0000-0000-0000-00000002e632"
+          ],
+          "max_minutes": 90,
+          "notes": "",
+          "start_fold": null,
+          "start_time": "08:00"
+        },
+        "alternatives": [
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e631",
+            "name": "Sirály csónakház",
+            "sports": [
+              "KAYAK",
+              "STRENGTH"
+            ],
+            "resources": [
+              "Szabad padlófelület",
+              "Tornaszőnyeg",
+              "Vízszintes edzőpad",
+              "Állítható edzőpad",
+              "Fellépő / stabil edződoboz",
+              "Húzódzkodó rúd",
+              "Tolódzkodó állvány",
+              "Függesztéses heveder (TRX)",
+              "Tornagyűrű",
+              "Gumiszalag-rögzítési pont",
+              "Kézisúlyzó",
+              "Kettlebell",
+              "Súlyzórúd",
+              "Súlytárcsák",
+              "Tárcsarögzítők",
+              "Hajlított (EZ) rúd",
+              "Trap / hex rúd",
+              "Homokzsák / súlyzsák",
+              "Súlymellény",
+              "Erőkeret / guggolókeret",
+              "Guggolóállvány",
+              "Smith-keret",
+              "Landmine rúdrögzítő",
+              "Állítható csigás állvány",
+              "Felső csiga",
+              "Alsó csiga",
+              "Kötélfogantyú",
+              "Egykezes csigafogantyú",
+              "Széles lehúzórúd",
+              "Rövid csigás rúd",
+              "Bokapánt csigához",
+              "Mellhez lehúzó gép",
+              "Ülő evezőgép",
+              "Mellnyomó gép",
+              "Tárogató / pec deck gép",
+              "Vállnyomó gép",
+              "Lábnyomó gép",
+              "Lábhajlító gép",
+              "Combfeszítő gép",
+              "Csípőtávolító gép",
+              "Csípőközelítő gép",
+              "Hátfeszítő pad",
+              "Rásegítéses húzódzkodó gép",
+              "Erősítő gumiszalag",
+              "Mini band",
+              "Medicinlabda",
+              "Slam labda",
+              "Svájci labda / fitball",
+              "Egyensúlypárna / BOSU",
+              "Masszázshenger",
+              "Kajakergométer",
+              "Evezős ergométer",
+              "Szobakerékpár",
+              "Futópad",
+              "Síergométer",
+              "Saját gép, külön fogantyúval"
+            ],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          },
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e632",
+            "name": "Csillaghegyi uszoda",
+            "sports": [
+              "SWIMMING"
+            ],
+            "resources": [],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          }
+        ]
+      },
+      {
+        "key": "options:00000000-0000-0000-0000-00000002e634:2026-10-27",
+        "slot_id": "00000000-0000-0000-0000-00000002e634",
+        "date": "2026-10-27",
+        "overridden": false,
+        "details": {
+          "combine_allowed": false,
+          "effort_cap": "any",
+          "end_fold": null,
+          "end_time": "10:00",
+          "ends_next_day": false,
+          "location_ids": [
+            "00000000-0000-0000-0000-00000002e631",
+            "00000000-0000-0000-0000-00000002e632"
+          ],
+          "max_minutes": 90,
+          "notes": "",
+          "start_fold": null,
+          "start_time": "08:00"
+        },
+        "alternatives": [
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e631",
+            "name": "Sirály csónakház",
+            "sports": [
+              "KAYAK",
+              "STRENGTH"
+            ],
+            "resources": [
+              "Szabad padlófelület",
+              "Tornaszőnyeg",
+              "Vízszintes edzőpad",
+              "Állítható edzőpad",
+              "Fellépő / stabil edződoboz",
+              "Húzódzkodó rúd",
+              "Tolódzkodó állvány",
+              "Függesztéses heveder (TRX)",
+              "Tornagyűrű",
+              "Gumiszalag-rögzítési pont",
+              "Kézisúlyzó",
+              "Kettlebell",
+              "Súlyzórúd",
+              "Súlytárcsák",
+              "Tárcsarögzítők",
+              "Hajlított (EZ) rúd",
+              "Trap / hex rúd",
+              "Homokzsák / súlyzsák",
+              "Súlymellény",
+              "Erőkeret / guggolókeret",
+              "Guggolóállvány",
+              "Smith-keret",
+              "Landmine rúdrögzítő",
+              "Állítható csigás állvány",
+              "Felső csiga",
+              "Alsó csiga",
+              "Kötélfogantyú",
+              "Egykezes csigafogantyú",
+              "Széles lehúzórúd",
+              "Rövid csigás rúd",
+              "Bokapánt csigához",
+              "Mellhez lehúzó gép",
+              "Ülő evezőgép",
+              "Mellnyomó gép",
+              "Tárogató / pec deck gép",
+              "Vállnyomó gép",
+              "Lábnyomó gép",
+              "Lábhajlító gép",
+              "Combfeszítő gép",
+              "Csípőtávolító gép",
+              "Csípőközelítő gép",
+              "Hátfeszítő pad",
+              "Rásegítéses húzódzkodó gép",
+              "Erősítő gumiszalag",
+              "Mini band",
+              "Medicinlabda",
+              "Slam labda",
+              "Svájci labda / fitball",
+              "Egyensúlypárna / BOSU",
+              "Masszázshenger",
+              "Kajakergométer",
+              "Evezős ergométer",
+              "Szobakerékpár",
+              "Futópad",
+              "Síergométer",
+              "Saját gép, külön fogantyúval"
+            ],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          },
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e632",
+            "name": "Csillaghegyi uszoda",
+            "sports": [
+              "SWIMMING"
+            ],
+            "resources": [],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          }
+        ]
+      },
+      {
+        "key": "options:00000000-0000-0000-0000-00000002e634:2026-10-28",
+        "slot_id": "00000000-0000-0000-0000-00000002e634",
+        "date": "2026-10-28",
+        "overridden": false,
+        "details": {
+          "combine_allowed": false,
+          "effort_cap": "any",
+          "end_fold": null,
+          "end_time": "10:00",
+          "ends_next_day": false,
+          "location_ids": [
+            "00000000-0000-0000-0000-00000002e631",
+            "00000000-0000-0000-0000-00000002e632"
+          ],
+          "max_minutes": 90,
+          "notes": "",
+          "start_fold": null,
+          "start_time": "08:00"
+        },
+        "alternatives": [
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e631",
+            "name": "Sirály csónakház",
+            "sports": [
+              "KAYAK",
+              "STRENGTH"
+            ],
+            "resources": [
+              "Szabad padlófelület",
+              "Tornaszőnyeg",
+              "Vízszintes edzőpad",
+              "Állítható edzőpad",
+              "Fellépő / stabil edződoboz",
+              "Húzódzkodó rúd",
+              "Tolódzkodó állvány",
+              "Függesztéses heveder (TRX)",
+              "Tornagyűrű",
+              "Gumiszalag-rögzítési pont",
+              "Kézisúlyzó",
+              "Kettlebell",
+              "Súlyzórúd",
+              "Súlytárcsák",
+              "Tárcsarögzítők",
+              "Hajlított (EZ) rúd",
+              "Trap / hex rúd",
+              "Homokzsák / súlyzsák",
+              "Súlymellény",
+              "Erőkeret / guggolókeret",
+              "Guggolóállvány",
+              "Smith-keret",
+              "Landmine rúdrögzítő",
+              "Állítható csigás állvány",
+              "Felső csiga",
+              "Alsó csiga",
+              "Kötélfogantyú",
+              "Egykezes csigafogantyú",
+              "Széles lehúzórúd",
+              "Rövid csigás rúd",
+              "Bokapánt csigához",
+              "Mellhez lehúzó gép",
+              "Ülő evezőgép",
+              "Mellnyomó gép",
+              "Tárogató / pec deck gép",
+              "Vállnyomó gép",
+              "Lábnyomó gép",
+              "Lábhajlító gép",
+              "Combfeszítő gép",
+              "Csípőtávolító gép",
+              "Csípőközelítő gép",
+              "Hátfeszítő pad",
+              "Rásegítéses húzódzkodó gép",
+              "Erősítő gumiszalag",
+              "Mini band",
+              "Medicinlabda",
+              "Slam labda",
+              "Svájci labda / fitball",
+              "Egyensúlypárna / BOSU",
+              "Masszázshenger",
+              "Kajakergométer",
+              "Evezős ergométer",
+              "Szobakerékpár",
+              "Futópad",
+              "Síergométer",
+              "Saját gép, külön fogantyúval"
+            ],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          },
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e632",
+            "name": "Csillaghegyi uszoda",
+            "sports": [
+              "SWIMMING"
+            ],
+            "resources": [],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          }
+        ]
+      },
+      {
+        "key": "options:00000000-0000-0000-0000-00000002e634:2026-10-29",
+        "slot_id": "00000000-0000-0000-0000-00000002e634",
+        "date": "2026-10-29",
+        "overridden": false,
+        "details": {
+          "combine_allowed": false,
+          "effort_cap": "any",
+          "end_fold": null,
+          "end_time": "10:00",
+          "ends_next_day": false,
+          "location_ids": [
+            "00000000-0000-0000-0000-00000002e631",
+            "00000000-0000-0000-0000-00000002e632"
+          ],
+          "max_minutes": 90,
+          "notes": "",
+          "start_fold": null,
+          "start_time": "08:00"
+        },
+        "alternatives": [
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e631",
+            "name": "Sirály csónakház",
+            "sports": [
+              "KAYAK",
+              "STRENGTH"
+            ],
+            "resources": [
+              "Szabad padlófelület",
+              "Tornaszőnyeg",
+              "Vízszintes edzőpad",
+              "Állítható edzőpad",
+              "Fellépő / stabil edződoboz",
+              "Húzódzkodó rúd",
+              "Tolódzkodó állvány",
+              "Függesztéses heveder (TRX)",
+              "Tornagyűrű",
+              "Gumiszalag-rögzítési pont",
+              "Kézisúlyzó",
+              "Kettlebell",
+              "Súlyzórúd",
+              "Súlytárcsák",
+              "Tárcsarögzítők",
+              "Hajlított (EZ) rúd",
+              "Trap / hex rúd",
+              "Homokzsák / súlyzsák",
+              "Súlymellény",
+              "Erőkeret / guggolókeret",
+              "Guggolóállvány",
+              "Smith-keret",
+              "Landmine rúdrögzítő",
+              "Állítható csigás állvány",
+              "Felső csiga",
+              "Alsó csiga",
+              "Kötélfogantyú",
+              "Egykezes csigafogantyú",
+              "Széles lehúzórúd",
+              "Rövid csigás rúd",
+              "Bokapánt csigához",
+              "Mellhez lehúzó gép",
+              "Ülő evezőgép",
+              "Mellnyomó gép",
+              "Tárogató / pec deck gép",
+              "Vállnyomó gép",
+              "Lábnyomó gép",
+              "Lábhajlító gép",
+              "Combfeszítő gép",
+              "Csípőtávolító gép",
+              "Csípőközelítő gép",
+              "Hátfeszítő pad",
+              "Rásegítéses húzódzkodó gép",
+              "Erősítő gumiszalag",
+              "Mini band",
+              "Medicinlabda",
+              "Slam labda",
+              "Svájci labda / fitball",
+              "Egyensúlypárna / BOSU",
+              "Masszázshenger",
+              "Kajakergométer",
+              "Evezős ergométer",
+              "Szobakerékpár",
+              "Futópad",
+              "Síergométer",
+              "Saját gép, külön fogantyúval"
+            ],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          },
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e632",
+            "name": "Csillaghegyi uszoda",
+            "sports": [
+              "SWIMMING"
+            ],
+            "resources": [],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          }
+        ]
+      },
+      {
+        "key": "options:00000000-0000-0000-0000-00000002e634:2026-10-30",
+        "slot_id": "00000000-0000-0000-0000-00000002e634",
+        "date": "2026-10-30",
+        "overridden": false,
+        "details": {
+          "combine_allowed": false,
+          "effort_cap": "any",
+          "end_fold": null,
+          "end_time": "10:00",
+          "ends_next_day": false,
+          "location_ids": [
+            "00000000-0000-0000-0000-00000002e631",
+            "00000000-0000-0000-0000-00000002e632"
+          ],
+          "max_minutes": 90,
+          "notes": "",
+          "start_fold": null,
+          "start_time": "08:00"
+        },
+        "alternatives": [
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e631",
+            "name": "Sirály csónakház",
+            "sports": [
+              "KAYAK",
+              "STRENGTH"
+            ],
+            "resources": [
+              "Szabad padlófelület",
+              "Tornaszőnyeg",
+              "Vízszintes edzőpad",
+              "Állítható edzőpad",
+              "Fellépő / stabil edződoboz",
+              "Húzódzkodó rúd",
+              "Tolódzkodó állvány",
+              "Függesztéses heveder (TRX)",
+              "Tornagyűrű",
+              "Gumiszalag-rögzítési pont",
+              "Kézisúlyzó",
+              "Kettlebell",
+              "Súlyzórúd",
+              "Súlytárcsák",
+              "Tárcsarögzítők",
+              "Hajlított (EZ) rúd",
+              "Trap / hex rúd",
+              "Homokzsák / súlyzsák",
+              "Súlymellény",
+              "Erőkeret / guggolókeret",
+              "Guggolóállvány",
+              "Smith-keret",
+              "Landmine rúdrögzítő",
+              "Állítható csigás állvány",
+              "Felső csiga",
+              "Alsó csiga",
+              "Kötélfogantyú",
+              "Egykezes csigafogantyú",
+              "Széles lehúzórúd",
+              "Rövid csigás rúd",
+              "Bokapánt csigához",
+              "Mellhez lehúzó gép",
+              "Ülő evezőgép",
+              "Mellnyomó gép",
+              "Tárogató / pec deck gép",
+              "Vállnyomó gép",
+              "Lábnyomó gép",
+              "Lábhajlító gép",
+              "Combfeszítő gép",
+              "Csípőtávolító gép",
+              "Csípőközelítő gép",
+              "Hátfeszítő pad",
+              "Rásegítéses húzódzkodó gép",
+              "Erősítő gumiszalag",
+              "Mini band",
+              "Medicinlabda",
+              "Slam labda",
+              "Svájci labda / fitball",
+              "Egyensúlypárna / BOSU",
+              "Masszázshenger",
+              "Kajakergométer",
+              "Evezős ergométer",
+              "Szobakerékpár",
+              "Futópad",
+              "Síergométer",
+              "Saját gép, külön fogantyúval"
+            ],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          },
+          {
+            "location_id": "00000000-0000-0000-0000-00000002e632",
+            "name": "Csillaghegyi uszoda",
+            "sports": [
+              "SWIMMING"
+            ],
+            "resources": [],
+            "combine_allowed": false,
+            "restrictions": [],
+            "issues": []
+          }
+        ]
+      }
+    ],
+    "override_days": [
+      "2026-10-23",
+      "2026-10-24",
+      "2026-10-25",
+      "2026-10-26",
+      "2026-10-27",
+      "2026-10-28",
+      "2026-10-29",
+      "2026-10-30"
+    ],
+    "strength_catalog": {
+      "schema_version": "strength-catalog-v0.1",
+      "version": "2026-11-05",
+      "scope": "equipment_and_exercise_inventory",
+      "planning_authorized": false,
+      "workouts_changed": false,
+      "categories": [
+        {
+          "id": "basics",
+          "label": "Alapfelszerelés és saját testsúly"
+        },
+        {
+          "id": "free_weights",
+          "label": "Szabad súlyok"
+        },
+        {
+          "id": "racks",
+          "label": "Állványok és keretek"
+        },
+        {
+          "id": "cables",
+          "label": "Csigák és tartozékok"
+        },
+        {
+          "id": "machines",
+          "label": "Erősítőgépek"
+        },
+        {
+          "id": "functional",
+          "label": "Szalagok, labdák és kiegészítők"
+        },
+        {
+          "id": "ergometers",
+          "label": "Ergométerek és bemelegítő eszközök"
+        }
+      ],
+      "movements": [
+        {
+          "id": "pull",
+          "label": "Hát, vállöv és karok"
+        },
+        {
+          "id": "core",
+          "label": "Törzs és rotáció"
+        },
+        {
+          "id": "legs",
+          "label": "Csípő és láb"
+        },
+        {
+          "id": "push",
+          "label": "Nyomó mozgások"
+        },
+        {
+          "id": "functional",
+          "label": "Kiegészítő és teljes testes"
+        },
+        {
+          "id": "ergometers",
+          "label": "Ergométeres mozgások"
+        }
+      ],
+      "equipment": [
+        {
+          "id": "floor",
+          "label": "Szabad padlófelület",
+          "resource": "Szabad padlófelület",
+          "category": "basics",
+          "illustration": "mat",
+          "aliases": [],
+          "hint": "Saját testsúlyos és talajon végzett mozgások helye."
+        },
+        {
+          "id": "mat",
+          "label": "Tornaszőnyeg",
+          "resource": "Tornaszőnyeg",
+          "category": "basics",
+          "illustration": "mat",
+          "aliases": [
+            "Edzőszőnyeg",
+            "Jógaszőnyeg"
+          ],
+          "hint": "Talajon végzett gyakorlatokhoz."
+        },
+        {
+          "id": "flat_bench",
+          "label": "Vízszintes edzőpad",
+          "resource": "Vízszintes edzőpad",
+          "category": "basics",
+          "illustration": "bench",
+          "aliases": [
+            "Fekpad"
+          ],
+          "hint": "Vízszintes, stabil edzőpad."
+        },
+        {
+          "id": "adjustable_bench",
+          "label": "Állítható edzőpad",
+          "resource": "Állítható edzőpad",
+          "category": "basics",
+          "illustration": "incline_bench",
+          "aliases": [
+            "Állítható pad"
+          ],
+          "hint": "Állítható háttámlájú edzőpad."
+        },
+        {
+          "id": "box",
+          "label": "Fellépő / stabil edződoboz",
+          "resource": "Fellépő / stabil edződoboz",
+          "category": "basics",
+          "illustration": "box",
+          "aliases": [
+            "Plyo box",
+            "Step pad"
+          ],
+          "hint": "A rendelkezésre álló magasságot a megjegyzésben adhatod meg."
+        },
+        {
+          "id": "pullup_bar",
+          "label": "Húzódzkodó rúd",
+          "resource": "Húzódzkodó rúd",
+          "category": "basics",
+          "illustration": "pullup",
+          "aliases": [
+            "Húzódzkodó",
+            "Húzódzkodórúd"
+          ],
+          "hint": "A kerettől külön is jelölhető."
+        },
+        {
+          "id": "dip_bars",
+          "label": "Tolódzkodó állvány",
+          "resource": "Tolódzkodó állvány",
+          "category": "basics",
+          "illustration": "dip",
+          "aliases": [
+            "Korlát"
+          ],
+          "hint": "Párhuzamos fogantyúk tolódzkodáshoz."
+        },
+        {
+          "id": "suspension",
+          "label": "Függesztéses heveder (TRX)",
+          "resource": "Függesztéses heveder (TRX)",
+          "category": "basics",
+          "illustration": "suspension",
+          "aliases": [
+            "TRX",
+            "Függesztéses heveder"
+          ],
+          "hint": "Használható rögzítéssel együtt értendő."
+        },
+        {
+          "id": "rings",
+          "label": "Tornagyűrű",
+          "resource": "Tornagyűrű",
+          "category": "basics",
+          "illustration": "rings",
+          "aliases": [],
+          "hint": "Használható felfüggesztéssel együtt."
+        },
+        {
+          "id": "anchor",
+          "label": "Gumiszalag-rögzítési pont",
+          "resource": "Gumiszalag-rögzítési pont",
+          "category": "basics",
+          "illustration": "anchor",
+          "aliases": [],
+          "hint": "A szalagot külön jelöld."
+        },
+        {
+          "id": "dumbbells",
+          "label": "Kézisúlyzó",
+          "resource": "Kézisúlyzó",
+          "category": "free_weights",
+          "illustration": "dumbbell",
+          "aliases": [
+            "Dumbbell",
+            "Kézisúlyzók"
+          ],
+          "hint": "Fix vagy állítható; a súlytartomány a megjegyzésbe írható."
+        },
+        {
+          "id": "kettlebell",
+          "label": "Kettlebell",
+          "resource": "Kettlebell",
+          "category": "free_weights",
+          "illustration": "kettlebell",
+          "aliases": [
+            "Girja"
+          ],
+          "hint": "A rendelkezésre álló méreteket külön megadhatod."
+        },
+        {
+          "id": "barbell",
+          "label": "Súlyzórúd",
+          "resource": "Súlyzórúd",
+          "category": "free_weights",
+          "illustration": "barbell",
+          "aliases": [
+            "Olimpiai rúd"
+          ],
+          "hint": "A tárcsákat és rögzítőket külön jelöld."
+        },
+        {
+          "id": "plates",
+          "label": "Súlytárcsák",
+          "resource": "Súlytárcsák",
+          "category": "free_weights",
+          "illustration": "plates",
+          "aliases": [
+            "Súlytárcsa"
+          ],
+          "hint": "A rúdtól külön elérhető tartozék."
+        },
+        {
+          "id": "collars",
+          "label": "Tárcsarögzítők",
+          "resource": "Tárcsarögzítők",
+          "category": "free_weights",
+          "illustration": "collars",
+          "aliases": [
+            "Súlyzórögzítő"
+          ],
+          "hint": "A rúdhoz illő rögzítők."
+        },
+        {
+          "id": "ez_bar",
+          "label": "Hajlított (EZ) rúd",
+          "resource": "Hajlított (EZ) rúd",
+          "category": "free_weights",
+          "illustration": "ez_bar",
+          "aliases": [
+            "EZ rúd",
+            "Francia rúd"
+          ],
+          "hint": "A tárcsákat és rögzítőket külön jelöld."
+        },
+        {
+          "id": "trap_bar",
+          "label": "Trap / hex rúd",
+          "resource": "Trap / hex rúd",
+          "category": "free_weights",
+          "illustration": "trap_bar",
+          "aliases": [
+            "Hex rúd",
+            "Trap bar"
+          ],
+          "hint": "A tárcsákat és rögzítőket külön jelöld."
+        },
+        {
+          "id": "sandbag",
+          "label": "Homokzsák / súlyzsák",
+          "resource": "Homokzsák / súlyzsák",
+          "category": "free_weights",
+          "illustration": "sandbag",
+          "aliases": [
+            "Súlyzsák"
+          ],
+          "hint": "Tölthető vagy fix tömegű edzőzsák."
+        },
+        {
+          "id": "weight_vest",
+          "label": "Súlymellény",
+          "resource": "Súlymellény",
+          "category": "free_weights",
+          "illustration": "vest",
+          "aliases": [],
+          "hint": "A terhelését a megjegyzésben adhatod meg."
+        },
+        {
+          "id": "rack",
+          "label": "Erőkeret / guggolókeret",
+          "resource": "Erőkeret / guggolókeret",
+          "category": "racks",
+          "illustration": "rack",
+          "aliases": [
+            "Power rack",
+            "Guggolókeret"
+          ],
+          "hint": "A húzódzkodó rudat és egyéb funkciókat külön jelöld."
+        },
+        {
+          "id": "squat_stand",
+          "label": "Guggolóállvány",
+          "resource": "Guggolóállvány",
+          "category": "racks",
+          "illustration": "rack",
+          "aliases": [
+            "Guggoló állvány"
+          ],
+          "hint": "A rúdtól és tárcsáktól külön jelölhető."
+        },
+        {
+          "id": "smith",
+          "label": "Smith-keret",
+          "resource": "Smith-keret",
+          "category": "racks",
+          "illustration": "smith",
+          "aliases": [
+            "Smith gép"
+          ],
+          "hint": "Vezetett rudas állvány; a tárcsákat külön jelöld."
+        },
+        {
+          "id": "landmine",
+          "label": "Landmine rúdrögzítő",
+          "resource": "Landmine rúdrögzítő",
+          "category": "racks",
+          "illustration": "landmine",
+          "aliases": [
+            "Landmine"
+          ],
+          "hint": "A rúd és a tárcsák külön tartozékok."
+        },
+        {
+          "id": "cable_station",
+          "label": "Állítható csigás állvány",
+          "resource": "Állítható csigás állvány",
+          "category": "cables",
+          "illustration": "cable",
+          "aliases": [
+            "Állítható csiga",
+            "Kábeles tréner"
+          ],
+          "hint": "Állítható magasságú csigakimenet; a fogantyúkat külön jelöld."
+        },
+        {
+          "id": "high_pulley",
+          "label": "Felső csiga",
+          "resource": "Felső csiga",
+          "category": "cables",
+          "illustration": "high_cable",
+          "aliases": [],
+          "hint": "Felső, rögzített csigakimenet."
+        },
+        {
+          "id": "low_pulley",
+          "label": "Alsó csiga",
+          "resource": "Alsó csiga",
+          "category": "cables",
+          "illustration": "low_cable",
+          "aliases": [],
+          "hint": "Alsó, rögzített csigakimenet."
+        },
+        {
+          "id": "rope",
+          "label": "Kötélfogantyú",
+          "resource": "Kötélfogantyú",
+          "category": "cables",
+          "illustration": "rope",
+          "aliases": [
+            "Tricepsz kötél"
+          ],
+          "hint": "Csigás eszközhöz való kötélfeltét."
+        },
+        {
+          "id": "single_handle",
+          "label": "Egykezes csigafogantyú",
+          "resource": "Egykezes csigafogantyú",
+          "category": "cables",
+          "illustration": "handle",
+          "aliases": [
+            "D-fogantyú"
+          ],
+          "hint": "Csigás eszközhöz való külön fogantyú."
+        },
+        {
+          "id": "wide_bar",
+          "label": "Széles lehúzórúd",
+          "resource": "Széles lehúzórúd",
+          "category": "cables",
+          "illustration": "wide_bar",
+          "aliases": [
+            "Lehúzórúd"
+          ],
+          "hint": "Csigához illő széles rúd."
+        },
+        {
+          "id": "straight_handle",
+          "label": "Rövid csigás rúd",
+          "resource": "Rövid csigás rúd",
+          "category": "cables",
+          "illustration": "handle",
+          "aliases": [
+            "Egyenes csigás rúd"
+          ],
+          "hint": "Kétkezes fogáshoz használható feltét."
+        },
+        {
+          "id": "ankle_cuff",
+          "label": "Bokapánt csigához",
+          "resource": "Bokapánt csigához",
+          "category": "cables",
+          "illustration": "ankle_cuff",
+          "aliases": [
+            "Bokapánt"
+          ],
+          "hint": "Csigás lábgyakorlatokhoz való feltét."
+        },
+        {
+          "id": "lat_machine",
+          "label": "Mellhez lehúzó gép",
+          "resource": "Mellhez lehúzó gép",
+          "category": "machines",
+          "illustration": "lat_machine",
+          "aliases": [
+            "Lehúzógép",
+            "Lat pulldown"
+          ],
+          "hint": "Üléssel és hozzá tartozó lehúzófogással."
+        },
+        {
+          "id": "row_machine",
+          "label": "Ülő evezőgép",
+          "resource": "Ülő evezőgép",
+          "category": "machines",
+          "illustration": "row_machine",
+          "aliases": [
+            "Csigás evezőgép"
+          ],
+          "hint": "Erősítőgép; különbözik az evezős ergométertől."
+        },
+        {
+          "id": "chest_press",
+          "label": "Mellnyomó gép",
+          "resource": "Mellnyomó gép",
+          "category": "machines",
+          "illustration": "press_machine",
+          "aliases": [
+            "Chest press"
+          ],
+          "hint": "Vezetett mellnyomó mozgású gép."
+        },
+        {
+          "id": "pec_deck",
+          "label": "Tárogató / pec deck gép",
+          "resource": "Tárogató / pec deck gép",
+          "category": "machines",
+          "illustration": "pec_machine",
+          "aliases": [
+            "Pec deck"
+          ],
+          "hint": "Tárogató mozgású gép."
+        },
+        {
+          "id": "shoulder_press",
+          "label": "Vállnyomó gép",
+          "resource": "Vállnyomó gép",
+          "category": "machines",
+          "illustration": "shoulder_machine",
+          "aliases": [
+            "Shoulder press"
+          ],
+          "hint": "Vezetett vállnyomó gép."
+        },
+        {
+          "id": "leg_press",
+          "label": "Lábnyomó gép",
+          "resource": "Lábnyomó gép",
+          "category": "machines",
+          "illustration": "leg_press",
+          "aliases": [
+            "Lábtoló",
+            "Lábtoló gép"
+          ],
+          "hint": "Lábtoló / lábnyomó funkció."
+        },
+        {
+          "id": "leg_curl",
+          "label": "Lábhajlító gép",
+          "resource": "Lábhajlító gép",
+          "category": "machines",
+          "illustration": "leg_curl",
+          "aliases": [
+            "Combhajlító gép"
+          ],
+          "hint": "Ülő vagy fekvő kivitel; a típust megjegyzésben pontosíthatod."
+        },
+        {
+          "id": "leg_extension",
+          "label": "Combfeszítő gép",
+          "resource": "Combfeszítő gép",
+          "category": "machines",
+          "illustration": "leg_extension",
+          "aliases": [
+            "Lábfeszítő gép"
+          ],
+          "hint": "Vezetett térdnyújtó gép."
+        },
+        {
+          "id": "hip_abduction",
+          "label": "Csípőtávolító gép",
+          "resource": "Csípőtávolító gép",
+          "category": "machines",
+          "illustration": "hip_machine",
+          "aliases": [],
+          "hint": "A közelítő funkciót külön jelöld."
+        },
+        {
+          "id": "hip_adduction",
+          "label": "Csípőközelítő gép",
+          "resource": "Csípőközelítő gép",
+          "category": "machines",
+          "illustration": "hip_machine",
+          "aliases": [],
+          "hint": "A távolító funkciót külön jelöld."
+        },
+        {
+          "id": "back_extension",
+          "label": "Hátfeszítő pad",
+          "resource": "Hátfeszítő pad",
+          "category": "machines",
+          "illustration": "back_extension",
+          "aliases": [
+            "Hiperhajlító pad"
+          ],
+          "hint": "Ferde vagy vízszintes támasztópad."
+        },
+        {
+          "id": "assisted_pullup",
+          "label": "Rásegítéses húzódzkodó gép",
+          "resource": "Rásegítéses húzódzkodó gép",
+          "category": "machines",
+          "illustration": "assisted_pullup",
+          "aliases": [],
+          "hint": "A használható funkciókat a helyszíni megjegyzésben pontosíthatod."
+        },
+        {
+          "id": "band",
+          "label": "Erősítő gumiszalag",
+          "resource": "Erősítő gumiszalag",
+          "category": "functional",
+          "illustration": "band",
+          "aliases": [
+            "Gumiszalag",
+            "Ellenállás-szalag"
+          ],
+          "hint": "A mini band külön eszköztípus."
+        },
+        {
+          "id": "mini_band",
+          "label": "Mini band",
+          "resource": "Mini band",
+          "category": "functional",
+          "illustration": "mini_band",
+          "aliases": [
+            "Miniband",
+            "Mini gumiszalag"
+          ],
+          "hint": "Rövid, zárt szalag."
+        },
+        {
+          "id": "medicine_ball",
+          "label": "Medicinlabda",
+          "resource": "Medicinlabda",
+          "category": "functional",
+          "illustration": "medicine_ball",
+          "aliases": [
+            "Medicin labda"
+          ],
+          "hint": "A slam labda külön típus."
+        },
+        {
+          "id": "slam_ball",
+          "label": "Slam labda",
+          "resource": "Slam labda",
+          "category": "functional",
+          "illustration": "slam_ball",
+          "aliases": [
+            "Slam ball"
+          ],
+          "hint": "Talajra csapáshoz készült labdatípus."
+        },
+        {
+          "id": "swiss_ball",
+          "label": "Svájci labda / fitball",
+          "resource": "Svájci labda / fitball",
+          "category": "functional",
+          "illustration": "swiss_ball",
+          "aliases": [
+            "Fitball",
+            "Svájci labda"
+          ],
+          "hint": "Nagy, felfújható labda."
+        },
+        {
+          "id": "balance_pad",
+          "label": "Egyensúlypárna / BOSU",
+          "resource": "Egyensúlypárna / BOSU",
+          "category": "functional",
+          "illustration": "balance",
+          "aliases": [
+            "BOSU",
+            "Egyensúlypárna"
+          ],
+          "hint": "A rendelkezésre álló típust megjegyzésben pontosíthatod."
+        },
+        {
+          "id": "foam_roller",
+          "label": "Masszázshenger",
+          "resource": "Masszázshenger",
+          "category": "functional",
+          "illustration": "roller",
+          "aliases": [
+            "SMR henger",
+            "Foam roller"
+          ],
+          "hint": "Hengeres kiegészítő eszköz."
+        },
+        {
+          "id": "kayak_erg",
+          "label": "Kajakergométer",
+          "resource": "Kajakergométer",
+          "category": "ergometers",
+          "illustration": "kayak_erg",
+          "aliases": [
+            "Kajak ergométer"
+          ],
+          "hint": "Kajakos lapátmozgást lehetővé tevő ergométer."
+        },
+        {
+          "id": "row_erg",
+          "label": "Evezős ergométer",
+          "resource": "Evezős ergométer",
+          "category": "ergometers",
+          "illustration": "row_erg",
+          "aliases": [
+            "RowErg",
+            "Indoor rower"
+          ],
+          "hint": "Csúszóüléses vagy evezős mozgású ergométer; nem kajakergométer."
+        },
+        {
+          "id": "bike",
+          "label": "Szobakerékpár",
+          "resource": "Szobakerékpár",
+          "category": "ergometers",
+          "illustration": "bike",
+          "aliases": [
+            "Kerékpárergométer",
+            "BikeErg"
+          ],
+          "hint": "Helyben használható kerékpáros eszköz."
+        },
+        {
+          "id": "treadmill",
+          "label": "Futópad",
+          "resource": "Futópad",
+          "category": "ergometers",
+          "illustration": "treadmill",
+          "aliases": [],
+          "hint": "Helyben futáshoz vagy gyalogláshoz."
+        },
+        {
+          "id": "ski_erg",
+          "label": "Síergométer",
+          "resource": "Síergométer",
+          "category": "ergometers",
+          "illustration": "ski_erg",
+          "aliases": [
+            "SkiErg"
+          ],
+          "hint": "Két felső fogantyús, sífutómozgású ergométer."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "pullup",
+          "label": "Húzódzkodás",
+          "english": "Pull-up",
+          "movement": "pull",
+          "requirements": [
+            [
+              "pullup_bar"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "lat_pulldown",
+          "label": "Lehúzás mellhez",
+          "english": "Lat pulldown",
+          "movement": "pull",
+          "requirements": [
+            [
+              "lat_machine"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "barbell_row",
+          "label": "Döntött törzsű evezés rúddal",
+          "english": "Barbell bent-over row",
+          "movement": "pull",
+          "requirements": [
+            [
+              "barbell",
+              "plates",
+              "collars"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "dumbbell_row",
+          "label": "Egykezes evezés kézisúlyzóval",
+          "english": "One-arm dumbbell row",
+          "movement": "pull",
+          "requirements": [
+            [
+              "dumbbells"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "seated_row",
+          "label": "Ülő csigás evezés",
+          "english": "Seated cable row",
+          "movement": "pull",
+          "requirements": [
+            [
+              "row_machine"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "straight_arm_pulldown",
+          "label": "Nyújtott karos lehúzás",
+          "english": "Straight-arm pulldown",
+          "movement": "pull",
+          "requirements": [
+            [
+              "high_pulley",
+              "straight_handle"
+            ],
+            [
+              "cable_station",
+              "straight_handle"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "face_pull",
+          "label": "Face pull kötéllel",
+          "english": "Face pull",
+          "movement": "pull",
+          "requirements": [
+            [
+              "high_pulley",
+              "rope"
+            ],
+            [
+              "cable_station",
+              "rope"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "band_external_rotation",
+          "label": "Külső rotáció gumiszalaggal",
+          "english": "Band external rotation",
+          "movement": "pull",
+          "requirements": [
+            [
+              "band"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "scapular_pullup",
+          "label": "Lapockahúzás függésben",
+          "english": "Scapular pull-up",
+          "movement": "pull",
+          "requirements": [
+            [
+              "pullup_bar"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "lateral_raise",
+          "label": "Oldalemelés",
+          "english": "Lateral raise",
+          "movement": "pull",
+          "requirements": [
+            [
+              "dumbbells"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "y_raise",
+          "label": "Y-emelés ferde padon",
+          "english": "Incline Y raise",
+          "movement": "pull",
+          "requirements": [
+            [
+              "dumbbells",
+              "adjustable_bench"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "farmers_carry",
+          "label": "Farmer séta",
+          "english": "Farmer carry",
+          "movement": "pull",
+          "requirements": [
+            [
+              "dumbbells",
+              "floor"
+            ],
+            [
+              "kettlebell",
+              "floor"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "biceps_curl",
+          "label": "Bicepsz hajlítás kézisúlyzóval",
+          "english": "Dumbbell curl",
+          "movement": "pull",
+          "requirements": [
+            [
+              "dumbbells"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "hammer_curl",
+          "label": "Kalapács bicepsz",
+          "english": "Hammer curl",
+          "movement": "pull",
+          "requirements": [
+            [
+              "dumbbells"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "triceps_pushdown",
+          "label": "Tricepsz letolás",
+          "english": "Triceps pushdown",
+          "movement": "pull",
+          "requirements": [
+            [
+              "high_pulley",
+              "rope"
+            ],
+            [
+              "cable_station",
+              "rope"
+            ],
+            [
+              "high_pulley",
+              "straight_handle"
+            ],
+            [
+              "cable_station",
+              "straight_handle"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "reverse_curl",
+          "label": "Fordított bicepsz",
+          "english": "Reverse curl",
+          "movement": "pull",
+          "requirements": [
+            [
+              "ez_bar",
+              "plates",
+              "collars"
+            ],
+            [
+              "barbell",
+              "plates",
+              "collars"
+            ]
+          ],
+          "guide_id": "back-arms"
+        },
+        {
+          "id": "plank",
+          "label": "Plank",
+          "english": "Plank",
+          "movement": "core",
+          "requirements": [
+            [
+              "floor"
+            ],
+            [
+              "mat"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "side_plank",
+          "label": "Oldalsó plank",
+          "english": "Side plank",
+          "movement": "core",
+          "requirements": [
+            [
+              "floor"
+            ],
+            [
+              "mat"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "dead_bug",
+          "label": "Hanyatt fekvő ellentétes nyújtás",
+          "english": "Dead bug",
+          "movement": "core",
+          "requirements": [
+            [
+              "floor"
+            ],
+            [
+              "mat"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "bird_dog",
+          "label": "Madár-kutya tartás",
+          "english": "Bird dog",
+          "movement": "core",
+          "requirements": [
+            [
+              "floor"
+            ],
+            [
+              "mat"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "hollow_hold",
+          "label": "Homorított tartás",
+          "english": "Hollow hold",
+          "movement": "core",
+          "requirements": [
+            [
+              "floor"
+            ],
+            [
+              "mat"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "ball_crunch",
+          "label": "Hasprés labdával",
+          "english": "Ball crunch",
+          "movement": "core",
+          "requirements": [
+            [
+              "medicine_ball",
+              "floor"
+            ],
+            [
+              "medicine_ball",
+              "mat"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "pallof_press",
+          "label": "Pallof nyomás",
+          "english": "Pallof press",
+          "movement": "core",
+          "requirements": [
+            [
+              "cable_station",
+              "single_handle"
+            ],
+            [
+              "band",
+              "anchor"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "kneeling_pallof",
+          "label": "Fél térdeléses Pallof nyomás",
+          "english": "Half-kneeling Pallof press",
+          "movement": "core",
+          "requirements": [
+            [
+              "cable_station",
+              "single_handle",
+              "floor"
+            ],
+            [
+              "band",
+              "anchor",
+              "floor"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "russian_twist",
+          "label": "Orosz twist labdával",
+          "english": "Russian twist",
+          "movement": "core",
+          "requirements": [
+            [
+              "medicine_ball",
+              "floor"
+            ],
+            [
+              "medicine_ball",
+              "mat"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "cable_rotation",
+          "label": "Kábeles törzsforgatás",
+          "english": "Cable rotation",
+          "movement": "core",
+          "requirements": [
+            [
+              "cable_station",
+              "single_handle"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "woodchop_high",
+          "label": "Favágó húzás felülről",
+          "english": "High-to-low woodchop",
+          "movement": "core",
+          "requirements": [
+            [
+              "high_pulley",
+              "single_handle"
+            ],
+            [
+              "cable_station",
+              "single_handle"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "woodchop_low",
+          "label": "Favágó húzás alulról",
+          "english": "Low-to-high woodchop",
+          "movement": "core",
+          "requirements": [
+            [
+              "low_pulley",
+              "single_handle"
+            ],
+            [
+              "cable_station",
+              "single_handle"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "rotational_throw",
+          "label": "Medicinlabdás rotációs dobás",
+          "english": "Medicine ball rotational throw",
+          "movement": "core",
+          "requirements": [
+            [
+              "medicine_ball",
+              "floor"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "slam",
+          "label": "Medicinlabda slam",
+          "english": "Ball slam",
+          "movement": "core",
+          "requirements": [
+            [
+              "slam_ball",
+              "floor"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "landmine_rotation",
+          "label": "Rúdvégforgatás",
+          "english": "Landmine rotation",
+          "movement": "core",
+          "requirements": [
+            [
+              "landmine",
+              "barbell",
+              "plates",
+              "collars"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "squat",
+          "label": "Saját testsúlyos guggolás",
+          "english": "Bodyweight squat",
+          "movement": "legs",
+          "requirements": [
+            [
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "front_squat",
+          "label": "Front guggolás rúddal",
+          "english": "Front squat",
+          "movement": "legs",
+          "requirements": [
+            [
+              "barbell",
+              "plates",
+              "collars",
+              "rack"
+            ],
+            [
+              "barbell",
+              "plates",
+              "collars",
+              "squat_stand"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "lunge",
+          "label": "Kitörés",
+          "english": "Lunge",
+          "movement": "legs",
+          "requirements": [
+            [
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "bulgarian_split_squat",
+          "label": "Bolgár guggolás",
+          "english": "Bulgarian split squat",
+          "movement": "legs",
+          "requirements": [
+            [
+              "flat_bench",
+              "floor"
+            ],
+            [
+              "box",
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "romanian_deadlift",
+          "label": "Román felhúzás rúddal",
+          "english": "Romanian deadlift",
+          "movement": "legs",
+          "requirements": [
+            [
+              "barbell",
+              "plates",
+              "collars"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "hip_thrust",
+          "label": "Csípőemelés rúddal, paddal",
+          "english": "Hip thrust",
+          "movement": "legs",
+          "requirements": [
+            [
+              "barbell",
+              "plates",
+              "collars",
+              "flat_bench"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "single_leg_rdl",
+          "label": "Egylábas román felhúzás",
+          "english": "Single-leg Romanian deadlift",
+          "movement": "legs",
+          "requirements": [
+            [
+              "dumbbells",
+              "floor"
+            ],
+            [
+              "kettlebell",
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "step_up",
+          "label": "Fellépés",
+          "english": "Step-up",
+          "movement": "legs",
+          "requirements": [
+            [
+              "box"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "leg_press",
+          "label": "Lábnyomás gépen",
+          "english": "Leg press",
+          "movement": "legs",
+          "requirements": [
+            [
+              "leg_press"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "leg_curl",
+          "label": "Lábhajlítás gépen",
+          "english": "Leg curl",
+          "movement": "legs",
+          "requirements": [
+            [
+              "leg_curl"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "leg_extension",
+          "label": "Combfeszítés gépen",
+          "english": "Leg extension",
+          "movement": "legs",
+          "requirements": [
+            [
+              "leg_extension"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "calf_raise",
+          "label": "Vádliemelés",
+          "english": "Calf raise",
+          "movement": "legs",
+          "requirements": [
+            [
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "kettlebell_swing",
+          "label": "Kettlebell swing",
+          "english": "Kettlebell swing",
+          "movement": "legs",
+          "requirements": [
+            [
+              "kettlebell",
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "jump_squat",
+          "label": "Ugró guggolás",
+          "english": "Jump squat",
+          "movement": "legs",
+          "requirements": [
+            [
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "knee_drive_stepup",
+          "label": "Fellépés térdemeléssel",
+          "english": "Step-up with knee drive",
+          "movement": "legs",
+          "requirements": [
+            [
+              "box"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "walking_lunge",
+          "label": "Séta kitörés",
+          "english": "Walking lunge",
+          "movement": "legs",
+          "requirements": [
+            [
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "forward_throw",
+          "label": "Medicinlabda dobás előre",
+          "english": "Medicine ball forward throw",
+          "movement": "legs",
+          "requirements": [
+            [
+              "medicine_ball",
+              "floor"
+            ]
+          ],
+          "guide_id": "legs"
+        },
+        {
+          "id": "pushup",
+          "label": "Fekvőtámasz",
+          "english": "Push-up",
+          "movement": "push",
+          "requirements": [
+            [
+              "floor"
+            ],
+            [
+              "mat"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "incline_pushup",
+          "label": "Emelt támaszos fekvőtámasz",
+          "english": "Incline push-up",
+          "movement": "push",
+          "requirements": [
+            [
+              "flat_bench"
+            ],
+            [
+              "box"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "db_benchpress",
+          "label": "Mellnyomás kézisúlyzóval",
+          "english": "Dumbbell bench press",
+          "movement": "push",
+          "requirements": [
+            [
+              "dumbbells",
+              "flat_bench"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "db_incline_press",
+          "label": "Ferde pados mellnyomás",
+          "english": "Incline dumbbell press",
+          "movement": "push",
+          "requirements": [
+            [
+              "dumbbells",
+              "adjustable_bench"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "barbell_benchpress",
+          "label": "Fekvenyomás rúddal",
+          "english": "Barbell bench press",
+          "movement": "push",
+          "requirements": [
+            [
+              "barbell",
+              "plates",
+              "collars",
+              "flat_bench",
+              "rack"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "chest_press",
+          "label": "Mellnyomás gépen",
+          "english": "Machine chest press",
+          "movement": "push",
+          "requirements": [
+            [
+              "chest_press"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "pec_deck",
+          "label": "Tárogatás gépen",
+          "english": "Pec deck fly",
+          "movement": "push",
+          "requirements": [
+            [
+              "pec_deck"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "db_overhead_press",
+          "label": "Vállból nyomás kézisúlyzóval",
+          "english": "Dumbbell overhead press",
+          "movement": "push",
+          "requirements": [
+            [
+              "dumbbells"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "machine_shoulder_press",
+          "label": "Vállnyomás gépen",
+          "english": "Machine shoulder press",
+          "movement": "push",
+          "requirements": [
+            [
+              "shoulder_press"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "dip",
+          "label": "Tolódzkodás",
+          "english": "Dip",
+          "movement": "push",
+          "requirements": [
+            [
+              "dip_bars"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "overhead_triceps",
+          "label": "Tricepsznyújtás fej fölött",
+          "english": "Overhead triceps extension",
+          "movement": "push",
+          "requirements": [
+            [
+              "dumbbells"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "goblet_squat",
+          "label": "Goblet guggolás",
+          "english": "Goblet squat",
+          "movement": "functional",
+          "requirements": [
+            [
+              "dumbbells"
+            ],
+            [
+              "kettlebell"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "db_rdl",
+          "label": "Román felhúzás kézisúlyzóval",
+          "english": "Dumbbell Romanian deadlift",
+          "movement": "functional",
+          "requirements": [
+            [
+              "dumbbells"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "trap_deadlift",
+          "label": "Felhúzás trap rúddal",
+          "english": "Trap-bar deadlift",
+          "movement": "functional",
+          "requirements": [
+            [
+              "trap_bar",
+              "plates",
+              "collars"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "glute_bridge",
+          "label": "Csípőemelés talajon",
+          "english": "Glute bridge",
+          "movement": "functional",
+          "requirements": [
+            [
+              "floor"
+            ],
+            [
+              "mat"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "hip_abduction",
+          "label": "Csípőtávolítás gépen",
+          "english": "Machine hip abduction",
+          "movement": "functional",
+          "requirements": [
+            [
+              "hip_abduction"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "hip_adduction",
+          "label": "Csípőközelítés gépen",
+          "english": "Machine hip adduction",
+          "movement": "functional",
+          "requirements": [
+            [
+              "hip_adduction"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "mini_band_walk",
+          "label": "Oldalazás mini banddel",
+          "english": "Mini-band lateral walk",
+          "movement": "functional",
+          "requirements": [
+            [
+              "mini_band",
+              "floor"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "back_extension",
+          "label": "Törzsemelés hátfeszítő padon",
+          "english": "Back extension",
+          "movement": "functional",
+          "requirements": [
+            [
+              "back_extension"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "suspension_row",
+          "label": "Evezés függesztéses hevederrel",
+          "english": "Suspension row",
+          "movement": "functional",
+          "requirements": [
+            [
+              "suspension"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "ring_row",
+          "label": "Evezés gyűrűn",
+          "english": "Ring row",
+          "movement": "functional",
+          "requirements": [
+            [
+              "rings"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "assisted_pullup",
+          "label": "Rásegítéses húzódzkodás",
+          "english": "Assisted pull-up",
+          "movement": "functional",
+          "requirements": [
+            [
+              "assisted_pullup"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "band_row",
+          "label": "Evezés gumiszalaggal",
+          "english": "Band row",
+          "movement": "functional",
+          "requirements": [
+            [
+              "band",
+              "anchor"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "suitcase_carry",
+          "label": "Egykezes súlycipelés",
+          "english": "Suitcase carry",
+          "movement": "functional",
+          "requirements": [
+            [
+              "dumbbells",
+              "floor"
+            ],
+            [
+              "kettlebell",
+              "floor"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "swiss_ball_curl",
+          "label": "Lábhajlítás svájci labdán",
+          "english": "Swiss-ball leg curl",
+          "movement": "functional",
+          "requirements": [
+            [
+              "swiss_ball",
+              "floor"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "landmine_press",
+          "label": "Nyomás rúdvégből",
+          "english": "Landmine press",
+          "movement": "functional",
+          "requirements": [
+            [
+              "landmine",
+              "barbell",
+              "plates",
+              "collars"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "sandbag_carry",
+          "label": "Súlyzsák cipelés",
+          "english": "Sandbag carry",
+          "movement": "functional",
+          "requirements": [
+            [
+              "sandbag",
+              "floor"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "kayak_erg",
+          "label": "Kajakergométeres mozgás",
+          "english": "",
+          "movement": "ergometers",
+          "requirements": [
+            [
+              "kayak_erg"
+            ]
+          ],
+          "guide_id": "trunk"
+        },
+        {
+          "id": "row_erg",
+          "label": "Evezős ergométeres mozgás",
+          "english": "",
+          "movement": "ergometers",
+          "requirements": [
+            [
+              "row_erg"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "bike",
+          "label": "Szobakerékpáros mozgás",
+          "english": "",
+          "movement": "ergometers",
+          "requirements": [
+            [
+              "bike"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "treadmill",
+          "label": "Gyaloglás / futás futópadon",
+          "english": "",
+          "movement": "ergometers",
+          "requirements": [
+            [
+              "treadmill"
+            ]
+          ],
+          "guide_id": null
+        },
+        {
+          "id": "ski_erg",
+          "label": "Síergométeres mozgás",
+          "english": "",
+          "movement": "ergometers",
+          "requirements": [
+            [
+              "ski_erg"
+            ]
+          ],
+          "guide_id": null
+        }
+      ],
+      "guides": [
+        {
+          "id": "kayak-phases",
+          "title": "Kajakos mozgásfázisok",
+          "src": "/strength-guides/kayak-phases.png",
+          "page": 1,
+          "width": 1055,
+          "height": 1491
+        },
+        {
+          "id": "back-arms",
+          "title": "Hát, vállöv és karok",
+          "src": "/strength-guides/back-arms.png",
+          "page": 2,
+          "width": 1055,
+          "height": 1491
+        },
+        {
+          "id": "trunk",
+          "title": "Törzsizmok és törzsrotáció",
+          "src": "/strength-guides/trunk.png",
+          "page": 3,
+          "width": 1055,
+          "height": 1491
+        },
+        {
+          "id": "legs",
+          "title": "Csípő, láb és funkcionális gyakorlatok",
+          "src": "/strength-guides/legs.png",
+          "page": 4,
+          "width": 1055,
+          "height": 1491
+        }
+      ],
+      "sources": [
+        {
+          "title": "Felhasználó által biztosított szemléltető lapok",
+          "url": null
+        },
+        {
+          "title": "ACE gyakorlatkönyvtár — eszköztípusok ellenőrzéséhez",
+          "url": "https://www.acefitness.org/resources/everyone/exercise-library/"
+        },
+        {
+          "title": "NASM gyakorlatkönyvtár — név- és eszközpéldák ellenőrzéséhez",
+          "url": "https://www.nasm.org/workout-exercise-guidance"
+        }
+      ],
+      "content_hash": "810c004dc04855d3ed80c945f92fddaee10d72f129400dcdb987554be934af93"
+    },
+    "strength_options": [
+      {
+        "location_id": "00000000-0000-0000-0000-00000002e631",
+        "equipment_ids": [
+          "floor",
+          "mat",
+          "flat_bench",
+          "adjustable_bench",
+          "box",
+          "pullup_bar",
+          "dip_bars",
+          "suspension",
+          "rings",
+          "anchor",
+          "dumbbells",
+          "kettlebell",
+          "barbell",
+          "plates",
+          "collars",
+          "ez_bar",
+          "trap_bar",
+          "sandbag",
+          "weight_vest",
+          "rack",
+          "squat_stand",
+          "smith",
+          "landmine",
+          "cable_station",
+          "high_pulley",
+          "low_pulley",
+          "rope",
+          "single_handle",
+          "wide_bar",
+          "straight_handle",
+          "ankle_cuff",
+          "lat_machine",
+          "row_machine",
+          "chest_press",
+          "pec_deck",
+          "shoulder_press",
+          "leg_press",
+          "leg_curl",
+          "leg_extension",
+          "hip_abduction",
+          "hip_adduction",
+          "back_extension",
+          "assisted_pullup",
+          "band",
+          "mini_band",
+          "medicine_ball",
+          "slam_ball",
+          "swiss_ball",
+          "balance_pad",
+          "foam_roller",
+          "kayak_erg",
+          "row_erg",
+          "bike",
+          "treadmill",
+          "ski_erg"
+        ],
+        "exercise_ids": [
+          "pullup",
+          "lat_pulldown",
+          "barbell_row",
+          "dumbbell_row",
+          "seated_row",
+          "straight_arm_pulldown",
+          "face_pull",
+          "band_external_rotation",
+          "scapular_pullup",
+          "lateral_raise",
+          "y_raise",
+          "farmers_carry",
+          "biceps_curl",
+          "hammer_curl",
+          "triceps_pushdown",
+          "reverse_curl",
+          "plank",
+          "side_plank",
+          "dead_bug",
+          "bird_dog",
+          "hollow_hold",
+          "ball_crunch",
+          "pallof_press",
+          "kneeling_pallof",
+          "russian_twist",
+          "cable_rotation",
+          "woodchop_high",
+          "woodchop_low",
+          "rotational_throw",
+          "slam",
+          "landmine_rotation",
+          "squat",
+          "front_squat",
+          "lunge",
+          "bulgarian_split_squat",
+          "romanian_deadlift",
+          "hip_thrust",
+          "single_leg_rdl",
+          "step_up",
+          "leg_press",
+          "leg_curl",
+          "leg_extension",
+          "calf_raise",
+          "kettlebell_swing",
+          "jump_squat",
+          "knee_drive_stepup",
+          "walking_lunge",
+          "forward_throw",
+          "pushup",
+          "incline_pushup",
+          "db_benchpress",
+          "db_incline_press",
+          "barbell_benchpress",
+          "chest_press",
+          "pec_deck",
+          "db_overhead_press",
+          "machine_shoulder_press",
+          "dip",
+          "overhead_triceps",
+          "goblet_squat",
+          "db_rdl",
+          "trap_deadlift",
+          "glute_bridge",
+          "hip_abduction",
+          "hip_adduction",
+          "mini_band_walk",
+          "back_extension",
+          "suspension_row",
+          "ring_row",
+          "assisted_pullup",
+          "band_row",
+          "suitcase_carry",
+          "swiss_ball_curl",
+          "landmine_press",
+          "sandbag_carry",
+          "kayak_erg",
+          "row_erg",
+          "bike",
+          "treadmill",
+          "ski_erg"
+        ],
+        "planning_authorized": false
+      },
+      {
+        "location_id": "00000000-0000-0000-0000-00000002e633",
+        "equipment_ids": [
+          "cable_station",
+          "rope"
+        ],
+        "exercise_ids": [
+          "face_pull",
+          "triceps_pushdown"
+        ],
+        "planning_authorized": false
+      }
+    ],
+    "timezone_review_required": false,
+    "workouts_changed": false,
+    "planning_authorized": false
+  }
+}

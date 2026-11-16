@@ -36,7 +36,7 @@ class EntryDetails(Closed):
     sport_scope: Literal["unknown", "any", "specified"]
     sports: list[Short] = Field(max_length=16)
     effort_cap: Literal["unknown", "easy", "moderate", "any"]
-    resources: list[Short] = Field(max_length=32)
+    resources: list[Short] = Field(max_length=128)
     location: Short
     notes: str = Field(max_length=2000)
 

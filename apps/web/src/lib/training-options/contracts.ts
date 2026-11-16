@@ -1,5 +1,14 @@
 import { canonical, day, object, sha } from "@/lib/planning-cycles/contracts";
 import { readDetails } from "@/lib/calendar/constraints";
+import { readCoordinates, readDaylightRules, readGeographicArea } from "./daylight-rules";
+import { readPrescriptionSettings } from "./prescription-settings";
+import type { PrescriptionSettings } from "./prescription-settings";
+import type { Coordinates, DaylightRule, GeographicArea } from "./daylight-rules";
+import {
+  readStrengthCatalog,
+  validateStrengthOptions,
+} from "./strength-catalog";
+import type { StrengthCatalog, StrengthOptions } from "./strength-catalog";
 
 export const sportLabels = {
   KAYAK: "Kajak",
@@ -11,12 +20,23 @@ export const sportLabels = {
   STRETCHING: "Nyújtás",
 } as const;
 export type Sport = keyof typeof sportLabels;
+export const MAX_WEEKLY_SLOTS = 128;
+export type ExerciseConfirmation = {
+  exercise_id: string;
+  source_kind: "self_report";
+  note: string;
+};
 export type Location = {
   id: string;
   name: string;
   kind: "fixed" | "mobile";
   sports: Sport[];
   resources: string[];
+  exercise_confirmations?: ExerciseConfirmation[];
+  coordinates?: Coordinates;
+  area?: GeographicArea;
+  pool_length_m?: string;
+  daylight_overrides?: DaylightRule[];
   combine_allowed: boolean;
   boat_transport: boolean;
   notes: string;
@@ -62,6 +82,8 @@ export type OptionsData = {
   weekly_slots: WeeklySlot[];
   exceptions: SlotException[];
   restrictions: LocationRestriction[];
+  daylight_rules?: DaylightRule[];
+  prescription_settings?: PrescriptionSettings;
 };
 export type OptionsReference = { artifact_id: string; content_hash: string };
 export type OptionsProposal = {
@@ -105,6 +127,8 @@ export type ResolvedGroup = {
   }[];
 };
 export type OptionsContext = {
+  strength_catalog?: StrengthCatalog;
+  strength_options?: StrengthOptions[];
   schema_version: "training-options-v0.1";
   athlete_id: string;
   timezone_name: string;
@@ -191,6 +215,7 @@ function slotDetails(value: unknown, locations: Set<string>): SlotDetails {
 }
 export function readOptionsData(value: unknown): OptionsData {
   const v = object(value);
+  if (v.daylight_rules !== undefined) readDaylightRules(v.daylight_rules);
   requireValue(typeof v.timezone_name === "string");
   new Intl.DateTimeFormat("hu-HU", { timeZone: v.timezone_name });
   requireValue(
@@ -204,7 +229,7 @@ export function readOptionsData(value: unknown): OptionsData {
     Array.isArray(v.locations) &&
       v.locations.length <= 64 &&
       Array.isArray(v.weekly_slots) &&
-      v.weekly_slots.length <= 128 &&
+      v.weekly_slots.length <= MAX_WEEKLY_SLOTS &&
       Array.isArray(v.exceptions) &&
       v.exceptions.length <= 1024 &&
       Array.isArray(v.restrictions) &&
@@ -212,8 +237,16 @@ export function readOptionsData(value: unknown): OptionsData {
   );
   const ids = new Set<string>(),
     names = new Set<string>();
+  if (v.prescription_settings !== undefined) readPrescriptionSettings(v.prescription_settings);
   for (const item of v.locations) {
     const location = object(item);
+    if (location.coordinates !== undefined) readCoordinates(location.coordinates);
+    if (location.area !== undefined) {
+      readGeographicArea(location.area);
+      requireValue(location.coordinates === undefined && location.kind === "mobile");
+    }
+    if(location.pool_length_m!==undefined)requireValue(typeof location.pool_length_m==="string"&&/^(?:[1-9][0-9]?|100)(?:\.[0-9]{1,6})?$/.test(location.pool_length_m)&&Number(location.pool_length_m)>=10&&Number(location.pool_length_m)<=100&&Array.isArray(location.sports)&&location.sports.includes("SWIMMING"));
+    if (location.daylight_overrides !== undefined) readDaylightRules(location.daylight_overrides, location.sports as string[]);
     requireValue(
       typeof location.id === "string" &&
         uuid.test(location.id) &&
@@ -227,7 +260,7 @@ export function readOptionsData(value: unknown): OptionsData {
         location.sports.every(
           (s) => typeof s === "string" && s in sportLabels,
         ) &&
-        unique(location.resources, 32) &&
+        unique(location.resources, 128) &&
         location.resources.every(
           (r) => text(r, 200) && !!r && r === r.trim(),
         ) &&
@@ -236,6 +269,25 @@ export function readOptionsData(value: unknown): OptionsData {
         typeof location.archived === "boolean" &&
         text(location.notes, 2000),
     );
+    if (location.exercise_confirmations !== undefined) {
+      requireValue(
+        Array.isArray(location.exercise_confirmations) &&
+          location.exercise_confirmations.length <= 128,
+      );
+      const seen = new Set<string>();
+      for (const raw of location.exercise_confirmations) {
+        const c = object(raw);
+        requireValue(
+          Object.keys(c).sort().join("|") === "exercise_id|note|source_kind" &&
+            typeof c.exercise_id === "string" &&
+            /^[a-z][a-z0-9_-]{0,63}$/.test(c.exercise_id) &&
+            !seen.has(c.exercise_id) &&
+            c.source_kind === "self_report" &&
+            text(c.note, 500),
+        );
+        seen.add(c.exercise_id);
+      }
+    }
     ids.add(location.id);
     if (!location.archived) {
       const name = location.name.toLocaleLowerCase("hu");
@@ -426,6 +478,10 @@ export async function readOptionsContext(
       );
     }
   }
+  if (c.strength_catalog !== undefined) {
+    const catalog = await readStrengthCatalog(c.strength_catalog);
+    validateStrengthOptions(catalog, data.locations, c.strength_options);
+  } else requireValue(c.strength_options === undefined);
   return c as OptionsContext;
 }
 export function readPending(value: string): OptionsPending {

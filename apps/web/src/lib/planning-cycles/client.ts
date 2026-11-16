@@ -11,6 +11,9 @@ import type {
 } from "./contracts";
 
 const reasons: Record<string, string> = {
+  CYCLE_PROGRAM_SUPERSEDED: "Ennek a célkitűzésnek már van újabb mentett változata. Töltsd be a legújabbat.",
+  CYCLE_REPLACEMENT_SOURCE_CHANGED: "A versenyek vagy a ciklushatárok időközben megváltoztak. Olvasd újra a mentett célkitűzést, majd ellenőrizd a változtatásaidat.",
+  CYCLE_REPLACEMENT_CONTEXT_REQUIRED: "A módosításhoz ugyanazt a céltípust és friss sportolói adatokat kell használni.",
   ATHLETE_CONTEXT_CHANGED_REVIEW_AGAIN:
     "A sportolói felmérés vagy a naptár időközben megváltozott. Frissítsd a felmérést, vedd át a szerkesztett tervbe, majd tekintsd át újra.",
   ATHLETE_PROFILE_REQUIRED: "Először mentsd el a sportolói felmérést.",
@@ -229,11 +232,32 @@ export async function loadDetail(
     )
       throw new Error("A ciklushatár-változatok lánca eltér.");
   });
+  const successor = d.replaced_by;
+  if (successor !== undefined && successor !== null) {
+    const next = object(successor);
+    if (!/^pt-cycle:[0-9a-f]{64}$/.test(String(next.artifact_id)) || !/^[0-9a-f]{64}$/.test(String(next.content_hash))) throw Error("A célkitűzés következő változatának hivatkozása hiányos.");
+  }
   return {
     program,
     competition_revisions: revisions,
     boundary_revisions: boundaries,
+    ...(successor !== undefined ? { replaced_by: successor as import("./contracts").Reference | null } : {}),
   };
+}
+export async function loadCurrentDetail(id: string, signal?: AbortSignal): Promise<Detail> {
+  const seen = new Set<string>();
+  let detail = await loadDetail(id, signal);
+  while (detail.replaced_by) {
+    if (seen.has(id) || seen.size >= 64) throw Error("A célkitűzés változatainak lánca nem megfelelő.");
+    seen.add(id);
+    const parent = detail.program.artifact, requested = detail.replaced_by;
+    detail = await loadDetail(requested.artifact_id, signal);
+    if (detail.program.artifact.content_hash !== requested.content_hash || detail.program.artifact.athlete_id !== parent.athlete_id ||
+        detail.program.artifact.proposal.replacement?.program_reference.artifact_id !== parent.artifact_id ||
+        detail.program.artifact.proposal.replacement?.program_reference.content_hash !== parent.content_hash) throw Error("A célkitűzés következő változata másik előzményhez tartozik.");
+    id = requested.artifact_id;
+  }
+  return detail;
 }
 export async function preview(program: Program): Promise<Preview> {
   const p = object(await request("preview", JSON.stringify(program)));

@@ -2,9 +2,8 @@
 import { capabilityLabels } from "@/lib/planning-goals/labels";
 import {
   emptyProfile,
-  ICF_SOURCE,
-  sprintKeys,
 } from "@/lib/planning-cycles/contracts";
+import { autoEventProfile, demandSources, demandSuggestion } from "@/lib/planning-cycles/event-demands";
 import type { EventProfile } from "@/lib/planning-cycles/contracts";
 import {
   Area,
@@ -24,20 +23,13 @@ export default function EventProfileEditor({
   index: number;
   sport?: string;
 }) {
-  const p = value ?? emptyProfile(sport);
+  const p = autoEventProfile(value ?? emptyProfile(sport), sport);
+  const suggested = demandSuggestion(p, sport);
   function patch(patch: Partial<EventProfile>) {
-    change({
-      ...p,
-      ...patch,
-      capability_basis: "unassessed",
-      capability_keys: [],
-    });
-  }
-  let suggested: string[] | null = null;
-  try {
-    suggested = sprintKeys(p);
-  } catch {
-    /* An incomplete number is reported by its input. */
+    const structural = ["discipline", "event_type", "distance_status", "distance_value", "distance_unit"].some((key) => key in patch);
+    const next = { ...p, ...patch };
+    if (structural) { next.capability_basis = "unassessed"; next.capability_keys = []; delete next.capability_weights; }
+    change(autoEventProfile(next, sport));
   }
   return (
     <div className="space-y-4 border-t border-zinc-700 pt-4">
@@ -128,42 +120,9 @@ export default function EventProfileEditor({
         value={p.course_description}
         onChange={(e) => patch({ course_description: e.target.value })}
       />
-      {suggested && (
-        <button
-          type="button"
-          className={secondaryClass}
-          onClick={() =>
-            change({
-              ...p,
-              capability_basis: "icf_sprint_v0_1",
-              capability_keys: suggested!,
-            })
-          }
-        >
-          ICF-alapú előzetes képességprofil átvétele
-        </button>
-      )}
-      <p className="text-xs leading-5 text-zinc-400">
-        {p.capability_basis === "unassessed"
-          ? "A képességigény még nincs értékelve. Megadhatod kézzel, vagy az elérhető forrásalapú javaslatból indulhatsz ki."
-          : p.capability_basis === "icf_sprint_v0_1"
-            ? "ICF kézikönyv alapján készített, minőségi alkalmazásjavaslat; a sportoló hiányosságait és az edzésadagokat nem állapítja meg."
-            : "Kézzel megadott követelményprofil."}
-        {p.capability_basis === "icf_sprint_v0_1" && (
-          <>
-            {" "}
-            <a
-              className="underline"
-              target="_blank"
-              rel="noreferrer"
-              href={ICF_SOURCE}
-            >
-              Forrás
-            </a>
-          </>
-        )}
-      </p>
-      <details>
+      {p.capability_basis === "paddling_demands_v0_1" ? <div className="pt-event-demands-summary"><p><strong>A képességigény automatikusan kitöltve.</strong> Relatív igény: 1–5. A pontok a verseny követelményeit súlyozzák; az edzésarány a sportoló állapotától és a felkészülési szakasztól is függ.</p><p className="text-xs">Szakirodalomra támaszkodó, szerkeszthető alkalmazásjavaslat. {demandSources.map((source, n) => <a className="underline mr-3" key={source.key} href={source.url} target="_blank" rel="noreferrer">Forrás {n + 1}</a>)}</p></div> : <p className="text-xs text-zinc-400">{p.capability_basis === "coach_declared" ? "Kézzel megadott képességigények és relatív súlyok." : "Ehhez a versenyszámhoz még nincs automatikus képességprofil. Az igények kézzel megadhatók."}</p>}
+      {suggested && p.capability_basis === "coach_declared" && <button type="button" className={secondaryClass} onClick={() => change(autoEventProfile({ ...p, capability_basis: "unassessed" }, sport))}>Forrásalapú súlyozás visszaállítása</button>}
+      <details open={p.capability_basis === "paddling_demands_v0_1" ? true : undefined}>
         <summary className="cursor-pointer text-sm text-teal-200">
           Képességigények áttekintése és kézi módosítása
         </summary>
@@ -173,6 +132,7 @@ export default function EventProfileEditor({
               <input
                 type="checkbox"
                 checked={p.capability_keys.includes(key)}
+                disabled={p.capability_keys.length === 1 && p.capability_keys.includes(key)}
                 onChange={(e) => {
                   const keys = e.target.checked
                     ? [...p.capability_keys, key]
@@ -180,6 +140,7 @@ export default function EventProfileEditor({
                   change({
                     ...p,
                     capability_keys: keys,
+                    ...(p.capability_weights && keys.length ? { capability_weights: Object.fromEntries(keys.map((k) => [k, p.capability_weights?.[k] ?? 3])) } : {}),
                     capability_basis: keys.length
                       ? "coach_declared"
                       : "unassessed",
@@ -187,6 +148,10 @@ export default function EventProfileEditor({
                 }}
               />
               {label}
+              {p.capability_keys.includes(key) && <select aria-label={`${label} relatív igénye`} value={p.capability_weights?.[key] ?? ""} onChange={(e) => {
+                const weights = Object.fromEntries(p.capability_keys.map((k) => [k, p.capability_weights?.[k] ?? 3])); weights[key] = Number(e.target.value);
+                change({ ...p, capability_basis: "coach_declared", capability_weights: weights });
+              }}><option value="" disabled>Nincs súly megadva</option>{[1, 2, 3, 4, 5].map((weight) => <option key={weight} value={weight}>{weight} / 5</option>)}</select>}
             </label>
           ))}
         </div>

@@ -61,6 +61,8 @@ class ClosedInput(BaseModel):
             "planning_basis",
             "details",
             "athlete_context",
+            "replacement",
+            "capability_weights",
             "target_kg",
         ):
             if value.get(key) is None:
@@ -105,8 +107,9 @@ class CompetitionProfile(ClosedInput):
     course_description: Annotated[str, StringConstraints(strip_whitespace=True, max_length=500)] = (
         ""
     )
-    capability_basis: Literal["unassessed", "coach_declared", "icf_sprint_v0_1"] = "unassessed"
+    capability_basis: Literal["unassessed", "coach_declared", "icf_sprint_v0_1", "paddling_demands_v0_1"] = "unassessed"
     capability_keys: list[str] = Field(default_factory=list, max_length=13)
+    capability_weights: dict[str, Annotated[int, Field(ge=1, le=5)]] | None = Field(default=None, max_length=13)
 
     @model_validator(mode="after")
     def meaningful_profile(self):
@@ -182,6 +185,14 @@ class MacrocycleInput(PeriodInput):
     mesocycles: list[PeriodInput] = Field(min_length=1, max_length=64)
 
 
+class ProgramReplacement(ClosedInput):
+    version: Literal['cycle-program-replacement-v0.1']
+    revision: int = Field(ge=1, le=64)
+    program_reference: CycleReference
+    competition_reference: CycleReference
+    boundary_reference: CycleReference | None
+
+
 class CycleProgramInput(ClosedInput):
     program_id: Token
     mode: Literal["olympic", "season", "race", "recreation"]
@@ -197,6 +208,7 @@ class CycleProgramInput(ClosedInput):
     continued_from: CycleReference | None = None
     planning_basis: PlanningBasis | None = None
     athlete_context: AthleteContext | None = None
+    replacement: ProgramReplacement | None = None
 
 
 class CompetitionRevisionInput(ClosedInput):

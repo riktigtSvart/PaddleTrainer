@@ -1,7 +1,29 @@
+import {validateSameDayReplacement} from "./same-day-replacement";
+import type {SameDayReplacement, AlternativesFor} from "./same-day-replacement";
+import {validateAlternativeAvailability} from './alternative-availability';
+import type {AlternativeAvailability} from './alternative-availability';
 import { object, sha } from "./contracts";
+import { validateDaylightReview } from "@/lib/training-options/daylight";
+import { validateSportAvailability } from "./sport-availability";
+import type { SportAvailability } from "./sport-availability";
 import type { Reference } from "./contracts";
 import { request } from "./client";
 import type { Constraint } from "@/lib/athlete-setup/contracts";
+import { validateExecutionReconciliation } from "./execution-reconciliation";
+import type { ExecutionReconciliation } from "./execution-reconciliation";
+import { validatePrescriptionContext } from "./prescription-context";
+import type { PrescriptionContext } from "./prescription-context";
+import { validateMesocycleCoordination } from "./mesocycle-coordination";
+import {validateDistribution} from "./training-distribution";
+import {validateInstructionContext} from "./workout-instructions";
+import type {WorkoutInstructions} from "./workout-instructions";
+import type {Distribution} from "./training-distribution";
+import type { MesocycleCoordination } from "./mesocycle-coordination";
+import type {
+  AssessedStrengthDose,
+  StrengthEvidence,
+  StrengthAssessmentSummary,
+} from "./strength-assessment";
 
 export type Candidate = {
   candidate_key: string;
@@ -10,12 +32,14 @@ export type Candidate = {
   start_at: string;
   end_at: string;
   duration_sec: number;
+  training_period_id?: string;
   title: string;
   description: string;
   capability_key: string;
   role: string;
   rationale: string;
   sport?: string;
+  strength_prescription?: AssessedStrengthDose;
   location?: string;
   location_id?: string;
   opportunity_key?: string;
@@ -43,6 +67,10 @@ export type TrainingEvent = {
   date?: string;
   workout_hash?: string;
   can_confirm_missed?: boolean;
+  sync_reference?: Reference;
+  checked_through?: string;
+  absence_window?: { from_at: string; to_exclusive_at: string };
+  reconciliation_issue?: "AMBIGUOUS_PROVIDER_TARGET";
 };
 export type EntryReview = {
   global_entry_gate: string;
@@ -58,7 +86,8 @@ export type EventSource = {
   date?: string;
 };
 export type Preparation = {
-  version: "training-preparation-v0.1";
+  sport_availability?: SportAvailability;
+  version: "training-preparation-v0.1" | "training-preparation-v0.2";
   available_days_per_week: number | null;
   available_minutes_per_week: number | null;
   max_sessions_per_7_days: number;
@@ -81,7 +110,13 @@ export type TrainingReview = {
   end_date: string;
   timezone_name: string;
   program_reference: Reference;
+  coordinate_mesocycles?: boolean;
+  calibration_review?: TrainingReview | null;
+  same_day_replacement?: SameDayReplacement;
+  alternatives_for?: AlternativesFor;
   inputs?: {
+    strength_assessment?: StrengthEvidence;
+    captured_at?: string;
     recent_sessions?: EventSource[];
     periods?: {
       id: string;
@@ -91,13 +126,19 @@ export type TrainingReview = {
       end_date: string;
       parent_id?: string | null;
     }[];
-    days?: { date: string; availability_state: string }[];
+    days?: {
+      date: string;
+      availability_state: string;
+      mesocycle_id?: string | null;
+      capability_roles?: { capability_key: string; role: string }[];
+    }[];
   };
   selection_preferences?: Record<
     string,
-    { template_key: string; opportunity_key: string }
+    { template_key: string; opportunity_key: string; capability_key?: string; role?: string }
   >;
   plan_snapshots: {
+    workout_hash?: string;
     workout: {
       id: string;
       title: string;
@@ -119,6 +160,13 @@ export type TrainingReview = {
     entry_review?: EntryReview | null;
     blockers: string[];
     events: TrainingEvent[];
+    execution_reconciliation?: ExecutionReconciliation;
+    prescription_context?: PrescriptionContext;
+    strength_assessment?: StrengthAssessmentSummary;
+    mesocycle_coordination?: MesocycleCoordination;
+    distribution?: Distribution;
+    instruction_context?:{schema_version:"training-instructions-v0.1";by_candidate:Record<string,WorkoutInstructions>};
+    alternative_availability?: AlternativeAvailability;
     proposals: Candidate[];
     alternatives?: AlternativeGroup[];
     unavailable_alternatives?: {
@@ -158,6 +206,8 @@ export type TrainingPending = {
   body: string;
 };
 export const trainingReasons: Record<string, string> = {
+  WORKOUT_NO_REMAINING_ALTERNATIVE: 'A megmaradt időablakok és a környező edzések terhelési, illetve pihenőkerete mellett most nincs választható csere. A jelenlegi edzés megmarad.',
+  SAME_DAY_NO_REMAINING_OPTION: "A mai nap hátralévő időablakaiba és terhelési keretébe most nem fér választható edzés. A naptár változatlan marad.",
   SELECTED_ALTERNATIVE_NO_LONGER_AVAILABLE:
     "Egy korábban választott változat a friss keretek között már nem használható. Válassz új lehetőséget az érintett napon.",
   PROFILE_REVIEW_REQUIRED:
@@ -165,7 +215,7 @@ export const trainingReasons: Record<string, string> = {
   RETURNING_ATHLETE_REVIEW:
     "Visszatéréshez még egyéni kezdőterhelést kell meghatározni.",
   PROGRAM_SPORT_NOT_SUPPORTED:
-    "Ehhez a sporthoz még nincs bekötött edzésminta. Jelenleg kajakos felkészüléshez készülhet terv.",
+    "Ehhez a sporthoz még nincs bekötött edzésminta. Jelenleg kajak, futás és erőnlét tervezhető a támogatott célokhoz.",
   CURRENT_ILLNESS_REVIEW:
     "A friss betegségjelzés miatt előbb állapotfelülvizsgálat szükséges.",
   ACCEPTED_WINDOW_ENDED:
@@ -174,8 +224,10 @@ export const trainingReasons: Record<string, string> = {
   CAPABILITY_ROLES_REQUIRED: "Előbb mentsd el a mezociklus képességszerepeit.",
   EXISTING_TRAINING_PRESERVED:
     "Meglévő terv vagy teljesítés mellett nem teszünk ide új edzést.",
+  GUIDED_ASSESSMENT_PENDING:
+    "A kezdő felmérőalkalom még folyamatban van vagy az órás felvétel összekapcsolására vár. Fejezd be és mentsd az alkalmat.",
   RECENT_EXECUTION_REVIEW:
-    "Egy közelmúltbeli edzés teljesítése még nem tisztázott.",
+    "Egy közeli edzéshez még hiányzik a teljesítések szinkronellenőrzése, vagy egy rögzített teljesítés adatai hiányosak.",
   RECOVERY_REVIEW:
     "A friss visszajelzés alapján a közeli edzések felülvizsgálandók.",
   EVENT_PHASE_REVIEW:
@@ -183,6 +235,8 @@ export const trainingReasons: Record<string, string> = {
   COMPETITION_DAY_PRESERVED: "Erre a napra verseny van megadva.",
   NO_SUPPORTED_SAMPLE_FITS:
     "Nem illeszkedik támogatott minta az ismert célhoz, eszközhöz, sporthoz vagy terhelési és időkerethez.",
+  PLANNED_RECOVERY_DAY:
+    "Az edzések közti időköz vagy a gördülő heti keret miatt ez pihenőnap a javaslatban.",
   PROGRAM_TIMEZONE_REVIEW:
     "A felkészülés és a jelenlegi naptár időzónáját egyeztetni kell.",
   GOAL_SOURCE_SNAPSHOT_CHANGED:
@@ -192,6 +246,7 @@ export const eventLabels: Record<string, string> = {
   planned_completed: "Tervezett és teljesített edzés",
   unplanned_completed: "Nem tervezett, teljesített edzés",
   confirmed_missed: "Megerősített kihagyás",
+  not_recorded_after_sync: "Nincs rögzített teljesítés · szinkronellenőrizve",
   reported_completed:
     "Teljesítettnek jelölt terv; a mért teljesítés külön adat",
   execution_unknown: "Lejárt terv; a teljesítés még nem igazolt",
@@ -219,10 +274,27 @@ async function verify(value: unknown, owner: string, program: string) {
 export async function readTrainingReview(
   value: unknown,
   expected: { owner: string; reference: Reference; zone: string },
+  calibrationDepth = 0,
 ) {
   const v = await verify(value, expected.owner, expected.reference.artifact_id),
     r = object(v.result),
     p = object(v.program_reference);
+  if (v.calibration_review) {
+    if (calibrationDepth > 0 || v.coordinate_mesocycles !== true)
+      throw Error("A ciklus kiindulópontja nem ellenőrizhető.");
+    const base = await readTrainingReview(
+      v.calibration_review,
+      expected,
+      calibrationDepth + 1,
+    );
+    if (
+      base.coordinate_mesocycles !== true ||
+      base.start_date > String(v.start_date) ||
+      base.end_date < String(v.end_date) ||
+      Date.parse(base.created_at) > Date.parse(String(v.created_at))
+    )
+      throw Error("A ciklus kiindulópontja más időszakhoz tartozik.");
+  }
   if (
     v.timezone_name !== expected.zone ||
     p.artifact_id !== expected.reference.artifact_id ||
@@ -276,7 +348,9 @@ export async function readTrainingReview(
   if (r.preparation !== undefined) {
     const prep = object(r.preparation);
     if (
-      prep.version !== "training-preparation-v0.1" ||
+      !["training-preparation-v0.1", "training-preparation-v0.2"].includes(
+        String(prep.version),
+      ) ||
       typeof prep.equipment_declared !== "boolean" ||
       (prep.strategy_ready !== undefined &&
         typeof prep.strategy_ready !== "boolean") ||
@@ -285,10 +359,12 @@ export async function readTrainingReview(
       Number(prep.available_day_count) > days ||
       !Number.isInteger(prep.max_sessions_per_7_days) ||
       Number(prep.max_sessions_per_7_days) < 0 ||
-      Number(prep.max_sessions_per_7_days) > 3 ||
+      Number(prep.max_sessions_per_7_days) >
+        (prep.version === "training-preparation-v0.2" ? 7 : 3) ||
       !Number.isInteger(prep.max_minutes_per_7_days) ||
       Number(prep.max_minutes_per_7_days) < 0 ||
-      Number(prep.max_minutes_per_7_days) > 180 ||
+      Number(prep.max_minutes_per_7_days) >
+        (prep.version === "training-preparation-v0.2" ? 10080 : 180) ||
       (prep.available_days_per_week !== null &&
         (!Number.isInteger(prep.available_days_per_week) ||
           Number(prep.available_days_per_week) < 0 ||
@@ -455,6 +531,15 @@ export async function readTrainingReview(
     throw Error(
       "Felülvizsgálati akadály mellett nem alkalmazható tervváltoztatás.",
     );
+  validateSameDayReplacement(v);
+  validateExecutionReconciliation(v);
+  await validatePrescriptionContext(v);
+  await validateMesocycleCoordination(v);
+  validateDistribution(v);
+  validateInstructionContext(v);
+  await validateDaylightReview(v);
+  await validateAlternativeAvailability(v);
+  validateSportAvailability(r, object(v.inputs));
   return v as unknown as TrainingReview;
 }
 
@@ -489,11 +574,22 @@ export async function reviewTraining(
   first: string,
   last: string,
   signal?: AbortSignal,
+  coordinateMesocycles?: boolean,
+  sameDayReplacement?: SameDayReplacement,
+  alternativesFor?: AlternativesFor,
 ) {
   const v = object(
     await request(
       `programs/${encodeURIComponent(expected.reference.artifact_id)}/training-plan/review`,
-      JSON.stringify({ start_date: first, end_date: last }),
+      JSON.stringify({
+        start_date: first,
+        end_date: last,
+        ...(sameDayReplacement?{same_day_replacement:sameDayReplacement}:{}),
+        ...(alternativesFor?{alternatives_for:alternativesFor}:{}),
+        ...(coordinateMesocycles !== undefined
+          ? { coordinate_mesocycles: coordinateMesocycles }
+          : {}),
+      }),
       signal,
     ),
   );

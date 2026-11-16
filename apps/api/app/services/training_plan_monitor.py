@@ -23,7 +23,10 @@ async def run_once(session_factory=SessionLocal):
         ).scalar_one_or_none()
         await session.rollback()
         if owner is not None:
-            return await refresh_active(session, str(owner))
+            reviews = await refresh_active(session, str(owner))
+            from app.services.automatic_planning import run_once as automatic_run
+            await automatic_run(session, str(owner))
+            return reviews
         return []
 
 

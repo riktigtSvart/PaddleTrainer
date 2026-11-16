@@ -1,4 +1,5 @@
 "use client";
+import { SaveActionButton } from "@/components/planning-data/save-actions";
 import { useEffect, useRef, useState } from "react";
 import { loadPlanningInputs } from "@/lib/planning-cycles/inputs";
 import {
@@ -271,6 +272,7 @@ export default function MacroForm({
                   </label>
                   {selected.has(key) && (
                     <div className="mt-5 space-y-5">
+                      {suggested?.demand_priority !== undefined && <p className="text-sm">Versenyigény relatív súlya: <strong>{suggested.demand_priority} / 5</strong>. A fejlesztési szerep a ciklus feladatát és az aktuális állapotot is figyelembe veszi.</p>}
                       {suggested && (
                         <details className="text-sm">
                           <summary>
@@ -421,13 +423,13 @@ export default function MacroForm({
               A mentés új, utólag nem módosítható verziót hoz létre. A korábbi
               verzió megmarad.
             </p>
-            <button
+            <SaveActionButton saveLabel="Fejlesztési célok mentése" saveHint={!selected.size ? "Válassz legalább egy fejlesztési képességet." : "A célokat és szerepeket az űrlap ellenőrzése után menti."}
               className={buttonClass}
               type="submit"
-              disabled={!selected.size}
+              disabled={locked || suggesting || !selected.size}
             >
               Makrocikluscélok mentése
-            </button>
+            </SaveActionButton>
           </fieldset>
         </form>
       )}

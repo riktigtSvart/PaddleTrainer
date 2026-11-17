@@ -5,13 +5,14 @@ import { slots } from '@/lib/nutrition/contracts';
 import type { Context, Meal } from '@/lib/nutrition/contracts';
 import { blankJournal, entryInstant, ensure, JournalHTTPError, journalPendingKey, loadJournal, localClock, nutrients, plannedTime, projectJournal, readJournalWrite, saveJournal } from '@/lib/nutrition/journal';
 import type { Entry, Journal, JournalData, Observation, Slot, Target } from '@/lib/nutrition/journal';
+import { notifyNutrition } from '@/lib/nutrition/events';
 
 const message = (e: unknown) => e instanceof Error ? e.message : 'A napló művelete nem sikerült.';
 const decimal = (s: string) => s.trim().replace(',', '.');
 const hms = (s: string) => s.length === 5 ? s + ':00' : s;
-export function useNutritionJournal(menu: Context | null) {
+export function useNutritionJournal(menu: Context | null, initial?: Journal) {
   const owner = menu?.athlete_id, catalog = menu?.catalog;
-  const [context, setContext] = useState<Journal | null>(null), [data, setData] = useState<JournalData>(blankJournal);
+  const [context, setContext] = useState<Journal | null>(initial ?? null), [data, setData] = useState<JournalData>(()=>structuredClone(initial?.saved?.proposal.data ?? blankJournal()));
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false), [pending, setPending] = useState<string | null>(null), [rejected, setRejected] = useState(false), [blocked, setBlocked] = useState(false), [reload, setReload] = useState(0);
   const writing = useRef(false), alive = useRef(false), installedOwner = useRef('');
   useEffect(() => {
@@ -19,7 +20,7 @@ export function useNutritionJournal(menu: Context | null) {
     alive.current = true;
     if (installedOwner.current === owner && reload === 0) return () => { alive.current = false; };
     const abort = new AbortController();
-    void loadJournal(owner, catalog, abort.signal).then(value => {
+    void (initial?.athlete_id === owner && reload === 0 ? Promise.resolve(initial) : loadJournal(owner, catalog, abort.signal)).then(value => {
       if (abort.signal.aborted) return;
       setContext(value); installedOwner.current = owner;
       setData(structuredClone(value.saved?.proposal.data ?? blankJournal()));
@@ -27,7 +28,7 @@ export function useNutritionJournal(menu: Context | null) {
       catch { setBlocked(true); setError('A korábbi naplómentés nem olvasható. Őrizd meg a böngésző adatait; az eredményt ellenőrizni kell.'); }
     }).catch(e => { if (!abort.signal.aborted) setError(message(e)); });
     return () => { alive.current = false; abort.abort(); };
-  }, [owner, catalog, reload]);
+  }, [owner, catalog, reload, initial]);
   const sources = useMemo(() => { const all = [...(context?.sources ?? [])]; if (menu?.saved && !all.some(a => a.artifact_id === menu.saved!.artifact_id)) all.push(menu.saved); const needed = new Set(data.entries.flatMap(e => e.source ? [e.source.reference.artifact_id] : [])); return all.filter(a => needed.has(a.artifact_id)); }, [context, menu, data.entries]);
   const preview = useMemo(() => { if (!catalog || !context) return null; try { return projectJournal(data, sources, context.now, context.timezone, catalog); } catch { return null; } }, [catalog, context, data, sources]);
   const dirty = !!context && canonical(data) !== canonical(context.saved?.proposal.data ?? blankJournal());
@@ -42,6 +43,7 @@ export function useNutritionJournal(menu: Context | null) {
       ensure(!previous || previous === body, 'Előbb ellenőrizd a korábbi naplómentést.');
       localStorage.setItem(key, body); setPending(body);
       const result = await saveJournal(context.athlete_id, catalog, body); committed = true;
+      notifyNutrition(context.athlete_id);
       if (localStorage.getItem(key) === body) localStorage.removeItem(key);
       if (!alive.current) return;
       const a = result.artifact;
@@ -71,7 +73,7 @@ export function MealJournalControls({ store, meal }: { store: Store; meal: Meal 
     return { id: crypto.randomUUID(), date: status === 'eaten' ? now.date : meal.date, time: status === 'eaten' ? now.time : null, timezone: context.timezone, fold: null, status, title, amount: status === 'eaten' ? '1' : '0', unit: 'portion', recipe_id: meal.recipe_id, source: { reference: { artifact_id: saved!.artifact_id, content_hash: saved!.content_hash }, date: meal.date, slot: meal.slot }, note: '', satisfaction: null };
   };
   return <div className="pt-meal-journal-controls"><label>Tervezett időpont<input aria-label={`Tervezett időpont · ${meal.date} · ${slots[meal.slot]}`} type="time" step={1} disabled={store.locked} value={at ?? ''} onChange={e => store.edit({ ...data, timings: [...data.timings.filter(t => t.date !== meal.date || t.slot !== meal.slot), { date: meal.date, slot: meal.slot, time: e.target.value ? hms(e.target.value) : null }] })} /></label>
-    {recorded ? <p role="status">{recorded.status === 'skipped' ? 'Kihagyva' : `Elfogyasztva: ${recorded.date} ${recorded.time} · ${recorded.amount} saját adag`}. A naplóban javítható.</p> : !canLog ? <p className="pt-meal-note">A naplózáshoz előbb mentsd el ezt az étel- és adagválasztást.</p> : <><div className="pt-meal-actions"><button className="pt-button" type="button" disabled={store.locked || meal.date > context.local_today} onClick={() => { if (meal.date === context.local_today) { const e = make('eaten'); try { entryInstant(e); store.save({ ...data, entries: [...data.entries, e] }); } catch { setOpen(true); } } else setOpen(true); }}>Megettem</button><button className="pt-button" type="button" disabled={store.locked || meal.date > context.local_today} onClick={() => store.save({ ...data, entries: [...data.entries, make('skipped')] })}>Kihagytam</button><button className="pt-button" type="button" disabled={store.locked} onClick={() => setOpen(v => !v)}>Más adag / időpont</button></div>{open && <IntakeForm key={`${meal.date}/${meal.slot}`} store={store} initial={{ ...make('eaten'), date: meal.date, time: at }} onDone={() => setOpen(false)} />}</>}
+    {recorded ? <p role="status">{recorded.source?.reference.artifact_id !== saved?.artifact_id ? `Ehhez az étkezéshez egy korábbi változatot naplóztál: ${recorded.title}` : recorded.status === 'skipped' ? 'Kihagyva' : `Elfogyasztva: ${recorded.date} ${recorded.time} · ${recorded.amount} saját adag`}. A naplóban javítható.</p> : !canLog ? <p className="pt-meal-note">A naplózáshoz előbb mentsd el ezt az étel- és adagválasztást.</p> : <><div className="pt-meal-actions"><button className="pt-button" type="button" disabled={store.locked || meal.date > context.local_today} onClick={() => { if (meal.date === context.local_today) { const e = make('eaten'); try { entryInstant(e); store.save({ ...data, entries: [...data.entries, e] }); } catch { setOpen(true); } } else setOpen(true); }}>Megettem</button><button className="pt-button" type="button" disabled={store.locked || meal.date > context.local_today} onClick={() => store.save({ ...data, entries: [...data.entries, make('skipped')] })}>Kihagytam</button><button className="pt-button" type="button" disabled={store.locked} onClick={() => setOpen(v => !v)}>Más adag / időpont</button></div>{open && <IntakeForm key={`${meal.date}/${meal.slot}`} store={store} initial={{ ...make('eaten'), date: meal.date, time: at }} onDone={() => setOpen(false)} />}</>}
   </div>;
 }
 

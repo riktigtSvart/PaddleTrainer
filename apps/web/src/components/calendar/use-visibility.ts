@@ -34,7 +34,7 @@ export function useVisibility(owner: string | null, span: Span) {
   }, [key, owner, span]);
   const value = useMemo(() => state.key === key ? state.value : defaultVisibility(), [state, key]);
   const layers = useMemo(() => ({ ...value.layers, training: true }), [value]);
-  return { layers, fullDay: value.fullDay, cycleLoad: value.cycleLoad, weekStart:value.weekStart??"monday", ready: state.key === key && state.ready,
+  return { layers, meals: value.meals ?? true, setMeals: (meals:boolean) => update(v=>({...v,meals})), fullDay: value.fullDay, cycleLoad: value.cycleLoad, weekStart:value.weekStart??"monday", ready: state.key === key && state.ready,
     notice: state.key === key ? state.notice : "",
     setLayer: (layer: VisibilityLayer, checked: boolean) => update(v => ({ ...v, layers: { ...v.layers, [layer]: checked } })),
     setFullDay: (fullDay: boolean) => update(v => ({ ...v, fullDay })),

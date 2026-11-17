@@ -1,4 +1,5 @@
 "use client";
+import { CalendarMealsDay } from "@/components/nutrition/calendar-layer";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { clockSlot, interactionHint } from "@/lib/calendar/interactions";
@@ -336,6 +337,7 @@ export default function TimeGrid({
                     )}
                   </small>
                   <CycleDayMarkers cycles={cycles} date={date} onOpenCycle={onOpenCycle} />
+                  <CalendarMealsDay date={date}/>
                 </div>
               );
             })}

@@ -1,4 +1,5 @@
 "use client";
+import { CalendarMealsDay, useNutritionLayerEnabled } from "@/components/nutrition/calendar-layer";
 import { useEffect, useRef, useState } from "react";
 import {
   formatDay,
@@ -48,6 +49,7 @@ export default function PeriodGrid({
   cycleContext?: CycleContext | null;
   onOpenCycle?: (cycle: CalendarCycle) => void;
 }) {
+  const mealsEnabled=useNutritionLayerEnabled();
   const cycles = showCycles ? calendarCycles(feed.periods) : [];
   const grid = useRef<HTMLDivElement>(null);
   const [capacity, setCapacity] = useState(3);
@@ -55,10 +57,10 @@ export default function PeriodGrid({
     if (!fitted || !grid.current || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(([entry]) => {
       const rows = Math.ceil(days.length / 7), rowHeight = (entry.contentRect.height - 20 - rows * 4) / rows;
-      setCapacity(Math.max(1, Math.floor((rowHeight - (showCycles ? 62 : 32)) / 22)));
+      setCapacity(Math.max(1, Math.floor((rowHeight - (showCycles ? 62 : 32) - (mealsEnabled ? 24 : 0)) / 22)));
     });
     observer.observe(grid.current); return () => observer.disconnect();
-  }, [fitted, days.length, showCycles]);
+  }, [fitted, days.length, showCycles, mealsEnabled]);
   const all = segments(
     events,
     days[0],
@@ -149,6 +151,7 @@ export default function PeriodGrid({
               <small>{d.endsWith("-01") ? d.slice(5, 7) + "." : ""}</small>
             </button>
             <CycleDayMarkers cycles={cycles} date={d} onOpenCycle={onOpenCycle} />
+            <CalendarMealsDay date={d} compact/>
             {fitted ? <>
               {shown.map((e) => <button type="button" key={e.key} data-calendar-event={e.key} className={e.kind === "planned" || e.kind === "session" ? `pt-month-event pt-goal-${goalFamily(e.goal)}` : "pt-month-commitment"} onClick={() => open(e)} aria-label={eventLabel(e, feed.timezone_name)} title={eventLabel(e, feed.timezone_name)}><Icon name={e.kind === "availability" ? "clock" : e.kind === "constraint" ? "calendar" : sportIcon(e.sport)} /><span>{e.start ? localParts(e.start, feed.timezone_name).clock + " " : ""}{e.kind === "availability" ? "Edzéslehetőség" : e.title}</span><AlternativeBadge event={e} />{e.kind === "session" && <Icon name="check" />}</button>)}
               {ordered.length > shown.length && <button type="button" className="pt-more" onClick={() => selectDay(d)}>+{ordered.length - shown.length} esemény</button>}

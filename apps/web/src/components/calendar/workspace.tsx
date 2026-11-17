@@ -46,6 +46,7 @@ import FittedFrame from "./fitted-frame";
 import type { CalendarTarget } from "@/lib/calendar/interactions";
 import AutomaticPlanning from "@/components/planning-data/automation";
 import { calendarLayerEntries } from "@/lib/calendar/layers";
+import { NutritionCalendarProvider, NutritionCalendarNotice } from "@/components/nutrition/calendar-layer";
 import { useVisibility } from "./use-visibility";
 import StateSummary from "./state-summary";
 import ConflictSummary from "./conflict-summary";
@@ -91,7 +92,7 @@ export default function CalendarWorkspace() {
     [success, setSuccess] = useState("");
   const [selection, setSelection] = useState<Selection | null>(null),
     [draftGoal, setDraftGoal] = useState("");
-  const { layers, fullDay, cycleLoad, weekStart, setWeekStart, setLayer, setFullDay, setCycleLoad, ready: visibilityReady, notice: visibilityNotice } = useVisibility(data?.athlete_id ?? null, view.span);
+  const { layers, fullDay, meals, setMeals, cycleLoad, weekStart, setWeekStart, setLayer, setFullDay, setCycleLoad, ready: visibilityReady, notice: visibilityNotice } = useVisibility(data?.athlete_id ?? null, view.span);
   const readCache=useMemo(()=>new CalendarViewCache(reload),[reload]);
   const cycleContext=useCycleContext(data,cycleLoad,readCache);
   function openCycle(cycle:CalendarCycle,source:Feed|null=data) {
@@ -424,7 +425,7 @@ export default function CalendarWorkspace() {
       (data.start_date === range.start && data.end_date === range.end));
   const days = data ? dayList(data.start_date, data.end_date) : [];
   return (
-    <main className="pt-calendar">
+    <NutritionCalendarProvider owner={data?.athlete_id ?? null} zone={data?.timezone_name} start={range?.start ?? ""} end={range?.end ?? ""} enabled={meals && visibilityReady}><main className="pt-calendar">
       <h1 className="pt-sr-only">Napirend</h1>
       {data && <AutomaticPlanning owner={data.athlete_id} compact />}
       <div className="pt-calendar-toolbar">
@@ -515,7 +516,8 @@ export default function CalendarWorkspace() {
                   {label}
                 </label>
               ))}
-              {["Táplálkozás", "Regenerációs javaslatok", "Becsült fáradtság"].map((label) => <label key={label} className="pt-module-placeholder"><input type="checkbox" disabled />{label} · későbbi modul</label>)}
+              <label><input type="checkbox" checked={meals} onChange={e=>setMeals(e.target.checked)}/>Étkezések és étkezési napló</label>
+              {["Regenerációs javaslatok", "Becsült fáradtság"].map((label) => <label key={label} className="pt-module-placeholder"><input type="checkbox" disabled />{label} · későbbi modul</label>)}
               <label><input type="checkbox" checked={cycleLoad} onChange={e=>setCycleLoad(e.target.checked)}/>Mikrociklusok terhelési színei</label>
               {view.span <= 7 && (
                 <label className="pt-hours-choice">
@@ -529,6 +531,7 @@ export default function CalendarWorkspace() {
               )}
         </div>
       </fieldset>
+      <NutritionCalendarNotice/>
       {visibilityNotice && <p role="status" className="pt-notice">{visibilityNotice}</p>}
       {cycleLoad&&<CycleLoadLegend/>}
       {cycleContext.error&&<p role="status" className="pt-notice">{cycleContext.error}</p>}
@@ -1016,6 +1019,6 @@ export default function CalendarWorkspace() {
         setManualRequest(null); setSuccess(r.operation === 'cancel' ? 'A saját edzést elhagytad.' : `${r.workout_ids.length} saját edzés mentve.${r.warnings.length ? ' Ezen a napon már van másik edzés is; a naptárban mindkettő megmaradt.' : ''}`);
       }} />}
       {cycleDetail&&data&&cycleDetail.owner===data.athlete_id&&cycleDetail.zone===data.timezone_name&&<CycleDetail key={`${cycleDetail.owner}:${cycleDetail.period.id}:${cycleDetail.period.start_date}:${cycleDetail.period.end_date}:${data.retrieved_at}`} period={cycleDetail.period} owner={cycleDetail.owner} zone={cycleDetail.zone} focusOrdinal={cycleDetail.ordinal} onClose={()=>setCycleDetail(null)}/>}
-    </main>
+    </main></NutritionCalendarProvider>
   );
 }

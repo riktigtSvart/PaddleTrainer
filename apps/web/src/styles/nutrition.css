@@ -68,3 +68,25 @@
 .pt-nutrition-journal input, .pt-nutrition-journal select, .pt-nutrition-journal textarea, .pt-meal-intake-form input, .pt-meal-intake-form select, .pt-meal-intake-form textarea { max-width: 100%; width: 100%; box-sizing: border-box; }
 .pt-nutrition-journal input[type=checkbox] { width: auto; }
 .pt-nutrition-journal summary { cursor: pointer; font-weight: 600; }
+
+/* Calendar meals stay separate from training lanes and duration budgets. */
+.pt-meal-savebar { position: sticky; bottom: 0; z-index: 4; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--pt-line); border-radius: 10px; background: var(--pt-panel); box-shadow: 0 -3px 12px #0002; }
+.pt-calendar-meals { display: grid; gap: 3px; padding-top: 5px; min-width: 0; font-size: 11px; }
+.pt-calendar-meals button, .pt-grid-day-head .pt-calendar-meals button { width: 100%; color: var(--pt-text); border: 1px solid var(--pt-line); border-left: 3px solid var(--pt-accent); border-radius: 4px; background: var(--pt-panel); padding: 3px 5px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; font-size: 11px; }
+.pt-calendar-meals button:hover, .pt-calendar-meals button:focus-visible { background: var(--pt-accent-bg); outline-color: var(--pt-accent); }
+.pt-calendar-meals .is-eaten { border-left-color: #65b67a; }
+.pt-calendar-meals.is-compact { margin-bottom: 4px; }
+.pt-meal-calendar-dialog { width: min(760px, calc(100vw - 28px)); max-height: calc(100dvh - 28px); overflow: auto; padding: 22px; border: 1px solid var(--pt-line); border-radius: 12px; color: var(--pt-text); background: var(--pt-bg); margin: auto; }
+.pt-meal-calendar-dialog::backdrop { background: #0009; }
+.pt-meal-calendar-dialog > header { display: flex; justify-content: space-between; align-items: start; gap: 15px; }
+.pt-meal-calendar-dialog h2 { font-size: 1.4rem; font-weight: 650; margin-block: 8px 14px; }
+.pt-meal-calendar-dialog h3 { font-weight: 650; margin-block: 14px 8px; }
+.pt-meal-calendar-dialog p, .pt-meal-calendar-dialog details { margin-block: 12px; line-height: 1.55; }
+.pt-meal-calendar-dialog ul, .pt-meal-calendar-dialog ol { padding-left: 22px; }
+.pt-meal-calendar-dialog ul { list-style: disc; }.pt-meal-calendar-dialog ol { list-style: decimal; }
+.pt-meal-calendar-dialog .pt-meal-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.pt-meal-calendar-dialog label { display: grid; gap: 6px; margin-block: 10px; }
+.pt-meal-calendar-dialog input, .pt-meal-calendar-dialog select, .pt-meal-calendar-dialog textarea { width: 100%; min-width: 0; padding: 9px; border: 1px solid var(--pt-line); border-radius: 6px; background: var(--pt-panel); color: var(--pt-text); }
+.pt-meal-calendar-dialog article { border-top: 1px solid var(--pt-line); padding: 12px 0; }
+.pt-meal-calendar-choice { display: grid; gap: 6px; padding: 12px; width: 100%; text-align: left; border: 1px solid var(--pt-line); border-radius: 8px; background: var(--pt-panel); margin-block: 8px; }
+@media (max-width:650px) { .pt-meal-calendar-dialog {padding:14px}.pt-meal-calendar-dialog .pt-meal-grid {grid-template-columns:1fr}.pt-meal-calendar-dialog > header {flex-wrap:wrap} }

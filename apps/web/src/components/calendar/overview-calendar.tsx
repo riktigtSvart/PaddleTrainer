@@ -1,4 +1,5 @@
 "use client";
+import { NutritionRangeLoader } from "@/components/nutrition/calendar-layer";
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { loadFeed } from "@/lib/calendar/client";
 import { loadConstraints } from "@/lib/calendar/constraint-client";
@@ -203,6 +204,7 @@ export default function OverviewCalendar({
               data-overview-start={chunk.start}
               className="pt-overview-chunk"
             >
+              <NutritionRangeLoader start={chunk.start} end={chunk.end}/>
               <h2>
                 {formatDay(chunk.start)} – {formatDay(chunk.end)}{" "}
                 <small>

@@ -6,6 +6,7 @@ import type { Context, Meal } from '@/lib/nutrition/contracts';
 import { blankJournal, entryInstant, ensure, JournalHTTPError, journalPendingKey, loadJournal, localClock, nutrients, plannedTime, projectJournal, readJournalWrite, saveJournal } from '@/lib/nutrition/journal';
 import type { Entry, Journal, JournalData, Observation, Slot, Target } from '@/lib/nutrition/journal';
 import { notifyNutrition } from '@/lib/nutrition/events';
+import { mealTiming, timingChanged, timingLabel } from '@/lib/nutrition/timing';
 
 const message = (e: unknown) => e instanceof Error ? e.message : 'A napló művelete nem sikerült.';
 const decimal = (s: string) => s.trim().replace(',', '.');
@@ -66,13 +67,16 @@ export function MealJournalControls({ store, meal }: { store: Store; meal: Meal 
   const recorded = data.entries.find(e => e.source?.date === meal.date && e.source.slot === meal.slot);
   const saved = menu.saved, original = saved?.proposal.data.plan?.meals.find(m => m.date === meal.date && m.slot === meal.slot);
   const canLog = original?.recipe_id === meal.recipe_id && original?.portion_factor === meal.portion_factor;
-  const at = plannedTime(data, meal.date, meal.slot);
+  const hint=mealTiming(menu,data,meal),at=hint?hint.time:plannedTime(data, meal.date, meal.slot);
   const title = menu.catalog.recipes.find(r => r.id === meal.recipe_id)!.title;
   const make = (status: Entry['status']): Entry => {
     const now = localClock(new Date().toISOString(), context.timezone);
     return { id: crypto.randomUUID(), date: status === 'eaten' ? now.date : meal.date, time: status === 'eaten' ? now.time : null, timezone: context.timezone, fold: null, status, title, amount: status === 'eaten' ? '1' : '0', unit: 'portion', recipe_id: meal.recipe_id, source: { reference: { artifact_id: saved!.artifact_id, content_hash: saved!.content_hash }, date: meal.date, slot: meal.slot }, note: '', satisfaction: null };
   };
   return <div className="pt-meal-journal-controls"><label>Tervezett időpont<input aria-label={`Tervezett időpont · ${meal.date} · ${slots[meal.slot]}`} type="time" step={1} disabled={store.locked} value={at ?? ''} onChange={e => store.edit({ ...data, timings: [...data.timings.filter(t => t.date !== meal.date || t.slot !== meal.slot), { date: meal.date, slot: meal.slot, time: e.target.value ? hms(e.target.value) : null }] })} /></label>
+    {hint&&<p className="pt-meal-note">{timingLabel(hint)}</p>}
+    {timingChanged(data,context.saved?.proposal.data,meal)&&<button type="button" className="pt-button" disabled={store.locked} onClick={()=>void store.save()}>Időpont mentése</button>}
+    {hint&&data.timings.some(t=>t.date===meal.date&&t.slot===meal.slot)&&<button type="button" className="pt-button" disabled={store.locked} onClick={()=>void store.save({...data,timings:data.timings.filter(t=>t.date!==meal.date||t.slot!==meal.slot)})}>Automatikus időpont visszaállítása</button>}
     {recorded ? <p role="status">{recorded.source?.reference.artifact_id !== saved?.artifact_id ? `Ehhez az étkezéshez egy korábbi változatot naplóztál: ${recorded.title}` : recorded.status === 'skipped' ? 'Kihagyva' : `Elfogyasztva: ${recorded.date} ${recorded.time} · ${recorded.amount} saját adag`}. A naplóban javítható.</p> : !canLog ? <p className="pt-meal-note">A naplózáshoz előbb mentsd el ezt az étel- és adagválasztást.</p> : <><div className="pt-meal-actions"><button className="pt-button" type="button" disabled={store.locked || meal.date > context.local_today} onClick={() => { if (meal.date === context.local_today) { const e = make('eaten'); try { entryInstant(e); store.save({ ...data, entries: [...data.entries, e] }); } catch { setOpen(true); } } else setOpen(true); }}>Megettem</button><button className="pt-button" type="button" disabled={store.locked || meal.date > context.local_today} onClick={() => store.save({ ...data, entries: [...data.entries, make('skipped')] })}>Kihagytam</button><button className="pt-button" type="button" disabled={store.locked} onClick={() => setOpen(v => !v)}>Más adag / időpont</button></div>{open && <IntakeForm key={`${meal.date}/${meal.slot}`} store={store} initial={{ ...make('eaten'), date: meal.date, time: at }} onDone={() => setOpen(false)} />}</>}
   </div>;
 }

@@ -21,6 +21,8 @@ BASE = '/api/v1/planning/nutrition'
 
 @pytest.fixture
 def env(environment, monkeypatch):
+    from app.models.entities import PlannedWorkout
+    PlannedWorkout.__table__.create(environment.engine, checkfirst=True)
     environment.app.include_router(route.router, prefix='/api/v1')
     environment.clock.current = datetime(2026, 11, 17, 12, tzinfo=UTC)
     monkeypatch.setattr(intake, '_now', environment.clock.tick)

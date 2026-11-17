@@ -10,8 +10,9 @@ from app.planning.infrastructure.persistence.sqlalchemy_models import PlanningAu
 from app.schemas.nutrition import NutritionWrite
 from app.services import nutrition as menus, nutrition_journal as journal
 from app.services.nutrition_domain import catalog
+from app.services import nutrition_timing
 
-SCHEMA = 'nutrition-calendar-v0.1'
+SCHEMA = 'nutrition-calendar-v0.2'
 
 
 def dates(start, end):
@@ -22,7 +23,7 @@ def dates(start, end):
     return [(first+timedelta(days=i)).isoformat() for i in range((last-first).days+1)]
 
 
-def project(sources, data, start, end, reported_sources=()):
+def project(sources, data, start, end, reported_sources=(), timing_context=None):
     wanted = set(dates(start, end)); selected = {}; bank = catalog()
     titles = {r['id']: r['title'] for r in bank['recipes']}
     for source in sources:  # newest first; replace the entire covered date
@@ -33,6 +34,7 @@ def project(sources, data, start, end, reported_sources=()):
             day = (date.fromisoformat(plan['start_date'])+timedelta(days=i)).isoformat()
             if day not in wanted or day in selected:
                 continue
+            schedule = nutrition_timing.day_schedule(data, day, [m['slot'] for m in plan['meals'] if m['date'] == day], timing_context) if timing_context else None
             meals = []
             for m in plan['meals']:
                 if m['date'] != day:
@@ -47,7 +49,8 @@ def project(sources, data, start, end, reported_sources=()):
                     and original['recipe_id'] == m['recipe_id'] and original['portion_factor'] == m['portion_factor']))
                 timing = next((t for t in data['timings'] if t['date'] == day and t['slot'] == m['slot']), None)
                 meals.append({**m, 'title': titles[m['recipe_id']], 'people': plan['people'], 'source': ref,
-                    'planned_time': timing['time'] if timing is not None else data['default_times'][m['slot']],
+                    'planned_time': schedule[m['slot']]['time'] if schedule else timing['time'] if timing is not None else data['default_times'][m['slot']],
+                    **({'timing': schedule[m['slot']]} if schedule else {}),
                     'status': report['status'] if same else 'planned',
                     'report_id': report['id'] if report else None, 'different_report': bool(report and not same)})
             selected[day] = meals
@@ -84,9 +87,11 @@ async def read(*, repository, session, owner, start, end):
             'saved': saved, 'reference': menus.reference(saved), 'sources': journal_sources, **journal.FLAGS}
         log['content_hash'] = digest(log)
         data = saved['proposal']['data'] if saved else journal.JournalData().model_dump()
+        timing_context = await nutrition_timing.context(session, owner, user.timezone, start, end, now)
         value = {'schema_version': SCHEMA, 'athlete_id': owner, 'timezone': user.timezone,
             'start_date': start, 'end_date': end, 'catalog': catalog(), 'sources': sources, 'journal': log,
-            'result': project(sources, data, start, end, journal_sources), 'read_only': True}
+            'timing_context': timing_context,
+            'result': project(sources, data, start, end, journal_sources, timing_context), 'read_only': True}
         value['content_hash'] = digest(value)
         return value
     finally:

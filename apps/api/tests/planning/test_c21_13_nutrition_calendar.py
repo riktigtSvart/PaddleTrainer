@@ -69,7 +69,11 @@ def test_actual_history_survives_replan_and_cannot_mark_replacement_as_eaten(env
 
 def test_unknown_meal_time_is_not_preparation_duration_or_evidence_of_eating(env):
     menu(env);v=calendar(env)
-    assert all(m['planned_time'] is None and m['status']=='planned' for d in v['result']['days'] for m in d['meals'])
+    defaults={'breakfast':'07:30:00','lunch':'12:30:00','snack':'16:00:00','dinner':'19:00:00'}
+    for d in v['result']['days']:
+        for m in d['meals']:
+            assert m['status']=='planned'
+            assert m['planned_time']==(None if d['date']<v['journal']['local_today'] else defaults[m['slot']])
 
 
 def test_shopping_state_save_does_not_undo_a_report_of_the_same_physical_meal(env):

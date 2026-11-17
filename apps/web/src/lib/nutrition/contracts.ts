@@ -1,4 +1,6 @@
 import { canonical, day, object, sha } from '@/lib/planning-cycles/contracts';
+import { readTimingContext } from './timing';
+import type { TimingContext } from './timing';
 
 export const SCHEMA = 'nutrition-workspace-v0.1';
 export const CATALOG_HASH = '793d79b56fbbbf2067b18c1bc086013705c74caf41138ece674dc1270d9ebda6';
@@ -15,7 +17,7 @@ export type Projection = { days: { date: string; meals: (Meal & { ingredients: {
 export type Reference = { artifact_id: string; content_hash: string };
 export type Write = { request_id: string; previous_reference: Reference | null; catalog_hash: string; data: NutritionData };
 export type Artifact = { schema_version: typeof SCHEMA; kind: 'nutrition_workspace'; athlete_id: string; artifact_id: string; created_at: string; proposal: Write; result: Projection; content_hash: string; workouts_changed: false; actual_intake_changed: false; personal_energy_prescribed: false };
-export type Context = { schema_version: typeof SCHEMA; athlete_id: string; local_today: string; catalog: Catalog; saved: Artifact | null; reference: Reference | null; content_hash: string };
+export type Context = { schema_version: typeof SCHEMA; athlete_id: string; local_today: string; catalog: Catalog; saved: Artifact | null; reference: Reference | null; content_hash: string; timing_context?: TimingContext };
 export type Receipt = { artifact: Artifact; committed: true; reused: boolean; durable_available_at: string };
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const digest = /^[a-f0-9]{64}$/;
@@ -109,6 +111,7 @@ export async function readNutritionContext(value: unknown, expectedOwner?: strin
   check(c.schema_version === 'nutrition-catalog-v0.1' && c.content_hash === CATALOG_HASH);
   const catalog = c as unknown as Catalog;
   const saved = v.saved === null ? null : await artifact(v.saved, v.athlete_id, catalog);
+  if(v.timing_context!==undefined){const plan=saved?.proposal.data.plan,start=plan?.start_date??v.local_today,end=civilDay(start,plan?plan.day_count-1:13);const timing=readTimingContext(v.timing_context,v.athlete_id,start,end);check(timing.local_today===v.local_today);}
   check(canonical(reference(v.reference)) === canonical(saved ? { artifact_id: saved.artifact_id, content_hash: saved.content_hash } : null));
   return v as unknown as Context;
 }

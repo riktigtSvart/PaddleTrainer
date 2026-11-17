@@ -1,6 +1,6 @@
 """Owned meal plans and shopping state, saved atomically as append-only snapshots."""
 import json
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from uuid import UUID
 from zoneinfo import ZoneInfo
 from sqlalchemy import select
@@ -53,9 +53,16 @@ async def read(*, repository, session, owner):
     try:
         user = await intake.lock_owner(session, owner)
         saved = await latest(repository, session, owner)
+        from app.services import nutrition_timing
+        now = intake._now()
+        today = now.astimezone(ZoneInfo(user.timezone)).date()
+        plan = saved['proposal']['data']['plan'] if saved else None
+        start = plan['start_date'] if plan else today.isoformat()
+        end = (date.fromisoformat(start)+timedelta(days=plan['day_count']-1 if plan else 13)).isoformat()
         value = {'schema_version': SCHEMA, 'athlete_id': owner,
-            'local_today': intake._now().astimezone(ZoneInfo(user.timezone)).date().isoformat(),
+            'local_today': today.isoformat(),
             'catalog': catalog(), 'saved': saved, 'reference': reference(saved),
+            'timing_context': await nutrition_timing.context(session, owner, user.timezone, start, end, now),
             'workouts_changed': False, 'actual_intake_changed': False, 'personal_energy_prescribed': False}
         value['content_hash'] = digest(value)
         return value

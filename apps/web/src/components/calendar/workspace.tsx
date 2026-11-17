@@ -425,7 +425,7 @@ export default function CalendarWorkspace() {
       (data.start_date === range.start && data.end_date === range.end));
   const days = data ? dayList(data.start_date, data.end_date) : [];
   return (
-    <NutritionCalendarProvider owner={data?.athlete_id ?? null} zone={data?.timezone_name} start={range?.start ?? ""} end={range?.end ?? ""} enabled={meals && visibilityReady}><main className="pt-calendar">
+    <NutritionCalendarProvider key={`${data?.athlete_id ?? ''}/${reload}`} owner={data?.athlete_id ?? null} zone={data?.timezone_name} start={range?.start ?? ""} end={range?.end ?? ""} enabled={meals && visibilityReady}><main className="pt-calendar">
       <h1 className="pt-sr-only">Napirend</h1>
       {data && <AutomaticPlanning owner={data.athlete_id} compact />}
       <div className="pt-calendar-toolbar">

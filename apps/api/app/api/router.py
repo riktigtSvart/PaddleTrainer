@@ -11,6 +11,7 @@ from app.api.routes import (
     guided_strength,
     health,
     initial_assessment,
+    nutrition,
     pft,
     phase_clarification_storage,
     phase_reconciliations,
@@ -55,6 +56,7 @@ api_router.include_router(initial_assessment.router)
 api_router.include_router(guided_strength.router)
 api_router.include_router(planning_calendar.router)
 api_router.include_router(athlete_setup.router)
+api_router.include_router(nutrition.router)
 
 api_router.include_router(health.router)
 api_router.include_router(polar.router)

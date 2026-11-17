@@ -31,6 +31,8 @@ class AuditArtifactKind(StrEnum):
     ATHLETE_PROFILE = "athlete_profile"
     BODY_MASS_MEASUREMENT = "body_mass_measurement"
     NUTRITION_GOAL = "nutrition_goal"
+    NUTRITION_WORKSPACE = "nutrition_workspace"
+    NUTRITION_JOURNAL = "nutrition_journal"
     ATHLETE_AVAILABILITY = "athlete_availability"
     ATHLETE_POLAR_IMPORT = "athlete_polar_import"
     WORKOUT_GOAL_TAG = "workout_goal_tag"

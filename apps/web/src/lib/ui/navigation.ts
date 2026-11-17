@@ -12,8 +12,9 @@ export const navigation: NavigationSection[] = [
     { href: "/training-planning#schedule", label: "Általános edzésrend" }, { href: "/training-planning#assessment", label: "Állapotfelmérés" },
   ] },
   { href: "/nutrition", label: "Táplálkozási opciók", icon: "activity", children: [
+    { href: "/nutrition", label: "Többnapos étrend" }, { href: "/shopping", label: "Bevásárlólista" },
     { href: "/nutrition#body-goals", label: "Testsúlycél és testtömeg" }, { href: "/nutrition#body-history", label: "Testtömeg-előzmények" },
-    { href: "/nutrition#preferences", label: "Preferenciák és igények" }, { href: "/nutrition#shopping-options", label: "Bevásárlási lehetőségek" },
+    { href: "/nutrition#preferences", label: "Preferenciák és igények" },
   ] },
   { href: "/settings", label: "Általános beállítások", icon: "settings", children: [
     { href: "/settings#appearance", label: "Megjelenés / téma" }, { href: "/settings#data-connections", label: "Órás adatkapcsolatok" },

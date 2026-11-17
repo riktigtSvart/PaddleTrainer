@@ -54,7 +54,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div className="pt-appbar-actions">
           <ThemeControl compact />
           <DataConnectionsControl />
-          <span title="Bevásárlólista lekérése · a bevásárlási modul elkészülése után"><button type="button" className="pt-header-future" disabled aria-label="Bevásárlólista lekérése · későbbi modul"><Icon name="cart" /></button></span>
+          <Link href="/shopping" className="pt-button" title="Bevásárlólista" aria-label="Bevásárlólista"><Icon name="cart" /></Link>
           <span title={`Nyelv: rendszer${language ? ` (${language})` : ""}. A többnyelvű felület későbbi lehetőség.`}><button type="button" className="pt-header-future" disabled aria-label="Nyelv · rendszer alapértelmezése · későbbi lehetőség"><Icon name="language" /></button></span>
         </div>
       </header>

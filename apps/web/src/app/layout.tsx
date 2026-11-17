@@ -10,6 +10,7 @@ import "@/styles/assessed-strength.css";
 import "@/styles/guided-strength.css";
 import "@/styles/session-analysis.css";
 import "@/styles/application-shell.css";
+import "@/styles/nutrition.css";
 
 export const metadata: Metadata = {
   title: { default: "PaddleTrainer", template: "%s · PaddleTrainer" },

@@ -1,0 +1,1256 @@
+{
+  "schema_version": "nutrition-catalog-v0.1",
+  "version": "2026-11-16",
+  "allergens": {
+    "gluten": "Glutént tartalmazó gabonák",
+    "crustaceans": "Rákfélék",
+    "eggs": "Tojás",
+    "fish": "Hal",
+    "peanuts": "Földimogyoró",
+    "soy": "Szója",
+    "milk": "Tej",
+    "nuts": "Diófélék",
+    "celery": "Zeller",
+    "mustard": "Mustár",
+    "sesame": "Szezámmag",
+    "sulphites": "Kén-dioxid és szulfitok",
+    "lupin": "Csillagfürt",
+    "molluscs": "Puhatestűek"
+  },
+  "categories": {
+    "vegetables": "Zöldségek",
+    "fruit": "Gyümölcsök",
+    "grains": "Gabonák és köretek",
+    "protein": "Fehérjeforrások",
+    "dairy": "Tejtermékek",
+    "pantry": "Egyéb alapanyagok"
+  },
+  "foods": [
+    {
+      "id": "carrot",
+      "name": "Sárgarépa",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "tomato",
+      "name": "Paradicsom",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "cucumber",
+      "name": "Uborka",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "broccoli",
+      "name": "Brokkoli",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "pepper",
+      "name": "Paprika",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "spinach",
+      "name": "Spenót",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "onion",
+      "name": "Vöröshagyma",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "potato",
+      "name": "Burgonya",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "lettuce",
+      "name": "Saláta",
+      "category": "vegetables",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "apple",
+      "name": "Alma",
+      "category": "fruit",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "banana",
+      "name": "Banán",
+      "category": "fruit",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "berries",
+      "name": "Bogyós gyümölcs (friss vagy fagyasztott)",
+      "category": "fruit",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "orange",
+      "name": "Narancs",
+      "category": "fruit",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "lemon",
+      "name": "Citrom",
+      "category": "fruit",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "oats",
+      "name": "Zabpehely (száraz)",
+      "category": "grains",
+      "unit": "g",
+      "allergens": [
+        "gluten"
+      ],
+      "animal_source": "none"
+    },
+    {
+      "id": "rice",
+      "name": "Barna rizs (száraz)",
+      "category": "grains",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "millet",
+      "name": "Köles (száraz)",
+      "category": "grains",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "quinoa",
+      "name": "Quinoa (száraz)",
+      "category": "grains",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "pasta",
+      "name": "Teljes kiőrlésű, tojásmentes tészta (száraz)",
+      "category": "grains",
+      "unit": "g",
+      "allergens": [
+        "gluten"
+      ],
+      "animal_source": "none"
+    },
+    {
+      "id": "bread",
+      "name": "Teljes kiőrlésű kenyér, növényi összetevőkkel",
+      "category": "grains",
+      "unit": "g",
+      "allergens": [
+        "gluten"
+      ],
+      "animal_source": "none"
+    },
+    {
+      "id": "wrap",
+      "name": "Teljes kiőrlésű tortilla, növényi összetevőkkel",
+      "category": "grains",
+      "unit": "g",
+      "allergens": [
+        "gluten"
+      ],
+      "animal_source": "none"
+    },
+    {
+      "id": "red_lentils",
+      "name": "Vöröslencse (száraz)",
+      "category": "protein",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "chickpeas",
+      "name": "Csicseriborsó (főtt, lecsöpögtetett)",
+      "category": "protein",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "beans",
+      "name": "Bab (főtt, lecsöpögtetett)",
+      "category": "protein",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "tofu",
+      "name": "Natúr tofu",
+      "category": "protein",
+      "unit": "g",
+      "allergens": [
+        "soy"
+      ],
+      "animal_source": "none"
+    },
+    {
+      "id": "chicken",
+      "name": "Csirkemell (nyers)",
+      "category": "protein",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "meat"
+    },
+    {
+      "id": "fish",
+      "name": "Lazacfilé (nyers)",
+      "category": "protein",
+      "unit": "g",
+      "allergens": [
+        "fish"
+      ],
+      "animal_source": "fish"
+    },
+    {
+      "id": "tuna",
+      "name": "Tonhal saját levében (lecsöpögtetett)",
+      "category": "protein",
+      "unit": "g",
+      "allergens": [
+        "fish"
+      ],
+      "animal_source": "fish"
+    },
+    {
+      "id": "eggs",
+      "name": "Tojás",
+      "category": "protein",
+      "unit": "db",
+      "allergens": [
+        "eggs"
+      ],
+      "animal_source": "milk_egg"
+    },
+    {
+      "id": "yogurt",
+      "name": "Natúr joghurt, zselatin nélkül",
+      "category": "dairy",
+      "unit": "g",
+      "allergens": [
+        "milk"
+      ],
+      "animal_source": "milk_egg"
+    },
+    {
+      "id": "cheese",
+      "name": "Vegetáriánus étrendhez megfelelő natúr sajt",
+      "category": "dairy",
+      "unit": "g",
+      "allergens": [
+        "milk"
+      ],
+      "animal_source": "milk_egg"
+    },
+    {
+      "id": "milk",
+      "name": "Tej",
+      "category": "dairy",
+      "unit": "ml",
+      "allergens": [
+        "milk"
+      ],
+      "animal_source": "milk_egg"
+    },
+    {
+      "id": "olive_oil",
+      "name": "Olívaolaj",
+      "category": "pantry",
+      "unit": "ml",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "walnuts",
+      "name": "Dió",
+      "category": "pantry",
+      "unit": "g",
+      "allergens": [
+        "nuts"
+      ],
+      "animal_source": "none"
+    },
+    {
+      "id": "pumpkin_seeds",
+      "name": "Natúr tökmag",
+      "category": "pantry",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    },
+    {
+      "id": "peanut_butter",
+      "name": "100% földimogyoróvaj",
+      "category": "pantry",
+      "unit": "g",
+      "allergens": [
+        "peanuts"
+      ],
+      "animal_source": "none"
+    },
+    {
+      "id": "rice_cakes",
+      "name": "Natúr rizsszelet, kizárólag rizsből",
+      "category": "grains",
+      "unit": "g",
+      "allergens": [],
+      "animal_source": "none"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "banana_oats",
+      "title": "Banános zabkása",
+      "slots": [
+        "breakfast"
+      ],
+      "prep_minutes": 10,
+      "ingredients": [
+        {
+          "food_id": "oats",
+          "quantity": "80"
+        },
+        {
+          "food_id": "banana",
+          "quantity": "150"
+        },
+        {
+          "food_id": "pumpkin_seeds",
+          "quantity": "20"
+        }
+      ],
+      "steps": [
+        "Főzd puhára a zabpelyhet vízzel.",
+        "Tedd rá a felkarikázott banánt és a tökmagot."
+      ]
+    },
+    {
+      "id": "apple_millet",
+      "title": "Almás köleskása",
+      "slots": [
+        "breakfast"
+      ],
+      "prep_minutes": 25,
+      "ingredients": [
+        {
+          "food_id": "millet",
+          "quantity": "80"
+        },
+        {
+          "food_id": "apple",
+          "quantity": "180"
+        },
+        {
+          "food_id": "pumpkin_seeds",
+          "quantity": "20"
+        }
+      ],
+      "steps": [
+        "Mosd át a kölest, és főzd puhára vízben.",
+        "Keverd hozzá a reszelt almát, majd szórd rá a tökmagot."
+      ]
+    },
+    {
+      "id": "berry_rice",
+      "title": "Gyümölcsös rizskása",
+      "slots": [
+        "breakfast"
+      ],
+      "prep_minutes": 35,
+      "ingredients": [
+        {
+          "food_id": "rice",
+          "quantity": "80"
+        },
+        {
+          "food_id": "berries",
+          "quantity": "150"
+        },
+        {
+          "food_id": "banana",
+          "quantity": "100"
+        }
+      ],
+      "steps": [
+        "A rizst főzd puhára bővebb vízben.",
+        "Keverd hozzá a banánt és a bogyós gyümölcsöt; a fagyasztott gyümölcsöt is forrósítsd át."
+      ]
+    },
+    {
+      "id": "yogurt_oats",
+      "title": "Joghurtos zab és alma",
+      "slots": [
+        "breakfast"
+      ],
+      "prep_minutes": 5,
+      "ingredients": [
+        {
+          "food_id": "yogurt",
+          "quantity": "250"
+        },
+        {
+          "food_id": "oats",
+          "quantity": "70"
+        },
+        {
+          "food_id": "apple",
+          "quantity": "180"
+        }
+      ],
+      "steps": [
+        "Mosd meg és darabold fel az almát.",
+        "Keverd össze a joghurttal és a zabpehellyel."
+      ]
+    },
+    {
+      "id": "eggs_toast",
+      "title": "Tojásos pirítós zöldségekkel",
+      "slots": [
+        "breakfast"
+      ],
+      "prep_minutes": 15,
+      "ingredients": [
+        {
+          "food_id": "eggs",
+          "quantity": "2"
+        },
+        {
+          "food_id": "bread",
+          "quantity": "100"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "150"
+        },
+        {
+          "food_id": "cucumber",
+          "quantity": "100"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "5"
+        }
+      ],
+      "steps": [
+        "A tojást az olajon süsd át teljesen.",
+        "Pirítsd meg a kenyeret, és tálald a megmosott, felszeletelt zöldségekkel."
+      ]
+    },
+    {
+      "id": "chickpea_toast",
+      "title": "Csicseriborsókrémes kenyér",
+      "slots": [
+        "breakfast"
+      ],
+      "prep_minutes": 10,
+      "ingredients": [
+        {
+          "food_id": "chickpeas",
+          "quantity": "150"
+        },
+        {
+          "food_id": "bread",
+          "quantity": "100"
+        },
+        {
+          "food_id": "lemon",
+          "quantity": "20"
+        },
+        {
+          "food_id": "cucumber",
+          "quantity": "150"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "5"
+        }
+      ],
+      "steps": [
+        "Törd össze a csicseriborsót a citrom levével és az olívaolajjal; szükség szerint kevés vízzel lazítsd.",
+        "Kend a kenyérre, és tálald uborkával."
+      ]
+    },
+    {
+      "id": "banana_yogurt",
+      "title": "Banán és joghurt",
+      "slots": [
+        "snack"
+      ],
+      "prep_minutes": 5,
+      "ingredients": [
+        {
+          "food_id": "banana",
+          "quantity": "150"
+        },
+        {
+          "food_id": "yogurt",
+          "quantity": "200"
+        }
+      ],
+      "steps": [
+        "A banánt karikázd fel, és tálald a natúr joghurttal."
+      ]
+    },
+    {
+      "id": "apple_walnuts",
+      "title": "Alma dióval",
+      "slots": [
+        "snack"
+      ],
+      "prep_minutes": 5,
+      "ingredients": [
+        {
+          "food_id": "apple",
+          "quantity": "180"
+        },
+        {
+          "food_id": "walnuts",
+          "quantity": "30"
+        }
+      ],
+      "steps": [
+        "Mosd meg és vágd fel az almát; mellé adagold ki a diót."
+      ]
+    },
+    {
+      "id": "orange_seeds",
+      "title": "Narancs tökmaggal",
+      "slots": [
+        "snack"
+      ],
+      "prep_minutes": 5,
+      "ingredients": [
+        {
+          "food_id": "orange",
+          "quantity": "200"
+        },
+        {
+          "food_id": "pumpkin_seeds",
+          "quantity": "30"
+        }
+      ],
+      "steps": [
+        "Hámozd meg a narancsot, és tálald a tökmaggal."
+      ]
+    },
+    {
+      "id": "carrot_chickpeas",
+      "title": "Répa csicseriborsókrémmel",
+      "slots": [
+        "snack"
+      ],
+      "prep_minutes": 10,
+      "ingredients": [
+        {
+          "food_id": "carrot",
+          "quantity": "180"
+        },
+        {
+          "food_id": "chickpeas",
+          "quantity": "100"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "5"
+        },
+        {
+          "food_id": "lemon",
+          "quantity": "20"
+        }
+      ],
+      "steps": [
+        "Törd össze a csicseriborsót az olajjal és a citrom levével.",
+        "A megmosott répát vágd hasábokra; mellé tálald a krémet."
+      ]
+    },
+    {
+      "id": "peanut_toast",
+      "title": "Mogyoróvajas banános kenyér",
+      "slots": [
+        "snack"
+      ],
+      "prep_minutes": 5,
+      "ingredients": [
+        {
+          "food_id": "bread",
+          "quantity": "60"
+        },
+        {
+          "food_id": "peanut_butter",
+          "quantity": "25"
+        },
+        {
+          "food_id": "banana",
+          "quantity": "100"
+        }
+      ],
+      "steps": [
+        "Kend a földimogyoróvajat a kenyérre, és tedd rá a banánkarikákat."
+      ]
+    },
+    {
+      "id": "lentil_rice",
+      "title": "Paradicsomos lencse barna rizzsel",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 40,
+      "ingredients": [
+        {
+          "food_id": "red_lentils",
+          "quantity": "90"
+        },
+        {
+          "food_id": "rice",
+          "quantity": "90"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "200"
+        },
+        {
+          "food_id": "carrot",
+          "quantity": "150"
+        },
+        {
+          "food_id": "onion",
+          "quantity": "50"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        }
+      ],
+      "steps": [
+        "A rizst külön főzd puhára.",
+        "Az olajon párold meg az aprított hagymát és répát. Add hozzá a megmosott lencsét, a paradicsomot és vizet.",
+        "Főzd teljesen puhára, és tálald a rizzsel."
+      ]
+    },
+    {
+      "id": "chickpea_quinoa",
+      "title": "Csicseriborsós quinoa zöldségekkel",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 30,
+      "ingredients": [
+        {
+          "food_id": "chickpeas",
+          "quantity": "180"
+        },
+        {
+          "food_id": "quinoa",
+          "quantity": "90"
+        },
+        {
+          "food_id": "pepper",
+          "quantity": "150"
+        },
+        {
+          "food_id": "cucumber",
+          "quantity": "150"
+        },
+        {
+          "food_id": "lemon",
+          "quantity": "25"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        }
+      ],
+      "steps": [
+        "A quinoát alaposan mosd át és főzd meg.",
+        "Forgasd össze a lecsöpögtetett csicseriborsóval és az aprított, megmosott zöldségekkel.",
+        "Tálald citromlével és olívaolajjal."
+      ]
+    },
+    {
+      "id": "bean_potato",
+      "title": "Babos burgonyasaláta",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 30,
+      "ingredients": [
+        {
+          "food_id": "beans",
+          "quantity": "200"
+        },
+        {
+          "food_id": "potato",
+          "quantity": "300"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "150"
+        },
+        {
+          "food_id": "cucumber",
+          "quantity": "150"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        },
+        {
+          "food_id": "lemon",
+          "quantity": "20"
+        }
+      ],
+      "steps": [
+        "Főzd puhára a burgonyát és vágd darabokra.",
+        "Forgasd össze a lecsöpögtetett babbal, a megmosott zöldségekkel, olajjal és citromlével."
+      ]
+    },
+    {
+      "id": "tofu_rice",
+      "title": "Tofu brokkolival és rizzsel",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 40,
+      "ingredients": [
+        {
+          "food_id": "tofu",
+          "quantity": "200"
+        },
+        {
+          "food_id": "rice",
+          "quantity": "100"
+        },
+        {
+          "food_id": "broccoli",
+          "quantity": "250"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        }
+      ],
+      "steps": [
+        "Főzd meg a rizst; a brokkolit párold meg.",
+        "A felkockázott tofut az olajon forrósítsd és pirítsd át, majd tálald a körettel."
+      ]
+    },
+    {
+      "id": "bean_wrap",
+      "title": "Babos-zöldséges tortilla",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 15,
+      "ingredients": [
+        {
+          "food_id": "beans",
+          "quantity": "200"
+        },
+        {
+          "food_id": "wrap",
+          "quantity": "100"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "150"
+        },
+        {
+          "food_id": "lettuce",
+          "quantity": "100"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "5"
+        }
+      ],
+      "steps": [
+        "Forrósítsd át a lecsöpögtetett babot az olajon, és melegítsd meg a tortillát.",
+        "Töltsd meg a babbal és a megmosott, felaprított zöldségekkel."
+      ]
+    },
+    {
+      "id": "lentil_pasta",
+      "title": "Lencsés paradicsomos tészta",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 30,
+      "ingredients": [
+        {
+          "food_id": "pasta",
+          "quantity": "110"
+        },
+        {
+          "food_id": "red_lentils",
+          "quantity": "70"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "250"
+        },
+        {
+          "food_id": "onion",
+          "quantity": "50"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        }
+      ],
+      "steps": [
+        "Főzd meg a tésztát.",
+        "Párold meg az aprított hagymát az olajon, add hozzá a megmosott lencsét, paradicsomot és vizet.",
+        "Főzd puhára a lencsét, majd keverd a tésztához."
+      ]
+    },
+    {
+      "id": "chickpea_salad",
+      "title": "Csicseriborsó-saláta kenyérrel",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 15,
+      "ingredients": [
+        {
+          "food_id": "chickpeas",
+          "quantity": "220"
+        },
+        {
+          "food_id": "bread",
+          "quantity": "100"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "200"
+        },
+        {
+          "food_id": "cucumber",
+          "quantity": "150"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        },
+        {
+          "food_id": "lemon",
+          "quantity": "20"
+        }
+      ],
+      "steps": [
+        "A lecsöpögtetett csicseriborsót keverd a megmosott, aprított zöldségekkel, citromlével és olívaolajjal.",
+        "Tálald kenyérrel."
+      ]
+    },
+    {
+      "id": "warm_beans",
+      "title": "Meleg babos-zöldséges tál",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 15,
+      "ingredients": [
+        {
+          "food_id": "beans",
+          "quantity": "250"
+        },
+        {
+          "food_id": "carrot",
+          "quantity": "150"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "200"
+        },
+        {
+          "food_id": "bread",
+          "quantity": "100"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        }
+      ],
+      "steps": [
+        "Párold meg az aprított répát kevés vízzel és az olajjal.",
+        "Add hozzá a paradicsomot és a lecsöpögtetett babot; forrósítsd át. Tálald kenyérrel."
+      ]
+    },
+    {
+      "id": "chicken_rice",
+      "title": "Csirkemell barna rizzsel és brokkolival",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 40,
+      "ingredients": [
+        {
+          "food_id": "chicken",
+          "quantity": "180"
+        },
+        {
+          "food_id": "rice",
+          "quantity": "100"
+        },
+        {
+          "food_id": "broccoli",
+          "quantity": "250"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        }
+      ],
+      "steps": [
+        "Főzd meg a rizst, és párold puhára a brokkolit.",
+        "A csirkemellet vágd kisebb darabokra és süsd át teljesen az olajon; külön eszközt használj a nyers húshoz és a kész ételhez.",
+        "Tálald együtt."
+      ]
+    },
+    {
+      "id": "chicken_potato",
+      "title": "Sült csirke burgonyával és salátával",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 45,
+      "ingredients": [
+        {
+          "food_id": "chicken",
+          "quantity": "180"
+        },
+        {
+          "food_id": "potato",
+          "quantity": "350"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "150"
+        },
+        {
+          "food_id": "lettuce",
+          "quantity": "100"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "15"
+        }
+      ],
+      "steps": [
+        "A megmosott burgonyát darabold fel, és kevés olajjal süsd puhára.",
+        "A csirkét süsd át teljesen; a nyers húshoz használt eszközöket különítsd el.",
+        "Tálald a megmosott salátával és paradicsommal."
+      ]
+    },
+    {
+      "id": "fish_quinoa",
+      "title": "Lazac quinoával és brokkolival",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 30,
+      "ingredients": [
+        {
+          "food_id": "fish",
+          "quantity": "180"
+        },
+        {
+          "food_id": "quinoa",
+          "quantity": "100"
+        },
+        {
+          "food_id": "broccoli",
+          "quantity": "250"
+        },
+        {
+          "food_id": "lemon",
+          "quantity": "25"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "5"
+        }
+      ],
+      "steps": [
+        "Főzd meg a quinoát és párold meg a brokkolit.",
+        "A halat az olajjal süsd át teljesen; tálaláskor adj hozzá citromlevet."
+      ]
+    },
+    {
+      "id": "tuna_beans",
+      "title": "Tonhalas babsaláta",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 15,
+      "ingredients": [
+        {
+          "food_id": "tuna",
+          "quantity": "150"
+        },
+        {
+          "food_id": "beans",
+          "quantity": "180"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "200"
+        },
+        {
+          "food_id": "cucumber",
+          "quantity": "150"
+        },
+        {
+          "food_id": "bread",
+          "quantity": "80"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "5"
+        }
+      ],
+      "steps": [
+        "A lecsöpögtetett tonhalat és babot keverd össze a megmosott, aprított zöldségekkel és az olajjal.",
+        "Tálald kenyérrel."
+      ]
+    },
+    {
+      "id": "egg_potato",
+      "title": "Tojásos burgonya spenóttal",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 30,
+      "ingredients": [
+        {
+          "food_id": "eggs",
+          "quantity": "3"
+        },
+        {
+          "food_id": "potato",
+          "quantity": "300"
+        },
+        {
+          "food_id": "spinach",
+          "quantity": "200"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "150"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        }
+      ],
+      "steps": [
+        "A burgonyát főzd puhára.",
+        "Az olajon párold meg a spenótot, add hozzá a darabolt burgonyát és a tojást.",
+        "Süsd át teljesen, és tálald a megmosott paradicsommal."
+      ]
+    },
+    {
+      "id": "cheese_pasta",
+      "title": "Spenótos-sajtos tészta",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 20,
+      "ingredients": [
+        {
+          "food_id": "pasta",
+          "quantity": "110"
+        },
+        {
+          "food_id": "spinach",
+          "quantity": "200"
+        },
+        {
+          "food_id": "cheese",
+          "quantity": "60"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "150"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "5"
+        }
+      ],
+      "steps": [
+        "Főzd meg a tésztát.",
+        "Az olajon párold meg a spenótot, keverd össze a tésztával és a sajttal, majd forrósítsd át.",
+        "Tálald megmosott paradicsommal."
+      ]
+    },
+    {
+      "id": "banana_rice_cakes",
+      "title": "Banános rizsszelet tökmaggal",
+      "slots": [
+        "breakfast"
+      ],
+      "prep_minutes": 5,
+      "ingredients": [
+        {
+          "food_id": "rice_cakes",
+          "quantity": "80"
+        },
+        {
+          "food_id": "banana",
+          "quantity": "180"
+        },
+        {
+          "food_id": "pumpkin_seeds",
+          "quantity": "30"
+        }
+      ],
+      "steps": [
+        "A rizsszelet mellé adagold ki a banánt és a tökmagot."
+      ]
+    },
+    {
+      "id": "chickpea_seed_salad",
+      "title": "Csicseriborsó-saláta tökmaggal",
+      "slots": [
+        "lunch",
+        "dinner"
+      ],
+      "prep_minutes": 15,
+      "ingredients": [
+        {
+          "food_id": "chickpeas",
+          "quantity": "250"
+        },
+        {
+          "food_id": "carrot",
+          "quantity": "100"
+        },
+        {
+          "food_id": "tomato",
+          "quantity": "150"
+        },
+        {
+          "food_id": "cucumber",
+          "quantity": "150"
+        },
+        {
+          "food_id": "pumpkin_seeds",
+          "quantity": "30"
+        },
+        {
+          "food_id": "olive_oil",
+          "quantity": "10"
+        },
+        {
+          "food_id": "lemon",
+          "quantity": "20"
+        }
+      ],
+      "steps": [
+        "A megmosott répát reszeld le, a többi zöldséget darabold fel.",
+        "Forgasd össze a lecsöpögtetett csicseriborsóval, a maggal, olajjal és a citrom levével."
+      ]
+    },
+    {
+      "id": "apple_rice_cakes",
+      "title": "Alma és rizsszelet tökmaggal",
+      "slots": [
+        "snack"
+      ],
+      "prep_minutes": 5,
+      "ingredients": [
+        {
+          "food_id": "rice_cakes",
+          "quantity": "40"
+        },
+        {
+          "food_id": "apple",
+          "quantity": "180"
+        },
+        {
+          "food_id": "pumpkin_seeds",
+          "quantity": "20"
+        }
+      ],
+      "steps": [
+        "Mosd meg az almát; tálald a rizsszelettel és a tökmaggal."
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "title": "WHO: Healthy diet",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/healthy-diet"
+    },
+    {
+      "title": "EFSA: Food allergens",
+      "url": "https://www.efsa.europa.eu/enIE/safe2eat/food-allergens"
+    }
+  ]
+}

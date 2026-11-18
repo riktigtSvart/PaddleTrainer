@@ -1,5 +1,6 @@
 "use client";
-import { CalendarMealsDay } from "@/components/nutrition/calendar-layer";
+import { CalendarMealsDay, useCalendarMealMarkers } from "@/components/nutrition/calendar-layer";
+import { slots as mealSlots } from "@/lib/nutrition/contracts";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { clockSlot, interactionHint } from "@/lib/calendar/interactions";
@@ -130,6 +131,8 @@ export default function TimeGrid({
   const cycles = showCycles ? calendarCycles(feed.periods) : [];
   const from = fullDay ? 0 : 6,
     to = fullDay ? 24 : 22;
+  const mealsForDay = useCalendarMealMarkers();
+  const mealMarkers = new Map(days.map(date => [date, mealsForDay(date)]));
   const body = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState({ hours: 0, hour: 24 });
   // The grid compresses with viewport height. Use the same measured scale for
@@ -162,6 +165,11 @@ export default function TimeGrid({
       )
       .map((s) => s.event.key),
   );
+  for (const markers of mealMarkers.values()) {
+    for (const marker of markers) {
+      if (marker.top < from * 60 || marker.top >= to * 60) outside.add(marker.event.key);
+    }
+  }
   const hours = Array.from({ length: to - from + 1 }, (_, i) => from + i);
   function draw(s: Segment) {
     const top = Math.max(s.top, from * 60),
@@ -337,7 +345,7 @@ export default function TimeGrid({
                     )}
                   </small>
                   <CycleDayMarkers cycles={cycles} date={date} onOpenCycle={onOpenCycle} />
-                  <CalendarMealsDay date={date}/>
+                  <CalendarMealsDay date={date} gridHours={{ from, to }} />
                 </div>
               );
             })}
@@ -386,14 +394,16 @@ export default function TimeGrid({
               );
               const busy = perDay.filter((s) => s.event.kind === "constraint");
               const activity = allocateLanes(
-                perDay.filter(
+                [...perDay.filter(
                   (s) =>
                     s.event.kind !== "availability" &&
                     s.event.kind !== "constraint" &&
                     (s.point
                       ? s.top >= from * 60 && s.top < to * 60
                       : s.bottom > from * 60 && s.top < to * 60),
-                ),
+                ), ...(mealMarkers.get(date) ?? []).filter(
+                  marker => marker.top >= from * 60 && marker.top < to * 60,
+                )],
                 (MIN_ACTIVITY_HEIGHT / hour) * 60,
                 from * 60,
               );
@@ -427,7 +437,31 @@ export default function TimeGrid({
                 >
                   {available.map(draw)}
                   {busy.map(draw)}
-                  {activity.map(draw)}
+                  {activity.map(segment => {
+                    if (!("meal" in segment)) return draw(segment);
+                    const { meal } = segment;
+                    const clock = segment.clock.endsWith(":00") ? segment.clock.slice(0, 5) : segment.clock;
+                    const label = `${clock} · ${mealSlots[meal.slot]} · ${meal.title}`;
+                    const status = meal.status === "eaten" ? " · Megettem" : meal.status === "skipped" ? " · Kihagytam" : meal.different_report ? " · Más étel naplózva" : "";
+                    return (
+                      <button type="button" className="pt-event is-point pt-timed-meal"
+                        key={segment.event.key} data-nutrition-meal={`${date}/${meal.slot}`} data-meal-status={meal.status}
+                        style={{
+                          top: `${((segment.top / 60 - from) / (to - from)) * 100}%`,
+                          height: MIN_ACTIVITY_HEIGHT, left: `${(segment.lane / segment.lanes) * 100}%`,
+                          width: `calc(${100 / segment.lanes}% - 6px)`, zIndex: 2,
+                        }}
+                        aria-label={label + status} title={label + status} onClick={segment.open}
+                        onContextMenu={event => event.stopPropagation()}
+                      >
+                        <span className="pt-event-label">
+                          <span>{label}</span>
+                          {meal.status === "eaten" && <Icon name="check" />}
+                          {meal.status === "skipped" && <span aria-hidden="true">×</span>}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               );
             })}

@@ -8,9 +8,18 @@ from app.services import nutrition as service
 from app.schemas.nutrition_journal import JournalWrite
 from app.services import nutrition_journal as journal
 from app.services import nutrition_calendar as calendar
+from app.services import nutrition_requirements as requirements
 from app.api.routes.athlete_setup import DayQuery, valid_range
 
 router = APIRouter(prefix='/planning/nutrition', tags=['nutrition'], route_class=SetupRoute)
+
+
+@router.get('/requirements')
+async def read_requirements(db: DB, owner: Owner, start_date: DayQuery, end_date: DayQuery):
+    valid_range(start_date, end_date)
+    _fresh(db)
+    return await call(requirements.read(repository=SqlAlchemyPlanningAuditRepository(db), session=db,
+        owner=owner, start=start_date, end=end_date))
 
 
 @router.get('/calendar')

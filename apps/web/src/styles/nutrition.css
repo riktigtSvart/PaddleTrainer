@@ -90,3 +90,16 @@
 .pt-meal-calendar-dialog article { border-top: 1px solid var(--pt-line); padding: 12px 0; }
 .pt-meal-calendar-choice { display: grid; gap: 6px; padding: 12px; width: 100%; text-align: left; border: 1px solid var(--pt-line); border-radius: 8px; background: var(--pt-panel); margin-block: 8px; }
 @media (max-width:650px) { .pt-meal-calendar-dialog {padding:14px}.pt-meal-calendar-dialog .pt-meal-grid {grid-template-columns:1fr}.pt-meal-calendar-dialog > header {flex-wrap:wrap} }
+.pt-time-grid .pt-timed-meal { background: var(--pt-panel); border-color: var(--pt-line); border-left: 3px solid var(--pt-accent); }
+.pt-timed-meal .pt-event-label > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pt-requirements { display: grid; gap: 12px; }
+.pt-requirements-metrics { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.pt-requirements-metrics > div { border-top: 1px solid var(--pt-line); padding-top: 10px; }
+.pt-requirements-metrics dt { font-size: 13px; color: var(--pt-muted); }
+.pt-requirements-metrics dd { font-size: 1.15rem; font-weight: 650; }
+.pt-requirements .pt-meal-note { margin: 0; }
+.pt-requirements .pt-meal-note a { color: var(--pt-accent); text-decoration: underline; }
+.pt-requirements .pt-muted { color: var(--pt-muted); }
+.pt-nutrient-table td:nth-child(2) small { display: block; white-space: normal; }
+.pt-nutrient-table th, .pt-nutrient-table td { padding: 8px 12px; }

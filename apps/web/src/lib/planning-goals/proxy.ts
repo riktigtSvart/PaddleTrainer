@@ -20,7 +20,7 @@ export async function forwardGoals(
     method = request.method;
   const resource = path[0];
   const nutrition = resource === "nutrition" && (path.length === 1 || path.length === 2 && path[1] === "journal");
-  const nutritionCalendar = resource === "nutrition" && path.length === 2 && path[1] === "calendar";
+  const nutritionRange = resource === "nutrition" && path.length === 2 && ["calendar", "requirements"].includes(path[1]);
   const automaticPlanning = path.length === 1 && resource === "automation";
   const automaticRun = path.length === 2 && resource === "automation" && path[1] === "run";
   const trainingOptions = path.length === 1 && resource === "training-options";
@@ -89,7 +89,7 @@ export async function forwardGoals(
   const periods = path.length === 1 && resource === "periods";
   if (
     !(
-      nutritionCalendar || nutrition || trainingOptions || daylightPreview ||
+      nutritionRange || nutrition || trainingOptions || daylightPreview ||
       automaticPlanning || automaticRun ||
       initialAssessment ||
       guidedRevision ||
@@ -138,7 +138,7 @@ export async function forwardGoals(
     return failure(405, "GOAL_METHOD_NOT_ALLOWED");
   const allowedQuery =
     method === "GET" && bodyMass ? ["limit", "offset"] :
-    method === "GET" && (nutritionCalendar || athleteRead || planningInputs || trainingOptions)
+    method === "GET" && (nutritionRange || athleteRead || planningInputs || trainingOptions)
       ? ["start_date", "end_date"]
       : method === "GET" && collection
         ? ["limit", "offset"]
@@ -207,7 +207,7 @@ export async function forwardGoals(
       root.hash
     )
       return failure(503, "GOAL_API_CONFIGURATION_INVALID");
-    const relative = nutritionCalendar || nutrition || initialAssessment || guidedRevision || automaticPlanning || automaticRun || daylightPreview
+    const relative = nutritionRange || nutrition || initialAssessment || guidedRevision || automaticPlanning || automaticRun || daylightPreview
       ? "api/v1/planning/" + path.map(encodeURIComponent).join("/")
       : trainingOptions
         ? "api/v1/planning/training-options"

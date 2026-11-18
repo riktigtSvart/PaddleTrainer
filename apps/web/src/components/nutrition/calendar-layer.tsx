@@ -49,10 +49,47 @@ export function NutritionCalendarNotice() {
   const layer = useContext(ContextLayer);if (!layer?.enabled) return null;
   return <>{layer.error && <p className="pt-message is-error" role="alert">{layer.error} <button className="pt-button" onClick={layer.retry}>Étkezések újraolvasása</button></p>}{layer.loading && <p className="pt-notice" role="status">Étkezések betöltése…</p>}</>;
 }
-export function CalendarMealsDay({ date, compact = false }: { date: string; compact?: boolean }) {
+function calendarForDay(packets: NutritionCalendar[], date: string) {
+  return packets.findLast(packet => packet.start_date <= date && packet.end_date >= date);
+}
+
+function compareMealTimes(a: CalendarMeal, b: CalendarMeal) {
+  return (a.planned_time ?? '24:00:00').localeCompare(b.planned_time ?? '24:00:00');
+}
+
+function mealClockMinute(time: string) {
+  const [hour, minute, second = 0] = time.split(':').map(Number);
+  return hour * 60 + minute + second / 60;
+}
+
+export function useCalendarMealMarkers() {
+  const layer = useContext(ContextLayer);
+  return (date: string) => {
+    const calendar = layer?.enabled ? calendarForDay(layer.packets, date) : undefined;
+    if (!calendar || !layer) return [];
+    const meals = calendar.result.days.find(day => day.date === date)?.meals ?? [];
+    return meals.flatMap(meal => {
+      const clock = meal.planned_time;
+      if (!clock) return [];
+      const minute = mealClockMinute(clock);
+      return [{
+        event: { key: `meal/${date}/${meal.slot}` },
+        meal, clock, top: minute, bottom: minute, lane: 0, lanes: 1,
+        open: () => layer.select({ calendar, date, meal }),
+      }];
+    });
+  };
+}
+
+export function CalendarMealsDay({ date, compact = false, gridHours }: { date: string; compact?: boolean; gridHours?: { from: number; to: number } }) {
   const layer = useContext(ContextLayer); if (!layer?.enabled) return null;
-  const calendar = [...layer.packets].reverse().find(p => p.start_date <= date && p.end_date >= date); if (!calendar) return null;
-  const meals = calendar.result.days.find(d => d.date === date)?.meals ?? [], actual = calendar.result.actual_entries.filter(e => e.date === date && e.status === 'eaten');
+  const calendar = calendarForDay(layer.packets, date); if (!calendar) return null;
+  const meals = (calendar.result.days.find(d => d.date === date)?.meals ?? []).filter(meal => {
+    if (!gridHours || !meal.planned_time) return true;
+    const minute = mealClockMinute(meal.planned_time);
+    return minute < gridHours.from * 60 || minute >= gridHours.to * 60;
+  }).sort(compareMealTimes);
+  const actual = calendar.result.actual_entries.filter(e => e.date === date && e.status === 'eaten');
   if (compact) return <div className="pt-calendar-meals is-compact" onDoubleClick={e => e.stopPropagation()} onContextMenu={e => e.stopPropagation()}><button type="button" onClick={e => { e.stopPropagation(); layer.select({ calendar, date }); }} aria-label={`Étkezések · ${date} · ${meals.length} tervezett · ${actual.length} naplózott`}>Étkezések · {meals.length} terv · {actual.length} napló</button></div>;
   return <div className="pt-calendar-meals" onDoubleClick={e => e.stopPropagation()} onContextMenu={e => e.stopPropagation()}>{meals.map(m => <button key={m.slot} type="button" data-nutrition-meal={`${date}/${m.slot}`} className={m.status === 'eaten' ? 'is-eaten' : ''} title={m.title+(m.timing?' · '+timingLabel(m.timing):'')} aria-label={`${date} · ${m.planned_time ?? 'Időpont nélkül'} · ${slots[m.slot]} · ${m.title}`} onClick={e => { e.stopPropagation(); layer.select({ calendar, date, meal: m }); }}>{m.planned_time?.slice(0,5) ?? '–:–'} · {slots[m.slot]}{m.status === 'eaten' ? ' ✓' : m.status === 'skipped' ? ' · kihagyva' : m.different_report ? ' · más étel naplózva' : ''}</button>)}<button type="button" onClick={e => { e.stopPropagation(); layer.select({ calendar, date }); }}>Étkezési napló{actual.length ? ` · ${actual.length}` : ''} / hozzáadás</button></div>;
 }

@@ -646,11 +646,11 @@ export function segments(
   return result;
 }
 export const MIN_ACTIVITY_HEIGHT = 32;
-export function allocateLanes(
-  input: Segment[],
+export function allocateLanes<T extends Pick<Segment, "top" | "bottom" | "lane" | "lanes"> & { event: { key: string } }>(
+  input: T[],
   minimumMinutes = 1,
   clipStart = 0,
-): Segment[] {
+): T[] {
   const sorted = input
     .map((x) => ({ ...x }))
     .sort(
@@ -659,7 +659,7 @@ export function allocateLanes(
         b.bottom - a.bottom ||
         a.event.key.localeCompare(b.event.key),
     );
-  let group: Segment[] = [],
+  let group: T[] = [],
     ends: number[] = [],
     until = -1;
   const finish = () => {
